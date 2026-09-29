@@ -3,13 +3,14 @@
 DB 값이 항상 우선이며, 이 파일의 값은 DB에 값이 없을 때 사용하는 fallback이다.
 """
 
+import os
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # 경로
 # ---------------------------------------------------------------------------
 BASE_DIR: Path = Path(__file__).resolve().parent
-DB_PATH: Path = BASE_DIR / "factory_config.db"
+DB_PATH: Path = Path(os.environ.get("ROBOT_FACTORY_DB", BASE_DIR / "factory_config.db"))  # 환경변수로 교체 가능
 SCHEMA_PATH: Path = BASE_DIR / "database" / "schema.sql"
 QSS_PATH: Path = BASE_DIR / "gui" / "styles" / "theme.qss"
 

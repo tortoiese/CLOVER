@@ -92,6 +92,50 @@ class OrderStatus:
     ACTIVE: Final[frozenset[str]] = frozenset({PENDING, IN_PROGRESS})
 
 
+class ActionKind:
+    """AI 에이전트 / GUI가 요청하는 동작 종류.
+
+    SIM_COMMANDS에 속한 동작은 SimWorker 명령으로, 나머지는 FactoryService(DB 쓰기)로 처리된다.
+    """
+
+    # 시뮬레이션 제어 (SimWorker)
+    START: Final[str] = "start"
+    PAUSE: Final[str] = "pause"
+    STOP: Final[str] = "stop"
+    RESET: Final[str] = "reset"
+    SET_SPEED: Final[str] = "set_speed"
+    SET_MODE: Final[str] = "set_mode"
+    SET_TASK_RATE: Final[str] = "set_task_rate"
+    SCALE_TASK_RATE: Final[str] = "scale_task_rate"
+    FORCE_CHARGE: Final[str] = "force_charge"
+    EMERGENCY_PLAN: Final[str] = "emergency_plan"
+    RECALL_ROBOTS: Final[str] = "recall_robots"
+    PRECHARGE: Final[str] = "precharge"
+    SET_MIN_CHARGE_MODE: Final[str] = "set_min_charge_mode"
+    RELOAD_CONFIG: Final[str] = "reload_config"
+    SYNC_ORDERS: Final[str] = "sync_orders"
+
+    # DB 변경 (FactoryService → ConfigWatcher → 핫리로드)
+    ADD_ROBOTS: Final[str] = "add_robots"
+    ADD_CHARGER: Final[str] = "add_charger"
+    MOVE_OBSTACLE: Final[str] = "move_obstacle"
+    MOVE_STATION: Final[str] = "move_station"
+    SET_STATION_ACTIVE: Final[str] = "set_station_active"
+    CREATE_ORDER: Final[str] = "create_order"
+    CANCEL_ORDER: Final[str] = "cancel_order"
+
+    SIM_COMMANDS: Final[frozenset[str]] = frozenset({
+        START, PAUSE, STOP, RESET, SET_SPEED, SET_MODE, SET_TASK_RATE, SCALE_TASK_RATE, FORCE_CHARGE,
+        EMERGENCY_PLAN, RECALL_ROBOTS, PRECHARGE, SET_MIN_CHARGE_MODE, RELOAD_CONFIG, SYNC_ORDERS,
+    })
+
+
+class SchedulerModeLabel:
+    """스케줄러 모드 표시 이름."""
+
+    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "최적화"}
+
+
 class Tables:
     """DB 테이블 이름 상수."""
 

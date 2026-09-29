@@ -369,7 +369,7 @@ class DBManager:
         """트랜잭션 내부 upsert. (최종 id, 변경 여부)를 반환한다."""
         spec = _SPECS[table]
         values = self._model_to_values(spec, obj)
-        obj_id = getattr(obj, "id")
+        obj_id = obj.id
         is_new_auto = spec.autoincrement and (obj_id is None or int(obj_id) < 0)
         old_row = None if is_new_auto else conn.execute(f"SELECT * FROM {table} WHERE id = ?", (obj_id,)).fetchone()
         if old_row is None:

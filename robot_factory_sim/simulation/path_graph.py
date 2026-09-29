@@ -113,7 +113,7 @@ class PathGraph:
         self.nodes: dict[int, Point] = {n.id: (n.x, n.y) for n in factory.nodes}
         self.adjacency: dict[int, list[tuple[int, float]]] = {n: [] for n in self.nodes}
         self.edges: list[tuple[int, int, bool]] = []  # (a, b, blocked)
-        self.facility_nodes: dict[str, int] = {}
+        self.facility_nodes: dict[str, int] = {}  # 설비 ID → 접근 노드 (노드 ID는 저장 전 음수 임시 ID일 수 있음)
         self._dist_cache: dict[int, tuple[dict[int, float], dict[int, int]]] = {}
 
         for edge in factory.edges:
@@ -133,20 +133,22 @@ class PathGraph:
         facilities = [(s.id, s.x, s.y) for s in factory.stations] + [(c.id, c.x, c.y) for c in factory.chargers]
         for facility_id, fx, fy in facilities:
             node = linked.get(facility_id)
-            self.facility_nodes[facility_id] = node if node is not None else self.nearest_node(fx, fy)
+            nearest = node if node is not None else self.nearest_node(fx, fy)
+            if nearest is not None:
+                self.facility_nodes[facility_id] = nearest
 
-    def nearest_node(self, x: float, y: float) -> int:
-        """좌표에서 가장 가까운 노드 (그래프가 비면 -1).
+    def nearest_node(self, x: float, y: float) -> int | None:
+        """좌표에서 가장 가까운 노드 (그래프가 비면 None).
 
         Args:
             x: X 좌표
             y: Y 좌표
 
         Returns:
-            노드 ID
+            노드 ID 또는 None
         """
         if not self.nodes:
-            return -1
+            return None
         return min(self.nodes, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
 
     def _dijkstra(self, source: int) -> tuple[dict[int, float], dict[int, int]]:
@@ -203,7 +205,7 @@ class PathGraph:
             Route 또는 도달 불가 시 None
         """
         target = self.facility_nodes.get(facility_id)
-        if target is None or target < 0:
+        if target not in self.nodes:
             return None
         start = self.nearest_node(x, y)
         result = self.shortest_path(start, target)
@@ -228,7 +230,7 @@ class PathGraph:
             거리 (px)
         """
         target = self.facility_nodes.get(facility_id)
-        if target is None or target < 0 or not self.nodes:
+        if target not in self.nodes:
             return math.inf
         start = self.nearest_node(x, y)
         dist, _ = self._dijkstra(start)

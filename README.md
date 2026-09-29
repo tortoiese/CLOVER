@@ -70,7 +70,10 @@ robot_factory_sim/
 │   ├── seed_data.py               # 기본 공장 구성 시드 데이터
 │   └── api_stub.py                # REST API 클라이언트 스텁
 ├── simulation/
-│   ├── engine.py                  # SimPy 시뮬레이션 엔진
+│   ├── engine.py                  # SimPy 시뮬레이션 엔진 (GUI 없이 단독 실행 가능)
+│   ├── sim_worker.py              # SimWorker(QThread) — Baseline·최적화 엔진 병렬 실행
+│   ├── factory_service.py         # GUI용 공장 구성/주문 서비스 (gui → database 직접 참조 방지)
+│   ├── state.py                   # SimState 스냅샷 + 에이전트 컨텍스트 변환
 │   ├── robot.py                   # Robot 프로세스
 │   ├── station.py                 # WorkStation, ChargingStation
 │   ├── scheduler.py               # BaselineScheduler, OptimizedScheduler
@@ -88,6 +91,8 @@ robot_factory_sim/
 │   ├── config_editor.py           # 공장 설정 에디터
 │   ├── order_dialog.py            # 주문 관리 다이얼로그
 │   ├── alert_banner.py            # 긴급 알림 배너
+│   ├── agent_bridge.py            # AgentBridge(QThread) — 에이전트 실행 스레드
+│   ├── constants.py               # 색상/크기/문구 상수
 │   ├── widgets/
 │   │   ├── kpi_card.py
 │   │   ├── chat_bubble.py
@@ -98,8 +103,21 @@ robot_factory_sim/
 │       └── theme.qss              # 다크 테마
 └── utils/
     ├── metrics.py                 # KPI 계산
-    └── event_types.py             # 이벤트 타입 상수
+    ├── event_types.py             # 이벤트/동작 타입 상수
+    ├── config_models.py           # 공장 구성·주문 dataclass
+    └── layout_tools.py            # 격자 경로망 생성 등 레이아웃 보조
 ```
+
+### 스레드 구성
+| 스레드 | 역할 |
+|---|---|
+| 메인 (Qt GUI) | 화면 렌더링, 사용자 입력 |
+| SimWorker | SimPy 실행 — Baseline·최적화 엔진을 같은 시드로 나란히 돌려 KPI 동시 비교 |
+| ConfigWatcher | `config_changelog` 1초 폴링 → 설정 핫리로드 |
+| ProductionEventWatcher | `production_events` 1초 폴링 → AI 자율 대응 |
+| AgentBridge | 관제 에이전트 실행 (LLM 에이전트로 교체해도 GUI가 멈추지 않음) |
+
+스레드 간 통신은 모두 Qt Signal/Slot으로 한다. 툴바의 스케줄러 선택은 **화면 표시·AI 조치 대상 엔진**을 바꾸며, 두 엔진은 항상 함께 실행된다.
 
 ---
 
@@ -112,16 +130,25 @@ robot_factory_sim/
 ### 설치
 ```bash
 git clone <repo-url>
-cd robot_factory_sim
+cd CLOVER/robot_factory_sim
 pip install -r requirements.txt
 ```
+> Windows에서 PySide6 설치가 긴 경로 문제(`OSError: [Errno 2] ...`)로 실패하면 Windows 긴 경로 지원을 켜거나, 경로가 짧은 가상환경(예: `C:\venv`)에 설치하세요.
 
 ### 실행
 ```bash
 python main.py
 ```
 - 최초 실행 시 `factory_config.db`가 자동 생성되고 기본 공장 구성(스테이션 5개, 충전소 2개, 로봇 5대)이 삽입됩니다.
-- GUI 창이 열리면 **[▶ 시작]** 버튼으로 시뮬레이션을 시작하세요.
+- GUI 창이 열리면 **[▶ 시작]** 버튼으로 시뮬레이션과 DB 감시(ConfigWatcher / ProductionEventWatcher)를 시작하세요.
+- 다른 DB 파일을 쓰려면 환경변수 `ROBOT_FACTORY_DB`에 경로를 지정합니다.
+
+### GUI 없이 테스트
+```bash
+python -m simulation.engine          # Baseline vs 최적화 KPI 비교 (headless)
+python -m agent.mock_agent           # 자연어 명령 해석 확인
+python -m simulation.factory_service # :memory: DB로 서비스 동작 확인
+```
 
 ---
 
@@ -131,10 +158,12 @@ python main.py
 1. 툴바의 **[⚙ 공장 설정]** 클릭
 2. 팔레트에서 설비를 드래그 & 드롭으로 배치
 3. 클릭하여 속성(좌표, 처리시간, 충전 슬롯 수 등) 편집
-4. **[저장]** → 시뮬레이터에 즉시 반영
+4. **[🧭 경로 편집]** 모드: 빈 곳 클릭 = 노드 추가, 노드 두 개 연속 클릭 = 엣지 연결, 우클릭 = 삭제 (벽에 막힌 엣지는 빨간 점선)
+5. **[🤖 로봇 관리]** 탭에서 로봇 추가/삭제·파라미터 설정, 상단에서 업체별 프리셋 저장/불러오기
+6. **[저장]** → 시뮬레이터에 즉시 반영 (무중단 핫리로드)
 
 ### 방법 2: DB 직접 수정
-외부 시스템(MES/WMS)에서 `factory_config.db`의 테이블을 직접 INSERT/UPDATE하면, ConfigWatcher가 1초 내 자동 감지하여 시뮬레이터에 반영합니다.
+외부 시스템(MES/WMS)에서 `factory_config.db`의 테이블을 INSERT/UPDATE하고 **`config_changelog`에 변경 이력 행을 함께 남기면**, ConfigWatcher가 1초 내 감지하여 시뮬레이터에 반영합니다. (`DBManager` / `FactoryService`를 통해 쓰면 이력은 자동으로 기록됩니다.)
 
 ### 방법 3: AI 관제 콘솔
 ```
@@ -150,7 +179,7 @@ python main.py
 ### 긴급 주문 투입
 - **관제 콘솔**: `"긴급 주문 넣어줘: 제품A 300개, 2시간 내"`
 - **주문 관리 다이얼로그**: [📋 주문 관리] 버튼 → 주문 추가
-- **DB 직접**: `production_orders` 테이블에 `priority='critical'` INSERT
+- **DB 직접**: `production_orders` 테이블에 `priority='critical'` INSERT + `config_changelog` 기록 (긴급 이벤트는 시뮬레이터가 감지해 `production_events`에 자동 기록)
 
 ### AI 자율 대응 시나리오
 | 상황 | AI 자동 조치 |

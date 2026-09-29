@@ -1,0 +1,362 @@
+/* Robot Factory Simulator — 다크 관제 테마
+   배경 #1a1a2e / 패널 #16213e / 강조 #0f3460 / 긴급 #e74c3c, #f39c12 */
+
+* {
+    font-family: "Malgun Gothic", "Segoe UI", "Noto Sans KR", sans-serif;
+    font-size: 10pt;
+    color: #e6e9f5;
+}
+
+QMainWindow, QDialog {
+    background: #1a1a2e;
+}
+
+QWidget#Panel, QFrame#Panel {
+    background: #16213e;
+    border: 1px solid #22304f;
+    border-radius: 10px;
+}
+
+QLabel#PanelTitle {
+    font-size: 11pt;
+    font-weight: 700;
+    padding: 2px 4px;
+}
+
+QLabel#Muted {
+    color: #8b93b5;
+}
+
+QLabel#InfoChip {
+    background: #0f3460;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 9pt;
+}
+
+/* ---------------- 툴바 ---------------- */
+QToolBar {
+    background: #16213e;
+    border: none;
+    border-bottom: 1px solid #22304f;
+    padding: 4px 6px;
+    spacing: 6px;
+}
+
+QToolBar QToolButton, QPushButton {
+    background: #0f3460;
+    border: 1px solid #1d4b85;
+    border-radius: 7px;
+    padding: 5px 12px;
+}
+
+QToolBar QToolButton:hover, QPushButton:hover {
+    background: #1a4a80;
+    border-color: #4f8cff;
+}
+
+QToolBar QToolButton:pressed, QPushButton:pressed {
+    background: #0b2748;
+}
+
+QToolBar QToolButton:checked, QPushButton:checked {
+    background: #4f8cff;
+    border-color: #8fb5ff;
+}
+
+QToolBar QToolButton:disabled, QPushButton:disabled {
+    color: #5c6488;
+    background: #16213e;
+    border-color: #22304f;
+}
+
+QPushButton#Primary {
+    background: #4f8cff;
+    border-color: #8fb5ff;
+    font-weight: 700;
+}
+
+QPushButton#Danger {
+    background: #7b241c;
+    border-color: #e74c3c;
+}
+
+QLabel#DbStatus {
+    padding: 3px 10px;
+    border-radius: 8px;
+    background: #0f3460;
+}
+
+QLabel#DbStatus[connected="true"] {
+    color: #2ecc71;
+}
+
+QLabel#DbStatus[connected="false"] {
+    color: #e74c3c;
+}
+
+/* ---------------- 입력 ---------------- */
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit {
+    background: #0f1a33;
+    border: 1px solid #2a3b63;
+    border-radius: 6px;
+    padding: 4px 6px;
+    selection-background-color: #4f8cff;
+}
+
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
+    border-color: #4f8cff;
+}
+
+QComboBox QAbstractItemView {
+    background: #16213e;
+    selection-background-color: #0f3460;
+}
+
+QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+}
+
+/* ---------------- 스플리터 / 스크롤 ---------------- */
+QSplitter::handle {
+    background: #1a1a2e;
+}
+
+QSplitter::handle:hover {
+    background: #4f8cff;
+}
+
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 9px;
+}
+
+QScrollBar::handle:vertical {
+    background: #2a3b63;
+    border-radius: 4px;
+    min-height: 24px;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    height: 0;
+}
+
+/* ---------------- 탭 ---------------- */
+QTabWidget::pane {
+    border: 1px solid #22304f;
+    border-radius: 8px;
+    background: #16213e;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background: #1a1a2e;
+    border: 1px solid #22304f;
+    padding: 5px 10px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    margin-right: 2px;
+    color: #8b93b5;
+}
+
+QTabBar::tab:selected {
+    background: #0f3460;
+    color: #e6e9f5;
+}
+
+QTabBar::tab:hover {
+    color: #e6e9f5;
+}
+
+/* ---------------- 표 / 리스트 ---------------- */
+QTableWidget, QListWidget, QTreeWidget {
+    background: #0f1a33;
+    alternate-background-color: #131f3d;
+    border: 1px solid #22304f;
+    border-radius: 6px;
+    gridline-color: #22304f;
+}
+
+QHeaderView::section {
+    background: #0f3460;
+    border: none;
+    padding: 4px;
+    font-weight: 700;
+}
+
+QListWidget::item {
+    padding: 6px;
+    border-radius: 5px;
+}
+
+QListWidget::item:hover {
+    background: #0f3460;
+}
+
+QListWidget::item:selected {
+    background: #1a4a80;
+}
+
+QGroupBox {
+    border: 1px solid #22304f;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 6px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    color: #8b93b5;
+}
+
+/* ---------------- KPI 카드 ---------------- */
+QFrame#KpiCard {
+    background: #0f1a33;
+    border: 1px solid #22304f;
+    border-radius: 10px;
+}
+
+QFrame#KpiCard:hover {
+    border-color: #4f8cff;
+}
+
+QLabel#KpiTitle {
+    color: #8b93b5;
+    font-size: 9pt;
+}
+
+QLabel#KpiValue {
+    font-size: 16pt;
+    font-weight: 700;
+}
+
+QLabel#KpiUnit {
+    color: #8b93b5;
+    font-size: 9pt;
+}
+
+QLabel#KpiDelta {
+    font-size: 9pt;
+    font-weight: 700;
+}
+
+QLabel#KpiDelta[trend="better"] {
+    color: #2ecc71;
+}
+
+QLabel#KpiDelta[trend="worse"] {
+    color: #e74c3c;
+}
+
+QLabel#KpiDelta[trend="flat"] {
+    color: #8b93b5;
+}
+
+/* ---------------- 채팅 ---------------- */
+QWidget#ChatArea {
+    background: transparent;
+}
+
+QFrame#Bubble {
+    border-radius: 12px;
+    padding: 2px;
+}
+
+QFrame#Bubble[role="user"] {
+    background: #1d4b85;
+    border: 1px solid #4f8cff;
+}
+
+QFrame#Bubble[role="agent"] {
+    background: #0f1a33;
+    border: 1px solid #2a3b63;
+}
+
+QFrame#Bubble[role="agent"][severity="warning"] {
+    border: 1px solid #f39c12;
+}
+
+QFrame#Bubble[role="agent"][severity="critical"] {
+    border: 2px solid #e74c3c;
+    background: #2a1420;
+}
+
+QFrame#Bubble[role="system"] {
+    background: transparent;
+    border: 1px dashed #2a3b63;
+}
+
+QLabel#BubbleText {
+    font-family: "Malgun Gothic", "Consolas", monospace;
+}
+
+QLabel#BubbleMeta {
+    color: #8b93b5;
+    font-size: 8pt;
+}
+
+QLabel#Badge {
+    background: #e74c3c;
+    border-radius: 9px;
+    padding: 1px 7px;
+    font-weight: 700;
+    font-size: 9pt;
+}
+
+QPushButton#QuickCommand {
+    background: #0f1a33;
+    border: 1px solid #2a3b63;
+    border-radius: 11px;
+    padding: 3px 10px;
+    font-size: 9pt;
+}
+
+QPushButton#QuickCommand:hover {
+    border-color: #4f8cff;
+}
+
+/* ---------------- 긴급 배너 ---------------- */
+QFrame#AlertBanner {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+QFrame#AlertBanner[severity="critical"] {
+    background: #e74c3c;
+}
+
+QFrame#AlertBanner[severity="warning"] {
+    background: #f39c12;
+}
+
+QLabel#BannerTitle {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+QLabel#BannerText {
+    color: #ffffff;
+}
+
+QPushButton#BannerClose {
+    background: transparent;
+    border: none;
+    font-size: 13pt;
+    color: #ffffff;
+    padding: 0 6px;
+}
+
+QToolTip {
+    background: #0f3460;
+    border: 1px solid #4f8cff;
+    color: #e6e9f5;
+    padding: 4px;
+}
