@@ -287,43 +287,43 @@ class MainWindow(QMainWindow):
             return
         if message:
             self._console.add_system_message(message)
+        if not self._watchers_started:
+            # ConfigWatcher는 시작 시점 이후 변경만 감시하므로, 시작 전 변경은 워커에 직접 반영을 요청한다.
+            orders = action.kind in (ActionKind.CREATE_ORDER, ActionKind.CANCEL_ORDER)
+            self._worker.send_command(ActionKind.SYNC_ORDERS if orders else ActionKind.RELOAD_CONFIG)
 
     def _execute_db_action(self, action: AgentAction) -> str:
         """DB 변경형 조치. 변경은 ConfigWatcher를 거쳐 시뮬레이터에 반영된다."""
         p = action.params
-        if not self._watchers_started:
-            note = "\n(DB 감시가 아직 꺼져 있어 [▶ 시작] 후 반영됩니다)"
-        else:
-            note = ""
         match action.kind:
             case ActionKind.ADD_ROBOTS:
                 added = self._service.add_robots(int(p.get("count", 1)))
-                return f"🤖 DB INSERT: {', '.join(added)}{note}"
+                return f"🤖 DB INSERT: {', '.join(added)}"
             case ActionKind.ADD_CHARGER:
                 charger_id = self._service.add_charger(float(p["x"]), float(p["y"]), int(p.get("capacity", 2)))
-                return f"⚡ DB INSERT: 충전소 {charger_id} ({p['x']:.0f}, {p['y']:.0f}){note}"
+                return f"⚡ DB INSERT: 충전소 {charger_id} ({p['x']:.0f}, {p['y']:.0f})"
             case ActionKind.MOVE_OBSTACLE:
                 moved = self._service.move_obstacle(str(p["obstacle_type"]), tuple(p["coords"]))
                 if moved is None:
                     raise ValueError(f"{p['obstacle_type']} 항목을 찾을 수 없습니다.")
-                return f"🚪 DB UPDATE: {moved.label or moved.obstacle_type} 위치 변경{note}"
+                return f"🚪 DB UPDATE: {moved.label or moved.obstacle_type} 위치 변경"
             case ActionKind.MOVE_STATION:
                 if not self._service.move_station(str(p["station_id"]), float(p["x"]), float(p["y"])):
                     raise ValueError(f"{p['station_id']} 스테이션을 찾을 수 없습니다.")
-                return f"📐 DB UPDATE: {p['station_id']} 위치 변경{note}"
+                return f"📐 DB UPDATE: {p['station_id']} 위치 변경"
             case ActionKind.SET_STATION_ACTIVE:
                 changed = self._service.set_station_active(str(p["station_id"]), bool(p["active"]))
                 state = "가동" if p["active"] else "비활성(고장)"
                 if not changed:
                     return f"{p['station_id']}는 이미 {state} 상태입니다."
-                return f"DB UPDATE: {p['station_id']} → {state}{note}"
+                return f"DB UPDATE: {p['station_id']} → {state}"
             case ActionKind.CREATE_ORDER:
                 now = self.sim_clock()
                 seconds = p.get("deadline_seconds")
                 deadline = now + timedelta(seconds=float(seconds)) if seconds and not math.isnan(seconds) else None
                 order = self._service.create_order(p["product_type"], int(p["quantity"]), p.get("priority", "normal"),
                                                    deadline, list(p.get("required_stations") or []), now, "ai_agent")
-                return f"📋 DB INSERT: {order.order_id} ({order.priority}){note}"
+                return f"📋 DB INSERT: {order.order_id} ({order.priority})"
             case ActionKind.CANCEL_ORDER:
                 if not self._service.cancel_order(str(p["order_id"]), "ai_agent"):
                     raise ValueError(f"{p['order_id']}는 취소할 수 없는 주문입니다.")
