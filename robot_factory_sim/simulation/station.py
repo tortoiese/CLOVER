@@ -15,6 +15,24 @@ if TYPE_CHECKING:
 MIN_PROCESS_TIME: float = 0.5
 
 
+class ResizableResource(simpy.Resource):
+    """점유자와 FIFO 대기열을 유지하며 용량을 변경하는 충전 자원."""
+
+    def resize(self, capacity: int) -> None:
+        """용량을 변경한다. 축소 시 기존 충전은 완료하되 신규 점유는 제한한다.
+
+        Args:
+            capacity: 새 동시 점유 한도
+        """
+        # SimPy Resource는 공개 용량 setter가 없으므로 확장 클래스에서 내부 훅을 사용한다.
+        self._capacity = max(1, capacity)
+        while self.queue and self.count < self.capacity:
+            previous_count = self.count
+            self._trigger_put(None)
+            if self.count == previous_count:
+                break
+
+
 class WorkStation:
     """작업 스테이션. 한 번에 로봇 1대가 작업하며 대기열은 우선순위 순."""
 
@@ -112,7 +130,7 @@ class ChargingStation:
         """
         self.env = env
         self.cfg = cfg
-        self.resource = simpy.Resource(env, capacity=max(1, int(cfg.capacity)))
+        self.resource = ResizableResource(env, capacity=max(1, int(cfg.capacity)))
         self.removed = False
         self.occupants: set[str] = set()
         self.incoming: set[str] = set()
@@ -143,11 +161,11 @@ class ChargingStation:
         return self.capacity - len(self.occupants) - self.waiting - len(self.incoming)
 
     def update_config(self, cfg: ChargingStationConfig) -> None:
-        """설정을 갱신한다. 슬롯 수가 바뀌면 자원을 새로 만든다 (기존 점유자는 이전 자원에서 해제).
+        """설정을 갱신한다. 슬롯 변경 시 기존 점유와 대기 순서를 유지한다.
 
         Args:
             cfg: 새 설정
         """
         if max(1, int(cfg.capacity)) != self.capacity:
-            self.resource = simpy.Resource(self.env, capacity=max(1, int(cfg.capacity)))
+            self.resource.resize(max(1, int(cfg.capacity)))
         self.cfg = cfg
