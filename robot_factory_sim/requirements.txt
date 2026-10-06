@@ -2,3 +2,6 @@ PySide6>=6.6
 simpy>=4.1
 pyqtgraph>=0.13.7
 numpy>=1.26
+chromadb>=1.0,<2
+openai>=2,<3
+pypdf>=5,<7

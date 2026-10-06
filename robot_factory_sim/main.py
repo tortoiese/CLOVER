@@ -19,7 +19,7 @@ import pyqtgraph as pg  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 import config  # noqa: E402
-from agent.mock_agent import MockAgent  # noqa: E402
+from agent.rag.factory import create_agent  # noqa: E402
 from gui import constants as c  # noqa: E402
 from gui.main_window import MainWindow  # noqa: E402
 from simulation.factory_service import FactoryService  # noqa: E402
@@ -51,7 +51,7 @@ def main() -> int:
 
     service = FactoryService(config.DB_PATH)
     seeded = service.ensure_database()
-    window = MainWindow(service, MockAgent())
+    window = MainWindow(service, create_agent())
     if seeded:
         window.statusBar().showMessage("factory_config.db 생성 — 기본 공장 구성(스테이션 5, 충전소 2, 로봇 5)을 넣었습니다.", 8000)
     window.show()

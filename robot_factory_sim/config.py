@@ -104,3 +104,16 @@ BACKGROUND_PRODUCT: str = "general"
 # ---------------------------------------------------------------------------
 WATCHER_IGNORED_ACTORS: frozenset[str] = frozenset({"simulation", "event_watcher"})
 WATCHER_IGNORED_TABLES: frozenset[str] = frozenset({"production_events", "config_presets"})
+
+# RAG: 기본 로컬 모드. OpenAI 모드는 명시적인 외부 요청 허용이 필요하다.
+RAG_ENABLED: bool = os.environ.get("CLOVER_RAG_ENABLED", "0") == "1"
+RAG_PROVIDER: str = os.environ.get("CLOVER_RAG_PROVIDER", "local")
+RAG_DATA_PATH: Path = Path(os.environ.get("CLOVER_RAG_DATA_PATH", BASE_DIR / "rag_data"))
+RAG_DOCUMENT_PATH: Path | None = (
+    Path(os.environ["CLOVER_RAG_DOCUMENT_PATH"]) if os.environ.get("CLOVER_RAG_DOCUMENT_PATH") else None
+)
+RAG_ALLOW_NETWORK: bool = os.environ.get("CLOVER_RAG_ALLOW_NETWORK", "0") == "1"
+RAG_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+RAG_EMBEDDING_MODEL: str = os.environ.get("CLOVER_RAG_EMBEDDING_MODEL", "text-embedding-3-small")
+RAG_CHAT_MODEL: str = os.environ.get("CLOVER_RAG_CHAT_MODEL", "")
+RAG_MIN_SCORE: float = float(os.environ.get("CLOVER_RAG_MIN_SCORE", "0.15"))
