@@ -68,6 +68,10 @@ class Robot:
         self.alive = True
         self.charge_sessions = 0
         self.tasks_done = 0
+        self.distance_m = 0.0
+        self.travel_energy_units = 0.0
+        self.work_energy_units = 0.0
+        self._work_started: float | None = None
         self._depleted = False
         self._segment: tuple[float, float, float, float, float, float, float] | None = None
         self._charge_step: tuple[float, float] | None = None
@@ -225,6 +229,8 @@ class Robot:
         x0, y0, x1, y1, _, _, drain = self._segment
         self.x = x0 + (x1 - x0) * fraction
         self.y = y0 + (y1 - y0) * fraction
+        self.distance_m += math.hypot(x1 - x0, y1 - y0) * config.METERS_PER_PIXEL * fraction
+        self.travel_energy_units += min(self.battery, drain * fraction)
         self.battery = max(0.0, self.battery - drain * fraction)
         self._segment = None
 
@@ -346,13 +352,19 @@ class Robot:
             engine.on_task_started(task, self)
             station.begin(task, self.robot_id)
             started = self.env.now
+            self._work_started = float(started)
             completed = False
             try:
-                yield self.env.timeout(station.sample_process_time())
+                duration = (max(0.5, station.cfg.avg_process_time + task.process_noise * station.cfg.process_time_std)
+                            if task.process_noise is not None else station.sample_process_time())
+                yield self.env.timeout(duration)
                 completed = True
             finally:
                 station.end(completed)
-                self.battery = max(0.0, self.battery - config.WORK_DRAIN_PER_SEC * (self.env.now - started))
+                drain = min(self.battery, config.WORK_DRAIN_PER_SEC * (self.env.now - started))
+                self.work_energy_units += drain
+                self.battery = max(0.0, self.battery - drain)
+                self._work_started = None
         self.current_task = None
         self.target_id = None
         self.tasks_done += 1
