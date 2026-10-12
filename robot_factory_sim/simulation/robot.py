@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 import simpy
 
 import config
+from simulation.planning.models import Action
 from utils.config_models import RobotConfig
 from utils.event_types import RobotState
 from utils.metrics import RobotTimeUsage
@@ -27,6 +28,10 @@ Point = tuple[float, float]
 
 class BatteryDepleted(Exception):
     """이동 중 배터리가 0이 되었음을 알린다."""
+
+
+class PlanRejected(Exception):
+    """A committed prefix no longer matches the live execution premises."""
 
 
 class InterruptKind:
@@ -61,6 +66,9 @@ class Robot:
         self.state_since = self.env.now
         self.state_time: dict[str, float] = defaultdict(float)
         self.current_task: Task | None = None
+        self.planned_actions: tuple[Action, ...] = ()
+        self._planned_layout: int | None = None
+        self._planned_arrival: float = 0.0
         self.target_id: str | None = None
         self.route: list[Point] = []
         self.emergency_order: str | None = None
@@ -141,6 +149,7 @@ class Robot:
             and self.current_task is None
             and not self.forced_charge
             and not self._depleted
+            and not self.planned_actions
         )
 
     def usage(self) -> RobotTimeUsage:
@@ -164,6 +173,14 @@ class Robot:
         """
         self.current_task = task
         task.robot_id = self.robot_id
+        self.wake()
+
+    def assign_planned(self, actions: tuple[Action, ...], task: Task | None) -> None:
+        """Wake a robot for a committed travel/wait/service or charging prefix."""
+        self.planned_actions = actions
+        self._planned_layout = self.engine.layout_version
+        self.current_task = task
+        self._planned_arrival = self.env.now
         self.wake()
 
     def wake(self) -> None:
@@ -256,6 +273,9 @@ class Robot:
                 if self._depleted:
                     yield from self._fault_process()
                     continue
+                if self.planned_actions:
+                    yield from self._planned_process()
+                    continue
                 if self.forced_charge or (
                     self.current_task is None and self.engine.scheduler.should_charge(self, self.engine)
                 ):
@@ -271,8 +291,13 @@ class Robot:
             except simpy.Interrupt as interrupt:
                 self._wake = None
                 self._settle()
+                self._clear_plan()
                 self._handle_interrupt(interrupt.cause)
+            except PlanRejected:
+                self._clear_plan()
+                self._requeue_current()
             except BatteryDepleted:
+                self._clear_plan()
                 self._depleted = True
         self._set_state(RobotState.IDLE)
 
@@ -293,7 +318,121 @@ class Robot:
         elif kind in (InterruptKind.PREEMPT, InterruptKind.STATION_DOWN):
             self._requeue_current()
         if task is not None:
-            self.engine.assign(task, self)
+            if self.engine.scheduler.planning_active:
+                if not any(pending is task for pending in self.engine.pending_tasks):
+                    self.engine.requeue_task(task)
+            else:
+                self.engine.assign(task, self)
+
+    def _clear_plan(self) -> None:
+        """Release reservations even when a prefix is interrupted or rejected."""
+        if self.planned_actions:
+            self.planned_actions = ()
+            self._planned_layout = None
+            self.engine.scheduler.release(self.robot_id)
+
+    def _planned_pause_process(self, until: float) -> Generator[Any, Any, None]:
+        """Wait without occupying a workstation or charger."""
+        if until > self.env.now + 1e-7:
+            self._set_state(RobotState.PLANNED_WAIT)
+            yield self.env.timeout(until - self.env.now)
+
+    def _planned_process(self) -> Generator[Any, Any, None]:
+        """Execute a prefix using actual Resource grants, never predicted grants."""
+        actions = self.planned_actions
+        for action in actions:
+            if self._planned_layout != self.engine.layout_version:
+                raise PlanRejected("Layout changed")
+            yield from self._planned_pause_process(action.start)
+            if self._planned_layout != self.engine.layout_version:
+                raise PlanRejected("Layout changed while waiting")
+            if action.kind == "move":
+                self.target_id = actions[-1].resource
+                self._set_state(RobotState.MOVING)
+                yield from self._travel_process(list(action.points))
+                self._planned_arrival = self.env.now
+            elif action.kind == "work":
+                yield from self._planned_work_process(action)
+            elif action.kind == "charge":
+                yield from self._planned_charge_process(action)
+            elif action.kind != "wait":
+                raise PlanRejected("Unknown planned action")
+            if self.env.now > action.end + 1e-6:
+                self.engine.scheduler.on_delay(self.robot_id, action, self.env.now)
+            yield from self._planned_pause_process(action.end)
+        self.target_id = None
+        self._clear_plan()
+
+    def _planned_work_process(self, action: Action) -> Generator[Any, Any, None]:
+        """Use a single-capacity work station and account for actual processing."""
+        engine = self.engine
+        task = self.current_task
+        station = engine.stations.get(action.resource)
+        order = engine.orders.get(task.order_id) if task is not None and task.order_id else None
+        if (task is None or station is None or not station.active or task.task_id != action.job_id
+                or order is not None and not order.is_active):
+            raise PlanRejected("Job or station became unavailable")
+        if (station.dedicated_order not in (None, task.order_id)
+                or order is not None and station.id not in engine.order_stations(order)
+                or self.emergency_order is not None and self.emergency_order != task.order_id):
+            raise PlanRejected("Work eligibility changed before its start")
+        self.target_id = station.id
+        self._set_state(RobotState.WAITING)
+        arrived = self._planned_arrival
+        with station.resource.request(priority=task.priority) as request:
+            yield request
+            if not station.active or engine.stations.get(station.id) is not station:
+                raise PlanRejected("Station changed while waiting")
+            engine.metrics.record_station_wait(self.env.now - arrived)
+            self._set_state(RobotState.WORKING)
+            engine.on_task_started(task, self)
+            station.begin(task, self.robot_id)
+            started = self.env.now
+            completed = False
+            try:
+                duration = engine.sample_process_time(station, task)
+                yield self.env.timeout(duration)
+                completed = True
+            finally:
+                station.end(completed)
+                drain = config.WORK_DRAIN_PER_SEC * (self.env.now - started)
+                self.battery = max(0.0, self.battery - drain)
+        self.current_task = None
+        self.tasks_done += 1
+        engine.complete_task(task, self)
+        if self.battery <= 0:
+            raise BatteryDepleted()
+
+    def _planned_charge_process(self, action: Action) -> Generator[Any, Any, None]:
+        """Charge to the committed amount; keep the live capacity constraint."""
+        engine = self.engine
+        charger = engine.chargers.get(action.resource)
+        if charger is None or not charger.active:
+            raise PlanRejected("Charger became unavailable")
+        self.target_id = charger.id
+        self._set_state(RobotState.CHARGE_WAIT)
+        requested = self._planned_arrival
+        with charger.resource.request() as request:
+            yield request
+            if not charger.active or engine.chargers.get(charger.id) is not charger:
+                raise PlanRejected("Charger changed while waiting")
+            engine.metrics.record_charge_wait(self.env.now - requested)
+            self._set_state(RobotState.CHARGING)
+            self.charge_sessions += 1
+            charger.occupants.add(self.robot_id)
+            target = min(self.capacity, self.battery + action.gain)
+            try:
+                while self.battery < target - 1e-7:
+                    if not charger.active:
+                        raise PlanRejected("Charger disabled")
+                    rate = max(0.01, charger.cfg.charge_rate)
+                    step = min(config.CHARGE_STEP, (target - self.battery) / rate)
+                    self._charge_step = (self.env.now, rate)
+                    yield self.env.timeout(step)
+                    self._charge_step = None
+                    self.battery = min(self.capacity, self.battery + rate * step)
+            finally:
+                charger.occupants.discard(self.robot_id)
 
     def _travel_process(self, points: list[Point]) -> Generator[Any, Any, None]:
         """경유점을 따라 이동한다. 배터리가 바닥나면 BatteryDepleted."""
@@ -337,18 +476,20 @@ class Robot:
         yield from self._travel_process(route.points)
 
         self._set_state(RobotState.WAITING)
+        arrived = self.env.now
         with station.resource.request(priority=task.priority) as request:
             yield request
             if not station.active or engine.stations.get(station.id) is not station:
                 self._requeue_current()
                 return
             self._set_state(RobotState.WORKING)
+            engine.metrics.record_station_wait(self.env.now - arrived)
             engine.on_task_started(task, self)
             station.begin(task, self.robot_id)
             started = self.env.now
             completed = False
             try:
-                yield self.env.timeout(station.sample_process_time())
+                yield self.env.timeout(engine.sample_process_time(station, task))
                 completed = True
             finally:
                 station.end(completed)

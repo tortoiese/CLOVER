@@ -6,6 +6,7 @@ SimWorker는 Baseline / 최적화 엔진 2개를 같은 시드·같은 작업 �
 
 from __future__ import annotations
 
+import hashlib
 import itertools
 import math
 from collections import deque
@@ -21,11 +22,29 @@ import config
 from simulation.path_graph import PathGraph
 from simulation.robot import InterruptKind, Robot
 from simulation.scheduler import BaseScheduler, create_scheduler
-from simulation.state import ChargerSnapshot, OrderSnapshot, RobotSnapshot, StationSnapshot, TimelineEvent
+from simulation.state import (
+    ChargerSnapshot,
+    OrderSnapshot,
+    RobotSnapshot,
+    StationSnapshot,
+    TimelineEvent,
+)
 from simulation.station import ChargingStation, WorkStation
 from simulation.task_generator import Task, TaskGenerator
-from utils.config_models import ChargingStationConfig, FactoryConfig, OrderRecord, RobotConfig, WorkStationConfig
-from utils.event_types import OrderStatus, ProductionEventType, RobotState, Severity, TimelineKind
+from utils.config_models import (
+    ChargingStationConfig,
+    FactoryConfig,
+    OrderRecord,
+    RobotConfig,
+    WorkStationConfig,
+)
+from utils.event_types import (
+    OrderStatus,
+    ProductionEventType,
+    RobotState,
+    Severity,
+    TimelineKind,
+)
 from utils.metrics import MetricsCollector
 
 Point = tuple[float, float]
@@ -105,8 +124,14 @@ class SimulationEngine:
         self.env = simpy.Environment()
         self.mode = mode
         self.scheduler: BaseScheduler = create_scheduler(mode)
+        self.planning_revision = 0
         self.epoch = epoch or datetime.now()
-        self.params: dict[str, float] = {"task_rate": config.DEFAULT_TASK_RATE, "min_charge_mode": 0.0}
+        self.params: dict[str, float] = {
+            "task_rate": config.DEFAULT_TASK_RATE, "min_charge_mode": 0.0, "background_enabled": 1.0,
+            "planning_horizon": config.PLANNING_HORIZON, "planning_step": config.PLANNING_STEP,
+            "planning_interval": config.PLANNING_INTERVAL, "planning_timeout": config.PLANNING_TIMEOUT,
+            "planning_max_tasks": float(config.PLANNING_MAX_TASKS), "planning_sigma": config.PLANNING_SIGMA,
+        }
         if params:
             self.params.update(params)
         self.metrics = MetricsCollector()
@@ -127,6 +152,8 @@ class SimulationEngine:
         self._surge_flagged = False
         self._unreachable_warned: set[tuple[int, str]] = set()
         self._process_rng = np.random.default_rng(seed + 1)
+        self.seed = seed
+        self.trace_processing = False
 
         for station_cfg in factory.stations:
             self._create_station(station_cfg)
@@ -313,6 +340,8 @@ class SimulationEngine:
             deadline=deadline,
         )
         self.pending_tasks.append(task)
+        self.planning_revision += 1
+        self.scheduler.invalidate("arrival", task.priority == config.PRIORITY_LEVELS["critical"])
         return task
 
     def assign(self, task: Task, robot: Robot) -> None:
@@ -333,6 +362,8 @@ class SimulationEngine:
             order.responded = True
             self.metrics.record_response(self.now - order.detected_at)
         robot.assign(task)
+        self.planning_revision += 1
+        self.scheduler.invalidate("assignment")
 
     def requeue_task(self, task: Task) -> None:
         """중단된 작업을 대기열로 되돌린다.
@@ -349,6 +380,8 @@ class SimulationEngine:
         if not self.station_available(task.station_id):
             self._rehome_task(task)
         self.pending_tasks.append(task)
+        self.planning_revision += 1
+        self.scheduler.invalidate("requeue", urgent=True)
 
     def on_task_started(self, task: Task, robot: Robot) -> None:
         """스테이션에서 작업이 시작됐을 때 호출된다.
@@ -360,6 +393,16 @@ class SimulationEngine:
         task.started_at = self.now
         self.metrics.record_wait(self.now - task.created_at)
 
+    def sample_process_time(self, station: WorkStation, task: Task) -> float:
+        """Use station sampling, or a task-keyed draw for common-trace experiments."""
+        if not self.trace_processing:
+            return station.sample_process_time()
+        key = f"{self.seed}:{task.task_id}:{station.id}".encode()
+        seed = int.from_bytes(hashlib.blake2b(key, digest_size=8).digest(), "big")
+        value = np.random.default_rng(seed).normal(station.cfg.avg_process_time,
+                                                   max(0.0, station.cfg.process_time_std))
+        return max(0.5, float(value))
+
     def complete_task(self, task: Task, robot: Robot) -> None:
         """작업 완료를 처리한다.
 
@@ -369,6 +412,8 @@ class SimulationEngine:
         """
         started = task.assigned_at if task.assigned_at is not None else task.created_at
         self.metrics.record_task_completed(self.now, self.now - started)
+        self.planning_revision += 1
+        self.scheduler.invalidate("completed", urgent=True)
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is None:
             return
@@ -435,6 +480,10 @@ class SimulationEngine:
         Returns:
             요청 전달 여부
         """
+        self.planning_revision += 1
+        self.scheduler.invalidate("forced_charge", urgent=True)
+        if robot.planned_actions:
+            return robot.interrupt(InterruptKind.CHARGE)
         if robot.state in (RobotState.CHARGING, RobotState.CHARGE_WAIT) or robot.target_id in self.chargers:
             return False
         if robot.state == RobotState.IDLE and robot.current_task is None:
@@ -453,6 +502,8 @@ class SimulationEngine:
         Returns:
             선점 여부
         """
+        self.planning_revision += 1
+        self.scheduler.invalidate("preempt", urgent=True)
         self._remove_pending(task)
         if not robot.interrupt(InterruptKind.PREEMPT, task):
             self.pending_tasks.append(task)
@@ -498,6 +549,24 @@ class SimulationEngine:
         Returns:
             적용된 값
         """
+        planning_bounds = {
+            "planning_horizon": (5.0, 300.0), "planning_step": (0.25, 5.0),
+            "planning_interval": (0.5, 60.0), "planning_timeout": (0.01, 5.0),
+            "planning_max_tasks": (1.0, 40.0), "planning_sigma": (0.0, 3.0),
+        }
+        if key in planning_bounds:
+            low, high = planning_bounds[key]
+            if not math.isfinite(value) or not low <= value <= high:
+                raise ValueError(f"{key} must be between {low} and {high}")
+            if key == "planning_max_tasks" and not float(value).is_integer():
+                raise ValueError("planning_max_tasks must be an integer")
+            self.params[key] = float(value)
+            self.planning_revision += 1
+            self.scheduler.invalidate("parameter", urgent=True)
+            return float(value)
+        if key == "background_enabled":
+            self.params[key] = float(bool(value))
+            return self.params[key]
         if key not in TUNABLE_PARAMS:
             raise KeyError(f"변경할 수 없는 파라미터: {key}")
         if key == "task_rate":
@@ -505,6 +574,8 @@ class SimulationEngine:
         else:
             value = 1.0 if value else 0.0
         self.params[key] = value
+        self.planning_revision += 1
+        self.scheduler.invalidate("parameter", urgent=True)
         return value
 
     # ------------------------------------------------------------------
@@ -520,6 +591,8 @@ class SimulationEngine:
         Args:
             records: DB 주문 전체
         """
+        before = [(o.order_id, o.quantity, o.priority, o.deadline, tuple(o.required_stations), o.status)
+                  for o in self.orders.values()]
         for record in records:
             order = self.orders.get(record.order_id)
             if order is None:
@@ -545,6 +618,11 @@ class SimulationEngine:
                 order.risk_flagged = False
             if record.required_stations != order.required_stations:
                 order.required_stations = list(record.required_stations)
+        after = [(o.order_id, o.quantity, o.priority, o.deadline, tuple(o.required_stations), o.status)
+                 for o in self.orders.values()]
+        if after != before:
+            self.planning_revision += 1
+            self.scheduler.invalidate("orders", urgent=True)
 
     def _add_order(self, record: OrderRecord) -> None:
         """신규 주문 등록."""
@@ -719,6 +797,8 @@ class SimulationEngine:
         Returns:
             실제 수행된 조치 설명
         """
+        self.planning_revision += 1
+        self.scheduler.invalidate("emergency", urgent=True)
         order_id: str | None = plan.get("order_id")
         order = self.orders.get(order_id) if order_id else None
         if order_id and order is None:
@@ -802,6 +882,8 @@ class SimulationEngine:
         self.factory = factory
         self.path_graph = PathGraph(factory)
         self.layout_version += 1
+        self.planning_revision += 1
+        self.scheduler.invalidate("configuration", urgent=True)
 
         summary += self._apply_station_configs(factory.stations)
         summary += self._apply_charger_configs(factory.chargers)
@@ -1017,7 +1099,7 @@ class SimulationEngine:
             KPI key → 값
         """
         usages = [r.usage() for r in (*self.robots.values(), *self.retired)]
-        return self.metrics.compute(self.now, usages)
+        return {**self.metrics.compute(self.now, usages), **self.scheduler.diagnostics()}
 
     def robot_snapshots(self) -> list[RobotSnapshot]:
         """로봇 스냅샷.

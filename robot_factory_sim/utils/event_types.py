@@ -12,18 +12,20 @@ class RobotState:
     IDLE: Final[str] = "idle"
     MOVING: Final[str] = "moving"
     WAITING: Final[str] = "waiting"          # 스테이션 대기열
+    PLANNED_WAIT: Final[str] = "planned_wait"  # waiting for a committed time window, without a resource
     WORKING: Final[str] = "working"
     CHARGE_WAIT: Final[str] = "charge_wait"  # 충전기 대기열
     CHARGING: Final[str] = "charging"
     FAULT: Final[str] = "fault"
 
-    ALL: Final[tuple[str, ...]] = (IDLE, MOVING, WAITING, WORKING, CHARGE_WAIT, CHARGING, FAULT)
+    ALL: Final[tuple[str, ...]] = (IDLE, MOVING, WAITING, PLANNED_WAIT, WORKING, CHARGE_WAIT, CHARGING, FAULT)
     BUSY: Final[frozenset[str]] = frozenset({MOVING, WORKING, WAITING})
 
     LABELS: Final[dict[str, str]] = {
         IDLE: "대기",
         MOVING: "이동",
         WAITING: "작업대기",
+        PLANNED_WAIT: "예약대기",
         WORKING: "작업",
         CHARGE_WAIT: "충전대기",
         CHARGING: "충전",
@@ -133,7 +135,7 @@ class ActionKind:
 class SchedulerModeLabel:
     """스케줄러 모드 표시 이름."""
 
-    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "최적화"}
+    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "가중치 휴리스틱", "milp_rh": "MILP RH"}
 
 
 class Tables:

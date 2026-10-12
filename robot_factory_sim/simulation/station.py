@@ -15,6 +15,19 @@ if TYPE_CHECKING:
 MIN_PROCESS_TIME: float = 0.5
 
 
+class ResizableResource(simpy.Resource):
+    """Resize a charger without creating a second independent capacity pool."""
+
+    def resize(self, capacity: int) -> None:
+        """Keep existing users; a shrink limits new grants until usage falls."""
+        self._capacity = max(1, int(capacity))
+        while self.queue and self.count < self.capacity:
+            count = self.count
+            self._trigger_put(None)
+            if count == self.count:
+                break
+
+
 class WorkStation:
     """작업 스테이션. 한 번에 로봇 1대가 작업하며 대기열은 우선순위 순."""
 
@@ -112,7 +125,7 @@ class ChargingStation:
         """
         self.env = env
         self.cfg = cfg
-        self.resource = simpy.Resource(env, capacity=max(1, int(cfg.capacity)))
+        self.resource = ResizableResource(env, capacity=max(1, int(cfg.capacity)))
         self.removed = False
         self.occupants: set[str] = set()
         self.incoming: set[str] = set()
@@ -149,5 +162,5 @@ class ChargingStation:
             cfg: 새 설정
         """
         if max(1, int(cfg.capacity)) != self.capacity:
-            self.resource = simpy.Resource(self.env, capacity=max(1, int(cfg.capacity)))
+            self.resource.resize(max(1, int(cfg.capacity)))
         self.cfg = cfg

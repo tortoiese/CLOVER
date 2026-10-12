@@ -52,6 +52,8 @@ class TaskGenerator:
             yield env.timeout(float(self.rng.exponential(1.0 / rate)))
             # 두 엔진의 난수 시퀀스를 맞추기 위해 조건과 무관하게 항상 뽑는다.
             pick = float(self.rng.random())
+            if not self.engine.params.get("background_enabled", 1.0):
+                continue
             stations = self.engine.background_station_ids()
             if not stations or self.engine.background_task_count() >= config.MAX_BACKGROUND_TASKS:
                 continue

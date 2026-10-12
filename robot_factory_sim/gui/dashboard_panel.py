@@ -196,10 +196,15 @@ class DashboardPanel(QWidget):
 
     def _update_cards(self, state: SimState) -> None:
         """KPI 카드 갱신 (표시 엔진 vs 비교 엔진)."""
-        other_mode = next((m for m in state.engine_kpis if m != state.mode), None)
+        other_mode = "baseline" if state.mode != "baseline" else "optimized"
         other = state.engine_kpis.get(other_mode, {}) if other_mode else {}
         label = SchedulerModeLabel.LABELS.get(other_mode or "", "비교")
         self._kpi_title.setText(f"📊 성능 KPI — {SchedulerModeLabel.LABELS.get(state.mode, state.mode)} 모드")
+        planning = state.planning.get(state.mode)
+        if planning:
+            report = planning.get("report") or {}
+            status = "계산중" if planning.get("pending") else planning.get("execution_status", report.get("status", "대기"))
+            self._kpi_title.setText(f"📊 성능 KPI — {SchedulerModeLabel.LABELS[state.mode]} · {status}")
         for key, card in self._cards.items():
             card.set_values(state.kpis.get(key, math.nan), other.get(key, math.nan), label)
 
@@ -338,7 +343,7 @@ class DashboardPanel(QWidget):
             plot.addItem(label)
         modes = list(c.ENGINE_COLORS)
         for mode in modes:
-            other_mode = next(m for m in modes if m != mode)
+            other_mode = "baseline" if mode != "baseline" else "optimized"
             values = state.engine_kpis.get(mode, {})
             others = state.engine_kpis.get(other_mode, {})
             scores = [radar_score(d, values.get(d.key, math.nan), others.get(d.key, math.nan)) for d in KPI_DEFINITIONS]

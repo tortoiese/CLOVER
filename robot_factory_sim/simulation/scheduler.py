@@ -29,6 +29,24 @@ class BaseScheduler(ABC):
     """스케줄러 확장 포인트."""
 
     name: str = "base"
+    planning_active: bool = False
+
+    def invalidate(self, reason: str, urgent: bool = False) -> None:
+        """Notify a planning adapter of a changed execution premise."""
+
+    def release(self, robot_id: str) -> None:
+        """Release a finished or interrupted planned commitment, if any."""
+
+    def diagnostics(self) -> dict[str, float]:
+        """Return optional solver diagnostics for the current engine."""
+        return {}
+
+    def on_delay(self, robot_id: str, action: object, actual_end: float) -> None:
+        """Report actual execution beyond a nominal reservation."""
+
+    def planning_state(self) -> dict[str, object]:
+        """Return serializable planning status for a display snapshot."""
+        return {}
 
     def dispatch(self, engine: SimulationEngine) -> None:
         """유휴 로봇에 작업을 배정한다. (긴급 배정 로봇 우선)
@@ -124,7 +142,7 @@ class BaselineScheduler(BaseScheduler):
 
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만일 때만 충전 (반응형)."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """항상 만충전."""
@@ -275,16 +293,18 @@ class OptimizedScheduler(BaseScheduler):
     # ------------------------------------------------------------------
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만이면 충전."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """상황별 충전 목표: 긴급/최소충전 모드 → 적체 → 평상시."""
         critical_pending = any(t.priority == config.PRIORITY_LEVELS["critical"] for t in engine.pending_tasks)
         if engine.params.get("min_charge_mode") or critical_pending:
-            return config.MIN_CHARGE_TARGET
-        if len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
-            return BACKLOG_CHARGE_TARGET
-        return config.OPTIMIZED_CHARGE_TARGET
+            target = config.MIN_CHARGE_TARGET
+        elif len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
+            target = BACKLOG_CHARGE_TARGET
+        else:
+            target = config.OPTIMIZED_CHARGE_TARGET
+        return min(100.0, max(target, robot.cfg.charge_threshold))
 
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
         """이동시간 + 예상 대기시간이 가장 짧은 충전소."""
@@ -319,5 +339,8 @@ def create_scheduler(mode: str) -> BaseScheduler:
             return BaselineScheduler()
         case "optimized":
             return OptimizedScheduler()
+        case "milp_rh":
+            from simulation.planning.rolling_horizon import RollingHorizonScheduler
+            return RollingHorizonScheduler()
         case _:
             raise ValueError(f"알 수 없는 스케줄러 모드: {mode}")

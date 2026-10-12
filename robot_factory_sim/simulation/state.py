@@ -118,6 +118,7 @@ class SimState:
     engine_kpis: dict[str, dict[str, float]]
     params: dict[str, float]
     events: list[TimelineEvent] = field(default_factory=list)
+    planning: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 def state_to_context(state: SimState | None) -> dict[str, Any]:
@@ -151,6 +152,7 @@ def state_to_context(state: SimState | None) -> dict[str, Any]:
         "avg_task_cycle": state.avg_task_cycle,
         "kpis": dict(state.kpis),
         "engine_kpis": {mode: dict(values) for mode, values in state.engine_kpis.items()},
+        "planning": dict(state.planning),
         "params": dict(state.params),
         "robots": robots,
         "stations": [{**asdict(s), "avg_process_time": process_times.get(s.id, 0.0)} for s in state.stations],

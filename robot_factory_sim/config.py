@@ -50,7 +50,14 @@ RANDOM_SEED: int = 42
 SPEED_OPTIONS: tuple[int, ...] = (1, 2, 5, 10)
 DEFAULT_SPEED: int = 1
 DEFAULT_SCHEDULER_MODE: str = "optimized"   # "baseline" | "optimized"
-SCHEDULER_MODES: tuple[str, ...] = ("baseline", "optimized")
+SCHEDULER_MODES: tuple[str, ...] = ("baseline", "optimized", "milp_rh")
+
+PLANNING_HORIZON: float = 60.0
+PLANNING_STEP: float = 1.0
+PLANNING_INTERVAL: float = 5.0
+PLANNING_TIMEOUT: float = 2.0          # total model-build + solve wall-sec; GUI uses a separate worker
+PLANNING_MAX_TASKS: int = 8
+PLANNING_SIGMA: float = 1.0
 
 WORKER_LOOP_INTERVAL_MS: int = 25       # SimWorker 루프 주기
 STATE_EMIT_INTERVAL: float = 0.08       # 상태 스냅샷 emit 간격 (wall-sec)

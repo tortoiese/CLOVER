@@ -138,7 +138,8 @@ class MockAgent(BaseAgent):
             (lambda m: "배속" in m or bool(SPEED_RE.search(m)) and "배" in m, self._cmd_speed),
             (lambda m: _has(m, "빈도", "생성률", "작업량") and _has(m, "높", "늘", "증가", "올려", "낮", "줄", "감소",
                                                                "내려"), self._cmd_task_rate),
-            (lambda m: _has(m, "최적화", "baseline", "베이스라인", "기존 방식", "라운드로빈") and _has(m, "모드", "전환", "바꿔"),
+            (lambda m: _has(m, "최적화", "baseline", "베이스라인", "기존 방식", "라운드로빈", "milp", "MILP", "롤링")
+             and _has(m, "모드", "전환", "바꿔"),
              self._cmd_mode),
             (lambda m: "최소충전" in m or "최소 충전" in m, self._cmd_min_charge),
             (lambda m: _has(m, "효율", "kpi", "KPI", "성능", "분석"), self._cmd_efficiency),
@@ -267,7 +268,7 @@ class MockAgent(BaseAgent):
         if not ctx:
             return AgentResponse("KPI를 계산할 데이터가 아직 없습니다.")
         mode = ctx["mode"]
-        other_mode = next((m for m in ctx["engine_kpis"] if m != mode), None)
+        other_mode = "baseline" if mode != "baseline" else "optimized"
         other = ctx["engine_kpis"].get(other_mode, {}) if other_mode else {}
         label = SchedulerModeLabel.LABELS
         lines = [f"📈 효율 분석 — {label.get(mode, mode)} vs {label.get(other_mode, other_mode)}"]
@@ -406,9 +407,12 @@ class MockAgent(BaseAgent):
 
     async def _cmd_mode(self, message: str, ctx: Context) -> AgentResponse:
         """스케줄러 모드 전환."""
-        mode = "baseline" if _has(message, "baseline", "베이스라인", "기존 방식", "라운드로빈") else "optimized"
+        if _has(message, "milp", "MILP", "롤링"):
+            mode = "milp_rh"
+        else:
+            mode = "baseline" if _has(message, "baseline", "베이스라인", "기존 방식", "라운드로빈") else "optimized"
         label = SchedulerModeLabel.LABELS[mode]
-        return AgentResponse(f"🔀 스케줄링 모드를 {label}로 전환합니다. (두 엔진은 계속 병렬 실행되어 KPI 비교가 유지됩니다)",
+        return AgentResponse(f"🔀 스케줄링 모드를 {label}로 전환합니다. (비교 엔진도 계속 실행됩니다)",
                              [AgentAction(ActionKind.SET_MODE, {"mode": mode})])
 
     async def _cmd_min_charge(self, message: str, ctx: Context) -> AgentResponse:

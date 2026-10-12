@@ -1,4 +1,5 @@
 PySide6>=6.6
-simpy>=4.1
+simpy>=4.1,<4.2
 pyqtgraph>=0.13.7
 numpy>=1.26
+ortools==9.15.6755

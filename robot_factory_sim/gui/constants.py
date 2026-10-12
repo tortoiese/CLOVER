@@ -32,6 +32,7 @@ ROBOT_STATE_COLORS: Final[dict[str, str]] = {
     RobotState.MOVING: "#3498db",
     RobotState.WORKING: "#2ecc71",
     RobotState.WAITING: "#27ae60",
+    RobotState.PLANNED_WAIT: "#b7a1d8",
     RobotState.CHARGING: "#f1c40f",
     RobotState.CHARGE_WAIT: "#d4ac0d",
     RobotState.IDLE: "#95a5a6",
@@ -69,7 +70,7 @@ TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
     TimelineKind.INFO: (0, TEXT_MUTED, "d", "ℹ 정보"),
 }
 
-ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7"}
+ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7", "milp_rh": "#c7a6ff"}
 
 # ---------------------------------------------------------------------------
 # 크기

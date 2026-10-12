@@ -21,8 +21,16 @@ import config
 from database.db_manager import DBManager
 from database.order_manager import OrderManager
 from simulation.engine import SimulationEngine
+from simulation.planning.models import SolveResult
+from simulation.planning.qt_worker import PlannerWorker
 from simulation.state import SimState
-from utils.event_types import ActionKind, OrderStatus, ProductionEventType, SchedulerModeLabel, Severity
+from utils.event_types import (
+    ActionKind,
+    OrderStatus,
+    ProductionEventType,
+    SchedulerModeLabel,
+    Severity,
+)
 
 DEDUPED_EVENTS: frozenset[str] = frozenset({
     ProductionEventType.CRITICAL_ORDER, ProductionEventType.DEADLINE_RISK, ProductionEventType.ORDER_COMPLETED,
@@ -36,6 +44,7 @@ class _SimController(QObject):
     state_ready = Signal(object)
     notice = Signal(str, str)
     running_changed = Signal(bool)
+    plan_requested = Signal(object)
 
     def __init__(self, db_path: str) -> None:
         """컨트롤러를 생성한다 (반드시 워커 스레드에서 호출).
@@ -55,6 +64,14 @@ class _SimController(QObject):
         self._wall_elapsed = 0.0
         self._engines: dict[str, SimulationEngine] = {}
         self._build_engines()
+        self._planner_thread = QThread(self)
+        self._planner = PlannerWorker()
+        self._planner.moveToThread(self._planner_thread)
+        self.plan_requested.connect(self._planner.solve)
+        self._planner.result_ready.connect(self._planning_result)
+        self._planner_thread.finished.connect(self._planner.deleteLater)
+        self._planner_thread.start()
+        self._bind_planners()
         self._timer = QTimer(self)
         self._timer.setInterval(config.WORKER_LOOP_INTERVAL_MS)
         self._timer.timeout.connect(self._tick)
@@ -74,6 +91,9 @@ class _SimController(QObject):
     def shutdown(self) -> None:
         """타이머를 멈추고 진행률을 저장한 뒤 DB 연결을 닫는다."""
         self._timer.stop()
+        self._planner_thread.quit()
+        if not self._planner_thread.wait(10000):
+            raise RuntimeError("Planning thread did not finish its bounded solve")
         try:
             self._flush_progress()
         except Exception:  # noqa: BLE001 — 종료 중 DB 오류는 무시
@@ -99,6 +119,22 @@ class _SimController(QObject):
         for engine in self._engines.values():
             engine.drain_alerts()
             engine.drain_notices()
+        if hasattr(self, "_planner"):
+            self._bind_planners()
+
+    def _bind_planners(self) -> None:
+        """Send planning requests through a queued cross-thread Qt signal."""
+        for engine in self._engines.values():
+            if engine.scheduler.planning_active:
+                engine.scheduler.set_submitter(self.plan_requested.emit)
+
+    @Slot(object)
+    def _planning_result(self, result: SolveResult) -> None:
+        """Only the owning current engine may consume a result after reset."""
+        for engine in self._engines.values():
+            scheduler = engine.scheduler
+            if scheduler.planning_active and scheduler.waiting_token == result.token:
+                scheduler.deliver(result)
 
     # ------------------------------------------------------------------
     # 루프
@@ -206,6 +242,8 @@ class _SimController(QObject):
             engine_kpis={mode: e.kpis() for mode, e in self._engines.items()},
             params=params,
             events=list(engine.timeline),
+            planning={mode: e.scheduler.planning_state() for mode, e in self._engines.items()
+                      if e.scheduler.planning_active},
         )
         self.state_ready.emit(state)
 

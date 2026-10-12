@@ -68,6 +68,7 @@ class MetricsCollector:
         self.wait_times: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.cycle_times: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.charge_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
+        self.station_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.response_times: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.total_completed = 0
         self.orders_finished = 0
@@ -99,6 +100,10 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.charge_waits.append(max(0.0, wait))
+
+    def record_station_wait(self, wait: float) -> None:
+        """Record arrival-to-grant delay separately from creation-to-start delay."""
+        self.station_waits.append(max(0.0, wait))
 
     def record_response(self, response: float) -> None:
         """긴급 이벤트 대응시간을 기록한다.
@@ -166,6 +171,9 @@ class MetricsCollector:
             "avg_wait": _mean(self.wait_times),
             "utilization": busy / total * 100.0 if total > 0 else 0.0,
             "charge_wait": _mean(self.charge_waits),
+            "station_wait": _mean(self.station_waits),
+            "wait_p95": sorted(self.wait_times)[min(len(self.wait_times) - 1, int(len(self.wait_times) * 0.95))]
+            if self.wait_times else math.nan,
             "idle_rate": idle / total * 100.0 if total > 0 else 0.0,
             "battery_eff": self.total_completed / sessions if sessions else math.nan,
             "order_fulfillment": order_rate,
