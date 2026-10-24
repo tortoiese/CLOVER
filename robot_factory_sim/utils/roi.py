@@ -127,3 +127,11 @@ if __name__ == "__main__":
     diff = compare(base, opt)
     print("전력량 변화   : %.1f%%" % diff["energy_wh"]["pct"])
     print("순이익 변화   : %+.0f원" % diff["net_profit"]["delta"])
+
+    # 데모: 완료 건수/이동거리는 고정하고 파라미터(전력 단가)만 바꿔도 ROI 숫자가 바로 바뀐다.
+    # gui.widgets.roi_panel.RoiPanel의 스핀박스가 바로 이 파라미터들을 조절한다.
+    print("\n[파라미터 변경 데모] 완료=510건, 이동거리=16500m 고정 — 전력 단가(원/Wh)만 변경")
+    for price in (0.05, 0.13, 0.30):
+        result = compute_roi(completed_units=510, total_distance_m=16500, power_price_per_wh=price)
+        print(f"  전력 단가 {price:.2f}원/Wh → 총투입비용 {result.total_cost:,.0f}원  "
+              f"순이익 {result.net_profit:,.0f}원  ROI {result.roi_pct:.1f}%")

@@ -1,4 +1,4 @@
-"""기본 공장 구성 시드 데이터 (스테이션 5개, 충전소 2개, 로봇 5대) + 물리 제약 시나리오 프리셋."""
+"""기본 공장 구성 시드 데이터 (3층, 스테이션 5개, 충전소 3개, 엘리베이터 1대, 로봇 5대) + 물리 제약 시나리오 프리셋."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import config
 from database.db_manager import DBManager
 from utils.config_models import (
     ChargingStationConfig,
+    ElevatorConfig,
     FactoryConfig,
     FactoryProfile,
     ObstacleConfig,
@@ -111,6 +112,33 @@ def _corridor_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConf
     return FactoryConfig(profile, stations, chargers, robots, [], nodes, edges)
 
 
+def _single_floor_config() -> FactoryConfig:
+    """1층짜리 기본 공장 (스테이션 5, 충전소 2, 로봇 5, 벽/문/랙) — 물리 시나리오의 격자형 바탕."""
+    profile = FactoryProfile(id=1, factory_name="클로봇 데모 공장", floor_width=config.DEFAULT_FLOOR_WIDTH,
+                             floor_height=config.DEFAULT_FLOOR_HEIGHT, grid_cell_size=config.DEFAULT_GRID_CELL_SIZE)
+    stations = [
+        WorkStationConfig("WS-01", "조립 A", 100, 100, task_type="assembly", avg_process_time=6.0),
+        WorkStationConfig("WS-02", "용접", 300, 100, task_type="welding", avg_process_time=8.0, process_time_std=1.5),
+        WorkStationConfig("WS-03", "도장", 100, 500, task_type="painting", avg_process_time=7.0),
+        WorkStationConfig("WS-04", "검사", 300, 500, task_type="inspection", avg_process_time=4.0,
+                          process_time_std=0.5),
+        WorkStationConfig("WS-05", "포장", 700, 100, task_type="packaging", avg_process_time=5.0),
+    ]
+    chargers = [
+        ChargingStationConfig("CS-01", 700, 500, capacity=2, charge_rate=2.0),
+        ChargingStationConfig("CS-02", 300, 300, capacity=1, charge_rate=2.5),
+    ]
+    robots = [RobotConfig(f"R-{i:02d}", move_speed=2.0, battery_drain_rate=0.35, charge_threshold=20.0)
+              for i in range(1, 6)]
+    obstacles = [
+        ObstacleConfig(-1, "wall", 500, 0, 500, 600, False, "구획 벽"),
+        ObstacleConfig(-2, "door", 500, 250, 500, 350, True, "출입문"),
+        ObstacleConfig(-3, "obstacle", 190, 330, 210, 470, False, "팔레트 랙"),
+    ]
+    nodes, edges = build_grid_network(profile.floor_width, profile.floor_height, SEED_NODE_SPACING, stations, chargers)
+    return FactoryConfig(profile, stations, chargers, robots, obstacles, nodes, edges)
+
+
 def _grid_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
     """격자형: 기본 그리드 경로망 + 중앙 교차점 1개 + 교차점 인접 통로 폭 조절.
 
@@ -120,7 +148,7 @@ def _grid_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
     Returns:
         FactoryConfig
     """
-    factory = build_default_config()
+    factory = _single_floor_config()
     profile = factory.profile
     center = min(factory.nodes, key=lambda n: math.hypot(n.x - profile.floor_width / 2, n.y - profile.floor_height / 2))
     if center.node_type == "waypoint":
@@ -132,10 +160,9 @@ def _grid_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
 
 
 def _loop_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
-    """루프형: 1층 루프 통로(교차점 1개) + 엘리베이터로 연결된 2층 포장 구역.
+    """루프형: 1층 루프 통로(교차점 1개) + 엘리베이터 EV-01로 연결된 2층 포장 구역.
 
-    2층은 1층과 겹치지 않도록 같은 평면 좌표계의 오른쪽 영역에 배치한다
-    (최단경로 계산이 좌표 기반이라, 층을 겹쳐 그리면 다른 층 노드와 혼동될 수 있다).
+    2층은 실제 층(floor=2)이라 1층과 같은 평면 좌표를 써도 경로가 섞이지 않는다.
 
     Args:
         main_width: 루프 통로(병목 구간) 폭 (m)
@@ -144,14 +171,15 @@ def _loop_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
         FactoryConfig
     """
     profile = FactoryProfile(id=1, factory_name="루프형 공장(2층)", floor_width=1000.0, floor_height=600.0,
-                              grid_cell_size=50.0)
+                              grid_cell_size=50.0, floor_count=2)
     stations = [
         WorkStationConfig("WS-A1", "조립", 150, 150, task_type="assembly", avg_process_time=6.0),
         WorkStationConfig("WS-A2", "용접", 450, 150, task_type="welding", avg_process_time=8.0),
         WorkStationConfig("WS-A3", "검사", 450, 450, task_type="inspection", avg_process_time=4.0),
-        WorkStationConfig("WS-B1", "포장(2F)", 900, 300, task_type="packaging", avg_process_time=5.0),
+        WorkStationConfig("WS-B1", "포장(2F)", 900, 300, task_type="packaging", avg_process_time=5.0, floor=2),
     ]
     chargers = [ChargingStationConfig("CS-01", 300, 300, capacity=2, charge_rate=2.0)]
+    elevators = [ElevatorConfig("EV-01", "엘리베이터", 300, 450, travel_time=profile.floor_travel_sec)]
     robots = [RobotConfig(f"R-{i:02d}") for i in range(1, 5)]
 
     nodes: list[PathNodeConfig] = []
@@ -162,7 +190,7 @@ def _loop_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
     n_cs = _node(nodes, 300, 300, "charger", "CS-01")
     n_x = _node(nodes, 300, 150, "intersection")
     n_ev1 = _node(nodes, 300, 450, "elevator", "EV-01", floor=1)
-    n_ev2 = _node(nodes, 900, 450, "elevator", "EV-01", floor=2)
+    n_ev2 = _node(nodes, 300, 450, "elevator", "EV-01", floor=2)
     n_b1 = _node(nodes, 900, 300, "station", "WS-B1", floor=2)
 
     _edge(edges, n_a1, n_x, main_width)
@@ -171,10 +199,9 @@ def _loop_layout(main_width: float = _DEFAULT_CORRIDOR_WIDTH) -> FactoryConfig:
     _edge(edges, n_a3, n_cs)
     _edge(edges, n_cs, n_x)
     _edge(edges, n_x, n_ev1, main_width)
-    _edge(edges, n_ev1, n_ev2)      # 엘리베이터 샤프트 (층간 — 거리는 이동시간 계산에 쓰이지 않는다)
-    _edge(edges, n_ev2, n_b1)
+    _edge(edges, n_ev2, n_b1)       # 2층: 엘리베이터 승강장 → 포장 스테이션 (층간 이동은 EV-01 승강로)
 
-    return FactoryConfig(profile, stations, chargers, robots, [], nodes, edges)
+    return FactoryConfig(profile, stations, chargers, robots, [], nodes, edges, elevators)
 
 
 LAYOUT_BUILDERS: dict[str, Callable[[float], FactoryConfig]] = {
@@ -249,8 +276,13 @@ def seed_scenario_presets(db: DBManager) -> list[str]:
     return names
 
 
+DEMO_PRESET_NAME: str = "3층 데모 공장"
+
+
 def build_default_config() -> FactoryConfig:
-    """기본 공장 구성을 만든다.
+    """기본 공장 구성(3층 + 엘리베이터)을 만든다.
+
+    1층 조립·용접, 2층 도장·검사, 3층 포장 라인이며 엘리베이터 EL-01이 세 층을 잇는다.
 
     Returns:
         FactoryConfig (노드/엣지/장애물 ID는 음수 임시 ID)
@@ -261,31 +293,40 @@ def build_default_config() -> FactoryConfig:
         floor_width=config.DEFAULT_FLOOR_WIDTH,
         floor_height=config.DEFAULT_FLOOR_HEIGHT,
         grid_cell_size=config.DEFAULT_GRID_CELL_SIZE,
+        floor_count=3,
     )
     stations = [
-        WorkStationConfig("WS-01", "조립 A", 100, 100, task_type="assembly", avg_process_time=6.0),
-        WorkStationConfig("WS-02", "용접", 300, 100, task_type="welding", avg_process_time=8.0, process_time_std=1.5),
-        WorkStationConfig("WS-03", "도장", 100, 500, task_type="painting", avg_process_time=7.0),
+        WorkStationConfig("WS-01", "조립 A", 100, 100, task_type="assembly", avg_process_time=6.0, floor=1),
+        WorkStationConfig("WS-02", "용접", 300, 100, task_type="welding", avg_process_time=8.0, process_time_std=1.5,
+                          floor=1),
+        WorkStationConfig("WS-03", "도장", 100, 500, task_type="painting", avg_process_time=7.0, floor=2),
         WorkStationConfig("WS-04", "검사", 300, 500, task_type="inspection", avg_process_time=4.0,
-                          process_time_std=0.5),
-        WorkStationConfig("WS-05", "포장", 700, 100, task_type="packaging", avg_process_time=5.0),
+                          process_time_std=0.5, floor=2),
+        WorkStationConfig("WS-05", "포장", 700, 100, task_type="packaging", avg_process_time=5.0, floor=3),
     ]
     chargers = [
-        ChargingStationConfig("CS-01", 700, 500, capacity=2, charge_rate=2.0),
-        ChargingStationConfig("CS-02", 300, 300, capacity=1, charge_rate=2.5),
+        ChargingStationConfig("CS-01", 700, 250, capacity=2, charge_rate=2.0, floor=1),
+        ChargingStationConfig("CS-02", 300, 300, capacity=1, charge_rate=2.5, floor=2),
+        ChargingStationConfig("CS-03", 200, 300, capacity=1, charge_rate=2.0, floor=3),
     ]
+    elevators = [ElevatorConfig("EL-01", "화물 엘리베이터", 650, 550)]
     robots = [
         RobotConfig(f"R-{i:02d}", move_speed=2.0, battery_drain_rate=0.35, charge_threshold=20.0)
         for i in range(1, 6)
     ]
     obstacles = [
-        ObstacleConfig(-1, "wall", 500, 0, 500, 600, False, "구획 벽"),
-        ObstacleConfig(-2, "door", 500, 250, 500, 350, True, "출입문"),
-        ObstacleConfig(-3, "obstacle", 190, 330, 210, 470, False, "팔레트 랙"),
+        ObstacleConfig(-1, "wall", 500, 0, 500, 600, False, "구획 벽", 1),
+        ObstacleConfig(-2, "door", 500, 250, 500, 350, True, "출입문", 1),
+        ObstacleConfig(-3, "obstacle", 190, 330, 210, 470, False, "팔레트 랙", 1),
+        ObstacleConfig(-4, "wall", 500, 0, 500, 600, False, "구획 벽", 2),
+        ObstacleConfig(-5, "door", 500, 250, 500, 350, True, "출입문", 2),
+        ObstacleConfig(-6, "obstacle", 190, 330, 210, 470, False, "도장 부스", 2),
+        ObstacleConfig(-7, "wall", 450, 200, 800, 200, False, "포장 구역 벽", 3),
+        ObstacleConfig(-8, "door", 600, 200, 700, 200, True, "포장 구역 문", 3),
     ]
     nodes, edges = build_grid_network(profile.floor_width, profile.floor_height, SEED_NODE_SPACING, stations,
-                                      chargers)
-    return FactoryConfig(profile, stations, chargers, robots, obstacles, nodes, edges)
+                                      chargers, profile.floor_count, elevators)
+    return FactoryConfig(profile, stations, chargers, robots, obstacles, nodes, edges, elevators)
 
 
 def build_default_orders() -> list[OrderRecord]:
@@ -296,9 +337,32 @@ def build_default_orders() -> list[OrderRecord]:
     """
     now = datetime.now()
     return [
-        OrderRecord("", "제품A", 120, priority="normal", required_stations=["WS-01", "WS-02"], created_at=now),
+        OrderRecord("", "제품A", 90, priority="normal", required_stations=["WS-01", "WS-03", "WS-05"], created_at=now),
         OrderRecord("", "제품C", 80, priority="high", required_stations=["WS-03", "WS-04"], created_at=now),
     ]
+
+
+def ensure_demo_preset(db: DBManager) -> None:
+    """3층 데모 구성을 프리셋으로 남긴다 (기존 DB에서도 공장 설정 > 프리셋으로 불러올 수 있게).
+
+    Args:
+        db: 초기화된 DBManager
+    """
+    if DEMO_PRESET_NAME not in db.list_presets():
+        db.save_preset(DEMO_PRESET_NAME, build_default_config(), changed_by="seed")
+
+
+def ensure_scenario_presets(db: DBManager) -> None:
+    """물리 제약 시나리오 레이아웃 프리셋을 없는 것만 저장한다 (이미 있는 프리셋은 덮어쓰지 않는다).
+
+    Args:
+        db: 초기화된 DBManager
+    """
+    existing = set(db.list_presets())
+    for layout in LAYOUT_PRESETS:
+        name = f"physical-{layout}"
+        if name not in existing:
+            db.save_preset(name, LAYOUT_BUILDERS[layout](_DEFAULT_CORRIDOR_WIDTH), changed_by="seed")
 
 
 def seed_default_factory(db: DBManager) -> bool:
@@ -311,8 +375,12 @@ def seed_default_factory(db: DBManager) -> bool:
         시드 삽입 여부
     """
     if db.is_seeded():
+        ensure_demo_preset(db)
+        ensure_scenario_presets(db)
         return False
     db.save_factory_config(build_default_config(), changed_by="seed")
+    ensure_demo_preset(db)
+    ensure_scenario_presets(db)
     for order in build_default_orders():
         order.order_id = db.next_order_id()
         db.insert_order(order, changed_by="seed")
@@ -324,7 +392,8 @@ if __name__ == "__main__":
     seed_db.initialize()
     print("seeded:", seed_default_factory(seed_db))
     factory = seed_db.load_factory_config()
-    print(len(factory.stations), "stations /", len(factory.nodes), "nodes /", len(factory.edges), "edges")
+    print(len(factory.stations), "stations /", len(factory.nodes), "nodes /", len(factory.edges), "edges /",
+          factory.floor_count, "floors /", len(factory.elevators), "elevators")
 
     # 물리 제약 데모: 같은 레이아웃(중앙복도형)에서 통로 폭만 줄이면 통로 대기·교착이 늘어난다.
     # 병목을 눈에 보이게 하려고 로봇 수/작업률을 키운 '증설+증속' 부하로 돌린다 (운영 변수).

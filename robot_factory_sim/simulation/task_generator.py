@@ -29,6 +29,7 @@ class Task:
     assigned_at: float | None = None
     started_at: float | None = None
     robot_id: str | None = None
+    process_noise: float | None = None  # 비교 실험에서 작업별 공통 난수를 고정
 
 
 class TaskGenerator:

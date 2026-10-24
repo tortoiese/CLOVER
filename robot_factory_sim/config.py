@@ -22,6 +22,11 @@ DEFAULT_FACTORY_NAME: str = "Default Factory"
 DEFAULT_FLOOR_WIDTH: float = 800.0
 DEFAULT_FLOOR_HEIGHT: float = 600.0
 DEFAULT_GRID_CELL_SIZE: float = 50.0
+DEFAULT_FLOOR_COUNT: int = 1
+MAX_FLOOR_COUNT: int = 6
+
+DEFAULT_ELEVATOR_SIZE: float = 60.0
+ELEVATOR_PX_PER_SEC: float = 20.0           # 엘리베이터 이동 시간을 경로 거리(px)로 환산하는 비율
 
 DEFAULT_STATION_WIDTH: float = 80.0
 DEFAULT_STATION_HEIGHT: float = 60.0
@@ -56,7 +61,7 @@ FLOOR_TRAVEL_SEC: float = 4.0          # 엘리베이터 층당 이동시간 (s)
 DOOR_TIME_SEC: float = 6.0             # 엘리베이터 문 개폐시간 (s)
 INTERSECTION_MARGIN_SEC: float = 1.0   # 교차점 통과 여유시간 (s)
 DEADLOCK_THRESHOLD_SEC: float = 120.0  # 통로 대기가 이 이상이면 교착으로 집계 (s)
-DEFAULT_ELEVATOR_CAPACITY: int = 1     # 동시 운행 가능한 엘리베이터(차) 수
+DEFAULT_ELEVATOR_CAPACITY: int = 1     # 엘리베이터 동시 탑승(운행) 로봇 수
 
 # ---------------------------------------------------------------------------
 # 시뮬레이션 런타임
@@ -128,3 +133,15 @@ WH_PER_M: float = 0.133            # 소비효율 e (Wh/m) = 배터리용량 ÷ 
 POWER_PRICE_PER_WH: float = 0.13   # 전력 단가 (원/Wh = 130원/kWh)
 OTHER_COST_KRW: float = 60000.0    # 기타 비용 (AI(API) + 로봇 운영 등, 원)
 REVENUE_PER_UNIT_KRW: float = 2000.0  # 완료 생산 1건당 매출/가치 (원)
+# RAG: 기본 로컬 모드. OpenAI 모드는 명시적인 외부 요청 허용이 필요하다.
+RAG_ENABLED: bool = os.environ.get("CLOVER_RAG_ENABLED", "0") == "1"
+RAG_PROVIDER: str = os.environ.get("CLOVER_RAG_PROVIDER", "local")
+RAG_DATA_PATH: Path = Path(os.environ.get("CLOVER_RAG_DATA_PATH", BASE_DIR / "rag_data"))
+RAG_DOCUMENT_PATH: Path | None = (
+    Path(os.environ["CLOVER_RAG_DOCUMENT_PATH"]) if os.environ.get("CLOVER_RAG_DOCUMENT_PATH") else None
+)
+RAG_ALLOW_NETWORK: bool = os.environ.get("CLOVER_RAG_ALLOW_NETWORK", "0") == "1"
+RAG_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+RAG_EMBEDDING_MODEL: str = os.environ.get("CLOVER_RAG_EMBEDDING_MODEL", "text-embedding-3-small")
+RAG_CHAT_MODEL: str = os.environ.get("CLOVER_RAG_CHAT_MODEL", "")
+RAG_MIN_SCORE: float = float(os.environ.get("CLOVER_RAG_MIN_SCORE", "0.15"))

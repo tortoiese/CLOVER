@@ -21,6 +21,7 @@ CRITICAL: Final[str] = "#e74c3c"
 WARNING: Final[str] = "#f39c12"
 SUCCESS: Final[str] = "#2ecc71"
 INFO: Final[str] = "#3498db"
+ELEVATOR: Final[str] = "#5dade2"
 
 SEVERITY_COLORS: Final[dict[str, str]] = {
     Severity.INFO: INFO,
@@ -60,6 +61,31 @@ OBSTACLE_COLORS: Final[dict[str, str]] = {
     "obstacle": "#7b6d5d",
 }
 
+# ---------------------------------------------------------------------------
+# 3D 건물 뷰 (BuildingView)
+# ---------------------------------------------------------------------------
+BUILDING_SLAB: Final[str] = "#24365f"          # 층 바닥판
+BUILDING_SLAB_EDGE: Final[str] = "#3d5a99"
+BUILDING_SLAB_SIDE: Final[str] = "#0f1a38"
+BUILDING_BG_TOP: Final[str] = "#1b2646"
+BUILDING_BG_BOTTOM: Final[str] = "#10172e"
+BUILDING_WALL_HEIGHT: Final[float] = 26.0
+BUILDING_STATION_HEIGHT: Final[float] = 24.0
+BUILDING_FLOOR_GAP: Final[float] = 340.0       # 층 간격 (월드 단위)
+BUILDING_SLAB_THICKNESS: Final[float] = 10.0
+BUILDING_YAW_DEG: Final[float] = 32.0
+BUILDING_PITCH_DEG: Final[float] = 22.0
+BUILDING_PITCH_RANGE_DEG: Final[tuple[float, float]] = (12.0, 62.0)
+BUILDING_WALL_STEP: Final[float] = 40.0        # 긴 벽을 깊이 정렬용으로 쪼개는 길이
+BUILDING_ANIMATION_MS: Final[int] = 560
+BUILDING_DRAG_THRESHOLD: Final[int] = 5
+
+# ---------------------------------------------------------------------------
+# 도면 축척 (1 : N). 격자 1칸이 종이 위에서 딱 떨어지는 값만 쓴다.
+# ---------------------------------------------------------------------------
+SCALE_RATIOS: Final[tuple[int, ...]] = (25, 50, 100, 200, 250, 500, 1000)
+MM_PER_INCH: Final[float] = 25.4
+
 TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
     # kind: (row, color, symbol, label)
     TimelineKind.EMERGENCY: (4, CRITICAL, "o", "🔴 긴급"),
@@ -92,6 +118,8 @@ BANNER_AUTO_HIDE_MS: Final[int] = 20000
 CONFIG_RELOAD_DEBOUNCE_MS: Final[int] = 300
 ORDER_DIALOG_REFRESH_MS: Final[int] = 2000
 CHAT_MAX_MESSAGES: Final[int] = 300
+DEMO_ORDER_QUANTITY: Final[int] = 60       # 엘리베이터 시연 주문 수량
+DEMO_DEADLINE_SEC: Final[float] = 1800.0   # 시연 주문 납기 (sim-sec)
 
 HISTORY_WINDOW: Final[float] = 1800.0     # 그래프 표시 구간 (sim-sec)
 GANTT_WINDOW: Final[float] = 300.0        # 간트 표시 구간 (sim-sec)
@@ -119,6 +147,7 @@ CHART_TABS: Final[tuple[str, ...]] = (
 PALETTE_ITEMS: Final[tuple[tuple[str, str], ...]] = (
     ("station", "🏭 작업 스테이션"),
     ("charger", "⚡ 충전소"),
+    ("elevator", "🛗 엘리베이터"),
     ("wall", "▬ 벽"),
     ("door", "🚪 문"),
     ("obstacle", "▦ 장애물"),

@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import math
+import uuid
+from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -31,20 +33,23 @@ from PySide6.QtWidgets import (
 import config
 from agent.base import BaseAgent
 from agent.models import AgentAction, AgentResponse
+from agent.orchestration import is_comparison_request
 from gui import constants as c
 from gui.agent_bridge import AgentBridge
 from gui.alert_banner import AlertBanner
 from gui.config_editor import ConfigEditorDialog
 from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
-from gui.factory_view import FactoryPanel
+from gui.factory_panel import FactoryPanel
 from gui.order_dialog import OrderDialog
+from gui.optimization_panel import OptimizationPanel
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
 from utils.event_types import ActionKind, ChangeType, SchedulerModeLabel, Severity, Tables
 
 THREAD_STOP_TIMEOUT_MS: int = 3000
+SHUTDOWN_POLL_INTERVAL_MS: int = 100
 SPLITTER_SIZES: tuple[int, int, int] = (620, 420, 560)
 
 
@@ -68,9 +73,18 @@ class MainWindow(QMainWindow):
         self._watchers_started = False
         self._pending_config_tables: set[str] = set()
         self._pending_config_by = "system"
+        self._closing = False
+        self._comparison_enabled = bool(getattr(agent, "supports_comparison", False))
+        self._comparison_pending = False
+        self._comparison_request_id: str | None = None
+        self._shutdown_timer = QTimer(self)
+        self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
+        self._shutdown_timer.timeout.connect(self._finish_shutdown)
 
         self._build_toolbar()
         self._build_body()
+        self._optimization = OptimizationPanel(self)
+        self._optimization.run_requested.connect(lambda: self._on_user_message("/최적화"))
 
         self._worker = SimWorker(service.db_path, self)
         self._worker.state_ready.connect(self._on_state)
@@ -96,6 +110,9 @@ class MainWindow(QMainWindow):
         self._agent_bridge.start()
         self._worker.start()
         self._console.add_system_message(f"DB 연결: {service.db_path}\n[▶ 시작]을 누르면 시뮬레이션과 DB 감시가 시작됩니다.")
+        if self._comparison_enabled:
+            self._console.add_system_message("RAG 운영안 비교: [운영안 비교]에서 조건 입력 → /최적화 → /추천. "
+                                             "문서 질문은 /검색 ROI 산식. 결과는 자동 적용되지 않습니다.")
 
     # ------------------------------------------------------------------
     # UI
@@ -130,6 +147,13 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         self._action(toolbar, "⚙ 공장 설정", self._open_config_editor)
         self._action(toolbar, "📋 주문 관리", self._open_order_dialog)
+        self._action(toolbar, "🛗 엘리베이터 시연", self._start_elevator_demo,
+                     "2층 이상 스테이션만 쓰는 주문을 넣고 1층 도크에서 다시 시작합니다")
+        comparison_action = self._action(toolbar, "운영안 비교", lambda: self._optimization.show(),
+                                         "현재 구성으로 베이스라인·MILP 배정을 비교합니다.")
+        comparison_action.setEnabled(self._comparison_enabled)
+        if not self._comparison_enabled:
+            comparison_action.setToolTip("CLOVER_RAG_ENABLED=1로 실행하면 활성화됩니다.")
 
         spacer = QWidget(self)
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -180,6 +204,24 @@ class MainWindow(QMainWindow):
             self._watchers_started = True
             self._console.add_system_message("ConfigWatcher / ProductionEventWatcher 시작 (1초 폴링)")
         self._worker.send_command(ActionKind.START)
+
+    def _start_elevator_demo(self) -> None:
+        """엘리베이터 시연: 위층 스테이션 전용 주문을 넣고 로봇을 1층에서 다시 출발시킨다."""
+        factory = self._service.load_factory_config()
+        upper = [s.id for s in factory.stations if s.floor > 1 and s.is_active]
+        if factory.floor_count < 2 or not factory.elevators or not upper:
+            QMessageBox.information(self, "엘리베이터 시연",
+                                    "2층 이상에 스테이션이 있고 엘리베이터가 있는 공장 구성이 필요합니다.\n"
+                                    "공장 설정 > 프리셋 '3층 데모 공장'을 불러와 저장한 뒤 다시 시도하세요.")
+            return
+        now = self.sim_clock()
+        self._service.create_order("시연-상층", c.DEMO_ORDER_QUANTITY, "high", now + timedelta(seconds=c.DEMO_DEADLINE_SEC),
+                                   upper, now, "operator")
+        self._console.add_system_message(f"🛗 엘리베이터 시연: {', '.join(upper)} 전용 주문 등록 — 로봇이 1층 도크에서 "
+                                         "엘리베이터를 타고 이동합니다.")
+        self._worker.send_command(ActionKind.SYNC_ORDERS)
+        self._worker.send_command(ActionKind.RESET)
+        self._start()
 
     def _stop(self) -> None:
         """정지 (초기 상태로)."""
@@ -233,6 +275,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_config_changed(self, table: str, change: dict[str, Any]) -> None:
         """ConfigWatcher 변경 → 콘솔 알림 + 디바운스 후 핫리로드/주문 동기화."""
+        self._optimization.mark_stale()
         if table == Tables.ORDERS:
             self._worker.send_command(ActionKind.SYNC_ORDERS)
             if change.get("change_type") == ChangeType.INSERT:
@@ -256,6 +299,8 @@ class MainWindow(QMainWindow):
 
     def _on_production_event(self, event: dict[str, Any]) -> None:
         """생산 이벤트 → AI 자율 대응."""
+        if self._closing:
+            return
         self._agent_bridge.event_requested.emit(event, state_to_context(self._state))
 
     # ------------------------------------------------------------------
@@ -263,10 +308,45 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_user_message(self, text: str) -> None:
         """사용자 채팅 → 에이전트."""
-        self._agent_bridge.message_requested.emit(text, state_to_context(self._state))
+        if self._closing:
+            return
+        context = state_to_context(self._state)
+        if self._comparison_pending:
+            self._console.add_system_message("비교 요청이 진행 중입니다. 완료 후 다시 요청하세요.")
+            return
+        if self._comparison_enabled and is_comparison_request(text):
+            try:
+                context["comparison_conditions"] = self._optimization.conditions()
+                context["factory_config"] = self._service.load_factory_config().to_dict()
+                context["sim_datetime"] = self.sim_clock().isoformat()
+                context["comparison_orders"] = []
+                for record in self._service.list_orders(active_only=True):
+                    values = asdict(record)
+                    for key in ("created_at", "deadline"):
+                        values[key] = values[key].isoformat() if values[key] else None
+                    context["comparison_orders"].append(values)
+            except (ValueError, TypeError) as exc:
+                self._console.add_system_message(str(exc), Severity.WARNING)
+                return
+            self._comparison_pending = True
+            self._comparison_request_id = uuid.uuid4().hex
+            context["_request_id"] = self._comparison_request_id
+            self._optimization.set_busy(True)
+        self._agent_bridge.message_requested.emit(text, context)
 
     def _on_agent_response(self, response: AgentResponse) -> None:
         """에이전트 응답 표시 + 조치 실행 + 긴급 배너."""
+        if self._closing:
+            return
+        if self._comparison_pending and response.request_id == self._comparison_request_id:
+            self._comparison_pending = False
+            self._optimization.set_busy(False)
+        if response.comparison_conditions:
+            self._optimization.set_conditions(response.comparison_conditions)
+        if response.comparison:
+            self._optimization.show_result(response.comparison)
+        if "운영 근거 (계산 결과와 별개인 문서):" in response.text:
+            self._optimization.show_evidence(response.text.split("운영 근거 (계산 결과와 별개인 문서):", 1)[1])
         self._console.add_message(response.text, "agent", response.severity)
         if response.source == "event" and response.severity in (Severity.CRITICAL, Severity.WARNING):
             first_line = response.text.splitlines()[0] if response.text else ""
@@ -300,15 +380,18 @@ class MainWindow(QMainWindow):
                 added = self._service.add_robots(int(p.get("count", 1)))
                 return f"🤖 DB INSERT: {', '.join(added)}"
             case ActionKind.ADD_CHARGER:
-                charger_id = self._service.add_charger(float(p["x"]), float(p["y"]), int(p.get("capacity", 2)))
-                return f"⚡ DB INSERT: 충전소 {charger_id} ({p['x']:.0f}, {p['y']:.0f})"
+                floor = int(p.get("floor", 1))
+                charger_id = self._service.add_charger(float(p["x"]), float(p["y"]), int(p.get("capacity", 2)),
+                                                       floor=floor)
+                return f"⚡ DB INSERT: 충전소 {charger_id} ({floor}F, {p['x']:.0f}, {p['y']:.0f})"
             case ActionKind.MOVE_OBSTACLE:
                 moved = self._service.move_obstacle(str(p["obstacle_type"]), tuple(p["coords"]))
                 if moved is None:
                     raise ValueError(f"{p['obstacle_type']} 항목을 찾을 수 없습니다.")
                 return f"🚪 DB UPDATE: {moved.label or moved.obstacle_type} 위치 변경"
             case ActionKind.MOVE_STATION:
-                if not self._service.move_station(str(p["station_id"]), float(p["x"]), float(p["y"])):
+                floor = int(p["floor"]) if p.get("floor") is not None else None
+                if not self._service.move_station(str(p["station_id"]), float(p["x"]), float(p["y"]), floor=floor):
                     raise ValueError(f"{p['station_id']} 스테이션을 찾을 수 없습니다.")
                 return f"📐 DB UPDATE: {p['station_id']} 위치 변경"
             case ActionKind.SET_STATION_ACTIVE:
@@ -342,6 +425,7 @@ class MainWindow(QMainWindow):
 
     def _on_config_saved(self, changes: int) -> None:
         """에디터 저장 알림 (감시 전이면 직접 리로드)."""
+        self._optimization.mark_stale()
         self._console.add_system_message(f"💾 공장 설정 저장: {changes}건 변경")
         if not self._watchers_started:
             self._worker.send_command(ActionKind.RELOAD_CONFIG)
@@ -350,6 +434,7 @@ class MainWindow(QMainWindow):
         """주문 관리."""
         dialog = OrderDialog(self._service, self.sim_clock, self)
         dialog.exec()
+        self._optimization.mark_stale()
         if not self._watchers_started:
             self._worker.send_command(ActionKind.SYNC_ORDERS)
 
@@ -357,13 +442,29 @@ class MainWindow(QMainWindow):
     # 종료
     # ------------------------------------------------------------------
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 — Qt override
-        """모든 스레드를 정리한다."""
-        for watcher in (self._config_watcher, self._event_watcher):
-            watcher.stop()
-        for thread in (self._config_watcher, self._event_watcher):
-            thread.wait(THREAD_STOP_TIMEOUT_MS)
-        for thread in (self._worker, self._agent_bridge):
-            thread.quit()
-            if not thread.wait(THREAD_STOP_TIMEOUT_MS):
-                QMessageBox.warning(self, "종료", "작업 스레드가 제때 종료되지 않았습니다.")
+        """스레드 종료를 요청하고 모두 종료되기 전에는 창을 유지한다."""
+        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        if not self._closing:
+            self._closing = True
+            self.setEnabled(False)
+            self._reload_timer.stop()
+            for watcher in (self._config_watcher, self._event_watcher):
+                watcher.stop()
+            for thread in (self._worker, self._agent_bridge):
+                thread.requestInterruption()
+                thread.quit()
+            for thread in threads:
+                thread.wait(THREAD_STOP_TIMEOUT_MS)
+        if any(thread.isRunning() for thread in threads):
+            event.ignore()
+            self._shutdown_timer.start()
+            return
+        self._shutdown_timer.stop()
         super().closeEvent(event)
+
+    def _finish_shutdown(self) -> None:
+        """진행 중인 요청이 끝난 뒤 메인 스레드에서 창을 닫는다."""
+        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        if not any(thread.isRunning() for thread in threads):
+            self._shutdown_timer.stop()
+            self.close()

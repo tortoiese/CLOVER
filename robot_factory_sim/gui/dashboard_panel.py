@@ -17,6 +17,7 @@ from PySide6.QtWidgets import QGraphicsPolygonItem, QGridLayout, QLabel, QSplitt
 
 from gui import constants as c
 from gui.widgets.kpi_card import KpiCard
+from gui.widgets.roi_panel import RoiPanel
 from simulation.state import SimState
 from utils.event_types import OrderStatus, RobotState, SchedulerModeLabel
 from utils.metrics import KPI_DEFINITIONS, KpiDefinition
@@ -126,6 +127,8 @@ class DashboardPanel(QWidget):
         self._plots = [make_plot(self._tabs) for _ in c.CHART_TABS]
         for plot, title in zip(self._plots, c.CHART_TABS, strict=True):
             self._tabs.addTab(plot, title)
+        self._roi_panel = RoiPanel(self._tabs)
+        self._tabs.addTab(self._roi_panel, "💰 ROI 비교")
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         self._setup_plots()
@@ -239,7 +242,7 @@ class DashboardPanel(QWidget):
             return
         index = self._tabs.currentIndex()
         drawers = (self._draw_throughput, self._draw_gantt, self._draw_queue, self._draw_battery, self._draw_radar,
-                   self._draw_orders, self._draw_events)
+                   self._draw_orders, self._draw_events, self._draw_roi)
         drawers[index]()
 
     def _draw_throughput(self) -> None:
@@ -415,3 +418,14 @@ class DashboardPanel(QWidget):
         plot.addItem(scatter)
         end = max(1.0, state.sim_time / 60.0)
         plot.setXRange(max(0.0, end - c.HISTORY_WINDOW / 60.0), end * 1.02)
+
+    def _draw_roi(self) -> None:
+        """Tab 8 — ROI 파라미터/숫자 요약/비교 차트. 완료 건수·이동거리만 넘기고 계산은 RoiPanel이 한다."""
+        state = self._state
+        assert state is not None
+        base_kpis = state.engine_kpis.get("baseline", {})
+        opt_kpis = state.engine_kpis.get("optimized", {})
+        self._roi_panel.update_kpis(
+            int(base_kpis.get("completed_units", 0.0)), base_kpis.get("distance_m", 0.0),
+            int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("distance_m", 0.0),
+        )

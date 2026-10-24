@@ -142,6 +142,7 @@ class Tables:
     FACTORY_PROFILE: Final[str] = "factory_profile"
     WORK_STATIONS: Final[str] = "work_stations"
     CHARGING_STATIONS: Final[str] = "charging_stations"
+    ELEVATORS: Final[str] = "elevators"
     ROBOTS: Final[str] = "robots"
     OBSTACLES: Final[str] = "obstacles"
     PATH_NODES: Final[str] = "path_nodes"
@@ -152,13 +153,15 @@ class Tables:
     PRESETS: Final[str] = "config_presets"
 
     CONFIG_TABLES: Final[frozenset[str]] = frozenset(
-        {FACTORY_PROFILE, WORK_STATIONS, CHARGING_STATIONS, ROBOTS, OBSTACLES, PATH_NODES, PATH_EDGES}
+        {FACTORY_PROFILE, WORK_STATIONS, CHARGING_STATIONS, ELEVATORS, ROBOTS, OBSTACLES, PATH_NODES,
+         PATH_EDGES}
     )
 
     LABELS: Final[dict[str, str]] = {
         FACTORY_PROFILE: "공장 정보",
         WORK_STATIONS: "작업 스테이션",
         CHARGING_STATIONS: "충전소",
+        ELEVATORS: "엘리베이터",
         ROBOTS: "로봇",
         OBSTACLES: "장애물/벽/문",
         PATH_NODES: "경로 노드",

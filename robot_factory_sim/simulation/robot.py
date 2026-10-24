@@ -21,6 +21,7 @@ from utils.event_types import RobotState
 from utils.metrics import RobotTimeUsage
 
 if TYPE_CHECKING:
+    from simulation.elevator import Elevator
     from simulation.engine import SimulationEngine
     from simulation.task_generator import Task
 
@@ -44,7 +45,8 @@ class InterruptKind:
 class Robot:
     """AGV/AMR 로봇 1대."""
 
-    def __init__(self, engine: SimulationEngine, cfg: RobotConfig, position: Point, color_index: int) -> None:
+    def __init__(self, engine: SimulationEngine, cfg: RobotConfig, position: Point, color_index: int,
+                 floor: int = 1) -> None:
         """로봇을 생성하고 프로세스를 등록한다.
 
         Args:
@@ -52,12 +54,14 @@ class Robot:
             cfg: 로봇 설정
             position: 초기 위치
             color_index: 고유 색상 인덱스
+            floor: 시작 층
         """
         self.engine = engine
         self.env: simpy.Environment = engine.env
         self.cfg = cfg
         self.color_index = color_index
         self.x, self.y = position
+        self.floor = floor
         self.battery = float(cfg.battery_capacity)
         self.state = RobotState.IDLE
         self.state_since = self.env.now
@@ -65,16 +69,22 @@ class Robot:
         self.current_task: Task | None = None
         self.target_id: str | None = None
         self.route: list[Point] = []
+        self.route_floors: list[int] = []
+        self.route_lifts: list[str | None] = []
         self.emergency_order: str | None = None
         self.forced_charge = False
         self.alive = True
         self.charge_sessions = 0
         self.tasks_done = 0
         self.distance_m = 0.0
+        self.travel_energy_units = 0.0
+        self.work_energy_units = 0.0
+        self._work_started: float | None = None
         self._depleted = False
         self._segment: tuple[float, float, float, float, float, float, float] | None = None
         self._charge_step: tuple[float, float] | None = None
         self._wake: simpy.Event | None = None
+        self._riding: Elevator | None = None
         self.process = self.env.process(self.run_process())
 
     # ------------------------------------------------------------------
@@ -130,6 +140,24 @@ class Robot:
         if not self.route:
             return []
         return [self.position(), *self.route]
+
+    def remaining_route_floors(self) -> list[int]:
+        """remaining_route()의 각 점이 있는 층.
+
+        Returns:
+            층 번호 리스트 (remaining_route와 같은 길이)
+        """
+        if not self.route:
+            return []
+        return [self.floor, *self.route_floors]
+
+    def floor_position(self) -> float:
+        """현재 층 (엘리베이터 탑승 중이면 캐빈 높이를 보간한 소수 층).
+
+        Returns:
+            층 번호
+        """
+        return self._riding.floor_position() if self._riding is not None else float(self.floor)
 
     def is_available(self) -> bool:
         """새 작업을 배정받을 수 있는지 여부.
@@ -226,9 +254,10 @@ class Robot:
         if self._segment is None:
             return
         x0, y0, x1, y1, _, _, drain = self._segment
-        self.distance_m += math.hypot(x1 - x0, y1 - y0) * fraction * config.METERS_PER_PIXEL
         self.x = x0 + (x1 - x0) * fraction
         self.y = y0 + (y1 - y0) * fraction
+        self.distance_m += math.hypot(x1 - x0, y1 - y0) * config.METERS_PER_PIXEL * fraction
+        self.travel_energy_units += min(self.battery, drain * fraction)
         self.battery = max(0.0, self.battery - drain * fraction)
         self._segment = None
 
@@ -241,7 +270,19 @@ class Robot:
             start, rate = self._charge_step
             self.battery = min(self.capacity, self.battery + rate * (self.env.now - start))
             self._charge_step = None
+        self._clear_route()
+
+    def _clear_route(self) -> None:
+        """남은 이동 경로를 비운다."""
         self.route = []
+        self.route_floors = []
+        self.route_lifts = []
+
+    def _pop_route(self) -> None:
+        """다음 경유점에 도착했을 때 경로의 첫 점을 지운다."""
+        self.route.pop(0)
+        self.route_floors.pop(0)
+        self.route_lifts.pop(0)
 
     def _requeue_current(self) -> None:
         """현재 작업을 엔진 대기열로 돌려보낸다."""
@@ -305,7 +346,7 @@ class Robot:
         Args:
             tx: 목표 X
             ty: 목표 Y
-            forced_duration: 지정하면 거리와 무관하게 이 시간을 쓴다 (엘리베이터 층간 이동 등)
+            forced_duration: 지정하면 거리와 무관하게 이 시간을 쓴다
         """
         dist_px = math.hypot(tx - self.x, ty - self.y)
         if dist_px < 1e-6 and forced_duration is None:
@@ -319,16 +360,13 @@ class Robot:
         yield self.env.timeout(duration * fraction)
         self._apply_segment(fraction)
         if fraction < 1.0:
-            self.route = []
+            self._clear_route()
             raise BatteryDepleted()
 
     def _cross_edge(self, edge_id: int, tx: float, ty: float) -> Generator[Any, Any, None]:
-        """통로(또는 엘리베이터) 엣지를 공유자원 제약 하에 통과한다."""
+        """통로 엣지를 차선 공유자원 제약 하에 통과한다 (층간 이동은 _ride_process가 맡는다)."""
         corridors = self.engine.corridors
-        if corridors.edge_kind(edge_id) == "elevator":
-            yield from self._cross_elevator(edge_id, tx, ty)
-            return
-        resource = corridors.edge_resource(edge_id)
+        resource = corridors.edge_resource(edge_id) if corridors.edge_kind(edge_id) == "corridor" else None
         if resource is None:
             yield from self._move_point(tx, ty)
             return
@@ -344,22 +382,6 @@ class Robot:
                 self.engine.metrics.record_deadlock()
             yield from self._move_point(tx, ty)
 
-    def _cross_elevator(self, edge_id: int, tx: float, ty: float) -> Generator[Any, Any, None]:
-        """엘리베이터 구간을 공유자원 제약 하에 통과한다 (층수 × 층이동시간 + 문개폐시간)."""
-        corridors = self.engine.corridors
-        resource = corridors.elevator_resource(edge_id)
-        floors = corridors.floor_change(edge_id)
-        if resource is None or floors <= 0:
-            yield from self._move_point(tx, ty)
-            return
-        profile = self.engine.factory.profile
-        wait_start = self.env.now
-        with resource.request() as request:
-            yield request
-            self.engine.metrics.record_ev_wait(self.env.now - wait_start)
-            duration = floors * profile.floor_travel_sec + profile.door_time_sec
-            yield from self._move_point(tx, ty, forced_duration=duration)
-
     def _pass_intersection(self, node_id: int) -> Generator[Any, Any, None]:
         """교차점을 상호배제(capacity=1)로 통과한다. 통과시간 = 로봇길이/속도 + 여유."""
         resource = self.engine.corridors.intersection_resource(node_id)
@@ -368,21 +390,51 @@ class Robot:
             yield request
             yield self.env.timeout(pass_time)
 
+    def _ride_process(self, lift_id: str, tx: float, ty: float, floor: int) -> Generator[Any, Any, None]:
+        """엘리베이터를 타고 floor층의 (tx, ty)로 이동한다. 도중에 중단되면 도착 층으로 옮겨진다."""
+        elevator = self.engine.elevators.get(lift_id)
+        if elevator is None or not elevator.active:
+            self.x, self.y, self.floor = tx, ty, floor
+            return
+        wait_start = self.env.now
+        with elevator.resource.request() as request:
+            self._set_state(RobotState.WAITING)
+            yield request
+            self.engine.metrics.record_ev_wait(self.env.now - wait_start)
+            yield from elevator.arrive(self.floor)
+            self._set_state(RobotState.MOVING)
+            self._riding = elevator
+            try:
+                yield from elevator.carry(floor)
+            except simpy.Interrupt:
+                self.x, self.y, self.floor = tx, ty, floor
+                raise
+            finally:
+                self._riding = None
+        self.x, self.y, self.floor = tx, ty, floor
+
     def _travel_route(self, route: Route) -> Generator[Any, Any, None]:
-        """경로를 따라 이동한다. 그래프 노드/엣지 정보가 있으면 통로 차선·교차점·엘리베이터 제약을 지킨다."""
+        """경로를 따라 이동한다. 층이 바뀌는 점은 엘리베이터 탑승, 그 외에는 통로 차선·교차점 제약을 지킨다."""
+        count = len(route.points)
         self.route = list(route.points)
-        has_graph = bool(route.nodes) and len(route.nodes) == len(route.points)
+        self.route_floors = list(route.floors) if len(route.floors) == count else [self.floor] * count
+        self.route_lifts = list(route.lifts) if len(route.lifts) == count else [None] * count
+        has_graph = bool(route.nodes) and len(route.nodes) == count
         corridors = self.engine.corridors
-        for index in range(len(route.points)):
+        for index in range(count):
             tx, ty = self.route[0]
+            lift, floor = self.route_lifts[0], self.route_floors[0]
             node_id = route.nodes[index] if has_graph else None
             prev_node = route.prev_nodes[index] if has_graph else None
-            edge_id = corridors.edge_between(prev_node, node_id) if has_graph else None
-            if edge_id is not None:
-                yield from self._cross_edge(edge_id, tx, ty)
+            if lift is not None and floor != self.floor:
+                yield from self._ride_process(lift, tx, ty, floor)
             else:
-                yield from self._move_point(tx, ty)
-            self.route.pop(0)
+                edge_id = corridors.edge_between(prev_node, node_id) if has_graph else None
+                if edge_id is not None:
+                    yield from self._cross_edge(edge_id, tx, ty)
+                else:
+                    yield from self._move_point(tx, ty)
+            self._pop_route()
             if corridors.is_intersection(node_id):
                 yield from self._pass_intersection(node_id)
 
@@ -395,7 +447,7 @@ class Robot:
         if station is None or not station.active:
             self._requeue_current()
             return
-        route = engine.path_graph.route_to_facility(self.x, self.y, station.id)
+        route = engine.path_graph.route_to_facility(self.x, self.y, station.id, self.floor)
         if route is None:
             self.current_task = None
             engine.report_unreachable(task, self)
@@ -415,13 +467,19 @@ class Robot:
             engine.on_task_started(task, self)
             station.begin(task, self.robot_id)
             started = self.env.now
+            self._work_started = float(started)
             completed = False
             try:
-                yield self.env.timeout(station.sample_process_time())
+                duration = (max(0.5, station.cfg.avg_process_time + task.process_noise * station.cfg.process_time_std)
+                            if task.process_noise is not None else station.sample_process_time())
+                yield self.env.timeout(duration)
                 completed = True
             finally:
                 station.end(completed)
-                self.battery = max(0.0, self.battery - config.WORK_DRAIN_PER_SEC * (self.env.now - started))
+                drain = min(self.battery, config.WORK_DRAIN_PER_SEC * (self.env.now - started))
+                self.work_energy_units += drain
+                self.battery = max(0.0, self.battery - drain)
+                self._work_started = None
         self.current_task = None
         self.target_id = None
         self.tasks_done += 1
@@ -431,7 +489,7 @@ class Robot:
         """충전소로 이동하여 목표 잔량까지 충전한다."""
         engine = self.engine
         charger = engine.scheduler.choose_charger(self, engine)
-        route = engine.path_graph.route_to_facility(self.x, self.y, charger.id) if charger else None
+        route = engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor) if charger else None
         if charger is None or route is None:
             self.forced_charge = False
             self._set_state(RobotState.IDLE)
@@ -455,8 +513,9 @@ class Robot:
             charger.occupants.add(self.robot_id)
             try:
                 while self.alive and charger.active:
-                    target = engine.scheduler.charge_target(self, engine) / 100.0 * self.capacity
-                    if self.battery >= target - 1e-6:
+                    target_pct = engine.scheduler.charge_target(self, engine)
+                    target = target_pct / 100.0 * self.capacity
+                    if self.battery_pct >= target_pct - 1e-6:
                         break
                     rate = max(0.01, float(charger.cfg.charge_rate))
                     step = min(config.CHARGE_STEP, (target - self.battery) / rate)

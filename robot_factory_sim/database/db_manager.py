@@ -22,6 +22,7 @@ from typing import Any
 import config
 from utils.config_models import (
     ChargingStationConfig,
+    ElevatorConfig,
     FactoryConfig,
     FactoryProfile,
     ObstacleConfig,
@@ -33,11 +34,12 @@ from utils.config_models import (
 )
 from utils.event_types import ChangeType, OrderStatus, Tables
 
-SCHEMA_VERSION: int = 3
+SCHEMA_VERSION: int = 4
 
 # 마이그레이션: 기존 DB에 누락된 컬럼을 ALTER TABLE ADD COLUMN 으로 보충한다.
 _MIGRATION_COLUMNS: dict[str, dict[str, str]] = {
     Tables.FACTORY_PROFILE: {
+        "floor_count": "INTEGER DEFAULT 1",
         "edge_clearance": "REAL DEFAULT 0.4",
         "side_clearance": "REAL DEFAULT 0.3",
         "floor_travel_sec": "REAL DEFAULT 4.0",
@@ -48,15 +50,18 @@ _MIGRATION_COLUMNS: dict[str, dict[str, str]] = {
         "height": "REAL DEFAULT 60",
         "process_time_std": "REAL DEFAULT 1.0",
         "is_active": "INTEGER DEFAULT 1",
+        "floor": "INTEGER DEFAULT 1",
     },
-    Tables.CHARGING_STATIONS: {"charge_rate": "REAL DEFAULT 2.0", "is_active": "INTEGER DEFAULT 1"},
+    Tables.CHARGING_STATIONS: {
+        "charge_rate": "REAL DEFAULT 2.0", "is_active": "INTEGER DEFAULT 1", "floor": "INTEGER DEFAULT 1",
+    },
     Tables.ROBOTS: {
         "charge_threshold": "REAL DEFAULT 20",
         "is_active": "INTEGER DEFAULT 1",
         "width": "REAL DEFAULT 0.6",
         "length": "REAL DEFAULT 0.8",
     },
-    Tables.OBSTACLES: {"is_passable": "INTEGER DEFAULT 0", "label": "TEXT"},
+    Tables.OBSTACLES: {"is_passable": "INTEGER DEFAULT 0", "label": "TEXT", "floor": "INTEGER DEFAULT 1"},
     Tables.PATH_NODES: {"linked_station_id": "TEXT", "floor": "INTEGER DEFAULT 1", "capacity": "INTEGER"},
     Tables.PATH_EDGES: {"width": "REAL DEFAULT 5.0"},
     Tables.ORDERS: {"required_stations": "TEXT", "completed": "INTEGER DEFAULT 0"},
@@ -77,12 +82,18 @@ class _TableSpec:
 _SPECS: dict[str, _TableSpec] = {
     Tables.WORK_STATIONS: _TableSpec(
         Tables.WORK_STATIONS, WorkStationConfig,
-        ("label", "x", "y", "width", "height", "task_type", "avg_process_time", "process_time_std", "is_active"),
+        ("label", "x", "y", "width", "height", "task_type", "avg_process_time", "process_time_std", "is_active",
+         "floor"),
         frozenset({"is_active"}), False,
     ),
     Tables.CHARGING_STATIONS: _TableSpec(
         Tables.CHARGING_STATIONS, ChargingStationConfig,
-        ("x", "y", "capacity", "charge_rate", "is_active"),
+        ("x", "y", "capacity", "charge_rate", "is_active", "floor"),
+        frozenset({"is_active"}), False,
+    ),
+    Tables.ELEVATORS: _TableSpec(
+        Tables.ELEVATORS, ElevatorConfig,
+        ("label", "x", "y", "width", "height", "travel_time", "capacity", "is_active"),
         frozenset({"is_active"}), False,
     ),
     Tables.ROBOTS: _TableSpec(
@@ -93,7 +104,7 @@ _SPECS: dict[str, _TableSpec] = {
     ),
     Tables.OBSTACLES: _TableSpec(
         Tables.OBSTACLES, ObstacleConfig,
-        ("obstacle_type", "x1", "y1", "x2", "y2", "is_passable", "label"),
+        ("obstacle_type", "x1", "y1", "x2", "y2", "is_passable", "label", "floor"),
         frozenset({"is_passable"}), True,
     ),
     Tables.PATH_NODES: _TableSpec(
@@ -174,16 +185,21 @@ def _values_equal(a: Any, b: Any) -> bool:
 class DBManager:
     """factory_config.db 접근 단일 진입점."""
 
-    def __init__(self, db_path: str | Path = config.DB_PATH, schema_path: str | Path = config.SCHEMA_PATH) -> None:
+    def __init__(self, db_path: str | Path = config.DB_PATH, schema_path: str | Path = config.SCHEMA_PATH,
+                 read_only: bool = False) -> None:
         """DBManager를 생성한다. 연결은 스레드별로 지연 생성된다.
 
         Args:
             db_path: SQLite 파일 경로 또는 ``":memory:"``
             schema_path: schema.sql 경로
+            read_only: 기존 파일을 읽기 전용으로 열지 여부.
         """
         self._path = str(db_path)
         self._schema_path = Path(schema_path)
         self._memory = self._path == ":memory:"
+        self._read_only = read_only
+        if read_only and self._memory:
+            raise ValueError("읽기 전용 연결은 기존 DB 파일이 필요합니다.")
         self._local = threading.local()
         self._shared: sqlite3.Connection | None = None
         self._lock = threading.RLock()
@@ -205,9 +221,11 @@ class DBManager:
             return self._shared
         conn: sqlite3.Connection | None = getattr(self._local, "conn", None)
         if conn is None:
-            conn = sqlite3.connect(self._path, timeout=5.0)
+            target = Path(self._path).resolve().as_uri() + "?mode=ro" if self._read_only else self._path
+            conn = sqlite3.connect(target, timeout=5.0, uri=self._read_only)
             conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA journal_mode=WAL")
+            if not self._read_only:
+                conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA foreign_keys=OFF")
             self._local.conn = conn
         return conn
@@ -271,9 +289,7 @@ class DBManager:
 
     def _migrate(self, conn: sqlite3.Connection) -> None:
         """누락 컬럼 보충 + user_version 갱신."""
-        version = conn.execute("PRAGMA user_version").fetchone()[0]
-        if version >= SCHEMA_VERSION:
-            return
+        # 브랜치마다 같은 버전 번호로 다른 컬럼을 추가했을 수 있으므로, 버전과 무관하게 누락 컬럼을 항상 보충한다.
         for table, columns in _MIGRATION_COLUMNS.items():
             existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
             for column, ddl in columns.items():
@@ -353,6 +369,8 @@ class DBManager:
     def _row_to_model(spec: _TableSpec, row: dict[str, Any]) -> Any:
         """DB 행을 dataclass로 변환한다."""
         values = {c: row.get(c) for c in spec.columns}
+        if "floor" in values:
+            values["floor"] = int(values["floor"] or 1)
         for column in spec.bool_columns:
             values[column] = bool(values[column]) if values[column] is not None else True
         return spec.model(id=row["id"], **values)
@@ -464,6 +482,7 @@ class DBManager:
             floor_width=row["floor_width"] or config.DEFAULT_FLOOR_WIDTH,
             floor_height=row["floor_height"] or config.DEFAULT_FLOOR_HEIGHT,
             grid_cell_size=row["grid_cell_size"] or config.DEFAULT_GRID_CELL_SIZE,
+            floor_count=max(1, int(row.get("floor_count") or config.DEFAULT_FLOOR_COUNT)),
             edge_clearance=row.get("edge_clearance") if row.get("edge_clearance") is not None
             else config.EDGE_CLEARANCE,
             side_clearance=row.get("side_clearance") if row.get("side_clearance") is not None
@@ -476,15 +495,15 @@ class DBManager:
 
     def _save_profile_in(self, conn: sqlite3.Connection, profile: FactoryProfile, changed_by: str) -> bool:
         """트랜잭션 내부 공장 정보 upsert."""
-        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size",
+        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size", "floor_count",
                    "edge_clearance", "side_clearance", "floor_travel_sec", "door_time_sec")
         values = {c: getattr(profile, c) for c in columns}
         old = conn.execute("SELECT * FROM factory_profile WHERE id = ?", (profile.id,)).fetchone()
         if old is None:
             conn.execute(
                 "INSERT INTO factory_profile(id, factory_name, floor_width, floor_height, grid_cell_size, "
-                "edge_clearance, side_clearance, floor_travel_sec, door_time_sec) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "floor_count, edge_clearance, side_clearance, floor_travel_sec, door_time_sec) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (profile.id, *values.values()),
             )
             self._log_change(conn, Tables.FACTORY_PROFILE, str(profile.id), ChangeType.INSERT, None, values,
@@ -495,7 +514,7 @@ class DBManager:
             return False
         conn.execute(
             "UPDATE factory_profile SET factory_name = ?, floor_width = ?, floor_height = ?, grid_cell_size = ?, "
-            "edge_clearance = ?, side_clearance = ?, floor_travel_sec = ?, door_time_sec = ?, "
+            "floor_count = ?, edge_clearance = ?, side_clearance = ?, floor_travel_sec = ?, door_time_sec = ?, "
             "updated_at = ? WHERE id = ?",
             (*values.values(), _now_str(), profile.id),
         )
@@ -522,7 +541,7 @@ class DBManager:
         Returns:
             FactoryConfig
         """
-        return FactoryConfig(
+        factory = FactoryConfig(
             profile=self.get_factory_profile(),
             stations=self.list_records(Tables.WORK_STATIONS),
             chargers=self.list_records(Tables.CHARGING_STATIONS),
@@ -530,7 +549,10 @@ class DBManager:
             obstacles=self.list_records(Tables.OBSTACLES),
             nodes=self.list_records(Tables.PATH_NODES),
             edges=self.list_records(Tables.PATH_EDGES),
+            elevators=self.list_records(Tables.ELEVATORS),
         )
+        factory.sync_facility_floors()
+        return factory
 
     def save_factory_config(self, factory: FactoryConfig, changed_by: str = "config_editor") -> int:
         """공장 전체 구성을 DB와 diff 하여 저장한다. (단일 트랜잭션)
@@ -550,6 +572,7 @@ class DBManager:
             for table, items in (
                 (Tables.WORK_STATIONS, factory.stations),
                 (Tables.CHARGING_STATIONS, factory.chargers),
+                (Tables.ELEVATORS, factory.elevators),
                 (Tables.ROBOTS, factory.robots),
                 (Tables.OBSTACLES, factory.obstacles),
             ):
@@ -786,6 +809,40 @@ class DBManager:
         rows = self._fetch_all(
             "SELECT * FROM production_events WHERE is_processed = 0 ORDER BY id LIMIT ?", (limit,)
         )
+        for row in rows:
+            try:
+                row["payload"] = json.loads(row["payload"])
+            except (json.JSONDecodeError, TypeError):
+                row["payload"] = {"raw": row["payload"]}
+            row["created_at"] = str(row["created_at"])
+        return rows
+
+    def latest_event_id(self) -> int:
+        """현재 생산 이벤트의 최대 ID를 반환한다.
+
+        Returns:
+            빈 테이블은 0, 그 외 최대 ID.
+        """
+        row = self._fetch_one("SELECT COALESCE(MAX(id), 0) AS maximum FROM production_events")
+        return int(row["maximum"]) if row else 0
+
+    def list_events(self, after_id: int = 0, through_id: int | None = None,
+                    limit: int = 500) -> list[dict[str, Any]]:
+        """처리 여부와 관계없이 ID 범위의 생산 이벤트를 읽는다.
+
+        Args:
+            after_id: 이 ID보다 큰 행만 읽는다.
+            through_id: 포함할 마지막 ID. None이면 현재 최대 ID.
+            limit: 페이지 최대 행 수.
+
+        Returns:
+            ID 오름차순의 이벤트 목록. 관제 처리 상태는 변경하지 않는다.
+        """
+        if after_id < 0 or limit < 1 or (through_id is not None and through_id < 0):
+            raise ValueError("이벤트 ID는 음수가 아니어야 하고 limit은 양수여야 합니다.")
+        upper = self.latest_event_id() if through_id is None else through_id
+        rows = self._fetch_all("SELECT * FROM production_events WHERE id > ? AND id <= ? ORDER BY id LIMIT ?",
+                               (after_id, upper, limit))
         for row in rows:
             try:
                 row["payload"] = json.loads(row["payload"])

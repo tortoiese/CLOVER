@@ -124,18 +124,19 @@ class BaselineScheduler(BaseScheduler):
 
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만일 때만 충전 (반응형)."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """항상 만충전."""
         return config.FULL_CHARGE_LEVEL
 
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
-        """직선 거리 기준 가장 가까운 충전소 (대기열 무시)."""
+        """같은 층을 우선하고 직선 거리가 가장 가까운 충전소 (대기열 무시)."""
         chargers = [c for c in engine.chargers.values() if c.active]
         if not chargers:
             return None
-        return min(chargers, key=lambda c: math.hypot(c.cfg.x - robot.x, c.cfg.y - robot.y))
+        return min(chargers, key=lambda c: (abs(c.cfg.floor - robot.floor),
+                                            math.hypot(c.cfg.x - robot.x, c.cfg.y - robot.y)))
 
 
 class OptimizedScheduler(BaseScheduler):
@@ -180,7 +181,8 @@ class OptimizedScheduler(BaseScheduler):
         station = engine.stations[station_id]
         sx, sy = station.cfg.x, station.cfg.y
         back = min(
-            (engine.path_graph.distance_to_facility(sx, sy, c.id) for c in engine.chargers.values() if c.active),
+            (engine.path_graph.distance_to_facility(sx, sy, c.id, station.cfg.floor)
+             for c in engine.chargers.values() if c.active),
             default=0.0,
         )
         back = 0.0 if math.isinf(back) else back
@@ -207,7 +209,7 @@ class OptimizedScheduler(BaseScheduler):
             for robot in free:
                 reserve = robot.capacity * config.BATTERY_RESERVE / 100.0
                 for station_id in candidates:
-                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id)
+                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id, robot.floor)
                     if math.isinf(distance):
                         continue
                     if robot.battery - self._energy_needed(robot, engine, station_id, distance) < reserve:
@@ -267,7 +269,8 @@ class OptimizedScheduler(BaseScheduler):
             and r.battery_pct > config.RECALL_MIN_BATTERY
         ]
         if victims:
-            victim = min(victims, key=lambda r: engine.path_graph.distance_to_facility(r.x, r.y, task.station_id))
+            victim = min(
+                victims, key=lambda r: engine.path_graph.distance_to_facility(r.x, r.y, task.station_id, r.floor))
             engine.preempt(victim, task)
 
     # ------------------------------------------------------------------
@@ -275,16 +278,19 @@ class OptimizedScheduler(BaseScheduler):
     # ------------------------------------------------------------------
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만이면 충전."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """상황별 충전 목표: 긴급/최소충전 모드 → 적체 → 평상시."""
         critical_pending = any(t.priority == config.PRIORITY_LEVELS["critical"] for t in engine.pending_tasks)
         if engine.params.get("min_charge_mode") or critical_pending:
-            return config.MIN_CHARGE_TARGET
-        if len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
-            return BACKLOG_CHARGE_TARGET
-        return config.OPTIMIZED_CHARGE_TARGET
+            target = config.MIN_CHARGE_TARGET
+        elif len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
+            target = BACKLOG_CHARGE_TARGET
+        else:
+            target = config.OPTIMIZED_CHARGE_TARGET
+        # 충전 종료 직후 다시 충전에 진입하지 않도록 시작 임계값 이상을 보장한다.
+        return min(100.0, max(target, robot.cfg.charge_threshold))
 
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
         """이동시간 + 예상 대기시간이 가장 짧은 충전소."""
@@ -293,7 +299,7 @@ class OptimizedScheduler(BaseScheduler):
         for charger in engine.chargers.values():
             if not charger.active:
                 continue
-            distance = engine.path_graph.distance_to_facility(robot.x, robot.y, charger.id)
+            distance = engine.path_graph.distance_to_facility(robot.x, robot.y, charger.id, robot.floor)
             if math.isinf(distance):
                 continue
             ahead = len(charger.occupants) + charger.waiting + len(charger.incoming)
