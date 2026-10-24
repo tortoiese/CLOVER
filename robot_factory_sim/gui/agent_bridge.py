@@ -41,7 +41,8 @@ class _AgentRunner(QObject):
             text: 사용자 입력
             context: sim_context
         """
-        self._run(self._agent.process_message(text, dict(context or {})))
+        values = dict(context or {})
+        self._run(self._agent.process_message(text, values), values.get("_request_id"))
 
     @Slot(object, object)
     def handle_event(self, event: Any, context: Any) -> None:
@@ -53,13 +54,14 @@ class _AgentRunner(QObject):
         """
         self._run(self._agent.handle_production_event(ProductionEvent.from_dict(event), dict(context or {})))
 
-    def _run(self, coroutine: Any) -> None:
+    def _run(self, coroutine: Any, request_id: str | None = None) -> None:
         """코루틴 실행 후 결과 전달 (예외는 오류 응답으로)."""
         try:
             response = self._loop.run_until_complete(coroutine)
         except Exception as exc:  # noqa: BLE001 — 에이전트 오류가 스레드를 죽이지 않도록
             traceback.print_exc()
             response = AgentResponse(f"에이전트 처리 중 오류가 발생했습니다: {exc}", severity=Severity.WARNING)
+        response.request_id = request_id
         self.response_ready.emit(response)
 
     def close(self) -> None:

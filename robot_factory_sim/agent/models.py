@@ -28,6 +28,9 @@ class AgentResponse:
     severity: str = Severity.INFO
     title: str | None = None          # 긴급 배너 제목 (이벤트 응답일 때)
     source: str = "chat"              # "chat" | "event"
+    comparison: dict[str, Any] | None = None
+    comparison_conditions: dict[str, Any] | None = None
+    request_id: str | None = None
 
 
 @dataclass

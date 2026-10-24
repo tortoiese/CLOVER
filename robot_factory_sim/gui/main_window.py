@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import math
+import uuid
+from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -31,6 +33,7 @@ from PySide6.QtWidgets import (
 import config
 from agent.base import BaseAgent
 from agent.models import AgentAction, AgentResponse
+from agent.orchestration import is_comparison_request
 from gui import constants as c
 from gui.agent_bridge import AgentBridge
 from gui.alert_banner import AlertBanner
@@ -39,6 +42,7 @@ from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
 from gui.factory_panel import FactoryPanel
 from gui.order_dialog import OrderDialog
+from gui.optimization_panel import OptimizationPanel
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
@@ -70,12 +74,17 @@ class MainWindow(QMainWindow):
         self._pending_config_tables: set[str] = set()
         self._pending_config_by = "system"
         self._closing = False
+        self._comparison_enabled = bool(getattr(agent, "supports_comparison", False))
+        self._comparison_pending = False
+        self._comparison_request_id: str | None = None
         self._shutdown_timer = QTimer(self)
         self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
         self._shutdown_timer.timeout.connect(self._finish_shutdown)
 
         self._build_toolbar()
         self._build_body()
+        self._optimization = OptimizationPanel(self)
+        self._optimization.run_requested.connect(lambda: self._on_user_message("/최적화"))
 
         self._worker = SimWorker(service.db_path, self)
         self._worker.state_ready.connect(self._on_state)
@@ -101,6 +110,9 @@ class MainWindow(QMainWindow):
         self._agent_bridge.start()
         self._worker.start()
         self._console.add_system_message(f"DB 연결: {service.db_path}\n[▶ 시작]을 누르면 시뮬레이션과 DB 감시가 시작됩니다.")
+        if self._comparison_enabled:
+            self._console.add_system_message("RAG 운영안 비교: [운영안 비교]에서 조건 입력 → /최적화 → /추천. "
+                                             "문서 질문은 /검색 ROI 산식. 결과는 자동 적용되지 않습니다.")
 
     # ------------------------------------------------------------------
     # UI
@@ -137,6 +149,11 @@ class MainWindow(QMainWindow):
         self._action(toolbar, "📋 주문 관리", self._open_order_dialog)
         self._action(toolbar, "🛗 엘리베이터 시연", self._start_elevator_demo,
                      "2층 이상 스테이션만 쓰는 주문을 넣고 1층 도크에서 다시 시작합니다")
+        comparison_action = self._action(toolbar, "운영안 비교", lambda: self._optimization.show(),
+                                         "현재 구성으로 베이스라인·MILP 배정을 비교합니다.")
+        comparison_action.setEnabled(self._comparison_enabled)
+        if not self._comparison_enabled:
+            comparison_action.setToolTip("CLOVER_RAG_ENABLED=1로 실행하면 활성화됩니다.")
 
         spacer = QWidget(self)
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -258,6 +275,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_config_changed(self, table: str, change: dict[str, Any]) -> None:
         """ConfigWatcher 변경 → 콘솔 알림 + 디바운스 후 핫리로드/주문 동기화."""
+        self._optimization.mark_stale()
         if table == Tables.ORDERS:
             self._worker.send_command(ActionKind.SYNC_ORDERS)
             if change.get("change_type") == ChangeType.INSERT:
@@ -292,12 +310,43 @@ class MainWindow(QMainWindow):
         """사용자 채팅 → 에이전트."""
         if self._closing:
             return
-        self._agent_bridge.message_requested.emit(text, state_to_context(self._state))
+        context = state_to_context(self._state)
+        if self._comparison_pending:
+            self._console.add_system_message("비교 요청이 진행 중입니다. 완료 후 다시 요청하세요.")
+            return
+        if self._comparison_enabled and is_comparison_request(text):
+            try:
+                context["comparison_conditions"] = self._optimization.conditions()
+                context["factory_config"] = self._service.load_factory_config().to_dict()
+                context["sim_datetime"] = self.sim_clock().isoformat()
+                context["comparison_orders"] = []
+                for record in self._service.list_orders(active_only=True):
+                    values = asdict(record)
+                    for key in ("created_at", "deadline"):
+                        values[key] = values[key].isoformat() if values[key] else None
+                    context["comparison_orders"].append(values)
+            except (ValueError, TypeError) as exc:
+                self._console.add_system_message(str(exc), Severity.WARNING)
+                return
+            self._comparison_pending = True
+            self._comparison_request_id = uuid.uuid4().hex
+            context["_request_id"] = self._comparison_request_id
+            self._optimization.set_busy(True)
+        self._agent_bridge.message_requested.emit(text, context)
 
     def _on_agent_response(self, response: AgentResponse) -> None:
         """에이전트 응답 표시 + 조치 실행 + 긴급 배너."""
         if self._closing:
             return
+        if self._comparison_pending and response.request_id == self._comparison_request_id:
+            self._comparison_pending = False
+            self._optimization.set_busy(False)
+        if response.comparison_conditions:
+            self._optimization.set_conditions(response.comparison_conditions)
+        if response.comparison:
+            self._optimization.show_result(response.comparison)
+        if "운영 근거 (계산 결과와 별개인 문서):" in response.text:
+            self._optimization.show_evidence(response.text.split("운영 근거 (계산 결과와 별개인 문서):", 1)[1])
         self._console.add_message(response.text, "agent", response.severity)
         if response.source == "event" and response.severity in (Severity.CRITICAL, Severity.WARNING):
             first_line = response.text.splitlines()[0] if response.text else ""
@@ -376,6 +425,7 @@ class MainWindow(QMainWindow):
 
     def _on_config_saved(self, changes: int) -> None:
         """에디터 저장 알림 (감시 전이면 직접 리로드)."""
+        self._optimization.mark_stale()
         self._console.add_system_message(f"💾 공장 설정 저장: {changes}건 변경")
         if not self._watchers_started:
             self._worker.send_command(ActionKind.RELOAD_CONFIG)
@@ -384,6 +434,7 @@ class MainWindow(QMainWindow):
         """주문 관리."""
         dialog = OrderDialog(self._service, self.sim_clock, self)
         dialog.exec()
+        self._optimization.mark_stale()
         if not self._watchers_started:
             self._worker.send_command(ActionKind.SYNC_ORDERS)
 
@@ -400,6 +451,7 @@ class MainWindow(QMainWindow):
             for watcher in (self._config_watcher, self._event_watcher):
                 watcher.stop()
             for thread in (self._worker, self._agent_bridge):
+                thread.requestInterruption()
                 thread.quit()
             for thread in threads:
                 thread.wait(THREAD_STOP_TIMEOUT_MS)

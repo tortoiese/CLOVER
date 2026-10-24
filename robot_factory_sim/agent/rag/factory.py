@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+from collections.abc import Callable
+from typing import Any
 
 import config
 from agent.base import BaseAgent
 from agent.mock_agent import MockAgent
-from agent.rag.documents import load_documents
+from agent.rag.documents import Document, load_documents
 from agent.rag.providers import HashEmbedder, OpenAIAnswerer, OpenAIEmbedder
 from agent.rag.service import RagService
 from agent.rag.store import ChromaStore
+from utils.comparison_models import ComparisonConditions
 
 
 def build_service(path: Path | None = None) -> RagService:
@@ -38,10 +41,15 @@ def _build_gui_service() -> RagService:
     if service.store.count() == 0:
         source = config.RAG_DOCUMENT_PATH or config.BASE_DIR.parent / "README.md"
         service.ingest(load_documents(source))
+    policy = Path(__file__).with_name("operating_policy.md")
+    service.ingest([Document(policy.read_text(encoding="utf-8"), str(policy), "운영안 비교 기준 v1",
+                             {"knowledge_type": "operating_policy", "version": "1"})])
     return service
 
 
-def create_agent() -> BaseAgent:
+def create_agent(
+    optimizer: Callable[[ComparisonConditions, dict[str, Any]], dict[str, Any]] | None = None,
+) -> BaseAgent:
     """GUI용 에이전트를 생성한다. 무거운 RAG 초기화는 작업 스레드까지 지연한다.
 
     Returns:
@@ -49,6 +57,10 @@ def create_agent() -> BaseAgent:
     """
     if not config.RAG_ENABLED:
         return MockAgent()
+    if optimizer is not None:
+        from agent.orchestration import OrchestrationAgent
+
+        return OrchestrationAgent(_build_gui_service, optimizer)
     from agent.rag_agent import RagAgent
 
     return RagAgent(_build_gui_service)

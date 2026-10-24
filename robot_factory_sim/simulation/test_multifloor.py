@@ -154,3 +154,18 @@ def test_demo_orders_force_elevator_use_in_both_schedulers() -> None:
         engine.env.run(until=900)
         assert engine.elevators["EL-01"].rides >= 5, mode
         assert engine.orders["ORD-DEMO"].completed > 0, mode
+
+
+def test_milp_comparison_runs_on_multi_floor_factory() -> None:
+    """MILP 운영안 비교(PR #3)가 다층 구성(층 인자 전달)에서도 끝까지 실행된다."""
+    from datetime import datetime
+
+    from simulation.comparison import run_comparison
+    from utils.comparison_models import ComparisonConditions
+
+    order = {"order_id": "O1", "product_type": "A", "quantity": 8, "completed": 0, "status": "pending",
+             "priority": "high", "required_stations": ["WS-03", "WS-05"], "deadline": None}
+    context = {"factory_config": _factory().to_dict(), "params": {"task_rate": 0.12, "min_charge_mode": 0},
+               "sim_datetime": datetime.now().isoformat(sep=" ", timespec="seconds"), "comparison_orders": [order]}
+    result = run_comparison(ComparisonConditions(duration=200, repeats=2), context)
+    assert result["factory_config"]["profile"]["floor_count"] == 3
