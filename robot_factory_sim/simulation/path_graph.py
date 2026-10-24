@@ -115,6 +115,7 @@ class PathGraph:
         self.edges: list[tuple[int, int, bool]] = []  # (a, b, blocked)
         self.facility_nodes: dict[str, int] = {}  # 설비 ID → 접근 노드 (노드 ID는 저장 전 음수 임시 ID일 수 있음)
         self._dist_cache: dict[int, tuple[dict[int, float], dict[int, int]]] = {}
+        self.obstacles = list(factory.obstacles)
 
         for edge in factory.edges:
             if edge.from_node not in self.nodes or edge.to_node not in self.nodes:
@@ -207,7 +208,9 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return None
-        start = self.nearest_node(x, y)
+        start = self._accessible_start(x, y, target)
+        if start is None:
+            return None
         result = self.shortest_path(start, target)
         if result is None:
             return None
@@ -232,12 +235,25 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return math.inf
-        start = self.nearest_node(x, y)
+        start = self._accessible_start(x, y, target)
+        if start is None:
+            return math.inf
         dist, _ = self._dijkstra(start)
         if target not in dist:
             return math.inf
         sx, sy = self.nodes[start]
         return dist[target] + math.hypot(sx - x, sy - y)
+
+    def _accessible_start(self, x: float, y: float, target: int) -> int | None:
+        """장애물 없이 연결할 수 있고 목적지에 도달 가능한 최근접 노드를 반환한다."""
+        candidates = sorted(self.nodes, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
+        for node in candidates:
+            if edge_blocked((x, y), self.nodes[node], self.obstacles):
+                continue
+            distances, _ = self._dijkstra(node)
+            if target in distances:
+                return node
+        return None
 
     def facility_point(self, facility_id: str) -> Point | None:
         """설비 접근 노드 좌표.

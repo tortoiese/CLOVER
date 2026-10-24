@@ -7,6 +7,7 @@ SimWorker는 Baseline / 최적화 엔진 2개를 같은 시드·같은 작업 �
 from __future__ import annotations
 
 import itertools
+import hashlib
 import math
 from collections import deque
 from collections.abc import Callable, Generator
@@ -92,6 +93,7 @@ class SimulationEngine:
         seed: int = config.RANDOM_SEED,
         epoch: datetime | None = None,
         params: dict[str, float] | None = None,
+        comparison_seed: int | None = None,
     ) -> None:
         """엔진을 생성하고 SimPy 프로세스를 등록한다.
 
@@ -103,6 +105,8 @@ class SimulationEngine:
             params: 초기 파라미터 (task_rate, min_charge_mode)
         """
         self.env = simpy.Environment()
+        self.comparison_seed = comparison_seed
+        self._comparison_counts: dict[str, int] = {}
         self.mode = mode
         self.scheduler: BaseScheduler = create_scheduler(mode)
         self.epoch = epoch or datetime.now()
@@ -137,7 +141,8 @@ class SimulationEngine:
                 self._create_robot(robot_cfg)
 
         self.generator = TaskGenerator(self, np.random.default_rng(seed))
-        self.env.process(self.generator.poisson_process())
+        if comparison_seed is None:
+            self.env.process(self.generator.poisson_process())
         self.env.process(self.generator.order_release_process())
         self.env.process(self._dispatch_process())
         self.env.process(self._monitor_process())
@@ -313,6 +318,12 @@ class SimulationEngine:
             deadline=deadline,
         )
         self.pending_tasks.append(task)
+        if self.comparison_seed is not None:
+            key = order_id or "background"
+            index = self._comparison_counts.get(key, 0)
+            self._comparison_counts[key] = index + 1
+            digest = hashlib.sha256(f"{self.comparison_seed}:{key}:{index}".encode()).digest()
+            task.process_noise = float(np.random.default_rng(int.from_bytes(digest[:8], "little")).normal())
         return task
 
     def assign(self, task: Task, robot: Robot) -> None:

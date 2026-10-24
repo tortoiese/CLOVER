@@ -113,3 +113,15 @@ WH_PER_M: float = 0.133            # 소비효율 e (Wh/m) = 배터리용량 ÷ 
 POWER_PRICE_PER_WH: float = 0.13   # 전력 단가 (원/Wh = 130원/kWh)
 OTHER_COST_KRW: float = 60000.0    # 기타 비용 (AI(API) + 로봇 운영 등, 원)
 REVENUE_PER_UNIT_KRW: float = 2000.0  # 완료 생산 1건당 매출/가치 (원)
+# RAG: 기본 로컬 모드. OpenAI 모드는 명시적인 외부 요청 허용이 필요하다.
+RAG_ENABLED: bool = os.environ.get("CLOVER_RAG_ENABLED", "0") == "1"
+RAG_PROVIDER: str = os.environ.get("CLOVER_RAG_PROVIDER", "local")
+RAG_DATA_PATH: Path = Path(os.environ.get("CLOVER_RAG_DATA_PATH", BASE_DIR / "rag_data"))
+RAG_DOCUMENT_PATH: Path | None = (
+    Path(os.environ["CLOVER_RAG_DOCUMENT_PATH"]) if os.environ.get("CLOVER_RAG_DOCUMENT_PATH") else None
+)
+RAG_ALLOW_NETWORK: bool = os.environ.get("CLOVER_RAG_ALLOW_NETWORK", "0") == "1"
+RAG_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+RAG_EMBEDDING_MODEL: str = os.environ.get("CLOVER_RAG_EMBEDDING_MODEL", "text-embedding-3-small")
+RAG_CHAT_MODEL: str = os.environ.get("CLOVER_RAG_CHAT_MODEL", "")
+RAG_MIN_SCORE: float = float(os.environ.get("CLOVER_RAG_MIN_SCORE", "0.15"))
