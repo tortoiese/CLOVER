@@ -37,11 +37,26 @@ DEFAULT_BATTERY_CAPACITY: float = 100.0
 DEFAULT_MOVE_SPEED: float = 2.0        # m/s
 DEFAULT_BATTERY_DRAIN_RATE: float = 0.5  # 배터리 단위 / m
 DEFAULT_CHARGE_THRESHOLD: float = 20.0   # %
+DEFAULT_ROBOT_WIDTH: float = 0.6       # m (차선 산정 기준폭으로도 쓰인다)
+DEFAULT_ROBOT_LENGTH: float = 0.8      # m (교차점 통과시간 산정에 쓰인다)
 
 TASK_TYPES: tuple[str, ...] = ("assembly", "welding", "painting", "inspection", "packaging", "machining")
 OBSTACLE_TYPES: tuple[str, ...] = ("wall", "door", "obstacle")
-NODE_TYPES: tuple[str, ...] = ("waypoint", "station", "charger")
+NODE_TYPES: tuple[str, ...] = ("waypoint", "station", "charger", "intersection", "elevator")
 ORDER_PRIORITIES: tuple[str, ...] = ("critical", "high", "normal", "low")
+
+# ---------------------------------------------------------------------------
+# 물리 제약 (통로 차선 / 교차점 / 엘리베이터) — fallback. 통로폭·EV 관련 여유값은
+# FactoryProfile에도 있어 DB 값이 우선이며, 아래 값은 DB에 프로필이 없을 때만 쓰인다.
+# ---------------------------------------------------------------------------
+DEFAULT_EDGE_WIDTH: float = 5.0        # 통로 폭 기본값 (m). 기본 데모가 병목 없이 돌도록 넉넉하게 잡는다.
+EDGE_CLEARANCE: float = 0.4            # 통로 벽 여유 (m)
+SIDE_CLEARANCE: float = 0.3            # 로봇 측면 여유 (m)
+FLOOR_TRAVEL_SEC: float = 4.0          # 엘리베이터 층당 이동시간 (s)
+DOOR_TIME_SEC: float = 6.0             # 엘리베이터 문 개폐시간 (s)
+INTERSECTION_MARGIN_SEC: float = 1.0   # 교차점 통과 여유시간 (s)
+DEADLOCK_THRESHOLD_SEC: float = 120.0  # 통로 대기가 이 이상이면 교착으로 집계 (s)
+DEFAULT_ELEVATOR_CAPACITY: int = 1     # 동시 운행 가능한 엘리베이터(차) 수
 
 # ---------------------------------------------------------------------------
 # 시뮬레이션 런타임

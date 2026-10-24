@@ -24,6 +24,10 @@ class FactoryProfile:
     floor_width: float = config.DEFAULT_FLOOR_WIDTH
     floor_height: float = config.DEFAULT_FLOOR_HEIGHT
     grid_cell_size: float = config.DEFAULT_GRID_CELL_SIZE
+    edge_clearance: float = config.EDGE_CLEARANCE
+    side_clearance: float = config.SIDE_CLEARANCE
+    floor_travel_sec: float = config.FLOOR_TRAVEL_SEC
+    door_time_sec: float = config.DOOR_TIME_SEC
 
 
 @dataclass
@@ -65,6 +69,8 @@ class RobotConfig:
     battery_drain_rate: float = config.DEFAULT_BATTERY_DRAIN_RATE
     charge_threshold: float = config.DEFAULT_CHARGE_THRESHOLD
     is_active: bool = True
+    width: float = config.DEFAULT_ROBOT_WIDTH
+    length: float = config.DEFAULT_ROBOT_LENGTH
 
 
 @dataclass
@@ -83,13 +89,20 @@ class ObstacleConfig:
 
 @dataclass
 class PathNodeConfig:
-    """경로 노드. id가 음수면 신규 항목."""
+    """경로 노드. id가 음수면 신규 항목.
+
+    node_type이 "intersection"이면 동시에 하나만 통과 가능한 교차점이다.
+    node_type이 "elevator"이면 linked_station_id를 엘리베이터 그룹(샤프트) ID로 쓰고,
+    같은 그룹·다른 floor를 가진 두 노드를 연결하는 엣지가 엘리베이터 구간이 된다.
+    """
 
     id: int
     x: float
     y: float
     node_type: str = "waypoint"
     linked_station_id: str | None = None
+    floor: int = 1
+    capacity: int | None = None  # 엘리베이터 노드의 동시 운행 차량 수 (None이면 config fallback)
 
 
 @dataclass
@@ -101,6 +114,7 @@ class PathEdgeConfig:
     to_node: int
     distance: float | None = None
     is_bidirectional: bool = True
+    width: float = config.DEFAULT_EDGE_WIDTH
 
 
 @dataclass

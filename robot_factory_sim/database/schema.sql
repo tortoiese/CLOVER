@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS factory_profile (
     floor_width REAL DEFAULT 800,
     floor_height REAL DEFAULT 600,
     grid_cell_size REAL DEFAULT 50,
+    edge_clearance REAL DEFAULT 0.4,
+    side_clearance REAL DEFAULT 0.3,
+    floor_travel_sec REAL DEFAULT 4.0,
+    door_time_sec REAL DEFAULT 6.0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -46,6 +50,8 @@ CREATE TABLE IF NOT EXISTS robots (
     battery_drain_rate REAL DEFAULT 0.5,
     charge_threshold REAL DEFAULT 20,
     is_active INTEGER DEFAULT 1,
+    width REAL DEFAULT 0.6,
+    length REAL DEFAULT 0.8,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -69,6 +75,8 @@ CREATE TABLE IF NOT EXISTS path_nodes (
     y REAL NOT NULL,
     node_type TEXT DEFAULT 'waypoint',
     linked_station_id TEXT,
+    floor INTEGER DEFAULT 1,
+    capacity INTEGER,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -79,6 +87,7 @@ CREATE TABLE IF NOT EXISTS path_edges (
     to_node INTEGER REFERENCES path_nodes(id),
     distance REAL,
     is_bidirectional INTEGER DEFAULT 1,
+    width REAL DEFAULT 5.0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
