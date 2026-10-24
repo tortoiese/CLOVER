@@ -68,6 +68,7 @@ class Robot:
         self.alive = True
         self.charge_sessions = 0
         self.tasks_done = 0
+        self.distance_m = 0.0
         self._depleted = False
         self._segment: tuple[float, float, float, float, float, float, float] | None = None
         self._charge_step: tuple[float, float] | None = None
@@ -223,6 +224,7 @@ class Robot:
         if self._segment is None:
             return
         x0, y0, x1, y1, _, _, drain = self._segment
+        self.distance_m += math.hypot(x1 - x0, y1 - y0) * fraction * config.METERS_PER_PIXEL
         self.x = x0 + (x1 - x0) * fraction
         self.y = y0 + (y1 - y0) * fraction
         self.battery = max(0.0, self.battery - drain * fraction)
