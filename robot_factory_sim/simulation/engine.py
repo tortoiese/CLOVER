@@ -18,6 +18,7 @@ import numpy as np
 import simpy
 
 import config
+from simulation.corridor import CorridorNetwork
 from simulation.path_graph import PathGraph
 from simulation.robot import InterruptKind, Robot
 from simulation.scheduler import BaseScheduler, create_scheduler
@@ -112,6 +113,7 @@ class SimulationEngine:
         self.metrics = MetricsCollector()
         self.factory = factory
         self.path_graph = PathGraph(factory)
+        self.corridors = CorridorNetwork(self.env, factory)
         self.layout_version = 0
         self.stations: dict[str, WorkStation] = {}
         self.chargers: dict[str, ChargingStation] = {}
@@ -801,6 +803,7 @@ class SimulationEngine:
         )
         self.factory = factory
         self.path_graph = PathGraph(factory)
+        self.corridors = CorridorNetwork(self.env, factory)
         self.layout_version += 1
 
         summary += self._apply_station_configs(factory.stations)
@@ -1016,8 +1019,12 @@ class SimulationEngine:
         Returns:
             KPI key → 값
         """
-        usages = [r.usage() for r in (*self.robots.values(), *self.retired)]
-        return self.metrics.compute(self.now, usages)
+        robots = (*self.robots.values(), *self.retired)
+        usages = [r.usage() for r in robots]
+        kpis = self.metrics.compute(self.now, usages)
+        kpis["completed_units"] = float(self.metrics.total_completed)
+        kpis["distance_m"] = sum(r.distance_m for r in robots)
+        return kpis
 
     def robot_snapshots(self) -> list[RobotSnapshot]:
         """로봇 스냅샷.

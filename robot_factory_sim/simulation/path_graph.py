@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import heapq
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from utils.config_models import FactoryConfig, ObstacleConfig
 
@@ -20,10 +20,18 @@ Point = tuple[float, float]
 
 @dataclass(frozen=True)
 class Route:
-    """이동 경로."""
+    """이동 경로.
+
+    nodes[i]는 points[i]에 해당하는 그래프 노드 ID(현재 위치에서 그래프에 올라타기 전의
+    연결 구간이면 그 시작점은 그래프 노드가 아닐 수 있다), prev_nodes[i]는 points[i]로
+    들어오기 직전 노드 ID(그래프 엣지를 타지 않은 연결 구간이면 None)이다.
+    Robot은 이 둘로 (prev_nodes[i], nodes[i]) 간 엣지를 찾아 통로/교차점 제약을 적용한다.
+    """
 
     points: list[Point]
     length: float  # px
+    nodes: list[int] = field(default_factory=list)
+    prev_nodes: list[int | None] = field(default_factory=list)
 
 
 def _segment_intersects_segment(p1: Point, p2: Point, q1: Point, q2: Point) -> bool:
@@ -211,12 +219,19 @@ class PathGraph:
         result = self.shortest_path(start, target)
         if result is None:
             return None
-        nodes, length = result
-        points = [self.nodes[n] for n in nodes]
+        node_path, length = result
+        points = [self.nodes[n] for n in node_path]
         start_gap = math.hypot(points[0][0] - x, points[0][1] - y)
         if start_gap < 1e-6:
+            # 로봇이 이미 그래프 노드 위에 있다 — 그 노드는 이동할 점이 아니라 출발점이다.
             points = points[1:]
-        return Route(points=points, length=length + start_gap)
+            nodes_out = node_path[1:]
+            prev_nodes: list[int | None] = list(node_path[:-1])
+        else:
+            # 그래프 밖(현재 좌표)에서 첫 노드까지는 엣지가 아니므로 물리 제약을 적용하지 않는다.
+            nodes_out = node_path
+            prev_nodes = [None, *node_path[:-1]]
+        return Route(points=points, length=length + start_gap, nodes=nodes_out, prev_nodes=prev_nodes)
 
     def distance_to_facility(self, x: float, y: float, facility_id: str) -> float:
         """현재 위치에서 설비까지의 경로 거리 (도달 불가 시 inf).
