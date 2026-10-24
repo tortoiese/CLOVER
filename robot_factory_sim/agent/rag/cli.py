@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import sys
 from pathlib import Path
 
@@ -21,6 +22,7 @@ def main() -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     ingest = commands.add_parser("ingest", help="자료 파일 또는 폴더 등록/갱신")
     ingest.add_argument("path", type=Path)
+    ingest.add_argument("--policy", action="store_true", help="운영 기준·ROI 문서를 추천 근거로 등록")
     ask = commands.add_parser("ask", help="자료 질의")
     ask.add_argument("question")
     ask.add_argument("--run-id", help="특정 시뮬레이션 실행으로 제한")
@@ -43,7 +45,11 @@ def main() -> int:
             return 0
         service = build_service(args.store)
         if args.command == "ingest":
-            count = service.ingest(load_documents(args.path))
+            documents = load_documents(args.path)
+            if args.policy:
+                documents = [replace(document, metadata={**document.metadata, "knowledge_type": "operating_policy"})
+                             for document in documents]
+            count = service.ingest(documents)
             print(f"등록 완료: {count}개 청크 / 전체 {service.store.count()}개")
         elif args.command == "ask":
             filters = []
