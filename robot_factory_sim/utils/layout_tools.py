@@ -76,6 +76,13 @@ def build_grid_network(
     return nodes, edges
 
 
+def _is_preserved(node: PathNodeConfig, elevator_ids: set[str]) -> bool:
+    """설비 연결을 다시 계산할 때 그대로 둘 노드: 교차점, 그리고 ElevatorConfig 없이 노드 그룹으로 정의된 엘리베이터."""
+    if node.node_type == "intersection":
+        return True
+    return node.node_type == "elevator" and bool(node.linked_station_id) and node.linked_station_id not in elevator_ids
+
+
 def link_facilities_to_nodes(
     nodes: list[PathNodeConfig],
     stations: list[WorkStationConfig],
@@ -92,7 +99,10 @@ def link_facilities_to_nodes(
         chargers: 충전소 목록
         elevators: 엘리베이터 목록
     """
+    elevator_ids = {e.id for e in elevators or []}
     for node in nodes:
+        if _is_preserved(node, elevator_ids):
+            continue
         node.node_type = "waypoint"
         node.linked_station_id = None
     if not nodes:
@@ -107,7 +117,8 @@ def link_facilities_to_nodes(
         on_floor = [n for n in nodes if n.floor == floor]
         if not on_floor:
             continue
-        candidates = [n for n in on_floor if n.linked_station_id is None] or on_floor
+        free = [n for n in on_floor if n.node_type != "intersection"] or on_floor
+        candidates = [n for n in free if n.linked_station_id is None] or free
         nearest = min(candidates, key=lambda n: math.hypot(n.x - fx, n.y - fy))
         nearest.node_type = node_type
         nearest.linked_station_id = facility_id

@@ -34,11 +34,17 @@ from utils.config_models import (
 )
 from utils.event_types import ChangeType, OrderStatus, Tables
 
-SCHEMA_VERSION: int = 3
+SCHEMA_VERSION: int = 4
 
 # 마이그레이션: 기존 DB에 누락된 컬럼을 ALTER TABLE ADD COLUMN 으로 보충한다.
 _MIGRATION_COLUMNS: dict[str, dict[str, str]] = {
-    Tables.FACTORY_PROFILE: {"floor_count": "INTEGER DEFAULT 1"},
+    Tables.FACTORY_PROFILE: {
+        "floor_count": "INTEGER DEFAULT 1",
+        "edge_clearance": "REAL DEFAULT 0.4",
+        "side_clearance": "REAL DEFAULT 0.3",
+        "floor_travel_sec": "REAL DEFAULT 4.0",
+        "door_time_sec": "REAL DEFAULT 6.0",
+    },
     Tables.WORK_STATIONS: {
         "width": "REAL DEFAULT 80",
         "height": "REAL DEFAULT 60",
@@ -49,9 +55,15 @@ _MIGRATION_COLUMNS: dict[str, dict[str, str]] = {
     Tables.CHARGING_STATIONS: {
         "charge_rate": "REAL DEFAULT 2.0", "is_active": "INTEGER DEFAULT 1", "floor": "INTEGER DEFAULT 1",
     },
-    Tables.ROBOTS: {"charge_threshold": "REAL DEFAULT 20", "is_active": "INTEGER DEFAULT 1"},
+    Tables.ROBOTS: {
+        "charge_threshold": "REAL DEFAULT 20",
+        "is_active": "INTEGER DEFAULT 1",
+        "width": "REAL DEFAULT 0.6",
+        "length": "REAL DEFAULT 0.8",
+    },
     Tables.OBSTACLES: {"is_passable": "INTEGER DEFAULT 0", "label": "TEXT", "floor": "INTEGER DEFAULT 1"},
-    Tables.PATH_NODES: {"linked_station_id": "TEXT", "floor": "INTEGER DEFAULT 1"},
+    Tables.PATH_NODES: {"linked_station_id": "TEXT", "floor": "INTEGER DEFAULT 1", "capacity": "INTEGER"},
+    Tables.PATH_EDGES: {"width": "REAL DEFAULT 5.0"},
     Tables.ORDERS: {"required_stations": "TEXT", "completed": "INTEGER DEFAULT 0"},
 }
 
@@ -86,7 +98,8 @@ _SPECS: dict[str, _TableSpec] = {
     ),
     Tables.ROBOTS: _TableSpec(
         Tables.ROBOTS, RobotConfig,
-        ("robot_type", "battery_capacity", "move_speed", "battery_drain_rate", "charge_threshold", "is_active"),
+        ("robot_type", "battery_capacity", "move_speed", "battery_drain_rate", "charge_threshold", "is_active",
+         "width", "length"),
         frozenset({"is_active"}), False,
     ),
     Tables.OBSTACLES: _TableSpec(
@@ -96,12 +109,12 @@ _SPECS: dict[str, _TableSpec] = {
     ),
     Tables.PATH_NODES: _TableSpec(
         Tables.PATH_NODES, PathNodeConfig,
-        ("x", "y", "node_type", "linked_station_id", "floor"),
+        ("x", "y", "node_type", "linked_station_id", "floor", "capacity"),
         frozenset(), True,
     ),
     Tables.PATH_EDGES: _TableSpec(
         Tables.PATH_EDGES, PathEdgeConfig,
-        ("from_node", "to_node", "distance", "is_bidirectional"),
+        ("from_node", "to_node", "distance", "is_bidirectional", "width"),
         frozenset({"is_bidirectional"}), True,
     ),
 }
@@ -276,9 +289,7 @@ class DBManager:
 
     def _migrate(self, conn: sqlite3.Connection) -> None:
         """누락 컬럼 보충 + user_version 갱신."""
-        version = conn.execute("PRAGMA user_version").fetchone()[0]
-        if version >= SCHEMA_VERSION:
-            return
+        # 브랜치마다 같은 버전 번호로 다른 컬럼을 추가했을 수 있으므로, 버전과 무관하게 누락 컬럼을 항상 보충한다.
         for table, columns in _MIGRATION_COLUMNS.items():
             existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
             for column, ddl in columns.items():
@@ -472,17 +483,27 @@ class DBManager:
             floor_height=row["floor_height"] or config.DEFAULT_FLOOR_HEIGHT,
             grid_cell_size=row["grid_cell_size"] or config.DEFAULT_GRID_CELL_SIZE,
             floor_count=max(1, int(row.get("floor_count") or config.DEFAULT_FLOOR_COUNT)),
+            edge_clearance=row.get("edge_clearance") if row.get("edge_clearance") is not None
+            else config.EDGE_CLEARANCE,
+            side_clearance=row.get("side_clearance") if row.get("side_clearance") is not None
+            else config.SIDE_CLEARANCE,
+            floor_travel_sec=row.get("floor_travel_sec") if row.get("floor_travel_sec") is not None
+            else config.FLOOR_TRAVEL_SEC,
+            door_time_sec=row.get("door_time_sec") if row.get("door_time_sec") is not None
+            else config.DOOR_TIME_SEC,
         )
 
     def _save_profile_in(self, conn: sqlite3.Connection, profile: FactoryProfile, changed_by: str) -> bool:
         """트랜잭션 내부 공장 정보 upsert."""
-        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size", "floor_count")
+        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size", "floor_count",
+                   "edge_clearance", "side_clearance", "floor_travel_sec", "door_time_sec")
         values = {c: getattr(profile, c) for c in columns}
         old = conn.execute("SELECT * FROM factory_profile WHERE id = ?", (profile.id,)).fetchone()
         if old is None:
             conn.execute(
-                "INSERT INTO factory_profile(id, factory_name, floor_width, floor_height, grid_cell_size, floor_count) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO factory_profile(id, factory_name, floor_width, floor_height, grid_cell_size, "
+                "floor_count, edge_clearance, side_clearance, floor_travel_sec, door_time_sec) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (profile.id, *values.values()),
             )
             self._log_change(conn, Tables.FACTORY_PROFILE, str(profile.id), ChangeType.INSERT, None, values,
@@ -493,7 +514,8 @@ class DBManager:
             return False
         conn.execute(
             "UPDATE factory_profile SET factory_name = ?, floor_width = ?, floor_height = ?, grid_cell_size = ?, "
-            "floor_count = ?, updated_at = ? WHERE id = ?",
+            "floor_count = ?, edge_clearance = ?, side_clearance = ?, floor_travel_sec = ?, door_time_sec = ?, "
+            "updated_at = ? WHERE id = ?",
             (*values.values(), _now_str(), profile.id),
         )
         self._log_change(conn, Tables.FACTORY_PROFILE, str(profile.id), ChangeType.UPDATE, old_values, values,
@@ -519,7 +541,7 @@ class DBManager:
         Returns:
             FactoryConfig
         """
-        return FactoryConfig(
+        factory = FactoryConfig(
             profile=self.get_factory_profile(),
             stations=self.list_records(Tables.WORK_STATIONS),
             chargers=self.list_records(Tables.CHARGING_STATIONS),
@@ -529,6 +551,8 @@ class DBManager:
             edges=self.list_records(Tables.PATH_EDGES),
             elevators=self.list_records(Tables.ELEVATORS),
         )
+        factory.sync_facility_floors()
+        return factory
 
     def save_factory_config(self, factory: FactoryConfig, changed_by: str = "config_editor") -> int:
         """공장 전체 구성을 DB와 diff 하여 저장한다. (단일 트랜잭션)

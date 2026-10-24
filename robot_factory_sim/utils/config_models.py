@@ -24,6 +24,10 @@ class FactoryProfile:
     floor_width: float = config.DEFAULT_FLOOR_WIDTH
     floor_height: float = config.DEFAULT_FLOOR_HEIGHT
     grid_cell_size: float = config.DEFAULT_GRID_CELL_SIZE
+    edge_clearance: float = config.EDGE_CLEARANCE
+    side_clearance: float = config.SIDE_CLEARANCE
+    floor_travel_sec: float = config.FLOOR_TRAVEL_SEC
+    door_time_sec: float = config.DOOR_TIME_SEC
     floor_count: int = config.DEFAULT_FLOOR_COUNT
 
 
@@ -67,7 +71,7 @@ class ElevatorConfig:
     y: float
     width: float = config.DEFAULT_ELEVATOR_SIZE
     height: float = config.DEFAULT_ELEVATOR_SIZE
-    travel_time: float = config.DEFAULT_ELEVATOR_TRAVEL_TIME
+    travel_time: float = config.FLOOR_TRAVEL_SEC
     capacity: int = config.DEFAULT_ELEVATOR_CAPACITY
     is_active: bool = True
 
@@ -83,6 +87,8 @@ class RobotConfig:
     battery_drain_rate: float = config.DEFAULT_BATTERY_DRAIN_RATE
     charge_threshold: float = config.DEFAULT_CHARGE_THRESHOLD
     is_active: bool = True
+    width: float = config.DEFAULT_ROBOT_WIDTH
+    length: float = config.DEFAULT_ROBOT_LENGTH
 
 
 @dataclass
@@ -102,7 +108,12 @@ class ObstacleConfig:
 
 @dataclass
 class PathNodeConfig:
-    """경로 노드. id가 음수면 신규 항목."""
+    """경로 노드. id가 음수면 신규 항목.
+
+    node_type이 "intersection"이면 동시에 하나만 통과 가능한 교차점이다.
+    node_type이 "elevator"이면 linked_station_id를 엘리베이터 그룹(샤프트) ID로 쓰고,
+    같은 그룹·다른 floor를 가진 두 노드를 연결하는 엣지가 엘리베이터 구간이 된다.
+    """
 
     id: int
     x: float
@@ -110,6 +121,7 @@ class PathNodeConfig:
     node_type: str = "waypoint"
     linked_station_id: str | None = None
     floor: int = 1
+    capacity: int | None = None  # 엘리베이터 노드의 동시 운행 차량 수 (None이면 config fallback)
 
 
 @dataclass
@@ -121,6 +133,7 @@ class PathEdgeConfig:
     to_node: int
     distance: float | None = None
     is_bidirectional: bool = True
+    width: float = config.DEFAULT_EDGE_WIDTH
 
 
 @dataclass
@@ -140,6 +153,17 @@ class FactoryConfig:
     def floor_count(self) -> int:
         """층 수 (1 이상)."""
         return max(1, int(self.profile.floor_count))
+
+    def sync_facility_floors(self) -> None:
+        """스테이션/충전소의 층을 연결된 경로 노드의 층에 맞춘다 (층 개념 없이 만든 구성 호환).
+
+        예전 물리 시나리오는 위층 설비를 노드의 floor로만 표시했으므로, 노드가 가리키는 층을 설비의 층으로 삼는다.
+        """
+        node_floor = {n.linked_station_id: n.floor for n in self.nodes
+                      if n.linked_station_id and n.node_type in ("station", "charger")}
+        for facility in (*self.stations, *self.chargers):
+            if facility.id in node_floor:
+                facility.floor = node_floor[facility.id]
 
     def to_dict(self) -> dict[str, Any]:
         """JSON 직렬화 가능한 dict로 변환한다.
@@ -167,7 +191,7 @@ class FactoryConfig:
         Returns:
             복원된 FactoryConfig
         """
-        return cls(
+        factory = cls(
             profile=FactoryProfile(**data.get("profile", {})),
             stations=[WorkStationConfig(**s) for s in data.get("stations", [])],
             chargers=[ChargingStationConfig(**c) for c in data.get("chargers", [])],
@@ -177,6 +201,8 @@ class FactoryConfig:
             edges=[PathEdgeConfig(**e) for e in data.get("edges", [])],
             elevators=[ElevatorConfig(**e) for e in data.get("elevators", [])],
         )
+        factory.sync_facility_floors()
+        return factory
 
     @classmethod
     def from_json(cls, text: str) -> FactoryConfig:

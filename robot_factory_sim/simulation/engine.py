@@ -19,6 +19,7 @@ import numpy as np
 import simpy
 
 import config
+from simulation.corridor import CorridorNetwork
 from simulation.elevator import Elevator
 from simulation.path_graph import PathGraph
 from simulation.robot import InterruptKind, Robot
@@ -131,6 +132,7 @@ class SimulationEngine:
         self.metrics = MetricsCollector()
         self.factory = factory
         self.path_graph = PathGraph(factory)
+        self.corridors = CorridorNetwork(self.env, factory)
         self.layout_version = 0
         self.stations: dict[str, WorkStation] = {}
         self.chargers: dict[str, ChargingStation] = {}
@@ -152,7 +154,7 @@ class SimulationEngine:
             self._create_station(station_cfg)
         for charger_cfg in factory.chargers:
             self._create_charger(charger_cfg)
-        for elevator_cfg in factory.elevators:
+        for elevator_cfg in self._elevator_configs():
             self._create_elevator(elevator_cfg)
         for robot_cfg in factory.robots:
             if robot_cfg.is_active:
@@ -182,9 +184,13 @@ class SimulationEngine:
 
     def _create_elevator(self, cfg: ElevatorConfig) -> Elevator:
         """엘리베이터를 생성·등록한다."""
-        elevator = Elevator(self.env, cfg)
+        elevator = Elevator(self.env, cfg, self.factory.profile.door_time_sec)
         self.elevators[cfg.id] = elevator
         return elevator
+
+    def _elevator_configs(self) -> list[ElevatorConfig]:
+        """운행할 엘리베이터 설정: 구성의 엘리베이터 + 노드 그룹으로만 정의된 엘리베이터(이전 물리 시나리오 방식)."""
+        return [*self.factory.elevators, *self.path_graph.implicit_elevators]
 
     def _create_robot(self, cfg: RobotConfig) -> Robot:
         """로봇을 생성·등록한다 (충전소 근처에 배치)."""
@@ -846,11 +852,12 @@ class SimulationEngine:
         )
         self.factory = factory
         self.path_graph = PathGraph(factory)
+        self.corridors = CorridorNetwork(self.env, factory)
         self.layout_version += 1
 
         summary += self._apply_station_configs(factory.stations)
         summary += self._apply_charger_configs(factory.chargers)
-        summary += self._apply_elevator_configs(factory.elevators)
+        summary += self._apply_elevator_configs(self._elevator_configs())
         summary += self._apply_robot_configs(factory.robots)
         self._clamp_robot_floors()
         if geometry_changed:
@@ -960,6 +967,8 @@ class SimulationEngine:
             elif elevator.cfg != cfg:
                 elevator.update_config(cfg)
                 summary.append(f"{cfg.id} 수정")
+            elevator = self.elevators[cfg.id]
+            elevator.door_time = self.factory.profile.door_time_sec
         return summary
 
     def _clamp_robot_floors(self) -> None:

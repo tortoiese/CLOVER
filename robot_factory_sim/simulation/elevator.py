@@ -20,15 +20,17 @@ FLOOR_EPSILON: float = 1e-6
 class Elevator:
     """엘리베이터 1대 (승강로 하나, 캐빈 하나)."""
 
-    def __init__(self, env: simpy.Environment, cfg: ElevatorConfig) -> None:
+    def __init__(self, env: simpy.Environment, cfg: ElevatorConfig, door_time: float = config.DOOR_TIME_SEC) -> None:
         """엘리베이터를 생성한다. 캐빈은 1층에서 대기한다.
 
         Args:
             env: SimPy 환경
             cfg: 엘리베이터 설정
+            door_time: 한 번 탑승에 드는 문 개폐 시간 (승차 + 하차 합계, sim-sec)
         """
         self.env = env
         self.cfg = cfg
+        self.door_time = door_time
         self.resource = simpy.Resource(env, capacity=max(1, int(cfg.capacity)))
         self.removed = False
         self.rides = 0
@@ -103,7 +105,7 @@ class Elevator:
             floor: 로봇이 기다리는 층
         """
         yield from self._move(float(floor))
-        yield self.env.timeout(config.ELEVATOR_BOARD_TIME / 2.0)
+        yield self.env.timeout(self.door_time / 2.0)
 
     def carry(self, floor: int) -> Generator[Any, Any, None]:
         """목적 층까지 이동하고 하차한다.
@@ -112,5 +114,5 @@ class Elevator:
             floor: 목적 층
         """
         yield from self._move(float(floor))
-        yield self.env.timeout(config.ELEVATOR_BOARD_TIME / 2.0)
+        yield self.env.timeout(self.door_time / 2.0)
         self.rides += 1
