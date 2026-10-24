@@ -45,6 +45,7 @@ from simulation.state import SimState, state_to_context
 from utils.event_types import ActionKind, ChangeType, SchedulerModeLabel, Severity, Tables
 
 THREAD_STOP_TIMEOUT_MS: int = 3000
+SHUTDOWN_POLL_INTERVAL_MS: int = 100
 SPLITTER_SIZES: tuple[int, int, int] = (620, 420, 560)
 
 
@@ -68,6 +69,10 @@ class MainWindow(QMainWindow):
         self._watchers_started = False
         self._pending_config_tables: set[str] = set()
         self._pending_config_by = "system"
+        self._closing = False
+        self._shutdown_timer = QTimer(self)
+        self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
+        self._shutdown_timer.timeout.connect(self._finish_shutdown)
 
         self._build_toolbar()
         self._build_body()
@@ -256,6 +261,8 @@ class MainWindow(QMainWindow):
 
     def _on_production_event(self, event: dict[str, Any]) -> None:
         """생산 이벤트 → AI 자율 대응."""
+        if self._closing:
+            return
         self._agent_bridge.event_requested.emit(event, state_to_context(self._state))
 
     # ------------------------------------------------------------------
@@ -263,10 +270,14 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_user_message(self, text: str) -> None:
         """사용자 채팅 → 에이전트."""
+        if self._closing:
+            return
         self._agent_bridge.message_requested.emit(text, state_to_context(self._state))
 
     def _on_agent_response(self, response: AgentResponse) -> None:
         """에이전트 응답 표시 + 조치 실행 + 긴급 배너."""
+        if self._closing:
+            return
         self._console.add_message(response.text, "agent", response.severity)
         if response.source == "event" and response.severity in (Severity.CRITICAL, Severity.WARNING):
             first_line = response.text.splitlines()[0] if response.text else ""
@@ -357,13 +368,28 @@ class MainWindow(QMainWindow):
     # 종료
     # ------------------------------------------------------------------
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 — Qt override
-        """모든 스레드를 정리한다."""
-        for watcher in (self._config_watcher, self._event_watcher):
-            watcher.stop()
-        for thread in (self._config_watcher, self._event_watcher):
-            thread.wait(THREAD_STOP_TIMEOUT_MS)
-        for thread in (self._worker, self._agent_bridge):
-            thread.quit()
-            if not thread.wait(THREAD_STOP_TIMEOUT_MS):
-                QMessageBox.warning(self, "종료", "작업 스레드가 제때 종료되지 않았습니다.")
+        """스레드 종료를 요청하고 모두 종료되기 전에는 창을 유지한다."""
+        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        if not self._closing:
+            self._closing = True
+            self.setEnabled(False)
+            self._reload_timer.stop()
+            for watcher in (self._config_watcher, self._event_watcher):
+                watcher.stop()
+            for thread in (self._worker, self._agent_bridge):
+                thread.quit()
+            for thread in threads:
+                thread.wait(THREAD_STOP_TIMEOUT_MS)
+        if any(thread.isRunning() for thread in threads):
+            event.ignore()
+            self._shutdown_timer.start()
+            return
+        self._shutdown_timer.stop()
         super().closeEvent(event)
+
+    def _finish_shutdown(self) -> None:
+        """진행 중인 요청이 끝난 뒤 메인 스레드에서 창을 닫는다."""
+        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        if not any(thread.isRunning() for thread in threads):
+            self._shutdown_timer.stop()
+            self.close()

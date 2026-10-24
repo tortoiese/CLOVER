@@ -124,7 +124,7 @@ class BaselineScheduler(BaseScheduler):
 
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만일 때만 충전 (반응형)."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """항상 만충전."""
@@ -275,16 +275,19 @@ class OptimizedScheduler(BaseScheduler):
     # ------------------------------------------------------------------
     def should_charge(self, robot: Robot, engine: SimulationEngine) -> bool:
         """임계치 미만이면 충전."""
-        return robot.battery_pct < robot.cfg.charge_threshold
+        return robot.battery_pct < min(100.0, robot.cfg.charge_threshold) - 1e-6
 
     def charge_target(self, robot: Robot, engine: SimulationEngine) -> float:
         """상황별 충전 목표: 긴급/최소충전 모드 → 적체 → 평상시."""
         critical_pending = any(t.priority == config.PRIORITY_LEVELS["critical"] for t in engine.pending_tasks)
         if engine.params.get("min_charge_mode") or critical_pending:
-            return config.MIN_CHARGE_TARGET
-        if len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
-            return BACKLOG_CHARGE_TARGET
-        return config.OPTIMIZED_CHARGE_TARGET
+            target = config.MIN_CHARGE_TARGET
+        elif len(engine.pending_tasks) > 2 * max(1, len(engine.robots)):
+            target = BACKLOG_CHARGE_TARGET
+        else:
+            target = config.OPTIMIZED_CHARGE_TARGET
+        # 충전 종료 직후 다시 충전에 진입하지 않도록 시작 임계값 이상을 보장한다.
+        return min(100.0, max(target, robot.cfg.charge_threshold))
 
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
         """이동시간 + 예상 대기시간이 가장 짧은 충전소."""

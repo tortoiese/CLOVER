@@ -161,16 +161,21 @@ def _values_equal(a: Any, b: Any) -> bool:
 class DBManager:
     """factory_config.db 접근 단일 진입점."""
 
-    def __init__(self, db_path: str | Path = config.DB_PATH, schema_path: str | Path = config.SCHEMA_PATH) -> None:
+    def __init__(self, db_path: str | Path = config.DB_PATH, schema_path: str | Path = config.SCHEMA_PATH,
+                 read_only: bool = False) -> None:
         """DBManager를 생성한다. 연결은 스레드별로 지연 생성된다.
 
         Args:
             db_path: SQLite 파일 경로 또는 ``":memory:"``
             schema_path: schema.sql 경로
+            read_only: 기존 파일을 읽기 전용으로 열지 여부.
         """
         self._path = str(db_path)
         self._schema_path = Path(schema_path)
         self._memory = self._path == ":memory:"
+        self._read_only = read_only
+        if read_only and self._memory:
+            raise ValueError("읽기 전용 연결은 기존 DB 파일이 필요합니다.")
         self._local = threading.local()
         self._shared: sqlite3.Connection | None = None
         self._lock = threading.RLock()
@@ -192,9 +197,11 @@ class DBManager:
             return self._shared
         conn: sqlite3.Connection | None = getattr(self._local, "conn", None)
         if conn is None:
-            conn = sqlite3.connect(self._path, timeout=5.0)
+            target = Path(self._path).resolve().as_uri() + "?mode=ro" if self._read_only else self._path
+            conn = sqlite3.connect(target, timeout=5.0, uri=self._read_only)
             conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA journal_mode=WAL")
+            if not self._read_only:
+                conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA foreign_keys=OFF")
             self._local.conn = conn
         return conn
@@ -762,6 +769,40 @@ class DBManager:
         rows = self._fetch_all(
             "SELECT * FROM production_events WHERE is_processed = 0 ORDER BY id LIMIT ?", (limit,)
         )
+        for row in rows:
+            try:
+                row["payload"] = json.loads(row["payload"])
+            except (json.JSONDecodeError, TypeError):
+                row["payload"] = {"raw": row["payload"]}
+            row["created_at"] = str(row["created_at"])
+        return rows
+
+    def latest_event_id(self) -> int:
+        """현재 생산 이벤트의 최대 ID를 반환한다.
+
+        Returns:
+            빈 테이블은 0, 그 외 최대 ID.
+        """
+        row = self._fetch_one("SELECT COALESCE(MAX(id), 0) AS maximum FROM production_events")
+        return int(row["maximum"]) if row else 0
+
+    def list_events(self, after_id: int = 0, through_id: int | None = None,
+                    limit: int = 500) -> list[dict[str, Any]]:
+        """처리 여부와 관계없이 ID 범위의 생산 이벤트를 읽는다.
+
+        Args:
+            after_id: 이 ID보다 큰 행만 읽는다.
+            through_id: 포함할 마지막 ID. None이면 현재 최대 ID.
+            limit: 페이지 최대 행 수.
+
+        Returns:
+            ID 오름차순의 이벤트 목록. 관제 처리 상태는 변경하지 않는다.
+        """
+        if after_id < 0 or limit < 1 or (through_id is not None and through_id < 0):
+            raise ValueError("이벤트 ID는 음수가 아니어야 하고 limit은 양수여야 합니다.")
+        upper = self.latest_event_id() if through_id is None else through_id
+        rows = self._fetch_all("SELECT * FROM production_events WHERE id > ? AND id <= ? ORDER BY id LIMIT ?",
+                               (after_id, upper, limit))
         for row in rows:
             try:
                 row["payload"] = json.loads(row["payload"])

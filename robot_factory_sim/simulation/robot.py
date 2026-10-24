@@ -386,8 +386,9 @@ class Robot:
             charger.occupants.add(self.robot_id)
             try:
                 while self.alive and charger.active:
-                    target = engine.scheduler.charge_target(self, engine) / 100.0 * self.capacity
-                    if self.battery >= target - 1e-6:
+                    target_pct = engine.scheduler.charge_target(self, engine)
+                    target = target_pct / 100.0 * self.capacity
+                    if self.battery_pct >= target_pct - 1e-6:
                         break
                     rate = max(0.01, float(charger.cfg.charge_rate))
                     step = min(config.CHARGE_STEP, (target - self.battery) / rate)
