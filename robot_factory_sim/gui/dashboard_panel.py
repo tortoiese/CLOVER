@@ -21,7 +21,6 @@ from gui.widgets.roi_panel import RoiPanel
 from simulation.state import SimState
 from utils.event_types import OrderStatus, RobotState, SchedulerModeLabel
 from utils.metrics import KPI_DEFINITIONS, KpiDefinition
-from utils.roi import compute_roi
 
 MAX_SAMPLES: int = int(c.HISTORY_WINDOW / c.HISTORY_SAMPLE_INTERVAL)
 GANTT_BAR_HEIGHT: float = 0.7
@@ -421,17 +420,12 @@ class DashboardPanel(QWidget):
         plot.setXRange(max(0.0, end - c.HISTORY_WINDOW / 60.0), end * 1.02)
 
     def _draw_roi(self) -> None:
-        """Tab 8 — ROI 비교 (베이스라인 vs 최적화안, utils.roi.compute_roi 기반)."""
+        """Tab 8 — ROI 파라미터/숫자 요약/비교 차트. 완료 건수·이동거리만 넘기고 계산은 RoiPanel이 한다."""
         state = self._state
         assert state is not None
         base_kpis = state.engine_kpis.get("baseline", {})
         opt_kpis = state.engine_kpis.get("optimized", {})
-        baseline = compute_roi(
-            completed_units=int(base_kpis.get("completed_units", 0.0)),
-            total_distance_m=base_kpis.get("distance_m", 0.0),
+        self._roi_panel.update_kpis(
+            int(base_kpis.get("completed_units", 0.0)), base_kpis.get("distance_m", 0.0),
+            int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("distance_m", 0.0),
         )
-        optimized = compute_roi(
-            completed_units=int(opt_kpis.get("completed_units", 0.0)),
-            total_distance_m=opt_kpis.get("distance_m", 0.0),
-        )
-        self._roi_panel.update_roi(baseline, optimized)
