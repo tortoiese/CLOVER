@@ -166,6 +166,7 @@ class FactoryService:
             self._db.upsert_record(Tables.ROBOTS, RobotConfig(
                 robot_id, template.robot_type, template.battery_capacity, template.move_speed,
                 template.battery_drain_rate, template.charge_threshold, True,
+                template.width, template.length,
             ), changed_by)
             added.append(robot_id)
         return added
