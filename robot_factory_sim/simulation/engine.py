@@ -1027,8 +1027,12 @@ class SimulationEngine:
         Returns:
             KPI key → 값
         """
-        usages = [r.usage() for r in (*self.robots.values(), *self.retired)]
-        return self.metrics.compute(self.now, usages)
+        robots = (*self.robots.values(), *self.retired)
+        usages = [r.usage() for r in robots]
+        kpis = self.metrics.compute(self.now, usages)
+        kpis["completed_units"] = float(self.metrics.total_completed)
+        kpis["distance_m"] = sum(r.distance_m for r in robots)
+        return kpis
 
     def robot_snapshots(self) -> list[RobotSnapshot]:
         """로봇 스냅샷.
