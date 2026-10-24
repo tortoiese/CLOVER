@@ -18,13 +18,28 @@ import numpy as np
 import simpy
 
 import config
+from simulation.elevator import Elevator
 from simulation.path_graph import PathGraph
 from simulation.robot import InterruptKind, Robot
 from simulation.scheduler import BaseScheduler, create_scheduler
-from simulation.state import ChargerSnapshot, OrderSnapshot, RobotSnapshot, StationSnapshot, TimelineEvent
+from simulation.state import (
+    ChargerSnapshot,
+    ElevatorSnapshot,
+    OrderSnapshot,
+    RobotSnapshot,
+    StationSnapshot,
+    TimelineEvent,
+)
 from simulation.station import ChargingStation, WorkStation
 from simulation.task_generator import Task, TaskGenerator
-from utils.config_models import ChargingStationConfig, FactoryConfig, OrderRecord, RobotConfig, WorkStationConfig
+from utils.config_models import (
+    ChargingStationConfig,
+    ElevatorConfig,
+    FactoryConfig,
+    OrderRecord,
+    RobotConfig,
+    WorkStationConfig,
+)
 from utils.event_types import OrderStatus, ProductionEventType, RobotState, Severity, TimelineKind
 from utils.metrics import MetricsCollector
 
@@ -115,6 +130,7 @@ class SimulationEngine:
         self.layout_version = 0
         self.stations: dict[str, WorkStation] = {}
         self.chargers: dict[str, ChargingStation] = {}
+        self.elevators: dict[str, Elevator] = {}
         self.robots: dict[str, Robot] = {}
         self.retired: list[Robot] = []
         self.pending_tasks: list[Task] = []
@@ -132,6 +148,8 @@ class SimulationEngine:
             self._create_station(station_cfg)
         for charger_cfg in factory.chargers:
             self._create_charger(charger_cfg)
+        for elevator_cfg in factory.elevators:
+            self._create_elevator(elevator_cfg)
         for robot_cfg in factory.robots:
             if robot_cfg.is_active:
                 self._create_robot(robot_cfg)
@@ -157,26 +175,39 @@ class SimulationEngine:
         self.chargers[cfg.id] = charger
         return charger
 
+    def _create_elevator(self, cfg: ElevatorConfig) -> Elevator:
+        """엘리베이터를 생성·등록한다."""
+        elevator = Elevator(self.env, cfg)
+        self.elevators[cfg.id] = elevator
+        return elevator
+
     def _create_robot(self, cfg: RobotConfig) -> Robot:
         """로봇을 생성·등록한다 (충전소 근처에 배치)."""
         index = next(self._color_ids)
-        robot = Robot(self, cfg, self._spawn_point(index), index)
+        point, floor = self._spawn_point(index)
+        robot = Robot(self, cfg, point, index, floor)
         self.robots[cfg.id] = robot
         return robot
 
-    def _spawn_point(self, index: int) -> Point:
-        """신규 로봇 배치 위치."""
+    def _spawn_point(self, index: int) -> tuple[Point, int]:
+        """신규 로봇 배치 위치와 층 (가장 낮은 층의 충전소를 번갈아 가며 그 근처 = 1층 입고 도크)."""
         chargers = [c for c in self.chargers.values() if c.active]
+        if chargers:
+            dock = min(c.cfg.floor for c in chargers)
+            chargers = [c for c in chargers if c.cfg.floor == dock]
+        floor = 1
         if chargers:
             charger = chargers[index % len(chargers)]
             base = self.path_graph.facility_point(charger.id) or (charger.cfg.x, charger.cfg.y)
+            floor = self.path_graph.facility_floor(charger.id) or charger.cfg.floor
         elif self.path_graph.nodes:
-            base = next(iter(self.path_graph.nodes.values()))
+            node = next(iter(self.path_graph.nodes))
+            base, floor = self.path_graph.nodes[node], self.path_graph.node_floor[node]
         else:
             profile = self.factory.profile
             base = (profile.floor_width / 2.0, profile.floor_height / 2.0)
         offset = ((index % 5) - 2) * SPAWN_SPACING
-        return base[0] + offset, base[1]
+        return (base[0] + offset, base[1]), floor
 
     # ------------------------------------------------------------------
     # 조회 (스케줄러 / 로봇 / 생성기가 사용)
@@ -326,7 +357,8 @@ class SimulationEngine:
         if not self.station_available(task.station_id):
             usable = self._usable_stations(task)
             if usable:
-                task.station_id = min(usable, key=lambda s: self.path_graph.distance_to_facility(robot.x, robot.y, s))
+                task.station_id = min(
+                    usable, key=lambda s: self.path_graph.distance_to_facility(robot.x, robot.y, s, robot.floor))
         task.assigned_at = self.now
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is not None and order.detected_at is not None and not order.responded:
@@ -795,9 +827,11 @@ class SimulationEngine:
         summary: list[str] = []
         geometry_changed = (
             old.obstacles != factory.obstacles or old.nodes != factory.nodes or old.edges != factory.edges
-            or old.profile != factory.profile
-            or [(s.id, s.x, s.y) for s in old.stations] != [(s.id, s.x, s.y) for s in factory.stations]
-            or [(c.id, c.x, c.y) for c in old.chargers] != [(c.id, c.x, c.y) for c in factory.chargers]
+            or old.profile != factory.profile or old.elevators != factory.elevators
+            or [(s.id, s.x, s.y, s.floor) for s in old.stations]
+            != [(s.id, s.x, s.y, s.floor) for s in factory.stations]
+            or [(c.id, c.x, c.y, c.floor) for c in old.chargers]
+            != [(c.id, c.x, c.y, c.floor) for c in factory.chargers]
         )
         self.factory = factory
         self.path_graph = PathGraph(factory)
@@ -805,7 +839,9 @@ class SimulationEngine:
 
         summary += self._apply_station_configs(factory.stations)
         summary += self._apply_charger_configs(factory.chargers)
+        summary += self._apply_elevator_configs(factory.elevators)
         summary += self._apply_robot_configs(factory.robots)
+        self._clamp_robot_floors()
         if geometry_changed:
             self._reroute_moving_robots()
             summary.append("경로 그래프 재계산")
@@ -897,6 +933,30 @@ class SimulationEngine:
                     self._evacuate_charger(cfg.id)
                 summary.append(f"{cfg.id} 수정")
         return summary
+
+    def _apply_elevator_configs(self, configs: list[ElevatorConfig]) -> list[str]:
+        """엘리베이터 diff 반영 (탑승 중인 로봇은 기존 자원으로 마무리한다)."""
+        summary: list[str] = []
+        new_ids = {c.id for c in configs}
+        for elevator_id in [eid for eid in self.elevators if eid not in new_ids]:
+            self.elevators.pop(elevator_id).removed = True
+            summary.append(f"{elevator_id} 제거")
+        for cfg in configs:
+            elevator = self.elevators.get(cfg.id)
+            if elevator is None:
+                self._create_elevator(cfg)
+                summary.append(f"{cfg.id} 추가")
+            elif elevator.cfg != cfg:
+                elevator.update_config(cfg)
+                summary.append(f"{cfg.id} 수정")
+        return summary
+
+    def _clamp_robot_floors(self) -> None:
+        """층 수가 줄어 사라진 층에 있는 로봇을 최상층으로 옮긴다."""
+        top = self.factory.floor_count
+        for robot in self.robots.values():
+            if robot.floor > top:
+                robot.floor = top
 
     def _evacuate_charger(self, charger_id: str) -> None:
         """사용 불가 충전소로 가거나 충전 중인 로봇을 다른 충전소로 보낸다."""
@@ -1044,6 +1104,9 @@ class SimulationEngine:
                 route=robot.remaining_route(),
                 tasks_done=robot.tasks_done,
                 robot_type=robot.cfg.robot_type,
+                floor=robot.floor,
+                floor_pos=robot.floor_position(),
+                route_floors=robot.remaining_route_floors(),
             ))
         return snapshots
 
@@ -1075,6 +1138,7 @@ class SimulationEngine:
                 processed=station.processed,
                 utilization=round(station.utilization(), 1),
                 dedicated_order=station.dedicated_order,
+                floor=cfg.floor,
             ))
         return snapshots
 
@@ -1087,9 +1151,24 @@ class SimulationEngine:
         return [
             ChargerSnapshot(
                 id=c.id, x=c.cfg.x, y=c.cfg.y, capacity=c.capacity, occupied=len(c.occupants),
-                queue_length=c.waiting, active=c.active, charge_rate=float(c.cfg.charge_rate),
+                queue_length=c.waiting, active=c.active, charge_rate=float(c.cfg.charge_rate), floor=c.cfg.floor,
             )
             for c in self.chargers.values()
+        ]
+
+    def elevator_snapshots(self) -> list[ElevatorSnapshot]:
+        """엘리베이터 스냅샷.
+
+        Returns:
+            ElevatorSnapshot 리스트
+        """
+        return [
+            ElevatorSnapshot(
+                id=e.id, label=e.cfg.label, x=e.cfg.x, y=e.cfg.y, width=e.cfg.width, height=e.cfg.height,
+                active=e.active, floor_pos=e.floor_position(), moving=e.moving, occupied=e.occupied,
+                queue_length=e.waiting, rides=e.rides,
+            )
+            for e in self.elevators.values()
         ]
 
     def order_snapshots(self) -> list[OrderSnapshot]:

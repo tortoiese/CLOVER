@@ -32,6 +32,9 @@ class RobotSnapshot:
     route: list[Point] = field(default_factory=list)
     tasks_done: int = 0
     robot_type: str = "AGV"
+    floor: int = 1
+    floor_pos: float = 1.0  # 엘리베이터 탑승 중이면 소수 층
+    route_floors: list[int] = field(default_factory=list)  # route 각 점의 층
 
 
 @dataclass
@@ -54,6 +57,7 @@ class StationSnapshot:
     processed: int
     utilization: float
     dedicated_order: str | None = None
+    floor: int = 1
 
 
 @dataclass
@@ -68,6 +72,25 @@ class ChargerSnapshot:
     queue_length: int
     active: bool
     charge_rate: float
+    floor: int = 1
+
+
+@dataclass
+class ElevatorSnapshot:
+    """엘리베이터 상태. floor_pos는 캐빈의 (소수) 층 번호."""
+
+    id: str
+    label: str
+    x: float
+    y: float
+    width: float
+    height: float
+    active: bool
+    floor_pos: float
+    moving: bool
+    occupied: int
+    queue_length: int
+    rides: int = 0
 
 
 @dataclass
@@ -118,6 +141,7 @@ class SimState:
     engine_kpis: dict[str, dict[str, float]]
     params: dict[str, float]
     events: list[TimelineEvent] = field(default_factory=list)
+    elevators: list[ElevatorSnapshot] = field(default_factory=list)
 
 
 def state_to_context(state: SimState | None) -> dict[str, Any]:
@@ -142,6 +166,7 @@ def state_to_context(state: SimState | None) -> dict[str, Any]:
     return {
         "factory_name": state.layout.profile.factory_name,
         "floor": {"width": state.layout.profile.floor_width, "height": state.layout.profile.floor_height},
+        "floor_count": state.layout.floor_count,
         "sim_time": state.sim_time,
         "sim_datetime": state.sim_datetime.isoformat(sep=" ", timespec="seconds"),
         "speed": state.speed,
@@ -155,6 +180,7 @@ def state_to_context(state: SimState | None) -> dict[str, Any]:
         "robots": robots,
         "stations": [{**asdict(s), "avg_process_time": process_times.get(s.id, 0.0)} for s in state.stations],
         "chargers": [asdict(c) for c in state.chargers],
+        "elevators": [asdict(e) for e in state.elevators],
         "orders": [asdict(o) for o in state.orders],
         "obstacles": [asdict(o) for o in state.layout.obstacles],
     }

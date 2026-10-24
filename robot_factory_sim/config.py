@@ -22,6 +22,14 @@ DEFAULT_FACTORY_NAME: str = "Default Factory"
 DEFAULT_FLOOR_WIDTH: float = 800.0
 DEFAULT_FLOOR_HEIGHT: float = 600.0
 DEFAULT_GRID_CELL_SIZE: float = 50.0
+DEFAULT_FLOOR_COUNT: int = 1
+MAX_FLOOR_COUNT: int = 6
+
+DEFAULT_ELEVATOR_SIZE: float = 60.0
+DEFAULT_ELEVATOR_TRAVEL_TIME: float = 4.0   # 한 층 이동 시간 (sim-sec)
+DEFAULT_ELEVATOR_CAPACITY: int = 1          # 동시 탑승 로봇 수
+ELEVATOR_PX_PER_SEC: float = 20.0           # 엘리베이터 이동 시간을 경로 거리(px)로 환산하는 비율
+ELEVATOR_BOARD_TIME: float = 1.0            # 승·하차 시간 (sim-sec)
 
 DEFAULT_STATION_WIDTH: float = 80.0
 DEFAULT_STATION_HEIGHT: float = 60.0

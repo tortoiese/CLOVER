@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS factory_profile (
     floor_width REAL DEFAULT 800,
     floor_height REAL DEFAULT 600,
     grid_cell_size REAL DEFAULT 50,
+    floor_count INTEGER DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS work_stations (
     avg_process_time REAL DEFAULT 5.0,
     process_time_std REAL DEFAULT 1.0,
     is_active INTEGER DEFAULT 1,
+    floor INTEGER DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -33,6 +35,21 @@ CREATE TABLE IF NOT EXISTS charging_stations (
     y REAL NOT NULL,
     capacity INTEGER DEFAULT 2,
     charge_rate REAL DEFAULT 2.0,
+    is_active INTEGER DEFAULT 1,
+    floor INTEGER DEFAULT 1,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 엘리베이터 (모든 층의 같은 x, y를 관통하는 승강로, schema v3)
+CREATE TABLE IF NOT EXISTS elevators (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    width REAL DEFAULT 60,
+    height REAL DEFAULT 60,
+    travel_time REAL DEFAULT 4.0,
+    capacity INTEGER DEFAULT 1,
     is_active INTEGER DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -59,6 +76,7 @@ CREATE TABLE IF NOT EXISTS obstacles (
     y2 REAL NOT NULL,
     is_passable INTEGER DEFAULT 0,
     label TEXT,
+    floor INTEGER DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -69,6 +87,7 @@ CREATE TABLE IF NOT EXISTS path_nodes (
     y REAL NOT NULL,
     node_type TEXT DEFAULT 'waypoint',
     linked_station_id TEXT,
+    floor INTEGER DEFAULT 1,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

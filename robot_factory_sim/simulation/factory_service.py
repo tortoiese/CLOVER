@@ -96,7 +96,7 @@ class FactoryService:
         Returns:
             변경된 레코드 수
         """
-        link_facilities_to_nodes(factory.nodes, factory.stations, factory.chargers)
+        link_facilities_to_nodes(factory.nodes, factory.stations, factory.chargers, factory.elevators)
         return self._db.save_factory_config(factory, changed_by)
 
     def list_presets(self) -> list[str]:
@@ -171,7 +171,7 @@ class FactoryService:
         return added
 
     def add_charger(self, x: float, y: float, capacity: int = config.DEFAULT_CHARGER_CAPACITY,
-                    changed_by: str = AI_ACTOR) -> str:
+                    changed_by: str = AI_ACTOR, floor: int = 1) -> str:
         """충전소를 추가한다.
 
         Args:
@@ -179,18 +179,21 @@ class FactoryService:
             y: 중심 Y
             capacity: 슬롯 수
             changed_by: 변경 주체
+            floor: 설치할 층 (1부터)
 
         Returns:
             새 충전소 ID
         """
         factory = self._db.load_factory_config()
-        self._check_inside(factory, x, y)
+        self._check_inside(factory, x, y, floor)
         charger_id = self._next_id("CS", {c.id for c in factory.chargers})
-        factory.chargers.append(ChargingStationConfig(charger_id, float(x), float(y), capacity=int(capacity)))
+        factory.chargers.append(
+            ChargingStationConfig(charger_id, float(x), float(y), capacity=int(capacity), floor=int(floor)))
         self.save_factory_config(factory, changed_by)
         return charger_id
 
-    def move_station(self, station_id: str, x: float, y: float, changed_by: str = AI_ACTOR) -> bool:
+    def move_station(self, station_id: str, x: float, y: float, changed_by: str = AI_ACTOR,
+                     floor: int | None = None) -> bool:
         """스테이션을 옮긴다.
 
         Args:
@@ -198,6 +201,7 @@ class FactoryService:
             x: 새 중심 X
             y: 새 중심 Y
             changed_by: 변경 주체
+            floor: 옮길 층 (None이면 현재 층 유지)
 
         Returns:
             성공 여부
@@ -206,8 +210,9 @@ class FactoryService:
         station = factory.station(station_id)
         if station is None:
             return False
-        self._check_inside(factory, x, y)
-        station.x, station.y = float(x), float(y)
+        target_floor = station.floor if floor is None else int(floor)
+        self._check_inside(factory, x, y, target_floor)
+        station.x, station.y, station.floor = float(x), float(y), target_floor
         self.save_factory_config(factory, changed_by)
         return True
 
@@ -253,9 +258,11 @@ class FactoryService:
         return True
 
     @staticmethod
-    def _check_inside(factory: FactoryConfig, x: float, y: float) -> None:
-        """좌표가 공장 바닥 안인지 확인한다."""
+    def _check_inside(factory: FactoryConfig, x: float, y: float, floor: int = 1) -> None:
+        """좌표가 공장 바닥 안인지, 층이 존재하는지 확인한다."""
         profile = factory.profile
+        if not 1 <= floor <= factory.floor_count:
+            raise ValueError(f"{floor}층은 없는 층입니다 (1~{factory.floor_count}층).")
         if not (0 <= x <= profile.floor_width and 0 <= y <= profile.floor_height) or math.isnan(x + y):
             raise ValueError(f"좌표 ({x:.0f}, {y:.0f})가 공장 범위(0~{profile.floor_width:.0f}, "
                              f"0~{profile.floor_height:.0f}) 밖입니다.")

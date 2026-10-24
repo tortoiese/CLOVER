@@ -24,11 +24,12 @@ class FactoryProfile:
     floor_width: float = config.DEFAULT_FLOOR_WIDTH
     floor_height: float = config.DEFAULT_FLOOR_HEIGHT
     grid_cell_size: float = config.DEFAULT_GRID_CELL_SIZE
+    floor_count: int = config.DEFAULT_FLOOR_COUNT
 
 
 @dataclass
 class WorkStationConfig:
-    """작업 스테이션 설정. (x, y)는 중심 좌표."""
+    """작업 스테이션 설정. (x, y)는 중심 좌표, floor는 1부터 시작하는 층 번호."""
 
     id: str
     label: str
@@ -40,6 +41,7 @@ class WorkStationConfig:
     avg_process_time: float = config.DEFAULT_PROCESS_TIME
     process_time_std: float = config.DEFAULT_PROCESS_TIME_STD
     is_active: bool = True
+    floor: int = 1
 
 
 @dataclass
@@ -51,6 +53,22 @@ class ChargingStationConfig:
     y: float
     capacity: int = config.DEFAULT_CHARGER_CAPACITY
     charge_rate: float = config.DEFAULT_CHARGE_RATE
+    is_active: bool = True
+    floor: int = 1
+
+
+@dataclass
+class ElevatorConfig:
+    """엘리베이터 설정. 모든 층의 같은 (x, y)를 관통하는 승강로이며 (x, y)는 중심 좌표."""
+
+    id: str
+    label: str
+    x: float
+    y: float
+    width: float = config.DEFAULT_ELEVATOR_SIZE
+    height: float = config.DEFAULT_ELEVATOR_SIZE
+    travel_time: float = config.DEFAULT_ELEVATOR_TRAVEL_TIME
+    capacity: int = config.DEFAULT_ELEVATOR_CAPACITY
     is_active: bool = True
 
 
@@ -79,6 +97,7 @@ class ObstacleConfig:
     y2: float
     is_passable: bool = False
     label: str = ""
+    floor: int = 1
 
 
 @dataclass
@@ -90,6 +109,7 @@ class PathNodeConfig:
     y: float
     node_type: str = "waypoint"
     linked_station_id: str | None = None
+    floor: int = 1
 
 
 @dataclass
@@ -114,6 +134,12 @@ class FactoryConfig:
     obstacles: list[ObstacleConfig] = field(default_factory=list)
     nodes: list[PathNodeConfig] = field(default_factory=list)
     edges: list[PathEdgeConfig] = field(default_factory=list)
+    elevators: list[ElevatorConfig] = field(default_factory=list)
+
+    @property
+    def floor_count(self) -> int:
+        """층 수 (1 이상)."""
+        return max(1, int(self.profile.floor_count))
 
     def to_dict(self) -> dict[str, Any]:
         """JSON 직렬화 가능한 dict로 변환한다.
@@ -149,6 +175,7 @@ class FactoryConfig:
             obstacles=[ObstacleConfig(**o) for o in data.get("obstacles", [])],
             nodes=[PathNodeConfig(**n) for n in data.get("nodes", [])],
             edges=[PathEdgeConfig(**e) for e in data.get("edges", [])],
+            elevators=[ElevatorConfig(**e) for e in data.get("elevators", [])],
         )
 
     @classmethod

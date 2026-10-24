@@ -143,6 +143,21 @@ QScrollBar::handle:vertical {
     min-height: 24px;
 }
 
+QScrollBar:horizontal {
+    background: transparent;
+    height: 9px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #2a3b63;
+    border-radius: 4px;
+    min-width: 24px;
+}
+
+QGraphicsView {
+    border: none;
+}
+
 QScrollBar::add-line, QScrollBar::sub-line {
     height: 0;
 }

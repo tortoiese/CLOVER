@@ -19,6 +19,7 @@ from utils.event_types import RobotState
 from utils.metrics import RobotTimeUsage
 
 if TYPE_CHECKING:
+    from simulation.elevator import Elevator
     from simulation.engine import SimulationEngine
     from simulation.task_generator import Task
 
@@ -42,7 +43,8 @@ class InterruptKind:
 class Robot:
     """AGV/AMR 로봇 1대."""
 
-    def __init__(self, engine: SimulationEngine, cfg: RobotConfig, position: Point, color_index: int) -> None:
+    def __init__(self, engine: SimulationEngine, cfg: RobotConfig, position: Point, color_index: int,
+                 floor: int = 1) -> None:
         """로봇을 생성하고 프로세스를 등록한다.
 
         Args:
@@ -50,12 +52,14 @@ class Robot:
             cfg: 로봇 설정
             position: 초기 위치
             color_index: 고유 색상 인덱스
+            floor: 시작 층
         """
         self.engine = engine
         self.env: simpy.Environment = engine.env
         self.cfg = cfg
         self.color_index = color_index
         self.x, self.y = position
+        self.floor = floor
         self.battery = float(cfg.battery_capacity)
         self.state = RobotState.IDLE
         self.state_since = self.env.now
@@ -63,6 +67,8 @@ class Robot:
         self.current_task: Task | None = None
         self.target_id: str | None = None
         self.route: list[Point] = []
+        self.route_floors: list[int] = []
+        self.route_lifts: list[str | None] = []
         self.emergency_order: str | None = None
         self.forced_charge = False
         self.alive = True
@@ -72,6 +78,7 @@ class Robot:
         self._segment: tuple[float, float, float, float, float, float, float] | None = None
         self._charge_step: tuple[float, float] | None = None
         self._wake: simpy.Event | None = None
+        self._riding: Elevator | None = None
         self.process = self.env.process(self.run_process())
 
     # ------------------------------------------------------------------
@@ -127,6 +134,24 @@ class Robot:
         if not self.route:
             return []
         return [self.position(), *self.route]
+
+    def remaining_route_floors(self) -> list[int]:
+        """remaining_route()의 각 점이 있는 층.
+
+        Returns:
+            층 번호 리스트 (remaining_route와 같은 길이)
+        """
+        if not self.route:
+            return []
+        return [self.floor, *self.route_floors]
+
+    def floor_position(self) -> float:
+        """현재 층 (엘리베이터 탑승 중이면 캐빈 높이를 보간한 소수 층).
+
+        Returns:
+            층 번호
+        """
+        return self._riding.floor_position() if self._riding is not None else float(self.floor)
 
     def is_available(self) -> bool:
         """새 작업을 배정받을 수 있는지 여부.
@@ -237,7 +262,19 @@ class Robot:
             start, rate = self._charge_step
             self.battery = min(self.capacity, self.battery + rate * (self.env.now - start))
             self._charge_step = None
+        self._clear_route()
+
+    def _clear_route(self) -> None:
+        """남은 이동 경로를 비운다."""
         self.route = []
+        self.route_floors = []
+        self.route_lifts = []
+
+    def _pop_route(self) -> None:
+        """다음 경유점에 도착했을 때 경로의 첫 점을 지운다."""
+        self.route.pop(0)
+        self.route_floors.pop(0)
+        self.route_lifts.pop(0)
 
     def _requeue_current(self) -> None:
         """현재 작업을 엔진 대기열로 돌려보낸다."""
@@ -295,14 +332,43 @@ class Robot:
         if task is not None:
             self.engine.assign(task, self)
 
-    def _travel_process(self, points: list[Point]) -> Generator[Any, Any, None]:
-        """경유점을 따라 이동한다. 배터리가 바닥나면 BatteryDepleted."""
+    def _ride_process(self, lift_id: str, tx: float, ty: float, floor: int) -> Generator[Any, Any, None]:
+        """엘리베이터를 타고 floor층의 (tx, ty)로 이동한다. 도중에 중단되면 도착 층으로 옮겨진다."""
+        elevator = self.engine.elevators.get(lift_id)
+        if elevator is None or not elevator.active:
+            self.x, self.y, self.floor = tx, ty, floor
+            return
+        with elevator.resource.request() as request:
+            self._set_state(RobotState.WAITING)
+            yield request
+            yield from elevator.arrive(self.floor)
+            self._set_state(RobotState.MOVING)
+            self._riding = elevator
+            try:
+                yield from elevator.carry(floor)
+            except simpy.Interrupt:
+                self.x, self.y, self.floor = tx, ty, floor
+                raise
+            finally:
+                self._riding = None
+        self.x, self.y, self.floor = tx, ty, floor
+
+    def _travel_process(self, points: list[Point], floors: list[int] | None = None,
+                        lifts: list[str | None] | None = None) -> Generator[Any, Any, None]:
+        """경유점을 따라 이동한다 (층이 바뀌는 점은 엘리베이터 탑승). 배터리가 바닥나면 BatteryDepleted."""
         self.route = list(points)
+        self.route_floors = list(floors) if floors is not None else [self.floor] * len(points)
+        self.route_lifts = list(lifts) if lifts is not None else [None] * len(points)
         while self.route:
             tx, ty = self.route[0]
+            lift = self.route_lifts[0]
+            if lift is not None and self.route_floors[0] != self.floor:
+                yield from self._ride_process(lift, tx, ty, self.route_floors[0])
+                self._pop_route()
+                continue
             dist_px = math.hypot(tx - self.x, ty - self.y)
             if dist_px < 1e-6:
-                self.route.pop(0)
+                self._pop_route()
                 continue
             speed_px = max(0.05, float(self.cfg.move_speed)) / config.METERS_PER_PIXEL
             duration = dist_px / speed_px
@@ -313,9 +379,9 @@ class Robot:
             yield self.env.timeout(duration * fraction)
             self._apply_segment(fraction)
             if fraction < 1.0:
-                self.route = []
+                self._clear_route()
                 raise BatteryDepleted()
-            self.route.pop(0)
+            self._pop_route()
 
     def _task_process(self) -> Generator[Any, Any, None]:
         """배정된 작업 1건을 수행한다: 이동 → 대기열 → 작업."""
@@ -326,7 +392,7 @@ class Robot:
         if station is None or not station.active:
             self._requeue_current()
             return
-        route = engine.path_graph.route_to_facility(self.x, self.y, station.id)
+        route = engine.path_graph.route_to_facility(self.x, self.y, station.id, self.floor)
         if route is None:
             self.current_task = None
             engine.report_unreachable(task, self)
@@ -334,7 +400,7 @@ class Robot:
             return
         self.target_id = station.id
         self._set_state(RobotState.MOVING)
-        yield from self._travel_process(route.points)
+        yield from self._travel_process(route.points, route.floors, route.lifts)
 
         self._set_state(RobotState.WAITING)
         with station.resource.request(priority=task.priority) as request:
@@ -362,7 +428,7 @@ class Robot:
         """충전소로 이동하여 목표 잔량까지 충전한다."""
         engine = self.engine
         charger = engine.scheduler.choose_charger(self, engine)
-        route = engine.path_graph.route_to_facility(self.x, self.y, charger.id) if charger else None
+        route = engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor) if charger else None
         if charger is None or route is None:
             self.forced_charge = False
             self._set_state(RobotState.IDLE)
@@ -372,7 +438,7 @@ class Robot:
         charger.incoming.add(self.robot_id)
         try:
             self._set_state(RobotState.MOVING)
-            yield from self._travel_process(route.points)
+            yield from self._travel_process(route.points, route.floors, route.lifts)
         finally:
             charger.incoming.discard(self.robot_id)
 

@@ -206,6 +206,7 @@ class _SimController(QObject):
             engine_kpis={mode: e.kpis() for mode, e in self._engines.items()},
             params=params,
             events=list(engine.timeline),
+            elevators=engine.elevator_snapshots(),
         )
         self.state_ready.emit(state)
 

@@ -1,42 +1,59 @@
-"""공장 시각화 (Factory Floor View).
+"""공장 층별 도면 (Floor Plan View).
 
-DB 구성(SimState.layout)으로 바닥·설비·장애물·경로망을 그리고, 매 스냅샷마다 로봇/설비 상태를 갱신한다.
+DB 구성(SimState.layout)으로 한 층의 바닥·설비·장애물·경로망을 그리고, 매 스냅샷마다 로봇/설비 상태를 갱신한다.
+층은 set_floor()로 바꾸며, 모든 층의 아이템을 한 씬에 두고 보이는 층만 켠다(층 전환이 즉시 이뤄진다).
+Ctrl+휠로 축척(1 : N)을 격자에 딱 떨어지는 단계(SCALE_RATIOS)로 바꿀 수 있다.
 레이아웃 버전이 바뀌면(핫리로드) 정적 요소를 다시 그린다.
 """
 
 from __future__ import annotations
 
-from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
-from PySide6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen, QResizeEvent
+import math
+
+from PySide6.QtCore import QPointF, QRectF, Qt, QTimer, Signal
+from PySide6.QtGui import (
+    QBrush,
+    QColor,
+    QFont,
+    QMouseEvent,
+    QPainter,
+    QPainterPath,
+    QPen,
+    QResizeEvent,
+    QTransform,
+    QWheelEvent,
+)
 from PySide6.QtWidgets import (
-    QCheckBox,
     QGraphicsItem,
     QGraphicsPathItem,
     QGraphicsRectItem,
     QGraphicsScene,
     QGraphicsView,
-    QHBoxLayout,
-    QLabel,
-    QVBoxLayout,
     QWidget,
 )
 
+import config
 from gui import constants as c
+from gui.widgets.elevator_item import ElevatorItem
 from gui.widgets.obstacle_item import ObstacleItem
 from gui.widgets.robot_item import RobotItem
 from gui.widgets.station_item import ChargerItem, StationItem
 from simulation.path_graph import PathGraph
 from simulation.state import RobotSnapshot, SimState
 from utils.config_models import FactoryConfig
-from utils.event_types import OrderStatus, SchedulerModeLabel
 
 SCENE_MARGIN: float = 30.0
 ROUTE_WIDTH: float = 1.6
 DASH_STEP: float = 1.0
+WHEEL_NOTCH: int = 120
+SCALE_BAR_CHOICES_M: tuple[float, ...] = (1, 2, 5, 10, 20, 50, 100, 200)
+SCALE_BAR_MIN_PX: float = 60.0
+SCALE_BAR_MAX_PX: float = 170.0
+RATIO_EPSILON: float = 1e-6
 
 
 def draw_grid(parent_scene: QGraphicsScene, factory: FactoryConfig) -> list[QGraphicsItem]:
-    """바닥과 격자를 그린다.
+    """바닥과 격자를 그린다 (모든 층의 바닥 크기가 같다).
 
     Args:
         parent_scene: 대상 씬
@@ -71,35 +88,43 @@ def draw_grid(parent_scene: QGraphicsScene, factory: FactoryConfig) -> list[QGra
     return [floor, grid_item]
 
 
-def build_network_item(factory: FactoryConfig) -> QGraphicsPathItem:
-    """경로망(노드 + 엣지) 아이템을 만든다. 장애물로 차단된 엣지는 제외된다.
+def build_network_items(factory: FactoryConfig) -> dict[int, QGraphicsPathItem]:
+    """층별 경로망(노드 + 엣지) 아이템을 만든다. 장애물로 차단된 엣지는 제외된다.
 
     Args:
         factory: 공장 구성
 
     Returns:
-        경로망 아이템
+        층 번호 → 경로망 아이템
     """
     graph = PathGraph(factory)
-    path = QPainterPath()
+    paths: dict[int, QPainterPath] = {floor: QPainterPath() for floor in range(1, factory.floor_count + 1)}
     for a, b, blocked in graph.edges:
-        if blocked:
+        path = paths.get(graph.node_floor[a])
+        if blocked or path is None:
             continue
         (ax, ay), (bx, by) = graph.nodes[a], graph.nodes[b]
         path.moveTo(ax, ay)
         path.lineTo(bx, by)
-    for x, y in graph.nodes.values():
-        path.addEllipse(QPointF(x, y), c.PATH_NODE_RADIUS, c.PATH_NODE_RADIUS)
-    item = QGraphicsPathItem(path)
+    for node, (x, y) in graph.nodes.items():
+        path = paths.get(graph.node_floor[node])
+        if path is not None:
+            path.addEllipse(QPointF(x, y), c.PATH_NODE_RADIUS, c.PATH_NODE_RADIUS)
+    items: dict[int, QGraphicsPathItem] = {}
     color = QColor(c.HIGHLIGHT)
     color.setAlpha(70)
-    item.setPen(QPen(color, 1.0))
-    item.setZValue(-5)
-    return item
+    for floor, path in paths.items():
+        item = QGraphicsPathItem(path)
+        item.setPen(QPen(color, 1.0))
+        item.setZValue(-5)
+        items[floor] = item
+    return items
 
 
 class FactoryView(QGraphicsView):
-    """공장 바닥 2D 뷰."""
+    """공장 한 층의 2D 도면. 층 전환·Ctrl+휠 축척·드래그 이동을 지원한다."""
+
+    scale_changed = Signal(float, bool)  # (축척 1:N 의 N, 맞춤 상태인지)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """뷰를 생성한다.
@@ -110,25 +135,33 @@ class FactoryView(QGraphicsView):
         super().__init__(parent)
         self._scene = QGraphicsScene(self)
         self.setScene(self._scene)
+        self.setFrameShape(QGraphicsView.Shape.NoFrame)
         self.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
         self.setBackgroundBrush(QBrush(QColor(c.BG)))
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.BoundingRectViewportUpdate)
+        self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
 
         self._layout: FactoryConfig | None = None
         self._layout_version = -1
+        self._floor = 1
         self._static_items: list[QGraphicsItem] = []
-        self._network_item: QGraphicsPathItem | None = None
+        self._obstacles: list[ObstacleItem] = []
+        self._network_items: dict[int, QGraphicsPathItem] = {}
         self._stations: dict[str, StationItem] = {}
         self._chargers: dict[str, ChargerItem] = {}
+        self._elevators: dict[str, ElevatorItem] = {}
         self._robots: dict[str, RobotItem] = {}
         self._routes: dict[str, QGraphicsPathItem] = {}
         self._last_robots: list[RobotSnapshot] = []
         self._show_network = True
+        self._fit_mode = True
+        self._wheel_accumulator = 0
         self._dash_offset = 0.0
         self._ticks = 0
         self._blink_on = False
+        self._apply_scrollbar_policy()
 
         self._anim_timer = QTimer(self)
         self._anim_timer.setInterval(c.ANIMATION_INTERVAL_MS)
@@ -136,8 +169,39 @@ class FactoryView(QGraphicsView):
         self._anim_timer.start()
 
     # ------------------------------------------------------------------
-    # 레이아웃
+    # 층 / 레이아웃
     # ------------------------------------------------------------------
+    @property
+    def floor(self) -> int:
+        """지금 보는 층 (1부터)."""
+        return self._floor
+
+    def set_floor(self, floor: int) -> None:
+        """보여 줄 층을 바꾼다.
+
+        Args:
+            floor: 층 번호 (1부터)
+        """
+        count = self._layout.floor_count if self._layout else 1
+        self._floor = max(1, min(count, floor))
+        self._apply_floor_visibility()
+        self._update_routes_for_floor()
+        self.viewport().update()
+
+    def _apply_floor_visibility(self) -> None:
+        """현재 층의 아이템만 보이게 한다."""
+        floor = self._floor
+        for item in self._obstacles:
+            item.setVisible(item.cfg.floor == floor)
+        for station in self._stations.values():
+            station.setVisible(station.cfg.floor == floor)
+        for charger in self._chargers.values():
+            charger.setVisible(charger.cfg.floor == floor)
+        for elevator in self._elevators.values():
+            elevator.set_view_floor(floor)
+        for number, item in self._network_items.items():
+            item.setVisible(self._show_network and number == floor)
+
     def set_layout(self, factory: FactoryConfig) -> None:
         """정적 레이아웃(바닥/설비/장애물/경로망)을 다시 그린다.
 
@@ -146,35 +210,47 @@ class FactoryView(QGraphicsView):
         """
         for item in self._static_items:
             self._scene.removeItem(item)
-        for item in [*self._stations.values(), *self._chargers.values()]:
+        for item in [*self._stations.values(), *self._chargers.values(), *self._elevators.values()]:
             self._scene.removeItem(item)
         self._static_items.clear()
+        self._obstacles.clear()
         self._stations.clear()
         self._chargers.clear()
+        self._elevators.clear()
         self._layout = factory
+        self._floor = max(1, min(factory.floor_count, self._floor))
 
         self._static_items += draw_grid(self._scene, factory)
         for obstacle in factory.obstacles:
-            item = ObstacleItem(obstacle)
+            obstacle_item = ObstacleItem(obstacle)
+            self._scene.addItem(obstacle_item)
+            self._static_items.append(obstacle_item)
+            self._obstacles.append(obstacle_item)
+        self._network_items = build_network_items(factory)
+        for item in self._network_items.values():
             self._scene.addItem(item)
             self._static_items.append(item)
-        self._network_item = build_network_item(factory)
-        self._network_item.setVisible(self._show_network)
-        self._scene.addItem(self._network_item)
-        self._static_items.append(self._network_item)
         for station in factory.stations:
-            item = StationItem(station)
-            self._scene.addItem(item)
-            self._stations[station.id] = item
+            station_item = StationItem(station)
+            self._scene.addItem(station_item)
+            self._stations[station.id] = station_item
         for charger in factory.chargers:
-            item = ChargerItem(charger)
-            self._scene.addItem(item)
-            self._chargers[charger.id] = item
+            charger_item = ChargerItem(charger)
+            self._scene.addItem(charger_item)
+            self._chargers[charger.id] = charger_item
+        for elevator in factory.elevators:
+            elevator_item = ElevatorItem(elevator)
+            self._scene.addItem(elevator_item)
+            self._elevators[elevator.id] = elevator_item
+        self._apply_floor_visibility()
 
         profile = factory.profile
         self._scene.setSceneRect(QRectF(-SCENE_MARGIN, -SCENE_MARGIN, profile.floor_width + 2 * SCENE_MARGIN,
                                         profile.floor_height + 2 * SCENE_MARGIN))
-        self._fit()
+        if self._fit_mode:
+            self.fit_to_view()
+        else:
+            self._emit_scale()
 
     def set_network_visible(self, visible: bool) -> None:
         """경로망 표시 토글.
@@ -183,8 +259,7 @@ class FactoryView(QGraphicsView):
             visible: 표시 여부
         """
         self._show_network = visible
-        if self._network_item is not None:
-            self._network_item.setVisible(visible)
+        self._apply_floor_visibility()
 
     # ------------------------------------------------------------------
     # 실시간 갱신
@@ -206,10 +281,14 @@ class FactoryView(QGraphicsView):
             item = self._chargers.get(snap.id)
             if item is not None:
                 item.apply_snapshot(snap)
+        for snap in state.elevators:
+            item = self._elevators.get(snap.id)
+            if item is not None:
+                item.apply_snapshot(snap)
         self._update_robots(state.robots)
 
     def _update_robots(self, robots: list[RobotSnapshot]) -> None:
-        """로봇 아이템과 이동 경로 점선을 갱신한다."""
+        """로봇 아이템과 이동 경로 점선을 갱신한다 (현재 층에 있는 로봇만 보인다)."""
         self._last_robots = robots
         alive = {r.id for r in robots}
         for robot_id in [rid for rid in self._robots if rid not in alive]:
@@ -226,16 +305,37 @@ class FactoryView(QGraphicsView):
                 self._robots[snap.id] = item
                 self._routes[snap.id] = route
             item.apply_snapshot(snap, self._blink_on)
+            item.setVisible(abs(snap.floor_pos - self._floor) < 0.5)
             self._update_route(self._routes[snap.id], snap, item)
 
+    def _update_routes_for_floor(self) -> None:
+        """층을 바꾼 직후 로봇/경로 표시를 마지막 스냅샷으로 다시 맞춘다."""
+        for snap in self._last_robots:
+            item = self._robots.get(snap.id)
+            if item is not None:
+                item.setVisible(abs(snap.floor_pos - self._floor) < 0.5)
+                self._update_route(self._routes[snap.id], snap, item)
+
     def _update_route(self, route_item: QGraphicsPathItem, snap: RobotSnapshot, robot_item: RobotItem) -> None:
-        """이동 경로 점선."""
+        """이동 경로 점선 (현재 층에 있는 구간만)."""
         if len(snap.route) < 2:
             route_item.setVisible(False)
             return
-        path = QPainterPath(QPointF(*snap.route[0]))
-        for x, y in snap.route[1:]:
-            path.lineTo(x, y)
+        floors = snap.route_floors if len(snap.route_floors) == len(snap.route) else [snap.floor] * len(snap.route)
+        path = QPainterPath()
+        pen_down = False
+        for (x, y), floor in zip(snap.route, floors):
+            if floor != self._floor:
+                pen_down = False
+                continue
+            if pen_down:
+                path.lineTo(x, y)
+            else:
+                path.moveTo(x, y)
+                pen_down = True
+        if path.elementCount() < 2:
+            route_item.setVisible(False)
+            return
         route_item.setPath(path)
         color = QColor(c.EMERGENCY_COLOR) if snap.emergency_order else QColor(robot_item.unique_color)
         color.setAlpha(190)
@@ -262,93 +362,146 @@ class FactoryView(QGraphicsView):
                     item.apply_snapshot(snap, self._blink_on)
 
     # ------------------------------------------------------------------
-    # 뷰
+    # 축척 (1 : N)
     # ------------------------------------------------------------------
-    def _fit(self) -> None:
-        """씬 전체가 보이도록 맞춘다."""
+    def _px_per_mm(self) -> float:
+        """화면 1mm가 차지하는 픽셀 수 (모니터 DPI 기준)."""
+        return max(1.0, float(self.logicalDpiX())) / c.MM_PER_INCH
+
+    def _scale_for_ratio(self, ratio: float) -> float:
+        """축척 1:ratio 에 해당하는 뷰 배율 (씬 1px → 화면 px)."""
+        return config.METERS_PER_PIXEL * 1000.0 * self._px_per_mm() / ratio
+
+    def current_ratio(self) -> float:
+        """지금의 축척 N (1 : N).
+
+        Returns:
+            실물 1 당 종이(화면)에 그려지는 크기의 역수
+        """
+        scale = max(1e-9, self.transform().m11())
+        return config.METERS_PER_PIXEL * 1000.0 * self._px_per_mm() / scale
+
+    def cell_size_text(self) -> str:
+        """격자 한 칸의 실제 크기와 종이(화면) 위 크기.
+
+        Returns:
+            "격자 1칸 = 5 m (화면 10 mm)" 형태의 문자열
+        """
+        cell = self._layout.profile.grid_cell_size if self._layout else config.DEFAULT_GRID_CELL_SIZE
+        meters = cell * config.METERS_PER_PIXEL
+        paper_mm = meters * 1000.0 / self.current_ratio()
+        return f"격자 1칸 = {meters:g} m (화면 {paper_mm:.1f} mm)"
+
+    def _emit_scale(self) -> None:
+        """축척이 바뀌었음을 알린다."""
+        self.scale_changed.emit(self.current_ratio(), self._fit_mode)
+        self.viewport().update()
+
+    def _apply_scrollbar_policy(self) -> None:
+        """맞춤 상태에서는 스크롤바를 숨기고, 확대하면 필요할 때만 보인다."""
+        policy = Qt.ScrollBarPolicy.ScrollBarAlwaysOff if self._fit_mode else Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        self.setHorizontalScrollBarPolicy(policy)
+        self.setVerticalScrollBarPolicy(policy)
+
+    def fit_to_view(self) -> None:
+        """도면 전체가 보이도록 맞춘다 (창 크기가 바뀌면 계속 맞춘다)."""
+        self._fit_mode = True
+        self._apply_scrollbar_policy()
         if not self._scene.sceneRect().isEmpty():
             self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        self._emit_scale()
+
+    def set_ratio(self, ratio: float, anchor_mouse: bool = False) -> None:
+        """축척을 1:ratio 로 정한다.
+
+        Args:
+            ratio: N (예: 500 → 1 : 500)
+            anchor_mouse: True면 마우스 아래 지점을 고정한 채 확대/축소한다
+        """
+        self._fit_mode = False
+        self._apply_scrollbar_policy()
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse if anchor_mouse
+                                     else QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        scale = self._scale_for_ratio(ratio)
+        self.setTransform(QTransform.fromScale(scale, scale))
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        self._emit_scale()
+
+    def zoom_step(self, direction: int, anchor_mouse: bool = False) -> None:
+        """축척을 한 단계(SCALE_RATIOS) 확대/축소한다.
+
+        Args:
+            direction: +1 확대(N이 작아짐), -1 축소
+            anchor_mouse: 마우스 아래 지점을 고정할지
+        """
+        now = self.current_ratio()
+        steps = sorted(c.SCALE_RATIOS)
+        if direction > 0:
+            lower = [n for n in steps if n < now - RATIO_EPSILON * now]
+            target = lower[-1] if lower else steps[0]
+        else:
+            higher = [n for n in steps if n > now + RATIO_EPSILON * now]
+            target = higher[0] if higher else steps[-1]
+        self.set_ratio(float(target), anchor_mouse)
+
+    def wheelEvent(self, event: QWheelEvent) -> None:  # noqa: N802 — Qt override
+        """Ctrl+휠: 축척 단계 변경 / Shift+휠: 좌우 이동 / 그 외: 상하 이동."""
+        modifiers = event.modifiers()
+        if modifiers & Qt.KeyboardModifier.ControlModifier:
+            self._wheel_accumulator += event.angleDelta().y()
+            while abs(self._wheel_accumulator) >= WHEEL_NOTCH:
+                step = 1 if self._wheel_accumulator > 0 else -1
+                self._wheel_accumulator -= step * WHEEL_NOTCH
+                self.zoom_step(step, anchor_mouse=True)
+            event.accept()
+            return
+        if modifiers & Qt.KeyboardModifier.ShiftModifier:
+            bar = self.horizontalScrollBar()
+            bar.setValue(bar.value() - event.angleDelta().y())
+            event.accept()
+            return
+        super().wheelEvent(event)
 
     def resizeEvent(self, event: QResizeEvent) -> None:  # noqa: N802 — Qt override
-        """크기 변경 시 다시 맞춘다."""
+        """맞춤 상태면 크기 변경 시 다시 맞춘다."""
         super().resizeEvent(event)
-        self._fit()
+        if self._fit_mode:
+            self.fit_to_view()
 
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:  # noqa: N802 — Qt override
+        """더블클릭: 맞춤."""
+        self.fit_to_view()
 
-class FactoryPanel(QWidget):
-    """공장 시각화 패널 (정보 칩 + 뷰)."""
+    def drawForeground(self, painter: QPainter, rect: QRectF) -> None:  # noqa: N802 — Qt override
+        """화면 고정 요소: 층 워터마크 + 축척 막대."""
+        painter.save()
+        painter.resetTransform()
+        view = self.viewport().rect()
+        font = QFont(self.font())
+        font.setPointSize(30)
+        font.setBold(True)
+        painter.setFont(font)
+        watermark = QColor(c.HIGHLIGHT)
+        watermark.setAlpha(46)
+        painter.setPen(watermark)
+        painter.drawText(QRectF(view.right() - 150, 8, 140, 52), Qt.AlignmentFlag.AlignRight, f"{self._floor}F")
+        self._draw_scale_bar(painter, view.left() + 14, view.bottom() - 16)
+        painter.restore()
 
-    def __init__(self, parent: QWidget | None = None) -> None:
-        """패널을 생성한다.
-
-        Args:
-            parent: 부모 위젯
-        """
-        super().__init__(parent)
-        self.setObjectName("Panel")
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
-
-        header = QHBoxLayout()
-        self._title = QLabel("🏭 공장 시각화", self)
-        self._title.setObjectName("PanelTitle")
-        header.addWidget(self._title)
-        header.addStretch(1)
-        self._network_toggle = QCheckBox("경로망", self)
-        self._network_toggle.setChecked(True)
-        header.addWidget(self._network_toggle)
-        layout.addLayout(header)
-
-        chips = QHBoxLayout()
-        chips.setSpacing(6)
-        self._sim_time = self._chip("Sim T+00:00:00")
-        self._wall = self._chip("경과 00:00")
-        self._orders = self._chip("활성 주문 0")
-        self._mode = self._chip("모드 -")
-        self._pending = self._chip("대기 작업 0")
-        for chip in (self._sim_time, self._wall, self._orders, self._pending, self._mode):
-            chips.addWidget(chip)
-        chips.addStretch(1)
-        layout.addLayout(chips)
-
-        self.view = FactoryView(self)
-        layout.addWidget(self.view, 1)
-
-        legend = QLabel(self._legend_text(), self)
-        legend.setObjectName("Muted")
-        legend.setTextFormat(Qt.TextFormat.RichText)
-        layout.addWidget(legend)
-        self._network_toggle.toggled.connect(self.view.set_network_visible)
-
-    def _chip(self, text: str) -> QLabel:
-        """정보 칩 라벨."""
-        label = QLabel(text, self)
-        label.setObjectName("InfoChip")
-        return label
-
-    @staticmethod
-    def _legend_text() -> str:
-        """로봇 상태 색상 범례."""
-        items = [("이동", "moving"), ("작업", "working"), ("충전", "charging"), ("대기", "idle"), ("고장", "fault")]
-        parts = [f"<span style='color:{c.ROBOT_STATE_COLORS[key]}'>●</span> {name}" for name, key in items]
-        parts.append(f"<span style='color:{c.EMERGENCY_COLOR}'>●</span> 긴급배정(깜빡임)")
-        return "&nbsp;&nbsp;".join(parts)
-
-    def update_state(self, state: SimState) -> None:
-        """스냅샷을 반영한다.
-
-        Args:
-            state: 시뮬레이션 상태
-        """
-        self._title.setText(f"🏭 공장 시각화 — {state.layout.profile.factory_name}")
-        seconds = int(state.sim_time)
-        self._sim_time.setText(f"Sim T+{seconds // 3600:02d}:{seconds % 3600 // 60:02d}:{seconds % 60:02d}")
-        wall = int(state.wall_elapsed)
-        self._wall.setText(f"경과 {wall // 60:02d}:{wall % 60:02d} · {state.speed}x")
-        active = sum(1 for o in state.orders if o.status in OrderStatus.ACTIVE)
-        self._orders.setText(f"활성 주문 {active}")
-        self._pending.setText(f"대기 작업 {state.pending_tasks}")
-        self._mode.setText(f"모드 {SchedulerModeLabel.LABELS.get(state.mode, state.mode)}")
-        self.view.update_state(state)
+    def _draw_scale_bar(self, painter: QPainter, x: float, y: float) -> None:
+        """실제 길이(m) 눈금이 있는 축척 막대와 1:N 표기."""
+        scale = max(1e-9, self.transform().m11())
+        px_per_m = scale / config.METERS_PER_PIXEL
+        meters = next((m for m in SCALE_BAR_CHOICES_M if SCALE_BAR_MIN_PX <= m * px_per_m <= SCALE_BAR_MAX_PX),
+                      SCALE_BAR_CHOICES_M[-1])
+        length = meters * px_per_m
+        color = QColor(c.TEXT)
+        painter.setPen(QPen(color, 1.6))
+        painter.drawLine(QPointF(x, y), QPointF(x + length, y))
+        for tick_x in (x, x + length / 2, x + length):
+            painter.drawLine(QPointF(tick_x, y - 4), QPointF(tick_x, y + 4))
+        font = QFont(self.font())
+        font.setPointSize(8)
+        painter.setFont(font)
+        painter.drawText(QRectF(x, y - 22, length + 150, 16), Qt.AlignmentFlag.AlignLeft,
+                         f"{meters:g} m   ·   1 : {math.floor(self.current_ratio() + 0.5)}")

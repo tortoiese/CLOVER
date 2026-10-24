@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import heapq
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import config
 from utils.config_models import FactoryConfig, ObstacleConfig
 
 WALL_HALF_THICKNESS: float = 4.0
@@ -20,10 +21,12 @@ Point = tuple[float, float]
 
 @dataclass(frozen=True)
 class Route:
-    """이동 경로."""
+    """이동 경로. floors[i] / lifts[i]는 points[i]에 도착했을 때의 층과, 그 점으로 올 때 탄 엘리베이터 ID."""
 
     points: list[Point]
     length: float  # px
+    floors: list[int] = field(default_factory=list)
+    lifts: list[str | None] = field(default_factory=list)
 
 
 def _segment_intersects_segment(p1: Point, p2: Point, q1: Point, q2: Point) -> bool:
@@ -102,7 +105,7 @@ def edge_blocked(p1: Point, p2: Point, obstacles: list[ObstacleConfig]) -> bool:
 
 
 class PathGraph:
-    """경로망 그래프."""
+    """층별 경로망 그래프. 층 사이는 엘리베이터 노드를 잇는 수직 엣지로만 이동한다."""
 
     def __init__(self, factory: FactoryConfig) -> None:
         """구성으로부터 그래프를 만든다.
@@ -111,17 +114,27 @@ class PathGraph:
             factory: 공장 구성
         """
         self.nodes: dict[int, Point] = {n.id: (n.x, n.y) for n in factory.nodes}
+        self.node_floor: dict[int, int] = {n.id: n.floor for n in factory.nodes}
+        self.floor_nodes: dict[int, list[int]] = {}
+        for node_id, floor in self.node_floor.items():
+            self.floor_nodes.setdefault(floor, []).append(node_id)
         self.adjacency: dict[int, list[tuple[int, float]]] = {n: [] for n in self.nodes}
-        self.edges: list[tuple[int, int, bool]] = []  # (a, b, blocked)
+        self.edges: list[tuple[int, int, bool]] = []  # (a, b, blocked) — 같은 층 안의 엣지만
+        self.lift_edges: dict[tuple[int, int], str] = {}  # (노드, 노드) → 엘리베이터 ID (양방향)
         self.facility_nodes: dict[str, int] = {}  # 설비 ID → 접근 노드 (노드 ID는 저장 전 음수 임시 ID일 수 있음)
         self._dist_cache: dict[int, tuple[dict[int, float], dict[int, int]]] = {}
         self.obstacles = list(factory.obstacles)
+        self.floor_obstacles: dict[int, list[ObstacleConfig]] = {}
+        for obstacle in factory.obstacles:
+            self.floor_obstacles.setdefault(obstacle.floor, []).append(obstacle)
 
         for edge in factory.edges:
             if edge.from_node not in self.nodes or edge.to_node not in self.nodes:
                 continue
+            if self.node_floor[edge.from_node] != self.node_floor[edge.to_node]:
+                continue
             a, b = self.nodes[edge.from_node], self.nodes[edge.to_node]
-            blocked = edge_blocked(a, b, factory.obstacles)
+            blocked = edge_blocked(a, b, self.floor_obstacles.get(self.node_floor[edge.from_node], []))
             self.edges.append((edge.from_node, edge.to_node, blocked))
             if blocked:
                 continue
@@ -130,27 +143,51 @@ class PathGraph:
             if edge.is_bidirectional:
                 self.adjacency[edge.to_node].append((edge.from_node, length))
 
-        linked = {n.linked_station_id: n.id for n in factory.nodes if n.linked_station_id}
-        facilities = [(s.id, s.x, s.y) for s in factory.stations] + [(c.id, c.x, c.y) for c in factory.chargers]
-        for facility_id, fx, fy in facilities:
+        self._link_elevators(factory)
+
+        linked = {n.linked_station_id: n.id for n in factory.nodes
+                  if n.linked_station_id and n.node_type != "elevator"}
+        facilities = [(s.id, s.x, s.y, s.floor) for s in factory.stations] + \
+            [(c.id, c.x, c.y, c.floor) for c in factory.chargers]
+        for facility_id, fx, fy, floor in facilities:
             node = linked.get(facility_id)
-            nearest = node if node is not None else self.nearest_node(fx, fy)
+            nearest = node if node is not None else self.nearest_node(fx, fy, floor)
             if nearest is not None:
                 self.facility_nodes[facility_id] = nearest
 
-    def nearest_node(self, x: float, y: float) -> int | None:
+    def _link_elevators(self, factory: FactoryConfig) -> None:
+        """엘리베이터 접근 노드를 인접한 층끼리 수직 엣지로 잇는다 (가동 중인 엘리베이터만)."""
+        for elevator in factory.elevators:
+            if not elevator.is_active:
+                continue
+            by_floor = {n.floor: n.id for n in factory.nodes
+                        if n.node_type == "elevator" and n.linked_station_id == elevator.id}
+            floors = sorted(by_floor)
+            hop_cost = (max(0.0, float(elevator.travel_time)) + config.ELEVATOR_BOARD_TIME) * config.ELEVATOR_PX_PER_SEC
+            for lower, upper in zip(floors, floors[1:]):
+                if upper - lower != 1:
+                    continue
+                a, b = by_floor[lower], by_floor[upper]
+                self.adjacency[a].append((b, hop_cost))
+                self.adjacency[b].append((a, hop_cost))
+                self.lift_edges[(a, b)] = elevator.id
+                self.lift_edges[(b, a)] = elevator.id
+
+    def nearest_node(self, x: float, y: float, floor: int | None = None) -> int | None:
         """좌표에서 가장 가까운 노드 (그래프가 비면 None).
 
         Args:
             x: X 좌표
             y: Y 좌표
+            floor: 이 층의 노드만 찾는다 (None이면 전체)
 
         Returns:
             노드 ID 또는 None
         """
-        if not self.nodes:
+        pool = list(self.nodes) if floor is None else self.floor_nodes.get(floor, [])
+        if not pool:
             return None
-        return min(self.nodes, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
+        return min(pool, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
 
     def _dijkstra(self, source: int) -> tuple[dict[int, float], dict[int, int]]:
         """단일 출발 Dijkstra (결과 캐시)."""
@@ -194,13 +231,16 @@ class PathGraph:
         path.reverse()
         return path, dist[target]
 
-    def route_to_facility(self, x: float, y: float, facility_id: str) -> Route | None:
-        """현재 위치에서 설비 접근 노드까지 경로.
+    def route_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> Route | None:
+        """현재 위치에서 설비 접근 노드까지 경로. 다른 층이면 엘리베이터를 경유한다.
+
+        연속된 같은 엘리베이터 구간은 한 번의 탑승(마지막 층 도착점)으로 합쳐진다.
 
         Args:
             x: 현재 X
             y: 현재 Y
             facility_id: 스테이션/충전소 ID
+            floor: 현재 층
 
         Returns:
             Route 또는 도달 불가 시 None
@@ -208,26 +248,37 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return None
-        start = self._accessible_start(x, y, target)
+        start = self._accessible_start(x, y, floor, target)
         if start is None:
             return None
         result = self.shortest_path(start, target)
         if result is None:
             return None
         nodes, length = result
-        points = [self.nodes[n] for n in nodes]
+        points: list[Point] = []
+        floors: list[int] = []
+        lifts: list[str | None] = []
+        for prev_node, node in zip([None, *nodes[:-1]], nodes):
+            lift = self.lift_edges.get((prev_node, node)) if prev_node is not None else None
+            if lift is not None and lifts and lifts[-1] == lift:
+                points[-1], floors[-1] = self.nodes[node], self.node_floor[node]
+                continue
+            points.append(self.nodes[node])
+            floors.append(self.node_floor[node])
+            lifts.append(lift)
         start_gap = math.hypot(points[0][0] - x, points[0][1] - y)
-        if start_gap < 1e-6:
-            points = points[1:]
-        return Route(points=points, length=length + start_gap)
+        if start_gap < 1e-6 and lifts[0] is None:
+            points, floors, lifts = points[1:], floors[1:], lifts[1:]
+        return Route(points=points, length=length + start_gap, floors=floors, lifts=lifts)
 
-    def distance_to_facility(self, x: float, y: float, facility_id: str) -> float:
-        """현재 위치에서 설비까지의 경로 거리 (도달 불가 시 inf).
+    def distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> float:
+        """현재 위치에서 설비까지의 경로 거리 (도달 불가 시 inf). 엘리베이터 이동은 환산 거리로 더해진다.
 
         Args:
             x: 현재 X
             y: 현재 Y
             facility_id: 스테이션/충전소 ID
+            floor: 현재 층
 
         Returns:
             거리 (px)
@@ -235,7 +286,7 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return math.inf
-        start = self._accessible_start(x, y, target)
+        start = self._accessible_start(x, y, floor, target)
         if start is None:
             return math.inf
         dist, _ = self._dijkstra(start)
@@ -244,11 +295,13 @@ class PathGraph:
         sx, sy = self.nodes[start]
         return dist[target] + math.hypot(sx - x, sy - y)
 
-    def _accessible_start(self, x: float, y: float, target: int) -> int | None:
-        """장애물 없이 연결할 수 있고 목적지에 도달 가능한 최근접 노드를 반환한다."""
-        candidates = sorted(self.nodes, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
+    def _accessible_start(self, x: float, y: float, floor: int, target: int) -> int | None:
+        """같은 층에서 장애물 없이 연결할 수 있고 목적지에 도달 가능한 최근접 노드를 반환한다."""
+        pool = self.floor_nodes.get(floor, [])
+        obstacles = self.floor_obstacles.get(floor, [])
+        candidates = sorted(pool, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
         for node in candidates:
-            if edge_blocked((x, y), self.nodes[node], self.obstacles):
+            if edge_blocked((x, y), self.nodes[node], obstacles):
                 continue
             distances, _ = self._dijkstra(node)
             if target in distances:
@@ -267,6 +320,18 @@ class PathGraph:
         node = self.facility_nodes.get(facility_id)
         return self.nodes.get(node) if node is not None else None
 
+    def facility_floor(self, facility_id: str) -> int | None:
+        """설비 접근 노드가 있는 층.
+
+        Args:
+            facility_id: 설비 ID
+
+        Returns:
+            층 번호 또는 None
+        """
+        node = self.facility_nodes.get(facility_id)
+        return self.node_floor.get(node) if node is not None else None
+
 
 if __name__ == "__main__":
     from database.seed_data import build_default_config
@@ -275,4 +340,4 @@ if __name__ == "__main__":
     graph = PathGraph(default)
     blocked = sum(1 for e in graph.edges if e[2])
     print(f"nodes={len(graph.nodes)} edges={len(graph.edges)} blocked={blocked}")
-    print("WS-01 → WS-05:", graph.route_to_facility(100, 150, "WS-05"))
+    print("WS-01 → WS-05:", graph.route_to_facility(100, 150, "WS-05", 1))

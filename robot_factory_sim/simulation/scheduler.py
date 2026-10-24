@@ -131,11 +131,12 @@ class BaselineScheduler(BaseScheduler):
         return config.FULL_CHARGE_LEVEL
 
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
-        """직선 거리 기준 가장 가까운 충전소 (대기열 무시)."""
+        """같은 층을 우선하고 직선 거리가 가장 가까운 충전소 (대기열 무시)."""
         chargers = [c for c in engine.chargers.values() if c.active]
         if not chargers:
             return None
-        return min(chargers, key=lambda c: math.hypot(c.cfg.x - robot.x, c.cfg.y - robot.y))
+        return min(chargers, key=lambda c: (abs(c.cfg.floor - robot.floor),
+                                            math.hypot(c.cfg.x - robot.x, c.cfg.y - robot.y)))
 
 
 class OptimizedScheduler(BaseScheduler):
@@ -180,7 +181,8 @@ class OptimizedScheduler(BaseScheduler):
         station = engine.stations[station_id]
         sx, sy = station.cfg.x, station.cfg.y
         back = min(
-            (engine.path_graph.distance_to_facility(sx, sy, c.id) for c in engine.chargers.values() if c.active),
+            (engine.path_graph.distance_to_facility(sx, sy, c.id, station.cfg.floor)
+             for c in engine.chargers.values() if c.active),
             default=0.0,
         )
         back = 0.0 if math.isinf(back) else back
@@ -207,7 +209,7 @@ class OptimizedScheduler(BaseScheduler):
             for robot in free:
                 reserve = robot.capacity * config.BATTERY_RESERVE / 100.0
                 for station_id in candidates:
-                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id)
+                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id, robot.floor)
                     if math.isinf(distance):
                         continue
                     if robot.battery - self._energy_needed(robot, engine, station_id, distance) < reserve:
@@ -267,7 +269,8 @@ class OptimizedScheduler(BaseScheduler):
             and r.battery_pct > config.RECALL_MIN_BATTERY
         ]
         if victims:
-            victim = min(victims, key=lambda r: engine.path_graph.distance_to_facility(r.x, r.y, task.station_id))
+            victim = min(
+                victims, key=lambda r: engine.path_graph.distance_to_facility(r.x, r.y, task.station_id, r.floor))
             engine.preempt(victim, task)
 
     # ------------------------------------------------------------------
@@ -296,7 +299,7 @@ class OptimizedScheduler(BaseScheduler):
         for charger in engine.chargers.values():
             if not charger.active:
                 continue
-            distance = engine.path_graph.distance_to_facility(robot.x, robot.y, charger.id)
+            distance = engine.path_graph.distance_to_facility(robot.x, robot.y, charger.id, robot.floor)
             if math.isinf(distance):
                 continue
             ahead = len(charger.occupants) + charger.waiting + len(charger.incoming)

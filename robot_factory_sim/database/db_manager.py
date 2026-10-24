@@ -22,6 +22,7 @@ from typing import Any
 import config
 from utils.config_models import (
     ChargingStationConfig,
+    ElevatorConfig,
     FactoryConfig,
     FactoryProfile,
     ObstacleConfig,
@@ -33,20 +34,24 @@ from utils.config_models import (
 )
 from utils.event_types import ChangeType, OrderStatus, Tables
 
-SCHEMA_VERSION: int = 2
+SCHEMA_VERSION: int = 3
 
 # 마이그레이션: 기존 DB에 누락된 컬럼을 ALTER TABLE ADD COLUMN 으로 보충한다.
 _MIGRATION_COLUMNS: dict[str, dict[str, str]] = {
+    Tables.FACTORY_PROFILE: {"floor_count": "INTEGER DEFAULT 1"},
     Tables.WORK_STATIONS: {
         "width": "REAL DEFAULT 80",
         "height": "REAL DEFAULT 60",
         "process_time_std": "REAL DEFAULT 1.0",
         "is_active": "INTEGER DEFAULT 1",
+        "floor": "INTEGER DEFAULT 1",
     },
-    Tables.CHARGING_STATIONS: {"charge_rate": "REAL DEFAULT 2.0", "is_active": "INTEGER DEFAULT 1"},
+    Tables.CHARGING_STATIONS: {
+        "charge_rate": "REAL DEFAULT 2.0", "is_active": "INTEGER DEFAULT 1", "floor": "INTEGER DEFAULT 1",
+    },
     Tables.ROBOTS: {"charge_threshold": "REAL DEFAULT 20", "is_active": "INTEGER DEFAULT 1"},
-    Tables.OBSTACLES: {"is_passable": "INTEGER DEFAULT 0", "label": "TEXT"},
-    Tables.PATH_NODES: {"linked_station_id": "TEXT"},
+    Tables.OBSTACLES: {"is_passable": "INTEGER DEFAULT 0", "label": "TEXT", "floor": "INTEGER DEFAULT 1"},
+    Tables.PATH_NODES: {"linked_station_id": "TEXT", "floor": "INTEGER DEFAULT 1"},
     Tables.ORDERS: {"required_stations": "TEXT", "completed": "INTEGER DEFAULT 0"},
 }
 
@@ -65,12 +70,18 @@ class _TableSpec:
 _SPECS: dict[str, _TableSpec] = {
     Tables.WORK_STATIONS: _TableSpec(
         Tables.WORK_STATIONS, WorkStationConfig,
-        ("label", "x", "y", "width", "height", "task_type", "avg_process_time", "process_time_std", "is_active"),
+        ("label", "x", "y", "width", "height", "task_type", "avg_process_time", "process_time_std", "is_active",
+         "floor"),
         frozenset({"is_active"}), False,
     ),
     Tables.CHARGING_STATIONS: _TableSpec(
         Tables.CHARGING_STATIONS, ChargingStationConfig,
-        ("x", "y", "capacity", "charge_rate", "is_active"),
+        ("x", "y", "capacity", "charge_rate", "is_active", "floor"),
+        frozenset({"is_active"}), False,
+    ),
+    Tables.ELEVATORS: _TableSpec(
+        Tables.ELEVATORS, ElevatorConfig,
+        ("label", "x", "y", "width", "height", "travel_time", "capacity", "is_active"),
         frozenset({"is_active"}), False,
     ),
     Tables.ROBOTS: _TableSpec(
@@ -80,12 +91,12 @@ _SPECS: dict[str, _TableSpec] = {
     ),
     Tables.OBSTACLES: _TableSpec(
         Tables.OBSTACLES, ObstacleConfig,
-        ("obstacle_type", "x1", "y1", "x2", "y2", "is_passable", "label"),
+        ("obstacle_type", "x1", "y1", "x2", "y2", "is_passable", "label", "floor"),
         frozenset({"is_passable"}), True,
     ),
     Tables.PATH_NODES: _TableSpec(
         Tables.PATH_NODES, PathNodeConfig,
-        ("x", "y", "node_type", "linked_station_id"),
+        ("x", "y", "node_type", "linked_station_id", "floor"),
         frozenset(), True,
     ),
     Tables.PATH_EDGES: _TableSpec(
@@ -347,6 +358,8 @@ class DBManager:
     def _row_to_model(spec: _TableSpec, row: dict[str, Any]) -> Any:
         """DB 행을 dataclass로 변환한다."""
         values = {c: row.get(c) for c in spec.columns}
+        if "floor" in values:
+            values["floor"] = int(values["floor"] or 1)
         for column in spec.bool_columns:
             values[column] = bool(values[column]) if values[column] is not None else True
         return spec.model(id=row["id"], **values)
@@ -458,17 +471,18 @@ class DBManager:
             floor_width=row["floor_width"] or config.DEFAULT_FLOOR_WIDTH,
             floor_height=row["floor_height"] or config.DEFAULT_FLOOR_HEIGHT,
             grid_cell_size=row["grid_cell_size"] or config.DEFAULT_GRID_CELL_SIZE,
+            floor_count=max(1, int(row.get("floor_count") or config.DEFAULT_FLOOR_COUNT)),
         )
 
     def _save_profile_in(self, conn: sqlite3.Connection, profile: FactoryProfile, changed_by: str) -> bool:
         """트랜잭션 내부 공장 정보 upsert."""
-        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size")
+        columns = ("factory_name", "floor_width", "floor_height", "grid_cell_size", "floor_count")
         values = {c: getattr(profile, c) for c in columns}
         old = conn.execute("SELECT * FROM factory_profile WHERE id = ?", (profile.id,)).fetchone()
         if old is None:
             conn.execute(
-                "INSERT INTO factory_profile(id, factory_name, floor_width, floor_height, grid_cell_size) "
-                "VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO factory_profile(id, factory_name, floor_width, floor_height, grid_cell_size, floor_count) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
                 (profile.id, *values.values()),
             )
             self._log_change(conn, Tables.FACTORY_PROFILE, str(profile.id), ChangeType.INSERT, None, values,
@@ -479,7 +493,7 @@ class DBManager:
             return False
         conn.execute(
             "UPDATE factory_profile SET factory_name = ?, floor_width = ?, floor_height = ?, grid_cell_size = ?, "
-            "updated_at = ? WHERE id = ?",
+            "floor_count = ?, updated_at = ? WHERE id = ?",
             (*values.values(), _now_str(), profile.id),
         )
         self._log_change(conn, Tables.FACTORY_PROFILE, str(profile.id), ChangeType.UPDATE, old_values, values,
@@ -513,6 +527,7 @@ class DBManager:
             obstacles=self.list_records(Tables.OBSTACLES),
             nodes=self.list_records(Tables.PATH_NODES),
             edges=self.list_records(Tables.PATH_EDGES),
+            elevators=self.list_records(Tables.ELEVATORS),
         )
 
     def save_factory_config(self, factory: FactoryConfig, changed_by: str = "config_editor") -> int:
@@ -533,6 +548,7 @@ class DBManager:
             for table, items in (
                 (Tables.WORK_STATIONS, factory.stations),
                 (Tables.CHARGING_STATIONS, factory.chargers),
+                (Tables.ELEVATORS, factory.elevators),
                 (Tables.ROBOTS, factory.robots),
                 (Tables.OBSTACLES, factory.obstacles),
             ):

@@ -1,5 +1,6 @@
 """공장 설정 에디터 (Factory Configurator).
 
+- 층 선택 콤보로 한 층씩 편집 (층 수는 공장 정보에서 설정, 엘리베이터는 모든 층의 같은 자리를 관통)
 - 팔레트 → 공장 바닥 드래그 앤 드롭 배치, 아이템 드래그 이동 (격자 스냅)
 - 속성 패널: 선택한 설비의 좌표/크기/처리시간/충전 슬롯 등 편집
 - 경로 편집 모드: 빈 곳 클릭 = 노드 추가, 노드 두 개 연속 클릭 = 엣지 연결, 우클릭 = 삭제
@@ -14,7 +15,7 @@ from collections.abc import Callable
 from typing import Any
 
 from PySide6.QtCore import QMimeData, QPointF, Qt, Signal
-from PySide6.QtGui import QBrush, QColor, QDragEnterEvent, QDragMoveEvent, QDropEvent, QKeyEvent, QMouseEvent, \
+from PySide6.QtGui import QBrush, QColor, QDragEnterEvent, QDragMoveEvent, QDropEvent, QFont, QKeyEvent, QMouseEvent, \
     QPainter, QPen
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -28,6 +29,7 @@ from PySide6.QtWidgets import (
     QGraphicsItem,
     QGraphicsLineItem,
     QGraphicsScene,
+    QGraphicsSimpleTextItem,
     QGraphicsView,
     QGroupBox,
     QHBoxLayout,
@@ -52,12 +54,14 @@ from PySide6.QtWidgets import (
 import config
 from gui import constants as c
 from gui.factory_view import draw_grid
+from gui.widgets.elevator_item import ElevatorItem
 from gui.widgets.obstacle_item import ObstacleItem
 from gui.widgets.station_item import ChargerItem, StationItem
 from simulation.factory_service import FactoryService
 from simulation.path_graph import edge_blocked
 from utils.config_models import (
     ChargingStationConfig,
+    ElevatorConfig,
     FactoryConfig,
     ObstacleConfig,
     PathEdgeConfig,
@@ -136,6 +140,23 @@ class EditableCharger(ChargerItem, _EditableBehavior):
 
         Args:
             cfg: 충전소 설정
+        """
+        super().__init__(cfg)
+        _make_editable(self)
+
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:  # noqa: N802
+        """이동 처리."""
+        return super().itemChange(change, self.handle_change(self, change, value))
+
+
+class EditableElevator(ElevatorItem, _EditableBehavior):
+    """편집용 엘리베이터 (모든 층에 같은 자리로 보인다)."""
+
+    def __init__(self, cfg: ElevatorConfig) -> None:
+        """아이템 생성.
+
+        Args:
+            cfg: 엘리베이터 설정
         """
         super().__init__(cfg)
         _make_editable(self)
@@ -225,6 +246,9 @@ class EdgeItem(QGraphicsLineItem):
         self.setToolTip("장애물로 차단된 엣지" if blocked else f"엣지 {self.edge.from_node} ↔ {self.edge.to_node}")
 
 
+_EDITABLE_ITEMS = (EditableStation, EditableCharger, EditableElevator, EditableObstacle)
+
+
 class PaletteList(QListWidget):
     """드래그 가능한 설비 팔레트."""
 
@@ -299,15 +323,14 @@ class EditorView(QGraphicsView):
         """경로 모드 클릭 / 우클릭 삭제."""
         item = self.itemAt(event.position().toPoint())
         if event.button() == Qt.MouseButton.RightButton:
-            if item is not None and isinstance(item, (NodeItem, EdgeItem, EditableStation, EditableCharger,
-                                                      EditableObstacle)):
+            if item is not None and isinstance(item, (NodeItem, EdgeItem, *_EDITABLE_ITEMS)):
                 self.delete_requested.emit([item])
             return
         if self.mode == MODE_PATH and event.button() == Qt.MouseButton.LeftButton:
             if isinstance(item, NodeItem):
                 self.node_clicked.emit(item)
                 return
-            if not isinstance(item, (EdgeItem, EditableStation, EditableCharger, EditableObstacle)):
+            if not isinstance(item, (EdgeItem, *_EDITABLE_ITEMS)):
                 self.empty_clicked.emit(self.mapToScene(event.position().toPoint()))
                 return
         super().mousePressEvent(event)
@@ -351,9 +374,11 @@ class ConfigEditorDialog(QDialog):
         self._factory = FactoryConfig()
         self._station_items: dict[str, EditableStation] = {}
         self._charger_items: dict[str, EditableCharger] = {}
+        self._elevator_items: dict[str, EditableElevator] = {}
         self._obstacle_items: list[EditableObstacle] = []
         self._node_items: dict[int, NodeItem] = {}
         self._edge_items: list[EdgeItem] = []
+        self._floor = 1
         self._pending_node: NodeItem | None = None
         self._selected: QGraphicsItem | None = None
         self._loading = False
@@ -383,10 +408,15 @@ class ConfigEditorDialog(QDialog):
             toolbar.addWidget(button)
         self._mode_group.buttons()[0].setChecked(True)
         self._mode_group.buttonClicked.connect(lambda b: self._set_mode(str(b.property("mode"))))
+        toolbar.addWidget(QLabel("  편집 층", self))
+        self._floor_combo = QComboBox(self)
+        self._floor_combo.setToolTip("한 번에 한 층씩 편집합니다. 엘리베이터는 모든 층에 함께 보입니다.")
+        self._floor_combo.currentIndexChanged.connect(self._on_floor_selected)
+        toolbar.addWidget(self._floor_combo)
         self._snap = QCheckBox("격자 스냅", self)
         self._snap.setChecked(True)
         toolbar.addWidget(self._snap)
-        grid_button = QPushButton("격자 경로망 자동 생성", self)
+        grid_button = QPushButton("이 층 격자 경로망 생성", self)
         grid_button.clicked.connect(self._generate_grid_network)
         toolbar.addWidget(grid_button)
         delete_button = QPushButton("선택 삭제", self)
@@ -464,13 +494,18 @@ class ConfigEditorDialog(QDialog):
         self._p_height = _spin(step=50)
         self._p_grid = _spin(maximum=500, step=5)
         self._p_grid.setMinimum(10)
+        self._p_floors = QSpinBox(profile_group)
+        self._p_floors.setRange(1, config.MAX_FLOOR_COUNT)
+        self._p_floors.setKeyboardTracking(False)
         profile_form.addRow("공장 이름", self._p_name)
+        profile_form.addRow("층 수", self._p_floors)
         profile_form.addRow("바닥 너비 (px)", self._p_width)
         profile_form.addRow("바닥 높이 (px)", self._p_height)
         profile_form.addRow("격자 크기 (px)", self._p_grid)
         self._p_name.editingFinished.connect(self._on_profile_edited)
         for spin in (self._p_width, self._p_height, self._p_grid):
             spin.valueChanged.connect(self._on_profile_edited)
+        self._p_floors.valueChanged.connect(self._on_floor_count_edited)
         layout.addWidget(profile_group)
 
         self._props = QStackedWidget(box)
@@ -482,6 +517,7 @@ class ConfigEditorDialog(QDialog):
         self._props.addWidget(self._build_charger_form())
         self._props.addWidget(self._build_obstacle_form())
         self._props.addWidget(self._build_node_form())
+        self._props.addWidget(self._build_elevator_form())
         group = QGroupBox("선택 항목 속성", box)
         group_layout = QVBoxLayout(group)
         group_layout.addWidget(self._props)
@@ -501,7 +537,8 @@ class ConfigEditorDialog(QDialog):
         self._s_time = _spin(maximum=600, decimals=2, step=0.5)
         self._s_std = _spin(maximum=120, decimals=2, step=0.1)
         self._s_active = QCheckBox("가동 (해제 = 고장/비활성)", page)
-        for label, widget in (("ID", self._s_id), ("라벨", self._s_label), ("X (중심)", self._s_x),
+        self._s_floor = self._floor_spin(page)
+        for label, widget in (("ID", self._s_id), ("층", self._s_floor), ("라벨", self._s_label), ("X (중심)", self._s_x),
                               ("Y (중심)", self._s_y), ("너비", self._s_w), ("높이", self._s_h), ("공정", self._s_type),
                               ("평균 처리시간 (s)", self._s_time), ("처리시간 표준편차", self._s_std), ("", self._s_active)):
             form.addRow(label, widget)
@@ -510,6 +547,7 @@ class ConfigEditorDialog(QDialog):
             spin.valueChanged.connect(self._apply_station_form)
         self._s_type.currentTextChanged.connect(self._apply_station_form)
         self._s_active.toggled.connect(self._apply_station_form)
+        self._s_floor.valueChanged.connect(self._apply_station_form)
         return page
 
     def _build_charger_form(self) -> QWidget:
@@ -524,13 +562,15 @@ class ConfigEditorDialog(QDialog):
         self._c_rate = _spin(maximum=50, decimals=2, step=0.5)
         self._c_rate.setMinimum(0.1)
         self._c_active = QCheckBox("가동", page)
-        for label, widget in (("ID", self._c_id), ("X (중심)", self._c_x), ("Y (중심)", self._c_y),
+        self._c_floor = self._floor_spin(page)
+        for label, widget in (("ID", self._c_id), ("층", self._c_floor), ("X (중심)", self._c_x), ("Y (중심)", self._c_y),
                               ("충전 슬롯 수", self._c_capacity), ("충전 속도 (/s)", self._c_rate), ("", self._c_active)):
             form.addRow(label, widget)
         for spin in (self._c_x, self._c_y, self._c_rate):
             spin.valueChanged.connect(self._apply_charger_form)
         self._c_capacity.valueChanged.connect(self._apply_charger_form)
         self._c_active.toggled.connect(self._apply_charger_form)
+        self._c_floor.valueChanged.connect(self._apply_charger_form)
         return page
 
     def _build_obstacle_form(self) -> QWidget:
@@ -542,7 +582,9 @@ class ConfigEditorDialog(QDialog):
         self._o_x1, self._o_y1, self._o_x2, self._o_y2 = _spin(), _spin(), _spin(), _spin()
         self._o_passable = QCheckBox("통과 가능 (문)", page)
         self._o_label = QLineEdit(page)
-        for label, widget in (("종류", self._o_type), ("X1", self._o_x1), ("Y1", self._o_y1), ("X2", self._o_x2),
+        self._o_floor = self._floor_spin(page)
+        for label, widget in (("층", self._o_floor), ("종류", self._o_type), ("X1", self._o_x1), ("Y1", self._o_y1),
+                              ("X2", self._o_x2),
                               ("Y2", self._o_y2), ("", self._o_passable), ("라벨", self._o_label)):
             form.addRow(label, widget)
         self._o_type.currentTextChanged.connect(self._apply_obstacle_form)
@@ -550,6 +592,42 @@ class ConfigEditorDialog(QDialog):
             spin.valueChanged.connect(self._apply_obstacle_form)
         self._o_passable.toggled.connect(self._apply_obstacle_form)
         self._o_label.editingFinished.connect(self._apply_obstacle_form)
+        self._o_floor.valueChanged.connect(self._apply_obstacle_form)
+        return page
+
+    @staticmethod
+    def _floor_spin(parent: QWidget) -> QSpinBox:
+        """층 번호 스핀박스 (최대값은 폼을 채울 때 현재 층 수로 맞춘다)."""
+        spin = QSpinBox(parent)
+        spin.setRange(1, config.MAX_FLOOR_COUNT)
+        spin.setKeyboardTracking(False)
+        return spin
+
+    def _build_elevator_form(self) -> QWidget:
+        """엘리베이터 속성 폼."""
+        page = QWidget(self)
+        form = QFormLayout(page)
+        self._e_id = QLabel(page)
+        self._e_label = QLineEdit(page)
+        self._e_x, self._e_y = _spin(), _spin()
+        self._e_w, self._e_h = _spin(maximum=400), _spin(maximum=400)
+        self._e_time = _spin(maximum=120, decimals=1, step=0.5)
+        self._e_capacity = QSpinBox(page)
+        self._e_capacity.setRange(1, 10)
+        self._e_capacity.setKeyboardTracking(False)
+        self._e_active = QCheckBox("운행 (해제 = 운행 중지)", page)
+        note = QLabel("모든 층의 같은 위치를 관통합니다.", page)
+        note.setObjectName("Muted")
+        for label, widget in (("ID", self._e_id), ("라벨", self._e_label), ("X (중심)", self._e_x),
+                              ("Y (중심)", self._e_y), ("너비", self._e_w), ("높이", self._e_h),
+                              ("한 층 이동 (s)", self._e_time), ("동시 탑승", self._e_capacity),
+                              ("", self._e_active), ("", note)):
+            form.addRow(label, widget)
+        self._e_label.editingFinished.connect(self._apply_elevator_form)
+        for spin in (self._e_x, self._e_y, self._e_w, self._e_h, self._e_time):
+            spin.valueChanged.connect(self._apply_elevator_form)
+        self._e_capacity.valueChanged.connect(self._apply_elevator_form)
+        self._e_active.toggled.connect(self._apply_elevator_form)
         return page
 
     def _build_node_form(self) -> QWidget:
@@ -602,24 +680,42 @@ class ConfigEditorDialog(QDialog):
         self._loading = True
         profile = self._factory.profile
         self._p_name.setText(profile.factory_name)
+        self._floor = max(1, min(self._factory.floor_count, self._floor))
         for spin, value in ((self._p_width, profile.floor_width), (self._p_height, profile.floor_height),
-                            (self._p_grid, profile.grid_cell_size)):
+                            (self._p_grid, profile.grid_cell_size), (self._p_floors, self._factory.floor_count)):
             spin.blockSignals(True)
             spin.setValue(value)
             spin.blockSignals(False)
         self._fill_robot_table()
+        self._rebuild_floor_combo()
         self._loading = False
         self._rebuild_scene()
         self._dirty = False
         self._update_status()
 
+    def _rebuild_floor_combo(self) -> None:
+        """층 수에 맞게 편집 층 콤보를 다시 채운다."""
+        self._floor_combo.blockSignals(True)
+        self._floor_combo.clear()
+        self._floor_combo.addItems([f"{n}F" for n in range(1, self._factory.floor_count + 1)])
+        self._floor_combo.setCurrentIndex(self._floor - 1)
+        self._floor_combo.blockSignals(False)
+
+    def _on_floor_selected(self, index: int) -> None:
+        """편집 층 변경 → 그 층의 설비만 씬에 다시 그린다."""
+        if index < 0 or self._loading or index + 1 == self._floor:
+            return
+        self._floor = index + 1
+        self._rebuild_scene()
+
     def _rebuild_scene(self) -> None:
-        """모델 전체로 씬을 다시 그린다."""
+        """모델 중 현재 편집 층의 항목(과 엘리베이터)으로 씬을 다시 그린다."""
         self._scene.blockSignals(True)
         self._scene.clear()
         self._scene.blockSignals(False)
         self._station_items.clear()
         self._charger_items.clear()
+        self._elevator_items.clear()
         self._obstacle_items.clear()
         self._node_items.clear()
         self._edge_items.clear()
@@ -628,14 +724,30 @@ class ConfigEditorDialog(QDialog):
         self._props.setCurrentIndex(0)
 
         draw_grid(self._scene, self._factory)
+        watermark = QGraphicsSimpleTextItem(f"{self._floor}F")
+        font = QFont()
+        font.setPointSize(54)
+        font.setBold(True)
+        watermark.setFont(font)
+        watermark.setBrush(QColor(c.HIGHLIGHT).darker(250))
+        watermark.setPos(14, 6)
+        watermark.setZValue(-8)
+        self._scene.addItem(watermark)
+        floor = self._floor
         for obstacle in self._factory.obstacles:
-            self._add_obstacle_item(obstacle)
+            if obstacle.floor == floor:
+                self._add_obstacle_item(obstacle)
         for station in self._factory.stations:
-            self._add_station_item(station)
+            if station.floor == floor:
+                self._add_station_item(station)
         for charger in self._factory.chargers:
-            self._add_charger_item(charger)
+            if charger.floor == floor:
+                self._add_charger_item(charger)
+        for elevator in self._factory.elevators:
+            self._add_elevator_item(elevator)
         for node in self._factory.nodes:
-            self._add_node_item(node)
+            if node.floor == floor:
+                self._add_node_item(node)
         self._rebuild_edges()
         profile = self._factory.profile
         margin = 40.0
@@ -662,6 +774,14 @@ class ConfigEditorDialog(QDialog):
         self._charger_items[cfg.id] = item
         return item
 
+    def _add_elevator_item(self, cfg: ElevatorConfig) -> EditableElevator:
+        """엘리베이터 아이템 추가."""
+        item = EditableElevator(cfg)
+        item.set_view_floor(self._floor)
+        self._attach(item)
+        self._elevator_items[cfg.id] = item
+        return item
+
     def _add_obstacle_item(self, cfg: ObstacleConfig) -> EditableObstacle:
         """장애물 아이템 추가."""
         item = EditableObstacle(cfg)
@@ -686,7 +806,8 @@ class ConfigEditorDialog(QDialog):
             if a is None or b is None:
                 continue
             item = EdgeItem(edge)
-            blocked = edge_blocked((a.node.x, a.node.y), (b.node.x, b.node.y), self._factory.obstacles)
+            blocked = edge_blocked((a.node.x, a.node.y), (b.node.x, b.node.y),
+                                   [o for o in self._factory.obstacles if o.floor == self._floor])
             item.set_geometry(a.pos(), b.pos(), blocked)
             self._scene.addItem(item)
             self._edge_items.append(item)
@@ -720,7 +841,8 @@ class ConfigEditorDialog(QDialog):
         """하단 상태 문구."""
         f = self._factory
         state = "● 저장되지 않은 변경 있음" if self._dirty else "DB와 동기화됨"
-        self._status.setText(f"스테이션 {len(f.stations)} · 충전소 {len(f.chargers)} · 로봇 {self._robot_table.rowCount()} · "
+        self._status.setText(f"{f.floor_count}층 · 스테이션 {len(f.stations)} · 충전소 {len(f.chargers)} · "
+                             f"엘리베이터 {len(f.elevators)} · 로봇 {self._robot_table.rowCount()} · "
                              f"장애물 {len(f.obstacles)} · 노드 {len(f.nodes)} · 엣지 {len(f.edges)}   |   {state}")
 
     # ------------------------------------------------------------------
@@ -742,30 +864,35 @@ class ConfigEditorDialog(QDialog):
         match kind:
             case "station":
                 station_id = self._next_code("WS", {s.id for s in f.stations})
-                cfg = WorkStationConfig(station_id, f"스테이션 {station_id[-2:]}", x, y)
+                cfg = WorkStationConfig(station_id, f"스테이션 {station_id[-2:]}", x, y, floor=self._floor)
                 f.stations.append(cfg)
                 item = self._add_station_item(cfg)
             case "charger":
                 charger_id = self._next_code("CS", {ch.id for ch in f.chargers})
-                cfg_c = ChargingStationConfig(charger_id, x, y)
+                cfg_c = ChargingStationConfig(charger_id, x, y, floor=self._floor)
                 f.chargers.append(cfg_c)
                 item = self._add_charger_item(cfg_c)
+            case "elevator":
+                elevator_id = self._next_code("EL", {e.id for e in f.elevators})
+                cfg_e = ElevatorConfig(elevator_id, f"엘리베이터 {elevator_id[-2:]}", x, y)
+                f.elevators.append(cfg_e)
+                item = self._add_elevator_item(cfg_e)
             case "wall" | "door":
                 half = DEFAULT_WALL_LENGTH / 2
                 obstacle = ObstacleConfig(self._next_temp_id(f.obstacles), kind, x - half, y, x + half, y,
-                                          kind == "door", "문" if kind == "door" else "벽")
+                                          kind == "door", "문" if kind == "door" else "벽", self._floor)
                 f.obstacles.append(obstacle)
                 item = self._add_obstacle_item(obstacle)
                 self._rebuild_edges()
             case "obstacle":
                 half = DEFAULT_OBSTACLE_SIZE / 2
                 obstacle = ObstacleConfig(self._next_temp_id(f.obstacles), "obstacle", x - half, y - half, x + half,
-                                          y + half, False, "장애물")
+                                          y + half, False, "장애물", self._floor)
                 f.obstacles.append(obstacle)
                 item = self._add_obstacle_item(obstacle)
                 self._rebuild_edges()
             case "node":
-                node = PathNodeConfig(self._next_temp_id(f.nodes), x, y)
+                node = PathNodeConfig(self._next_temp_id(f.nodes), x, y, floor=self._floor)
                 f.nodes.append(node)
                 item = self._add_node_item(node)
             case _:
@@ -780,7 +907,7 @@ class ConfigEditorDialog(QDialog):
         profile = self._factory.profile
         if not (0 <= pos.x() <= profile.floor_width and 0 <= pos.y() <= profile.floor_height):
             return
-        node = PathNodeConfig(self._next_temp_id(self._factory.nodes), pos.x(), pos.y())
+        node = PathNodeConfig(self._next_temp_id(self._factory.nodes), pos.x(), pos.y(), floor=self._floor)
         self._factory.nodes.append(node)
         item = self._add_node_item(node)
         if self._pending_node is not None:
@@ -823,7 +950,7 @@ class ConfigEditorDialog(QDialog):
     def _on_item_moved(self, item: QGraphicsItem) -> None:
         """아이템 드래그 이동 → 모델 좌표 갱신."""
         pos = item.pos()
-        if isinstance(item, (EditableStation, EditableCharger)):
+        if isinstance(item, (EditableStation, EditableCharger, EditableElevator)):
             item.cfg.x, item.cfg.y = round(pos.x(), 1), round(pos.y(), 1)
         elif isinstance(item, EditableObstacle):
             dx, dy = pos.x() - item.cfg.x1, pos.y() - item.cfg.y1
@@ -851,6 +978,9 @@ class ConfigEditorDialog(QDialog):
             elif isinstance(item, EditableCharger):
                 f.chargers = [ch for ch in f.chargers if ch.id != item.cfg.id]
                 self._charger_items.pop(item.cfg.id, None)
+            elif isinstance(item, EditableElevator):
+                f.elevators = [e for e in f.elevators if e.id != item.cfg.id]
+                self._elevator_items.pop(item.cfg.id, None)
             elif isinstance(item, EditableObstacle):
                 f.obstacles = [o for o in f.obstacles if o is not item.cfg]
                 self._obstacle_items = [o for o in self._obstacle_items if o is not item]
@@ -875,15 +1005,27 @@ class ConfigEditorDialog(QDialog):
             self._rebuild_edges()
             self._mark_dirty()
 
+    def _grid_network_for_floor(self, floor: int) -> None:
+        """모델에서 floor층의 경로 노드/엣지를 지우고 격자 경로망으로 바꾼다 (다른 층은 그대로)."""
+        f = self._factory
+        doomed = {n.id for n in f.nodes if n.floor == floor}
+        f.nodes = [n for n in f.nodes if n.floor != floor]
+        f.edges = [e for e in f.edges if e.from_node not in doomed and e.to_node not in doomed]
+        spacing = max(GRID_NETWORK_MIN_SPACING, f.profile.grid_cell_size * 2)
+        first_id = min(self._next_temp_id(f.nodes), self._next_temp_id(f.edges))
+        nodes, edges = build_grid_network(f.profile.floor_width, f.profile.floor_height, spacing, f.stations,
+                                          f.chargers, floors=f.floor_count, elevators=f.elevators, only_floor=floor,
+                                          first_id=first_id)
+        f.nodes += nodes
+        f.edges += edges
+
     def _generate_grid_network(self) -> None:
-        """격자 경로망을 자동 생성해 기존 노드/엣지를 교체."""
-        answer = QMessageBox.question(self, "격자 경로망", "기존 경로 노드/엣지를 모두 지우고 격자 경로망을 생성할까요?")
+        """현재 편집 층의 경로망을 격자로 새로 생성한다."""
+        answer = QMessageBox.question(self, "격자 경로망",
+                                      f"{self._floor}층의 경로 노드/엣지를 모두 지우고 격자 경로망을 생성할까요?")
         if answer != QMessageBox.StandardButton.Yes:
             return
-        f = self._factory
-        spacing = max(GRID_NETWORK_MIN_SPACING, f.profile.grid_cell_size * 2)
-        f.nodes, f.edges = build_grid_network(f.profile.floor_width, f.profile.floor_height, spacing, f.stations,
-                                              f.chargers)
+        self._grid_network_for_floor(self._floor)
         self._rebuild_scene()
         self._mark_dirty()
 
@@ -892,8 +1034,7 @@ class ConfigEditorDialog(QDialog):
     # ------------------------------------------------------------------
     def _on_selection_changed(self) -> None:
         """선택 변경 → 속성 폼 표시."""
-        selected = [i for i in self._scene.selectedItems()
-                    if isinstance(i, (EditableStation, EditableCharger, EditableObstacle, NodeItem))]
+        selected = [i for i in self._scene.selectedItems() if isinstance(i, (*_EDITABLE_ITEMS, NodeItem))]
         self._selected = selected[0] if len(selected) == 1 else None
         if self._selected is None:
             self._props.setCurrentIndex(0)
@@ -908,7 +1049,9 @@ class ConfigEditorDialog(QDialog):
                 cfg = item.cfg
                 self._props.setCurrentIndex(1)
                 self._s_id.setText(cfg.id)
-                self._set_values([(self._s_label, cfg.label), (self._s_x, cfg.x), (self._s_y, cfg.y),
+                self._s_floor.setMaximum(self._factory.floor_count)
+                self._set_values([(self._s_floor, cfg.floor), (self._s_label, cfg.label), (self._s_x, cfg.x),
+                                  (self._s_y, cfg.y),
                                   (self._s_w, cfg.width), (self._s_h, cfg.height), (self._s_type, cfg.task_type),
                                   (self._s_time, cfg.avg_process_time), (self._s_std, cfg.process_time_std),
                                   (self._s_active, cfg.is_active)])
@@ -916,12 +1059,24 @@ class ConfigEditorDialog(QDialog):
                 cfg_c = item.cfg
                 self._props.setCurrentIndex(2)
                 self._c_id.setText(cfg_c.id)
-                self._set_values([(self._c_x, cfg_c.x), (self._c_y, cfg_c.y), (self._c_capacity, cfg_c.capacity),
+                self._c_floor.setMaximum(self._factory.floor_count)
+                self._set_values([(self._c_floor, cfg_c.floor), (self._c_x, cfg_c.x), (self._c_y, cfg_c.y),
+                                  (self._c_capacity, cfg_c.capacity),
                                   (self._c_rate, cfg_c.charge_rate), (self._c_active, cfg_c.is_active)])
+            elif isinstance(item, EditableElevator):
+                cfg_e = item.cfg
+                self._props.setCurrentIndex(5)
+                self._e_id.setText(cfg_e.id)
+                self._set_values([(self._e_label, cfg_e.label), (self._e_x, cfg_e.x), (self._e_y, cfg_e.y),
+                                  (self._e_w, cfg_e.width), (self._e_h, cfg_e.height),
+                                  (self._e_time, cfg_e.travel_time), (self._e_capacity, cfg_e.capacity),
+                                  (self._e_active, cfg_e.is_active)])
             elif isinstance(item, EditableObstacle):
                 cfg_o = item.cfg
                 self._props.setCurrentIndex(3)
-                self._set_values([(self._o_type, cfg_o.obstacle_type), (self._o_x1, cfg_o.x1), (self._o_y1, cfg_o.y1),
+                self._o_floor.setMaximum(self._factory.floor_count)
+                self._set_values([(self._o_floor, cfg_o.floor), (self._o_type, cfg_o.obstacle_type),
+                                  (self._o_x1, cfg_o.x1), (self._o_y1, cfg_o.y1),
                                   (self._o_x2, cfg_o.x2), (self._o_y2, cfg_o.y2), (self._o_passable, cfg_o.is_passable),
                                   (self._o_label, cfg_o.label or "")])
             elif isinstance(item, NodeItem):
@@ -954,6 +1109,8 @@ class ConfigEditorDialog(QDialog):
         if self._loading or not isinstance(item, EditableStation):
             return
         cfg = item.cfg
+        moved_floor = cfg.floor != self._s_floor.value()
+        cfg.floor = self._s_floor.value()
         cfg.label = self._s_label.text().strip() or cfg.id
         cfg.x, cfg.y = self._s_x.value(), self._s_y.value()
         cfg.width, cfg.height = max(10.0, self._s_w.value()), max(10.0, self._s_h.value())
@@ -963,6 +1120,8 @@ class ConfigEditorDialog(QDialog):
         cfg.is_active = self._s_active.isChecked()
         self._apply_silently(item, lambda: item.apply_config(cfg))
         self._mark_dirty()
+        if moved_floor:
+            self._rebuild_scene()
 
     def _apply_charger_form(self) -> None:
         """충전소 폼 → 모델."""
@@ -970,12 +1129,16 @@ class ConfigEditorDialog(QDialog):
         if self._loading or not isinstance(item, EditableCharger):
             return
         cfg = item.cfg
+        moved_floor = cfg.floor != self._c_floor.value()
+        cfg.floor = self._c_floor.value()
         cfg.x, cfg.y = self._c_x.value(), self._c_y.value()
         cfg.capacity = self._c_capacity.value()
         cfg.charge_rate = self._c_rate.value()
         cfg.is_active = self._c_active.isChecked()
         self._apply_silently(item, lambda: item.apply_config(cfg))
         self._mark_dirty()
+        if moved_floor:
+            self._rebuild_scene()
 
     def _apply_obstacle_form(self) -> None:
         """장애물 폼 → 모델."""
@@ -983,12 +1146,32 @@ class ConfigEditorDialog(QDialog):
         if self._loading or not isinstance(item, EditableObstacle):
             return
         cfg = item.cfg
+        moved_floor = cfg.floor != self._o_floor.value()
+        cfg.floor = self._o_floor.value()
         cfg.obstacle_type = self._o_type.currentText()
         cfg.x1, cfg.y1, cfg.x2, cfg.y2 = self._o_x1.value(), self._o_y1.value(), self._o_x2.value(), self._o_y2.value()
         cfg.is_passable = self._o_passable.isChecked()
         cfg.label = self._o_label.text().strip()
         self._apply_silently(item, lambda: item.apply_config(cfg))
-        self._rebuild_edges()
+        self._mark_dirty()
+        if moved_floor:
+            self._rebuild_scene()
+        else:
+            self._rebuild_edges()
+
+    def _apply_elevator_form(self) -> None:
+        """엘리베이터 폼 → 모델."""
+        item = self._selected
+        if self._loading or not isinstance(item, EditableElevator):
+            return
+        cfg = item.cfg
+        cfg.label = self._e_label.text().strip() or cfg.id
+        cfg.x, cfg.y = self._e_x.value(), self._e_y.value()
+        cfg.width, cfg.height = max(20.0, self._e_w.value()), max(20.0, self._e_h.value())
+        cfg.travel_time = self._e_time.value()
+        cfg.capacity = self._e_capacity.value()
+        cfg.is_active = self._e_active.isChecked()
+        self._apply_silently(item, lambda: item.apply_config(cfg))
         self._mark_dirty()
 
     def _apply_node_form(self) -> None:
@@ -1020,6 +1203,42 @@ class ConfigEditorDialog(QDialog):
         profile.floor_width = self._p_width.value()
         profile.floor_height = self._p_height.value()
         profile.grid_cell_size = self._p_grid.value()
+        self._rebuild_scene()
+        self._mark_dirty()
+
+    def _on_floor_count_edited(self) -> None:
+        """층 수 변경. 줄일 때는 없어지는 층의 항목을 정리하고, 늘릴 때는 새 층에 격자 경로망을 만든다."""
+        if self._loading:
+            return
+        f = self._factory
+        new, old = self._p_floors.value(), f.floor_count
+        if new == old:
+            return
+        if new < old:
+            doomed = (sum(1 for s in f.stations if s.floor > new) + sum(1 for ch in f.chargers if ch.floor > new)
+                      + sum(1 for o in f.obstacles if o.floor > new))
+            if doomed and QMessageBox.question(
+                    self, "층 수 줄이기",
+                    f"{new + 1}층 이상에 있는 스테이션/충전소/장애물 {doomed}개가 함께 삭제됩니다. 계속할까요?",
+            ) != QMessageBox.StandardButton.Yes:
+                self._p_floors.blockSignals(True)
+                self._p_floors.setValue(old)
+                self._p_floors.blockSignals(False)
+                return
+            gone = {n.id for n in f.nodes if n.floor > new}
+            f.stations = [s for s in f.stations if s.floor <= new]
+            f.chargers = [ch for ch in f.chargers if ch.floor <= new]
+            f.obstacles = [o for o in f.obstacles if o.floor <= new]
+            f.nodes = [n for n in f.nodes if n.floor <= new]
+            f.edges = [e for e in f.edges if e.from_node not in gone and e.to_node not in gone]
+        f.profile.floor_count = new
+        if new > old:
+            for floor in range(old + 1, new + 1):
+                self._grid_network_for_floor(floor)
+        self._floor = min(self._floor, new)
+        self._loading = True
+        self._rebuild_floor_combo()
+        self._loading = False
         self._rebuild_scene()
         self._mark_dirty()
 
@@ -1105,7 +1324,16 @@ class ConfigEditorDialog(QDialog):
             if not factory.stations:
                 raise ValueError("작업 스테이션이 최소 1개 필요합니다.")
             if not factory.nodes:
-                raise ValueError("경로 노드가 없습니다. '격자 경로망 자동 생성'을 사용해 보세요.")
+                raise ValueError("경로 노드가 없습니다. '이 층 격자 경로망 생성'을 사용해 보세요.")
+            empty = [n for n in range(1, factory.floor_count + 1) if not any(node.floor == n for node in factory.nodes)]
+            if empty:
+                raise ValueError(f"{', '.join(f'{n}F' for n in empty)}에 경로 노드가 없습니다. 해당 층을 선택하고 "
+                                 "'이 층 격자 경로망 생성'을 눌러 주세요.")
+            if factory.floor_count > 1 and not any(e.is_active for e in factory.elevators) and QMessageBox.question(
+                    self, "엘리베이터 없음",
+                    "층이 2개 이상인데 운행 가능한 엘리베이터가 없습니다.\n로봇이 다른 층으로 이동할 수 없어 "
+                    "다른 층의 작업은 처리되지 않습니다. 그래도 저장할까요?") != QMessageBox.StandardButton.Yes:
+                return
             changes = self._service.save_factory_config(factory)
         except Exception as exc:  # noqa: BLE001 — 사용자에게 저장 실패 사유 표시
             QMessageBox.critical(self, "저장 실패", str(exc))

@@ -37,7 +37,7 @@ from gui.alert_banner import AlertBanner
 from gui.config_editor import ConfigEditorDialog
 from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
-from gui.factory_view import FactoryPanel
+from gui.factory_panel import FactoryPanel
 from gui.order_dialog import OrderDialog
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
@@ -135,6 +135,8 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         self._action(toolbar, "⚙ 공장 설정", self._open_config_editor)
         self._action(toolbar, "📋 주문 관리", self._open_order_dialog)
+        self._action(toolbar, "🛗 엘리베이터 시연", self._start_elevator_demo,
+                     "2층 이상 스테이션만 쓰는 주문을 넣고 1층 도크에서 다시 시작합니다")
 
         spacer = QWidget(self)
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -185,6 +187,24 @@ class MainWindow(QMainWindow):
             self._watchers_started = True
             self._console.add_system_message("ConfigWatcher / ProductionEventWatcher 시작 (1초 폴링)")
         self._worker.send_command(ActionKind.START)
+
+    def _start_elevator_demo(self) -> None:
+        """엘리베이터 시연: 위층 스테이션 전용 주문을 넣고 로봇을 1층에서 다시 출발시킨다."""
+        factory = self._service.load_factory_config()
+        upper = [s.id for s in factory.stations if s.floor > 1 and s.is_active]
+        if factory.floor_count < 2 or not factory.elevators or not upper:
+            QMessageBox.information(self, "엘리베이터 시연",
+                                    "2층 이상에 스테이션이 있고 엘리베이터가 있는 공장 구성이 필요합니다.\n"
+                                    "공장 설정 > 프리셋 '3층 데모 공장'을 불러와 저장한 뒤 다시 시도하세요.")
+            return
+        now = self.sim_clock()
+        self._service.create_order("시연-상층", c.DEMO_ORDER_QUANTITY, "high", now + timedelta(seconds=c.DEMO_DEADLINE_SEC),
+                                   upper, now, "operator")
+        self._console.add_system_message(f"🛗 엘리베이터 시연: {', '.join(upper)} 전용 주문 등록 — 로봇이 1층 도크에서 "
+                                         "엘리베이터를 타고 이동합니다.")
+        self._worker.send_command(ActionKind.SYNC_ORDERS)
+        self._worker.send_command(ActionKind.RESET)
+        self._start()
 
     def _stop(self) -> None:
         """정지 (초기 상태로)."""
@@ -311,15 +331,18 @@ class MainWindow(QMainWindow):
                 added = self._service.add_robots(int(p.get("count", 1)))
                 return f"🤖 DB INSERT: {', '.join(added)}"
             case ActionKind.ADD_CHARGER:
-                charger_id = self._service.add_charger(float(p["x"]), float(p["y"]), int(p.get("capacity", 2)))
-                return f"⚡ DB INSERT: 충전소 {charger_id} ({p['x']:.0f}, {p['y']:.0f})"
+                floor = int(p.get("floor", 1))
+                charger_id = self._service.add_charger(float(p["x"]), float(p["y"]), int(p.get("capacity", 2)),
+                                                       floor=floor)
+                return f"⚡ DB INSERT: 충전소 {charger_id} ({floor}F, {p['x']:.0f}, {p['y']:.0f})"
             case ActionKind.MOVE_OBSTACLE:
                 moved = self._service.move_obstacle(str(p["obstacle_type"]), tuple(p["coords"]))
                 if moved is None:
                     raise ValueError(f"{p['obstacle_type']} 항목을 찾을 수 없습니다.")
                 return f"🚪 DB UPDATE: {moved.label or moved.obstacle_type} 위치 변경"
             case ActionKind.MOVE_STATION:
-                if not self._service.move_station(str(p["station_id"]), float(p["x"]), float(p["y"])):
+                floor = int(p["floor"]) if p.get("floor") is not None else None
+                if not self._service.move_station(str(p["station_id"]), float(p["x"]), float(p["y"]), floor=floor):
                     raise ValueError(f"{p['station_id']} 스테이션을 찾을 수 없습니다.")
                 return f"📐 DB UPDATE: {p['station_id']} 위치 변경"
             case ActionKind.SET_STATION_ACTIVE:
