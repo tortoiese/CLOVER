@@ -66,6 +66,17 @@ AI 관제 콘솔을 통해 자연어로 시뮬레이션을 제어하고, 긴급 
 
 ---
 
+## 🖼️ 화면 미리보기
+
+| | |
+|:-:|:-:|
+| <img src="docs/images/01_main_window.png" width="440"><br>**전체 화면 (3층 데모 공장)** | <img src="docs/images/02_building_3d.png" width="440"><br>**3D 건물 개요 · 엘리베이터** |
+| <img src="docs/images/03_floor_plan.png" width="440"><br>**층 도면 (2F) · 축척 1:N** | <img src="docs/images/08_config_editor.png" width="440"><br>**공장 설정 에디터 (층별 편집)** |
+| <img src="docs/images/04_ai_console.png" width="440"><br>**AI 관제 콘솔** | <img src="docs/images/05_dashboard_throughput.png" width="440"><br>**성능 KPI · 처리량** |
+| <img src="docs/images/06_dashboard_radar.png" width="440"><br>**KPI 레이더 (Baseline vs 최적화)** | <img src="docs/images/07_dashboard_roi.png" width="440"><br>**ROI 비교** |
+
+---
+
 ## 🗂️ 디렉토리 구조
 
 ```
@@ -135,6 +146,7 @@ robot_factory_sim/
     ├── roi.py                     # ROI 계산
     └── roi_chart.py               # ROI 비교 그래프 (matplotlib)
 docs/
+├── images/                        # README 화면 캡처
 ├── USER_MANUAL.md                 # 제품 사용 설명서 (고객용)
 ├── FEATURES.md                    # 기능 상세 (다층·물리·RAG·MILP·ROI·KPI)
 ├── RAG_POLICY.md                  # RAG 구축·적용 가이드라인
