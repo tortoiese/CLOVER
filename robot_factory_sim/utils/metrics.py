@@ -35,8 +35,9 @@ KPI_DEFINITIONS: tuple[KpiDefinition, ...] = (
     KpiDefinition("order_fulfillment", "주문 달성률", "%", True),
     KpiDefinition("response_time", "긴급 대응시간", "s", False),
     KpiDefinition("corridor_wait", "통로 대기시간", "s", False),
+    KpiDefinition("intersection_wait", "교차로 대기시간", "s", False),
     KpiDefinition("ev_wait", "EV 대기시간", "s", False),
-    KpiDefinition("deadlock_count", "교착 발생", "건", False, 0),
+    KpiDefinition("deadlock_count", "장기 통행 대기", "건", False, 0),
 )
 
 KPI_BY_KEY: dict[str, KpiDefinition] = {k.key: k for k in KPI_DEFINITIONS}
@@ -73,6 +74,7 @@ class MetricsCollector:
         self.charge_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.response_times: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.corridor_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
+        self.intersection_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.ev_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.deadlock_count = 0
         self.total_completed = 0
@@ -129,6 +131,14 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.ev_waits.append(max(0.0, wait))
+
+    def record_intersection_wait(self, wait: float) -> None:
+        """교차로 자원 대기시간을 기록한다.
+
+        Args:
+            wait: 대기시간(sim-sec).
+        """
+        self.intersection_waits.append(max(0.0, wait))
 
     def record_deadlock(self) -> None:
         """통로 대기가 임계치(config.DEADLOCK_THRESHOLD_SEC)를 넘은 경우를 집계한다."""
@@ -197,6 +207,7 @@ class MetricsCollector:
             "order_fulfillment": order_rate,
             "response_time": _mean(self.response_times),
             "corridor_wait": _mean(self.corridor_waits),
+            "intersection_wait": _mean(self.intersection_waits),
             "ev_wait": _mean(self.ev_waits),
             "deadlock_count": float(self.deadlock_count),
         }

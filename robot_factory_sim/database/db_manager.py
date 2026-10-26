@@ -589,7 +589,7 @@ class DBManager:
                     continue
                 (ax, ay), (bx, by) = positions[a], positions[b]
                 distance = math.hypot(ax - bx, ay - by)
-                edges.append(PathEdgeConfig(edge.id, a, b, round(distance, 3), edge.is_bidirectional))
+                edges.append(PathEdgeConfig(edge.id, a, b, round(distance, 3), edge.is_bidirectional, edge.width))
             changes += self._sync_table_in(conn, Tables.PATH_EDGES, edges, changed_by)[0]
         return changes
 

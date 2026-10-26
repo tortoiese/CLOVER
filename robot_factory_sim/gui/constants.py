@@ -6,6 +6,13 @@ from typing import Final
 
 from utils.event_types import RobotState, Severity, TimelineKind
 
+# 통행 상태는 기본 경로망 위에 표시하며, 실시간 오버레이 갱신을 제한한다.
+TRAFFIC_REFRESH_SECONDS: float = 0.2
+TRAFFIC_NODE_RADIUS: float = 9.0
+TRAFFIC_ARROW_SIZE: float = 11.0
+TRAFFIC_BUSY_WIDTH: float = 3.2
+TRAFFIC_IDLE_WIDTH: float = 1.0
+
 # ---------------------------------------------------------------------------
 # 테마 색상
 # ---------------------------------------------------------------------------
