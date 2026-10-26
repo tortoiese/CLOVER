@@ -26,6 +26,14 @@ class RagAgent(BaseAgent):
         self._service = service
         self._fallback = fallback or MockAgent()
 
+    def close(self) -> None:
+        """Release lazily initialized storage on the agent's owning thread."""
+        if isinstance(self._service, RagService):
+            self._service.close()
+        close = getattr(self._fallback, "close", None)
+        if callable(close):
+            close()
+
     async def process_message(self, user_msg: str, sim_context: dict[str, Any]) -> AgentResponse:
         """검색 접두사가 있으면 RAG, 그 외는 기존 관제로 처리한다.
 

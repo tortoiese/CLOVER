@@ -486,6 +486,7 @@ class MainWindow(QMainWindow):
             self._shutdown_timer.start()
             return
         self._shutdown_timer.stop()
+        self._service.close()
         super().closeEvent(event)
 
     def _finish_shutdown(self) -> None:
