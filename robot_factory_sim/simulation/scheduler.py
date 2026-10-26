@@ -116,7 +116,7 @@ class BaselineScheduler(BaseScheduler):
                 continue
             for step in range(len(order)):
                 robot_id = order[(self._pointer + step) % len(order)]
-                if robot_id in idle_ids:
+                if robot_id in idle_ids and engine.can_assign(task, engine.robots[robot_id]):
                     engine.assign(task, engine.robots[robot_id])
                     idle_ids.discard(robot_id)
                     self._pointer = (self._pointer + step + 1) % len(order)
@@ -179,14 +179,15 @@ class OptimizedScheduler(BaseScheduler):
     def _energy_needed(self, robot: Robot, engine: SimulationEngine, station_id: str, distance: float) -> float:
         """작업 수행 + 가장 가까운 충전소 복귀까지 필요한 배터리량."""
         station = engine.stations[station_id]
+        graph = engine.path_graph.for_robot(robot.cfg.width)
         sx, sy = station.cfg.x, station.cfg.y
         back = min(
-            (engine.path_graph.distance_to_facility(sx, sy, c.id, station.cfg.floor)
+            (graph.physical_distance_to_facility(sx, sy, c.id, station.cfg.floor)
              for c in engine.chargers.values() if c.active),
             default=0.0,
         )
-        back = 0.0 if math.isinf(back) else back
-        travel = (distance + back) * config.METERS_PER_PIXEL * float(robot.cfg.battery_drain_rate)
+        outbound = graph.physical_distance_to_facility(robot.x, robot.y, station_id, robot.floor)
+        travel = (outbound + back) * float(robot.cfg.battery_drain_rate)
         work = station.cfg.avg_process_time * config.WORK_DRAIN_PER_SEC
         return travel + work
 
@@ -209,7 +210,8 @@ class OptimizedScheduler(BaseScheduler):
             for robot in free:
                 reserve = robot.capacity * config.BATTERY_RESERVE / 100.0
                 for station_id in candidates:
-                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id, robot.floor)
+                    distance = engine.path_graph.for_robot(robot.cfg.width).distance_to_facility(
+                        robot.x, robot.y, station_id, robot.floor)
                     if math.isinf(distance):
                         continue
                     if robot.battery - self._energy_needed(robot, engine, station_id, distance) < reserve:
@@ -321,9 +323,16 @@ def create_scheduler(mode: str) -> BaseScheduler:
         스케줄러 인스턴스
     """
     match mode:
-        case "baseline":
+        case "baseline" | "baseline_fifo":
             return BaselineScheduler()
-        case "optimized":
+        case "optimized" | "weighted_heuristic":
             return OptimizedScheduler()
+        case "assignment_milp_legacy":
+            from simulation.milp_scheduler import RollingMilpScheduler
+            return RollingMilpScheduler()
+        case "rh_milp" | "rh_cpsat":
+            from simulation.planning.contracts import Settings
+            from simulation.planning.controller import RollingHorizonScheduler
+            return RollingHorizonScheduler(mode.removeprefix("rh_"), Settings(scope="traffic"))
         case _:
             raise ValueError(f"알 수 없는 스케줄러 모드: {mode}")

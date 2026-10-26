@@ -30,6 +30,10 @@ class Task:
     started_at: float | None = None
     robot_id: str | None = None
     process_noise: float | None = None  # 비교 실험에서 작업별 공통 난수를 고정
+    planning_blocked: str | None = None
+    external_uid: str | None = None
+    attempts: int = 0
+    cancelled: bool = False
 
 
 class TaskGenerator:

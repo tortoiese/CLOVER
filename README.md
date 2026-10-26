@@ -163,7 +163,7 @@ docs/
 | ProductionEventWatcher | `production_events` 1초 폴링 → AI 자율 대응 |
 | AgentBridge | 관제 에이전트 실행 (LLM 에이전트로 교체해도 GUI가 멈추지 않음) |
 
-스레드 간 통신은 모두 Qt Signal/Slot으로 한다. 툴바의 스케줄러 선택은 **화면 표시·AI 조치 대상 엔진**을 바꾸며, 두 엔진은 항상 함께 실행된다.
+스레드 간 통신은 모두 Qt Signal/Slot으로 한다. 기본 정책은 가중치 휴리스틱이며 FIFO와 함께 실행한다. 툴바에서 RH-MILP 또는 RH-CP-SAT을 새로 활성화하면 선택한 RH 하나를 추가하고 공통 초기 상태에서 다시 시작한다. 이미 활성인 정책 선택은 **화면 표시·AI 조치 대상 엔진**만 바꾼다. RH 설정·예약·독립 비교·재현 방법은 [Rolling Horizon 가이드](docs/ROLLING_HORIZON.md)를 따른다.
 
 ---
 
@@ -195,7 +195,7 @@ python main.py
 CLOVER_RAG_ENABLED=1 CLOVER_RAG_PROVIDER=local python main.py     # macOS / Linux
 $env:CLOVER_RAG_ENABLED="1"; $env:CLOVER_RAG_PROVIDER="local"; python main.py   # Windows PowerShell
 ```
-기본값은 비활성(규칙 기반 MockAgent)이며, 켜면 문서 검색과 툴바의 **[운영안 비교]** 가 활성화됩니다. 자세한 설정은 [RAG](docs/FEATURES.md#-rag-문서-검색-관제)를 보세요.
+RAG 기본값은 비활성이며, 문서 검색을 켜지 않아도 **[운영안 비교]** 와 RH 두 정책의 로컬 계산을 사용할 수 있습니다. RAG와 외부 API는 비교 계산의 필수 의존성이 아닙니다. 자세한 설정은 [RAG](docs/FEATURES.md#-rag-문서-검색-관제)를 보세요.
 
 ### GUI 없이 테스트
 ```bash

@@ -31,7 +31,9 @@ class Elevator:
         self.env = env
         self.cfg = cfg
         self.door_time = door_time
-        self.resource = simpy.Resource(env, capacity=max(1, int(cfg.capacity)))
+        # A shaft has one cabin motion. Passenger slots never permit independent
+        # simultaneous trips to different floors in the same physical cabin.
+        self.resource = simpy.Resource(env, capacity=1)
         self.removed = False
         self.rides = 0
         self._floor = 1.0

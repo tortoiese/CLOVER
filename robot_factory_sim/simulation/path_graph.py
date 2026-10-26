@@ -9,9 +9,15 @@ from __future__ import annotations
 import heapq
 import math
 from dataclasses import dataclass, field
+from itertools import pairwise
 
 import config
-from utils.config_models import ElevatorConfig, FactoryConfig, ObstacleConfig, PathEdgeConfig
+from utils.config_models import (
+    ElevatorConfig,
+    FactoryConfig,
+    ObstacleConfig,
+    PathEdgeConfig,
+)
 
 WALL_HALF_THICKNESS: float = 4.0
 DOOR_HALF_THICKNESS: float = 8.0
@@ -115,12 +121,16 @@ def edge_blocked(p1: Point, p2: Point, obstacles: list[ObstacleConfig]) -> bool:
 class PathGraph:
     """층별 경로망 그래프. 층 사이는 엘리베이터 노드를 잇는 수직 엣지로만 이동한다."""
 
-    def __init__(self, factory: FactoryConfig) -> None:
+    def __init__(self, factory: FactoryConfig, robot_width: float | None = None) -> None:
         """구성으로부터 그래프를 만든다.
 
         Args:
             factory: 공장 구성
         """
+        self.factory = factory
+        self.robot_width = robot_width
+        self._width_graphs: dict[float, PathGraph] = {}
+        self._entry_cache: dict[tuple[float, float, int, int], int | None] = {}
         self.nodes: dict[int, Point] = {n.id: (n.x, n.y) for n in factory.nodes}
         self.node_floor: dict[int, int] = {n.id: n.floor for n in factory.nodes}
         self.floor_nodes: dict[int, list[int]] = {}
@@ -145,6 +155,7 @@ class PathGraph:
                 continue
             a, b = self.nodes[edge.from_node], self.nodes[edge.to_node]
             blocked = edge_blocked(a, b, self.floor_obstacles.get(self.node_floor[edge.from_node], []))
+            blocked |= robot_width is not None and edge.width - factory.profile.edge_clearance < robot_width - 1e-9
             self.edges.append((edge.from_node, edge.to_node, blocked))
             if blocked:
                 continue
@@ -198,7 +209,7 @@ class PathGraph:
                         if n.node_type == "elevator" and n.linked_station_id == elevator.id}
             floors = sorted(by_floor)
             hop_cost = (max(0.0, float(elevator.travel_time)) + factory.profile.door_time_sec) * config.ELEVATOR_PX_PER_SEC
-            for lower, upper in zip(floors, floors[1:]):
+            for lower, upper in pairwise(floors):
                 if upper - lower != 1:
                     continue
                 a, b = by_floor[lower], by_floor[upper]
@@ -338,9 +349,25 @@ class PathGraph:
 
     def _accessible_start(self, x: float, y: float, floor: int, target: int) -> int | None:
         """같은 층에서 장애물 없이 연결할 수 있고 목적지에 도달 가능한 최근접 노드를 반환한다."""
+        key = (x, y, floor, target)
+        if key not in self._entry_cache:
+            if len(self._entry_cache) >= 1024:
+                self._entry_cache.pop(next(iter(self._entry_cache)))
+            self._entry_cache[key] = self._find_accessible_start(x, y, floor, target)
+        return self._entry_cache[key]
+
+    def _find_accessible_start(self, x: float, y: float, floor: int, target: int) -> int | None:
+        """Scan one immutable width-filtered layout; hot reload creates a new cache."""
         pool = self.floor_nodes.get(floor, [])
         obstacles = self.floor_obstacles.get(floor, [])
         candidates = sorted(pool, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
+        if self.robot_width is not None and candidates:
+            closest = candidates[0]
+            if math.dist((x, y), self.nodes[closest]) < 1e-6:
+                return closest if self.shortest_path(closest, target) is not None else None
+            # Off-graph spawn connectors may enter the nearest visible graph point,
+            # but may not jump across an inaccessible narrow edge to a distant node.
+            candidates = [n for n in candidates if not edge_blocked((x, y), self.nodes[n], obstacles)][:1]
         for node in candidates:
             if edge_blocked((x, y), self.nodes[node], obstacles):
                 continue
@@ -348,6 +375,25 @@ class PathGraph:
             if target in distances:
                 return node
         return None
+
+    def for_robot(self, width: float) -> PathGraph:
+        """Return a cached width-filtered graph for this immutable layout."""
+        if width not in self._width_graphs:
+            self._width_graphs[width] = PathGraph(self.factory, width)
+        return self._width_graphs[width]
+
+    def physical_distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> float:
+        """Return horizontal metres, excluding the elevator's Dijkstra time cost."""
+        route = self.route_to_facility(x, y, facility_id, floor)
+        if route is None:
+            return math.inf
+        distance = 0.0
+        previous, previous_floor = (x, y), floor
+        for point, next_floor, lift in zip(route.points, route.floors, route.lifts, strict=True):
+            if lift is None and previous_floor == next_floor:
+                distance += math.dist(previous, point) * config.METERS_PER_PIXEL
+            previous, previous_floor = point, next_floor
+        return distance
 
     def facility_point(self, facility_id: str) -> Point | None:
         """설비 접근 노드 좌표.

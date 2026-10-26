@@ -26,7 +26,7 @@ COMPARISON_METRICS = (
     ("profit_per_wh", "전력 대비 순이익", "원/Wh"),
 )
 HELP_TEXT = (
-    "RAG 운영안 비교 사용법\n"
+    "운영안 비교 사용법\n"
     "1. 툴바 [운영안 비교]에서 기간·단가·배터리 Wh 환산값을 설정하세요.\n"
     "2. /최적화 또는 '비용 줄여줘' → 현재 GUI 구성으로 독립 비교 실험\n"
     "3. /비교 → 마지막 수치, /추천 → 추천 이유, /근거 → 운영 기준·ROI 출처\n"
@@ -71,7 +71,7 @@ def format_report(result: dict[str, Any]) -> str:
     if interval:
         lines.append(f"순이익 차이의 평균 95% 신뢰구간: {interval['low']:,.2f}~{interval['high']:,.2f}원")
     gap = result["solver"]["max_dispatch_gap"]
-    lines.append(f"개별 배정 MILP 최대 격차: {format_value(gap * 100 if gap is not None else None, '%')}")
+    lines.append(f"배정 격차(해당 시): {format_value(gap * 100 if gap is not None else None, '%')}")
     lines.extend([result["recommendation"], result["solver"]["scope"], *result["notes"]])
     return "\n".join(lines)
 
@@ -82,15 +82,19 @@ class OrchestrationAgent(RagAgent):
     name = "rag + 운영안 비교"
     supports_comparison = True
 
-    def __init__(self, service: RagService | Callable[[], RagService],
+    def __init__(self, service: RagService | Callable[[], RagService] | None,
                  optimizer: Callable[[ComparisonConditions, dict[str, Any]], dict[str, Any]]) -> None:
         """비교 실행 함수를 주입한다. agent는 simulation을 직접 import하지 않는다."""
         super().__init__(service)
         self._optimizer = optimizer
+        if service is None:
+            self.name = "로컬 운영안 비교"
         self._conditions = ComparisonConditions()
         self._last_result: dict[str, Any] | None = None
 
     def _evidence(self, question: str) -> str:
+        if self._service is None:
+            return "로컬 비교 계산 결과입니다. RAG 근거 검색은 비활성 상태입니다."
         if callable(self._service):
             self._service = self._service()
         hits = self._service.store.search(question, 3, {"knowledge_type": "operating_policy"},
@@ -142,7 +146,7 @@ class OrchestrationAgent(RagAgent):
                 self._last_result = result
                 try:
                     evidence = self._evidence("ROI 비용 산식 최적성 격차")
-                except Exception:
+                except Exception:  # noqa: BLE001 — preserve local computation when evidence retrieval fails
                     evidence = "운영 근거 검색에 실패했습니다. 계산 결과는 보존되며 /근거로 재조회할 수 있습니다."
                 return AgentResponse(format_report(result) + "\n\n" + evidence, source="comparison", comparison=result,
                                      comparison_conditions=asdict(self._conditions))
@@ -161,4 +165,7 @@ class OrchestrationAgent(RagAgent):
                                  source="comparison", comparison=self._last_result)
         if is_comparison_request(message):
             return AgentResponse("지원하지 않는 비교 명령 형식입니다.\n" + HELP_TEXT, source="comparison")
+        if self._service is None:
+            from agent.mock_agent import MockAgent
+            return await MockAgent().process_message(user_msg, sim_context)
         return await super().process_message(user_msg, sim_context)

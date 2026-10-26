@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import config
@@ -55,12 +55,12 @@ def create_agent(
     Returns:
         기본 MockAgent 또는 opt-in RagAgent.
     """
-    if not config.RAG_ENABLED:
-        return MockAgent()
     if optimizer is not None:
         from agent.orchestration import OrchestrationAgent
 
-        return OrchestrationAgent(_build_gui_service, optimizer)
+        return OrchestrationAgent(_build_gui_service if config.RAG_ENABLED else None, optimizer)
+    if not config.RAG_ENABLED:
+        return MockAgent()
     from agent.rag_agent import RagAgent
 
     return RagAgent(_build_gui_service)

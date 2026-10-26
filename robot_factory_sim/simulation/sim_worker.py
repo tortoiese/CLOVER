@@ -9,9 +9,12 @@
 
 from __future__ import annotations
 
+import copy
+import logging
 import threading
 import time
 import traceback
+from collections import deque
 from datetime import datetime
 from typing import Any
 
@@ -22,7 +25,14 @@ from database.db_manager import DBManager
 from database.order_manager import OrderManager
 from simulation.engine import SimulationEngine
 from simulation.state import SimState
-from utils.event_types import ActionKind, OrderStatus, ProductionEventType, SchedulerModeLabel, Severity
+from utils.config_models import FactoryConfig, OrderRecord
+from utils.event_types import (
+    ActionKind,
+    OrderStatus,
+    ProductionEventType,
+    SchedulerModeLabel,
+    Severity,
+)
 
 DEDUPED_EVENTS: frozenset[str] = frozenset({
     ProductionEventType.CRITICAL_ORDER, ProductionEventType.DEADLINE_RISK, ProductionEventType.ORDER_COMPLETED,
@@ -52,8 +62,15 @@ class _SimController(QObject):
         self._task_rate = config.DEFAULT_TASK_RATE
         self._config_dirty = False
         self._progress_cache: dict[str, tuple[int, str]] = {}
+        self._cached_orders: list[OrderRecord] = []
         self._wall_elapsed = 0.0
         self._engines: dict[str, SimulationEngine] = {}
+        self._active_policies = list(config.DEFAULT_ACTIVE_POLICIES)
+        from simulation.planning.contracts import Settings
+        self._planning_settings = Settings(scope="traffic")
+        self._command_sequence = 0
+        self._command_sent = 0.0
+        self._command_latency: deque[float] = deque(maxlen=1000)
         self._build_engines()
         self._timer = QTimer(self)
         self._timer.setInterval(config.WORKER_LOOP_INTERVAL_MS)
@@ -74,10 +91,13 @@ class _SimController(QObject):
     def shutdown(self) -> None:
         """타이머를 멈추고 진행률을 저장한 뒤 DB 연결을 닫는다."""
         self._timer.stop()
+        for engine in self._engines.values():
+            if hasattr(engine.scheduler, "close"):
+                engine.scheduler.close()
         try:
             self._flush_progress()
-        except Exception:  # noqa: BLE001 — 종료 중 DB 오류는 무시
-            pass
+        except Exception:
+            logging.getLogger(__name__).warning("종료 중 진행률 저장 실패", exc_info=True)
         self._db.close()
 
     @property
@@ -85,17 +105,28 @@ class _SimController(QObject):
         """화면에 표시·제어되는 엔진."""
         return self._engines[self._mode]
 
-    def _build_engines(self) -> None:
+    def _build_engines(self, factory: FactoryConfig | None = None, records: list[OrderRecord] | None = None) -> None:
         """DB 구성으로 두 엔진을 새로 만든다 (sim-time 0)."""
-        factory = self._db.load_factory_config()
+        for engine in self._engines.values():
+            if hasattr(engine.scheduler, "close"):
+                engine.scheduler.close()
+        factory = self._db.load_factory_config() if factory is None else copy.deepcopy(factory)
         epoch = datetime.now().replace(microsecond=0)
         self._engines = {
-            mode: SimulationEngine(factory, mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate})
-            for mode in config.SCHEDULER_MODES
+            mode: SimulationEngine(factory, mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate},
+                                   comparison_seed=config.RANDOM_SEED)
+            for mode in self._active_policies
         }
+        from simulation.planning.controller import RollingHorizonScheduler
+        from simulation.planning.process import SolverProcess
+        for engine in self._engines.values():
+            if isinstance(engine.scheduler, RollingHorizonScheduler):
+                engine.scheduler.settings = self._planning_settings
+                engine.scheduler.process = SolverProcess(engine.scheduler.backend)
         self._progress_cache.clear()
         self._wall_elapsed = 0.0
-        self._sync_orders()
+        self._sync_orders(records)
+        self._progress_cache = {r.order_id: (r.completed, r.status) for r in self._cached_orders}
         for engine in self._engines.values():
             engine.drain_alerts()
             engine.drain_notices()
@@ -146,9 +177,10 @@ class _SimController(QObject):
         if summary:
             self.notice.emit(Severity.INFO, "⚙ 설정 핫리로드 완료: " + ", ".join(summary))
 
-    def _sync_orders(self) -> None:
+    def _sync_orders(self, records: list[OrderRecord] | None = None) -> None:
         """DB 주문을 두 엔진에 반영한다."""
-        records = self._db.list_orders()
+        records = self._db.list_orders() if records is None else records
+        self._cached_orders = list(records)
         for engine in self._engines.values():
             engine.sync_orders(records)
 
@@ -207,6 +239,11 @@ class _SimController(QObject):
             params=params,
             events=list(engine.timeline),
             elevators=engine.elevator_snapshots(),
+            planning={mode: e.scheduler.planning_state() for mode, e in self._engines.items()
+                      if hasattr(e.scheduler, "planning_state")},
+            active_policies=tuple(self._active_policies),
+            diagnostics={"command_seq": self._command_sequence, "command_sent": self._command_sent,
+                         "worker_command_ms": self._command_latency[-1] if self._command_latency else 0},
         )
         self.state_ready.emit(state)
 
@@ -222,6 +259,11 @@ class _SimController(QObject):
             params: 명령 파라미터 dict
         """
         params = dict(params or {})
+        sent = params.pop("_sent_monotonic", None)
+        if sent is not None:
+            self._command_sent = float(sent)
+            self._command_sequence += 1
+            self._command_latency.append((time.monotonic() - self._command_sent) * 1000)
         try:
             self._dispatch_command(kind, params)
         except Exception as exc:  # noqa: BLE001 — 잘못된 명령이 워커를 죽이지 않도록
@@ -250,11 +292,28 @@ class _SimController(QObject):
                 self._speed = min(config.SPEED_OPTIONS, key=lambda s: abs(s - value))
             case ActionKind.SET_MODE:
                 mode = str(params.get("mode", config.DEFAULT_SCHEDULER_MODE))
-                if mode not in self._engines:
+                if mode not in config.SCHEDULER_MODES:
                     raise ValueError(f"알 수 없는 모드: {mode}")
+                if mode not in self._engines:
+                    # Activation starts a new paired comparison from time zero.
+                    factory = None if self._config_dirty else self.primary.factory
+                    records = None if self._config_dirty else self._cached_orders
+                    self._active_policies = list(config.DEFAULT_ACTIVE_POLICIES) + [mode]
+                    self._build_engines(factory, records)
+                    self.notice.emit(Severity.INFO, "비교 정책 활성화 — 모든 활성 정책을 0초부터 다시 시작합니다.")
                 self._mode = mode
                 self._progress_cache.clear()
                 self.notice.emit(Severity.INFO, f"스케줄링 모드 → {SchedulerModeLabel.LABELS.get(mode, mode)}")
+            case ActionKind.SET_PLANNING:
+                from simulation.planning.contracts import Settings
+                settings = Settings(**params)
+                settings.validate()
+                self._planning_settings = settings
+                for candidate in self._engines.values():
+                    if hasattr(candidate.scheduler, "settings"):
+                        candidate.scheduler.notify_event("settings")
+                        candidate.scheduler.settings = settings
+                self.notice.emit(Severity.INFO, "RH 계획 설정을 적용했습니다.")
             case ActionKind.SET_TASK_RATE | ActionKind.SCALE_TASK_RATE:
                 if kind == ActionKind.SET_TASK_RATE:
                     rate = float(params["rate"])
@@ -321,6 +380,7 @@ class SimWorker(QThread):
             params: 파라미터
         """
         payload = dict(params or {})
+        payload["_sent_monotonic"] = time.monotonic()
         with self._lock:
             if not self._ready:
                 self._backlog.append((kind, payload))

@@ -18,6 +18,7 @@ import math
 import simpy
 
 import config
+from simulation.resource_pool import CapacityPool
 from utils.config_models import FactoryConfig, FactoryProfile, PathEdgeConfig
 
 EdgeKind = str  # "corridor" | "elevator"
@@ -35,7 +36,7 @@ def lane_capacity(edge_width: float, profile: FactoryProfile) -> int:
     """
     usable = edge_width - profile.edge_clearance
     per_lane = config.DEFAULT_ROBOT_WIDTH + profile.side_clearance
-    return max(1, int(usable // per_lane))
+    return max(0, int((usable + profile.side_clearance + 1e-9) // per_lane))
 
 
 def lanes_consumed(robot_width: float, profile: FactoryProfile) -> int:
@@ -63,6 +64,7 @@ class CorridorNetwork:
             factory: 공장 구성 (노드/엣지)
         """
         self.env = env
+        self._factory = factory
         self.profile = factory.profile
         self._node_type: dict[int, str] = {n.id: n.node_type for n in factory.nodes}
         self._node_floor: dict[int, int] = {n.id: n.floor for n in factory.nodes}
@@ -74,7 +76,9 @@ class CorridorNetwork:
         self._edge_capacity: dict[int, int] = {}
         self._edge_floor_change: dict[int, int] = {}
         self._edge_group: dict[int, str] = {}
-        self._corridor_resource: dict[int, simpy.Resource] = {}
+        self._corridor_resource: dict[int, CapacityPool] = {}
+        self._physical: dict[tuple, CapacityPool] = {}
+        self._usable: dict[int, float] = {}
         self._elevator_resource: dict[str, simpy.Resource] = {}
 
         for edge in factory.edges:
@@ -111,7 +115,57 @@ class CorridorNetwork:
         capacity = lane_capacity(edge.width, self.profile)
         self._edge_kind[edge.id] = "corridor"
         self._edge_capacity[edge.id] = capacity
-        self._corridor_resource[edge.id] = simpy.Resource(self.env, capacity=capacity)
+        nodes = {n.id: (n.floor, n.x, n.y) for n in self._factory.nodes}
+        key = tuple(sorted((nodes[edge.from_node], nodes[edge.to_node])))
+        usable = max(0.0, edge.width - self.profile.edge_clearance)
+        self._usable[edge.id] = usable
+        units = math.floor((usable + self.profile.side_clearance) * 1000 + 1e-6)
+        resource = self._physical.setdefault(key, CapacityPool(self.env, units))
+        resource.resize(min(units, resource.capacity))
+        self._corridor_resource[edge.id] = resource
+
+    def update(self, factory: FactoryConfig) -> None:
+        """Preserve occupied physical resources across metadata and ID changes."""
+        fresh = CorridorNetwork(self.env, factory)
+        for key, candidate in list(fresh._physical.items()):
+            old = self._physical.get(key)
+            if old is not None:
+                old.resize(candidate.capacity)
+                fresh._physical[key] = old
+                for edge_id, resource in list(fresh._corridor_resource.items()):
+                    if resource is candidate:
+                        fresh._corridor_resource[edge_id] = old
+        old_points = {n.id: (n.floor, n.x, n.y) for n in self._factory.nodes}
+        intersections = {old_points[i]: r for i, r in self._intersection_resource.items()}
+        for node in factory.nodes:
+            key = (node.floor, node.x, node.y)
+            if node.id in fresh._intersection_resource and key in intersections:
+                fresh._intersection_resource[node.id] = intersections[key]
+        # Keep removed resources reachable until their owners have drained.
+        for key, resource in self._physical.items():
+            if key not in fresh._physical:
+                resource.resize(0)
+                fresh._physical[key] = resource
+        self.__dict__.update(fresh.__dict__)
+
+    def can_pass(self, edge_id: int, robot_width: float) -> bool:
+        """Check physical clearance without clamping an oversized robot."""
+        return robot_width <= self._usable.get(edge_id, 0.0) + 1e-9
+
+    def width_units(self, robot_width: float) -> int:
+        """Convert width plus inter-robot separation to conservative millimetres."""
+        return max(1, math.ceil((robot_width + self.profile.side_clearance) * 1000 - 1e-6))
+
+    def resource_id(self, edge_id: int) -> str:
+        """Identify a physical footprint independently of database edge IDs."""
+        resource = self._corridor_resource[edge_id]
+        key = next(key for key, value in self._physical.items() if value is resource)
+        return "corridor:" + repr(key)
+
+    def intersection_id(self, node_id: int) -> str:
+        """Identify an intersection by floor and position."""
+        node = next(n for n in self._factory.nodes if n.id == node_id)
+        return "intersection:" + repr((node.floor, node.x, node.y))
 
     def _elevator_capacity(self, group: str) -> int:
         """같은 엘리베이터 그룹의 노드 중 지정된 capacity가 있으면 그 값을, 없으면 fallback을 쓴다."""
@@ -171,8 +225,7 @@ class CorridorNetwork:
         Returns:
             점유 차선 수
         """
-        capacity = self._edge_capacity.get(edge_id, 1)
-        return min(lanes_consumed(robot_width, self.profile), capacity)
+        return lanes_consumed(robot_width, self.profile)
 
     def elevator_resource(self, edge_id: int) -> simpy.Resource | None:
         """이 엘리베이터 엣지가 속한 샤프트(그룹)의 공유자원.
