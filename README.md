@@ -206,7 +206,7 @@ python -m database.seed_data         # 3층 시드 확인 + 통로 폭 물리 �
 python -m simulation.path_graph      # 층 사이 엘리베이터 경로 출력
 python -m pytest -q                  # 전체 테스트 (Windows 한글 환경은 PYTHONUTF8=1 권장)
 ```
-> Windows에서는 RAG 테스트(ChromaDB 임시 폴더 삭제)가 `PermissionError`로 실패할 수 있습니다. 시뮬레이션·GUI 테스트(`simulation`, `gui`)와는 무관합니다.
+> ChromaDB 클라이언트는 사용 후 `close()`하거나 context manager로 닫습니다. 임시 디렉터리보다 먼저 닫아야 Windows에서도 파일 잠금이 해제됩니다. RH 기능의 검증 범위와 성능 결과는 [검수 기록](docs/RH_VALIDATION.md)을 확인하세요.
 
 ---
 

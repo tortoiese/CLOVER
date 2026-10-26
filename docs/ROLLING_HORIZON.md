@@ -1,6 +1,6 @@
 # Rolling Horizon MILP / CP-SAT 사용·검수 가이드
 
-두 RH 정책은 같은 관측 입력, 시간 확장 그래프, 정수 에너지, 목적함수와 독립 검증기를 사용한다. MILP는 OR-Tools의 SCIP, CP-SAT은 OR-Tools CP-SAT으로 같은 정수 선형 모델을 푼다. 기존 `optimized`는 가중치 휴리스틱, `assignment_milp_legacy`는 이전 배정 모델이다.
+두 RH 정책은 같은 관측 입력, 시간 확장 그래프, 정수 에너지, 목적함수와 독립 검증기를 사용한다. MILP는 OR-Tools의 SCIP, CP-SAT은 OR-Tools CP-SAT으로 같은 정수 선형 모델을 푼다. 기존 `optimized`는 가중치 휴리스틱, `assignment_milp_legacy`는 이전 배정 모델이다. 기본 정책은 `optimized`로 유지한다. [검수 기록](RH_VALIDATION.md)에 적용 조건·불리한 결과·최종 인수의 남은 목표를 명시했다.
 
 ## 실행과 GUI
 
@@ -23,7 +23,7 @@ ROBOT_FACTORY_DB=/tmp/clover-review.db CLOVER_RAG_ENABLED=0 CLOVER_RAG_PROVIDER=
 1. 첫 목적 F1은 우선순위·대기 나이를 반영한 미배정 작업 가중합이다.
 2. F1이 증명된 최적이면 그 값을 고정하고, 그렇지 않으면 검증된 F1보다 악화되지 않도록 제한해 F2를 푼다. F2는 정규화한 대기·납기 지연·실제 수평 이동거리·충전 비용의 정수 합이다.
 3. 공통 실행 가능 힌트는 탐색 시작점을 제공한다. 독립 행 검사에 통과한 F1=0 힌트가 있으면, 비음수 목적의 하한 0에 도달했으므로 F1 최적성을 증명할 수 있다. 이 증거는 `NONNEGATIVE_ZERO_WITNESS`로 기록한다. 힌트 사용 여부로 목적식이나 가능 영역은 바뀌지 않는다.
-4. 전체 H 계획 중 첫 작업/연속 충전 구간의 접두부만 원자적으로 확정한다. 확정 중 오류는 큐·소유권·예약·배정 상태를 함께 되돌린다. 확정하지 않은 미래 예약은 점유하지 않는다.
+4. 전체 H 계획 중 첫 작업/연속 충전 구간의 접두부만 원자적으로 확정한다. 첫 이동이 재계획 경계 이후에 있으면 앞부분의 대기만 실행하고 미래 작업을 배정하거나 예약하지 않는다. 작업·충전이 전혀 없는 전 구간 보류 해는 명시적 대체 실행 대상으로 남긴다. 확정 중 오류는 큐·소유권·예약·배정 상태를 함께 되돌린다. 확정하지 않은 미래 예약은 점유하지 않는다.
 
 기본 H=60초, 격자 1초, 재계획 5초, soft 2초, hard 3초, cold startup 10초, 후보 8개, 최대 32개, arc 기본 60,000개, planner RSS 기본 1GiB다. N=floor(H/격자)다. Decimal을 사용해 소비·예비량은 올림, 가용량·충전량은 내림, 비용은 half-up으로 정수화한다. 에너지 단위는 배터리 0.001, 비용 scale은 1,000,000이다. 실제 수평 거리와 엘리베이터 시간을 분리한다.
 
@@ -55,4 +55,6 @@ JSON에는 입력 공장/조건/trace/개입, 소스 hash, OS/Python/패키지 �
 QT_QPA_PLATFORM=offscreen CLOVER_RAG_PROVIDER=local CLOVER_RAG_ALLOW_NETWORK=0 python -B -m pytest -q -p no:cacheprovider
 ```
 
-CI 설정은 macOS/Windows/Linux × Python 3.11/3.14에서 pytest/Qt offscreen, 신규 계획 모듈 Ruff, pip check를 실행하도록 구성했다. 설정 파일이 존재하는 것과 실제 원격 CI가 통과한 것은 구분한다. 로컬 보고서에 기록된 OS/버전 밖의 결과는 원격 CI가 실행된 뒤 승인해야 한다. GUI 반응 목표는 고정 하드웨어에서 별도로 계측하며 정책 활성화에 따른 DB 재조회·전체 재시작 시간도 별도 보고한다.
+CI는 macOS/Windows/Ubuntu × Python 3.11/3.14에서 pytest/Qt offscreen, 신규 계획 모듈 Ruff, pip check를 실행한다. [6개 조합 통과 기록](https://github.com/tortoiese/CLOVER/actions/runs/40283424063)이 있다. PR의 최신 커밋 상태는 해당 PR의 Checks에서 확인한다. Qt는 검수한 PySide6 6.11.2, OR-Tools는 9.15.6755로 고정했다. ChromaDB는 public `close()`가 있는 1.5.9 이상을 사용한다. 운영 DB와 RAG 저장소를 소유한 스레드에서 닫고 종료한다.
+
+GUI 반응 목표는 고정 하드웨어에서 별도로 계측한다. 최종 macOS 실제 창의 30명령 측정 3회 P95는 89.4~135.3ms, 정책 활성화 전체 재시작은 223~224ms였다. 관측한 입력을 재사용하고 경로 그래프별 진입점 계산을 최대 1,024개 캐시한다. 명시적 reset·설정 변경은 DB와 새 그래프를 반영한다. 기본 공장 RH 처리량과 수락률의 남은 목표는 이 응답 수치로 대체하지 않는다.
