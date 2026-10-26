@@ -8,15 +8,28 @@ ROI 관련 화면은 전부 이 탭 하나에 모은다:
 
 from __future__ import annotations
 
+import json
+import math
+
 import pyqtgraph as pg
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QDoubleSpinBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
-import config
 from gui import constants as c
 from gui.widgets.kpi_card import KpiCard
+from utils.comparison_models import ComparisonConditions, calculate_economics
+from utils.event_types import SchedulerModeLabel
 from utils.metrics import KpiDefinition
-from utils.roi import ROIResult, compare, compute_roi
+from utils.roi import ROIResult, compare
 
 # (키, 제목, 단위, 높을수록 좋은지) — 차트 4종
 _PANELS: tuple[tuple[str, str, str, bool], ...] = (
@@ -37,9 +50,10 @@ _CARD_DEFS: tuple[KpiDefinition, ...] = (
 )
 
 
-def _spin(value: float, minimum: float, maximum: float, step: float, decimals: int = 3) -> QDoubleSpinBox:
+def _spin(value: float, minimum: float, maximum: float, step: float, decimals: int = 3,
+          parent: QWidget | None = None) -> QDoubleSpinBox:
     """ROI 파라미터 입력용 스핀박스 (config 기본값으로 시작)."""
-    spin = QDoubleSpinBox()
+    spin = QDoubleSpinBox(parent)
     spin.setRange(minimum, maximum)
     spin.setDecimals(decimals)
     spin.setSingleStep(step)
@@ -62,11 +76,18 @@ class RoiPanel(QWidget):
         self._base_d = 0.0
         self._opt_q = 0
         self._opt_d = 0.0
+        self._base_units = self._opt_units = 0.0
+        self._base_robot_energy = self._opt_robot_energy = None
+        self._candidate_id = "optimized"
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(4, 4, 4, 4)
         outer.setSpacing(8)
         outer.addWidget(self._build_params())
+        self._robot_profiles = QLineEdit("{}", self)
+        self._robot_profiles.setPlaceholderText('로봇별 환산 선택 입력: {"R0": [2.0, 0.9]}')
+        self._robot_profiles.editingFinished.connect(self._recompute)
+        outer.addWidget(self._robot_profiles)
         outer.addWidget(self._build_summary())
         outer.addWidget(self._build_charts(), 1)
 
@@ -78,22 +99,30 @@ class RoiPanel(QWidget):
     def _build_params(self) -> QWidget:
         """사용자 입력 파라미터(소비효율·전력 단가·기타 비용·건당 가치) 영역."""
         box = QGroupBox("ROI 파라미터 (조정 가능 — 기본값은 config.py)", self)
-        layout = QHBoxLayout(box)
-        self._wh_per_m = _spin(config.WH_PER_M, 0.001, 10.0, 0.001)
-        self._power_price = _spin(config.POWER_PRICE_PER_WH, 0.001, 100.0, 0.01)
-        self._other_cost = _spin(config.OTHER_COST_KRW, 0.0, 10_000_000.0, 1000.0, decimals=0)
-        self._revenue_per_unit = _spin(config.REVENUE_PER_UNIT_KRW, 0.0, 1_000_000.0, 100.0, decimals=0)
-        for label, spin, unit in (
-            ("소비효율", self._wh_per_m, "Wh/m"),
-            ("전력 단가", self._power_price, "원/Wh"),
+        layout = QGridLayout(box)
+        self._wh_per_unit = _spin(-1, -1, 100000, .01, parent=box)
+        self._power_price = _spin(-1, -1, 100000, 1, parent=box)
+        self._other_cost = _spin(0, 0, 10_000_000, 1000, decimals=0, parent=box)
+        self._revenue_per_unit = _spin(-1, -1, 1_000_000, 100, decimals=0, parent=box)
+        self._efficiency = _spin(.9, .001, 1, .01, parent=box)
+        self._move_cost = _spin(0, 0, 100000, .1, parent=box)
+        self._policy_cost = _spin(0, 0, 10000000, 1, parent=box)
+        for spin in (self._wh_per_unit, self._power_price, self._revenue_per_unit):
+            spin.setSpecialValueText("미입력")
+        for index, (label, spin, unit) in enumerate((
+            ("배터리 환산", self._wh_per_unit, "Wh/단위"),
+            ("전력 단가", self._power_price, "원/kWh"),
+            ("충전 효율", self._efficiency, ""),
             ("기타 비용", self._other_cost, "원"),
             ("건당 가치", self._revenue_per_unit, "원"),
-        ):
-            layout.addWidget(QLabel(label, box))
-            layout.addWidget(spin)
-            layout.addWidget(QLabel(unit, box))
+            ("이동 운영비", self._move_cost, "원/m"),
+            ("선택 정책 추가비", self._policy_cost, "원"),
+        )):
+            row, column = index // 3, (index % 3) * 3
+            layout.addWidget(QLabel(label, box), row, column)
+            layout.addWidget(spin, row, column + 1)
+            layout.addWidget(QLabel(unit, box), row, column + 2)
             spin.valueChanged.connect(self._recompute)
-        layout.addStretch(1)
         return box
 
     def _build_summary(self) -> QWidget:
@@ -138,7 +167,10 @@ class RoiPanel(QWidget):
     # ------------------------------------------------------------------
     # 갱신
     # ------------------------------------------------------------------
-    def update_kpis(self, base_completed: int, base_distance: float, opt_completed: int, opt_distance: float) -> None:
+    def update_kpis(self, base_completed: int, base_distance: float, opt_completed: int, opt_distance: float,
+                    base_units: float = 0, opt_units: float = 0,
+                    base_robot_energy: dict[str, float] | None = None,
+                    opt_robot_energy: dict[str, float] | None = None, candidate_id: str = "optimized") -> None:
         """시뮬레이션이 자동 수집한 값(완료 건수 Q·로봇 총 이동거리)으로 ROI를 다시 계산한다.
 
         Args:
@@ -149,18 +181,40 @@ class RoiPanel(QWidget):
         """
         self._base_q, self._base_d = base_completed, base_distance
         self._opt_q, self._opt_d = opt_completed, opt_distance
+        self._base_units, self._opt_units = base_units, opt_units
+        self._base_robot_energy, self._opt_robot_energy = base_robot_energy, opt_robot_energy
+        self._candidate_id = candidate_id
         self._recompute()
 
     def _recompute(self) -> None:
         """현재 파라미터 + 최근 수집된 완료 건수·이동거리로 ROI를 계산하고 화면을 갱신한다."""
-        params = dict(
-            wh_per_m=self._wh_per_m.value(),
-            power_price_per_wh=self._power_price.value(),
-            other_cost=self._other_cost.value(),
-            revenue_per_unit=self._revenue_per_unit.value(),
-        )
-        baseline = compute_roi(completed_units=self._base_q, total_distance_m=self._base_d, **params)
-        optimized = compute_roi(completed_units=self._opt_q, total_distance_m=self._opt_d, **params)
+        optional = lambda spin: None if spin.value() < 0 else spin.value()
+        try:
+            profiles = json.loads(self._robot_profiles.text())
+            ComparisonConditions(robot_energy_profiles=profiles).validate()
+        except (ValueError, TypeError):
+            self._summary.setText("로봇별 환산 JSON을 확인하세요. 이전 계산값은 갱신되지 않았습니다.")
+            return
+        conditions = ComparisonConditions(wh_per_battery_unit=optional(self._wh_per_unit),
+                                          electricity_per_kwh=optional(self._power_price),
+                                          revenue_per_task=optional(self._revenue_per_unit),
+                                          charge_efficiency=self._efficiency.value(), fixed_cost=self._other_cost.value(),
+                                          movement_cost_per_m=self._move_cost.value(), ai_cost=self._policy_cost.value(),
+                                          robot_energy_profiles=profiles)
+
+        def result(quantity: int, units: float, distance: float, by_robot: dict | None, proposed: bool) -> ROIResult:
+            values = calculate_economics(quantity, units, distance, conditions, proposed, by_robot)
+            aliases = ("energy_wh", "electricity_cost", "fixed_cost", "total_cost", "revenue", "net_profit",
+                       "profit_per_task", "roi", "profit_per_wh")
+            values["fixed_cost"] = conditions.fixed_cost
+            return ROIResult(*(values[key] if values[key] is not None else math.nan for key in aliases))
+
+        try:
+            baseline = result(self._base_q, self._base_units, self._base_d, self._base_robot_energy, False)
+            optimized = result(self._opt_q, self._opt_units, self._opt_d, self._opt_robot_energy, True)
+        except (ValueError, TypeError) as exc:
+            self._summary.setText(str(exc))
+            return
         for key, card in self._cards.items():
             card.set_values(getattr(optimized, key), getattr(baseline, key), "베이스라인")
         delta = compare(baseline, optimized)
@@ -169,9 +223,12 @@ class RoiPanel(QWidget):
         arrow = "▲" if profit_delta >= 0 else "▼"
         color = c.SUCCESS if profit_delta >= 0 else c.CRITICAL
         self._summary.setText(
-            f"<span style='color:{color}'>{arrow} 최적화안 적용 시 (베이스라인 대비) "
+            f"<span style='color:{color}'>{arrow} {SchedulerModeLabel.LABELS.get(self._candidate_id, self._candidate_id)} · FIFO 대비 "
             f"순이익 {profit_delta:+,.0f}원, ROI {roi_delta:+.1f}%p</span>"
         )
+        if not math.isfinite(profit_delta) or not math.isfinite(roi_delta):
+            self._summary.setText("미입력 단가는 ‘미입력’으로 표시합니다. 알려진 0원은 0으로 입력하세요. "
+                                  "배터리 소모 × Wh/단위 ÷ 충전효율을 사용합니다.")
         self._draw_charts(baseline, optimized)
 
     def _draw_charts(self, baseline: ROIResult, optimized: ROIResult) -> None:
@@ -181,10 +238,14 @@ class RoiPanel(QWidget):
         for key, title, unit, higher_better in _PANELS:
             plot = self._plots[key]
             plot.clear()
+            plot.getAxis("bottom").setTicks([[(0, "FIFO"), (1, SchedulerModeLabel.LABELS.get(self._candidate_id, self._candidate_id))]])
             b, o = base[key], opt[key]
+            if not math.isfinite(b) or not math.isfinite(o):
+                plot.setTitle(title + " · 미산정", color=c.TEXT_MUTED, size="10pt")
+                continue
             plot.addItem(pg.BarGraphItem(x=[0], height=[b], width=0.6, brush=QColor(c.ENGINE_COLORS["baseline"]),
                                          pen=None))
-            plot.addItem(pg.BarGraphItem(x=[1], height=[o], width=0.6, brush=QColor(c.ENGINE_COLORS["optimized"]),
+            plot.addItem(pg.BarGraphItem(x=[1], height=[o], width=0.6, brush=QColor(c.ENGINE_COLORS.get(self._candidate_id, c.HIGHLIGHT)),
                                          pen=None))
             top = max(b, o, 1e-9)
             for x, val in ((0, b), (1, o)):

@@ -105,6 +105,7 @@ class ActionKind:
     RESET: Final[str] = "reset"
     SET_SPEED: Final[str] = "set_speed"
     SET_MODE: Final[str] = "set_mode"
+    SET_PLANNING: Final[str] = "set_planning"
     SET_TASK_RATE: Final[str] = "set_task_rate"
     SCALE_TASK_RATE: Final[str] = "scale_task_rate"
     FORCE_CHARGE: Final[str] = "force_charge"
@@ -125,7 +126,7 @@ class ActionKind:
     CANCEL_ORDER: Final[str] = "cancel_order"
 
     SIM_COMMANDS: Final[frozenset[str]] = frozenset({
-        START, PAUSE, STOP, RESET, SET_SPEED, SET_MODE, SET_TASK_RATE, SCALE_TASK_RATE, FORCE_CHARGE,
+        START, PAUSE, STOP, RESET, SET_SPEED, SET_MODE, SET_PLANNING, SET_TASK_RATE, SCALE_TASK_RATE, FORCE_CHARGE,
         EMERGENCY_PLAN, RECALL_ROBOTS, PRECHARGE, SET_MIN_CHARGE_MODE, RELOAD_CONFIG, SYNC_ORDERS,
     })
 
@@ -133,7 +134,9 @@ class ActionKind:
 class SchedulerModeLabel:
     """스케줄러 모드 표시 이름."""
 
-    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "최적화"}
+    LABELS: Final[dict[str, str]] = {"baseline": "FIFO", "optimized": "가중치 휴리스틱",
+                                   "assignment_milp_legacy": "기존 배정 MILP", "rh_milp": "RH MILP",
+                                   "rh_cpsat": "RH CP-SAT"}
 
 
 class Tables:

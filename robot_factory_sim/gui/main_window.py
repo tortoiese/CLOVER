@@ -11,7 +11,9 @@
 from __future__ import annotations
 
 import math
+import time
 import uuid
+from collections import deque
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
@@ -41,12 +43,18 @@ from gui.config_editor import ConfigEditorDialog
 from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
 from gui.factory_panel import FactoryPanel
-from gui.order_dialog import OrderDialog
 from gui.optimization_panel import OptimizationPanel
+from gui.order_dialog import OrderDialog
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
-from utils.event_types import ActionKind, ChangeType, SchedulerModeLabel, Severity, Tables
+from utils.event_types import (
+    ActionKind,
+    ChangeType,
+    SchedulerModeLabel,
+    Severity,
+    Tables,
+)
 
 THREAD_STOP_TIMEOUT_MS: int = 3000
 SHUTDOWN_POLL_INTERVAL_MS: int = 100
@@ -77,6 +85,8 @@ class MainWindow(QMainWindow):
         self._comparison_enabled = bool(getattr(agent, "supports_comparison", False))
         self._comparison_pending = False
         self._comparison_request_id: str | None = None
+        self.gui_response_ms: deque[float] = deque(maxlen=1000)
+        self._last_response_seq = 0
         self._shutdown_timer = QTimer(self)
         self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
         self._shutdown_timer.timeout.connect(self._finish_shutdown)
@@ -111,7 +121,7 @@ class MainWindow(QMainWindow):
         self._worker.start()
         self._console.add_system_message(f"DB 연결: {service.db_path}\n[▶ 시작]을 누르면 시뮬레이션과 DB 감시가 시작됩니다.")
         if self._comparison_enabled:
-            self._console.add_system_message("RAG 운영안 비교: [운영안 비교]에서 조건 입력 → /최적화 → /추천. "
+            self._console.add_system_message("운영안 비교: [운영안 비교]에서 정책·조건 입력 → /최적화 → /추천. "
                                              "문서 질문은 /검색 ROI 산식. 결과는 자동 적용되지 않습니다.")
 
     # ------------------------------------------------------------------
@@ -140,10 +150,11 @@ class MainWindow(QMainWindow):
         for mode in config.SCHEDULER_MODES:
             self._mode.addItem(SchedulerModeLabel.LABELS[mode], mode)
         self._mode.setCurrentIndex(config.SCHEDULER_MODES.index(config.DEFAULT_SCHEDULER_MODE))
-        self._mode.setToolTip("두 스케줄러는 항상 병렬 실행되며, 선택한 쪽이 화면·AI 조치 대상이 됩니다.")
+        self._mode.setToolTip("선택은 화면·조치 대상을 바꿉니다. 비활성 정책을 처음 선택하면 비교를 0초부터 다시 시작합니다.")
         self._mode.currentIndexChanged.connect(
             lambda _: self._worker.send_command(ActionKind.SET_MODE, {"mode": self._mode.currentData()}))
         toolbar.addWidget(self._mode)
+        self._action(toolbar, "RH 설정", self._edit_planning, "계획 구간·격자·예산·후보·메모리 설정")
         toolbar.addSeparator()
         self._action(toolbar, "⚙ 공장 설정", self._open_config_editor)
         self._action(toolbar, "📋 주문 관리", self._open_order_dialog)
@@ -153,7 +164,7 @@ class MainWindow(QMainWindow):
                                          "현재 구성으로 베이스라인·MILP 배정을 비교합니다.")
         comparison_action.setEnabled(self._comparison_enabled)
         if not self._comparison_enabled:
-            comparison_action.setToolTip("CLOVER_RAG_ENABLED=1로 실행하면 활성화됩니다.")
+            comparison_action.setToolTip("비교 계산 실행 함수가 연결되지 않았습니다.")
 
         spacer = QWidget(self)
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -241,6 +252,18 @@ class MainWindow(QMainWindow):
         self._dashboard.update_state(state)
         self._sync_combo(self._speed, state.speed)
         self._sync_combo(self._mode, state.mode)
+        sequence = state.diagnostics.get("command_seq", 0)
+        if sequence and sequence != self._last_response_seq:
+            self.gui_response_ms.append((time.monotonic() - state.diagnostics["command_sent"]) * 1000)
+            self._last_response_seq = sequence
+
+    def _edit_planning(self) -> None:
+        from gui.planning_settings import PlanningSettingsDialog
+        from simulation.planning.contracts import Settings
+        values = (self._state.planning.get(self._state.mode, {}).get("settings") if self._state else None)
+        dialog = PlanningSettingsDialog(values or asdict(Settings(scope="traffic")), self)
+        if dialog.exec():
+            self._worker.send_command(ActionKind.SET_PLANNING, dialog.values())
 
     @staticmethod
     def _sync_combo(combo: QComboBox, value: Any) -> None:
@@ -317,6 +340,9 @@ class MainWindow(QMainWindow):
         if self._comparison_enabled and is_comparison_request(text):
             try:
                 context["comparison_conditions"] = self._optimization.conditions()
+                context["comparison_policies"] = self._optimization.policies()
+                context["comparison_candidate"] = self._optimization.candidate_policy()
+                context["comparison_scenario"] = self._optimization.scenario_id()
                 context["factory_config"] = self._service.load_factory_config().to_dict()
                 context["sim_datetime"] = self.sim_clock().isoformat()
                 context["comparison_orders"] = []
@@ -441,7 +467,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # 종료
     # ------------------------------------------------------------------
-    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 — Qt override
+    def closeEvent(self, event: QCloseEvent) -> None:
         """스레드 종료를 요청하고 모두 종료되기 전에는 창을 유지한다."""
         threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
         if not self._closing:
@@ -460,6 +486,7 @@ class MainWindow(QMainWindow):
             self._shutdown_timer.start()
             return
         self._shutdown_timer.stop()
+        self._service.close()
         super().closeEvent(event)
 
     def _finish_shutdown(self) -> None:

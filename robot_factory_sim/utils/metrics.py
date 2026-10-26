@@ -74,7 +74,10 @@ class MetricsCollector:
         self.response_times: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.corridor_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.ev_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
+        self.station_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
+        self.intersection_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.deadlock_count = 0
+        self.long_wait_count = 0
         self.total_completed = 0
         self.orders_finished = 0
         self.orders_on_time = 0
@@ -131,7 +134,7 @@ class MetricsCollector:
         self.ev_waits.append(max(0.0, wait))
 
     def record_deadlock(self) -> None:
-        """통로 대기가 임계치(config.DEADLOCK_THRESHOLD_SEC)를 넘은 경우를 집계한다."""
+        """검증된 순환 대기만 집계한다. 장시간 대기는 별도 지표다."""
         self.deadlock_count += 1
 
     def record_order_finished(self, on_time: bool) -> None:

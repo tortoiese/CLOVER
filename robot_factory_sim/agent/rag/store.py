@@ -5,7 +5,8 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
 
 from agent.rag.documents import Chunk
 from agent.rag.providers import Embedder
@@ -39,6 +40,24 @@ class ChromaStore:
             f"clover-rag-{suffix}", metadata={"hnsw:space": "cosine", "embedder": embedder.fingerprint},
             embedding_function=None,
         )
+
+    def close(self) -> None:
+        """Release this client's shared Chroma handles without deleting persisted data."""
+        if self._client is not None:
+            client, self._client = self._client, None
+            self._collection = None
+            client.close()
+
+    def __enter__(self) -> Self:
+        """Keep the store open for an explicit resource scope."""
+        if self._client is None:
+            raise RuntimeError("store is closed")
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None,
+                 traceback: TracebackType | None) -> None:
+        """Close all owned handles before the surrounding data directory is removed."""
+        self.close()
 
     def count(self) -> int:
         """현재 컬렉션의 청크 수를 반환한다."""

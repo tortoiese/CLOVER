@@ -60,7 +60,7 @@ SIDE_CLEARANCE: float = 0.3            # 로봇 측면 여유 (m)
 FLOOR_TRAVEL_SEC: float = 4.0          # 엘리베이터 층당 이동시간 (s)
 DOOR_TIME_SEC: float = 6.0             # 엘리베이터 문 개폐시간 (s)
 INTERSECTION_MARGIN_SEC: float = 1.0   # 교차점 통과 여유시간 (s)
-DEADLOCK_THRESHOLD_SEC: float = 120.0  # 통로 대기가 이 이상이면 교착으로 집계 (s)
+DEADLOCK_THRESHOLD_SEC: float = 120.0  # 장시간 통로 대기 통계의 임계값; 순환 교착과 구분 (s)
 DEFAULT_ELEVATOR_CAPACITY: int = 1     # 엘리베이터 동시 탑승(운행) 로봇 수
 
 # ---------------------------------------------------------------------------
@@ -70,7 +70,8 @@ RANDOM_SEED: int = 42
 SPEED_OPTIONS: tuple[int, ...] = (1, 2, 5, 10)
 DEFAULT_SPEED: int = 1
 DEFAULT_SCHEDULER_MODE: str = "optimized"   # "baseline" | "optimized"
-SCHEDULER_MODES: tuple[str, ...] = ("baseline", "optimized")
+SCHEDULER_MODES: tuple[str, ...] = ("baseline", "optimized", "assignment_milp_legacy", "rh_milp", "rh_cpsat")
+DEFAULT_ACTIVE_POLICIES: tuple[str, ...] = ("baseline", "optimized")
 
 WORKER_LOOP_INTERVAL_MS: int = 25       # SimWorker 루프 주기
 STATE_EMIT_INTERVAL: float = 0.08       # 상태 스냅샷 emit 간격 (wall-sec)

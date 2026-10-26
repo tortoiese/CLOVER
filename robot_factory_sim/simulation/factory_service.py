@@ -19,7 +19,13 @@ from database.config_watcher import ConfigWatcher
 from database.db_manager import DBManager
 from database.order_manager import OrderManager, ProductionEventWatcher
 from database.seed_data import seed_default_factory
-from utils.config_models import ChargingStationConfig, FactoryConfig, ObstacleConfig, OrderRecord, RobotConfig
+from utils.config_models import (
+    ChargingStationConfig,
+    FactoryConfig,
+    ObstacleConfig,
+    OrderRecord,
+    RobotConfig,
+)
 from utils.event_types import Tables
 from utils.layout_tools import link_facilities_to_nodes
 
@@ -43,6 +49,10 @@ class FactoryService:
     def db_path(self) -> str:
         """DB 경로."""
         return self._db_path
+
+    def close(self) -> None:
+        """Release the calling thread's DB handle after its widgets have shut down."""
+        self._db.close()
 
     # ------------------------------------------------------------------
     # 초기화 / 상태

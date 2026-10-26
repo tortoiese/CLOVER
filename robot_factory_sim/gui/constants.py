@@ -95,7 +95,9 @@ TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
     TimelineKind.INFO: (0, TEXT_MUTED, "d", "ℹ 정보"),
 }
 
-ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7"}
+ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7",
+                                     "assignment_milp_legacy": "#f9b572", "rh_milp": "#67d6e8",
+                                     "rh_cpsat": "#d890e8"}
 
 # ---------------------------------------------------------------------------
 # 크기
