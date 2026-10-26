@@ -186,6 +186,7 @@ class _SimController(QObject):
 
     def _flush_progress(self) -> None:
         """표시 엔진의 주문 진행률을 DB에 기록한다."""
+        cached = {record.order_id: record for record in self._cached_orders}
         for order in self.primary.orders.values():
             if order.status == OrderStatus.CANCELLED:
                 continue
@@ -193,6 +194,10 @@ class _SimController(QObject):
             if self._progress_cache.get(order.order_id) != key:
                 self._orders.update_progress(order.order_id, order.completed, order.status)
                 self._progress_cache[order.order_id] = key
+                # Policy activation reuses this observed DB snapshot. Keep our
+                # own persisted writes in it so finished work cannot reappear.
+                if record := cached.get(order.order_id):
+                    record.completed, record.status = key
 
     def _publish_alerts(self) -> None:
         """표시 엔진이 감지한 이벤트를 production_events에 기록한다 (비교 엔진 이벤트는 버림)."""

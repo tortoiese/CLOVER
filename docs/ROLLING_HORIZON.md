@@ -57,4 +57,4 @@ QT_QPA_PLATFORM=offscreen CLOVER_RAG_PROVIDER=local CLOVER_RAG_ALLOW_NETWORK=0 p
 
 CI는 macOS/Windows/Ubuntu × Python 3.11/3.14에서 pytest/Qt offscreen, 신규 계획 모듈 Ruff, pip check를 실행한다. [6개 조합 통과 기록](https://github.com/tortoiese/CLOVER/actions/runs/40283424063)이 있다. PR의 최신 커밋 상태는 해당 PR의 Checks에서 확인한다. Qt는 검수한 PySide6 6.11.2, OR-Tools는 9.15.6755로 고정했다. ChromaDB는 public `close()`가 있는 1.5.9 이상을 사용한다. 운영 DB와 RAG 저장소를 소유한 스레드에서 닫고 종료한다.
 
-GUI 반응 목표는 고정 하드웨어에서 별도로 계측한다. 최종 macOS 실제 창의 30명령 측정 3회 P95는 89.4~135.3ms, 정책 활성화 전체 재시작은 223~224ms였다. 관측한 입력을 재사용하고 경로 그래프별 진입점 계산을 최대 1,024개 캐시한다. 명시적 reset·설정 변경은 DB와 새 그래프를 반영한다. 기본 공장 RH 처리량과 수락률의 남은 목표는 이 응답 수치로 대체하지 않는다.
+GUI 반응 목표는 고정 하드웨어에서 별도로 계측한다. 최종 macOS 실제 창의 30명령 측정 4회 P95는 89.4~135.3ms, 정책 활성화 전체 재시작은 200~224ms였다. 관측한 입력을 재사용하고 경로 그래프별 진입점 계산을 최대 1,024개 캐시한다. 진행률 저장은 재시작 캐시에도 반영하며 명시적 reset·설정 변경은 DB와 새 그래프를 반영한다. 기본 공장 RH 처리량과 수락률의 남은 목표는 이 응답 수치로 대체하지 않는다.

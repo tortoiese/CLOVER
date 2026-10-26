@@ -193,3 +193,39 @@ def test_policy_activation_reuses_observed_inputs_and_keeps_default(tmp_path: Pa
     finally:
         controller.shutdown()
         app.processEvents()
+
+
+@pytest.mark.parametrize("quantity", [1, 3])
+def test_policy_activation_preserves_flushed_order_progress(tmp_path: Path, quantity: int) -> None:
+    """A new comparison must not restart work already persisted as completed."""
+    from simulation.sim_worker import _SimController
+
+    app = QApplication.instance() or QApplication([])
+    service = FactoryService(tmp_path / "progress.db")
+    service.ensure_database()
+    for existing in service.list_orders(active_only=True):
+        service.cancel_order(existing.order_id)
+    service.save_factory_config(factory())
+    order = service.create_order("Resume", quantity, required_stations=["S"])
+    controller = _SimController(str(service.db_path))
+    controller._timer.stop()
+    try:
+        for engine in controller._engines.values():
+            engine.update_param("task_rate", 0)
+            while engine.orders[order.order_id].completed == 0 and engine.now < 30:
+                engine.env.run(until=engine.now + .5)
+            assert engine.orders[order.order_id].completed == 1
+        controller._flush_progress()
+        persisted = next(row for row in service.list_orders() if row.order_id == order.order_id)
+        assert persisted.completed == 1
+        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp"})
+        for engine in controller._engines.values():
+            if quantity == 1:
+                assert order.order_id not in engine.orders
+            else:
+                assert engine.orders[order.order_id].completed == persisted.completed
+        assert next(row for row in service.list_orders() if row.order_id == order.order_id).completed == 1
+    finally:
+        controller.shutdown()
+        service.close()
+        app.processEvents()

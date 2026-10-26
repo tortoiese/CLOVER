@@ -3,7 +3,7 @@
   "date": "2026-10-26",
   "default_policy": "optimized",
   "scope": "Fixed scenarios and time-limited solvers; no claim of superiority on all factories.",
-  "source_note": "Snapshot based on main with source_dirty=true. Later handle lifetime changes are listed per case.",
+  "source_note": "Snapshot based on main with source_dirty=true. Later handle lifetime, live-policy cache and Qt QA changes are listed per case; the headless experiment does not use the live controller.",
   "units_note": "battery_units are relative simulator units. Wh/cost/ROI are null without measured inputs.",
   "raw_report_note": "All scalar per-seed metrics, solver timing distributions/status counts, full inputs and traces retained; raw per-call/action/task logs omitted. Original exports have SHA256 references.",
   "cases": [
@@ -7397,7 +7397,9 @@
         "agent/test_rag.py",
         "gui/agent_bridge.py",
         "gui/main_window.py",
-        "simulation/factory_service.py"
+        "gui/test_rh_gui.py",
+        "simulation/factory_service.py",
+        "simulation/sim_worker.py"
       ],
       "source_files_added_after_measurement": [
         "conftest.py"
@@ -17132,7 +17134,9 @@
         "agent/test_rag.py",
         "gui/agent_bridge.py",
         "gui/main_window.py",
-        "simulation/factory_service.py"
+        "gui/test_rh_gui.py",
+        "simulation/factory_service.py",
+        "simulation/sim_worker.py"
       ],
       "source_files_added_after_measurement": [
         "conftest.py"
@@ -21975,7 +21979,9 @@
         "agent/test_rag.py",
         "gui/agent_bridge.py",
         "gui/main_window.py",
-        "simulation/factory_service.py"
+        "gui/test_rh_gui.py",
+        "simulation/factory_service.py",
+        "simulation/sim_worker.py"
       ],
       "source_files_added_after_measurement": [
         "conftest.py"
@@ -28109,7 +28115,9 @@
         "agent/test_rag.py",
         "gui/agent_bridge.py",
         "gui/main_window.py",
-        "simulation/factory_service.py"
+        "gui/test_rh_gui.py",
+        "simulation/factory_service.py",
+        "simulation/sim_worker.py"
       ],
       "source_files_added_after_measurement": [
         "conftest.py"
