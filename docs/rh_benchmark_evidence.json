@@ -7399,6 +7399,9 @@
         "gui/main_window.py",
         "simulation/factory_service.py"
       ],
+      "source_files_added_after_measurement": [
+        "conftest.py"
+      ],
       "full_result_sha256": "c47dc0094329ef447e5b7ba848797e000052d679810ee93041044a9aea92aeca"
     },
     {
@@ -17131,6 +17134,9 @@
         "gui/main_window.py",
         "simulation/factory_service.py"
       ],
+      "source_files_added_after_measurement": [
+        "conftest.py"
+      ],
       "full_result_sha256": "9a94696d1b40913924ddd26411e36d1fb027948a36c7da6997a4764714f30974"
     },
     {
@@ -21970,6 +21976,9 @@
         "gui/agent_bridge.py",
         "gui/main_window.py",
         "simulation/factory_service.py"
+      ],
+      "source_files_added_after_measurement": [
+        "conftest.py"
       ],
       "full_result_sha256": "a18a09610aab4f8a9bcb91cff3b525a69a84da3ebd1bd38bd85357a11194b2fa"
     },
@@ -28101,6 +28110,9 @@
         "gui/agent_bridge.py",
         "gui/main_window.py",
         "simulation/factory_service.py"
+      ],
+      "source_files_added_after_measurement": [
+        "conftest.py"
       ],
       "full_result_sha256": "d1ea6cf6ff5c5751205463490e1597bfd1c66768d3c9e3e9a6f9137151c1317c"
     }
