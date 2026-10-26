@@ -11,12 +11,13 @@
 from __future__ import annotations
 
 import copy
+import math
 from collections.abc import Callable
 from typing import Any
 
-from PySide6.QtCore import QMimeData, QPointF, Qt, Signal
+from PySide6.QtCore import QMimeData, QPointF, Qt, QTimer, Signal
 from PySide6.QtGui import QBrush, QColor, QDragEnterEvent, QDragMoveEvent, QDropEvent, QFont, QKeyEvent, QMouseEvent, \
-    QPainter, QPen
+    QPainter, QPen, QShowEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QButtonGroup,
@@ -75,7 +76,8 @@ COORD_MAX: float = 5000.0
 DEFAULT_WALL_LENGTH: float = 100.0
 DEFAULT_OBSTACLE_SIZE: float = 40.0
 GRID_NETWORK_MIN_SPACING: float = 50.0
-ROBOT_COLUMNS: tuple[str, ...] = ("ID", "종류", "배터리 용량", "속도 (m/s)", "소모율 (/m)", "충전 임계치 (%)", "가동")
+ROBOT_COLUMNS: tuple[str, ...] = ("ID", "종류", "배터리 용량", "속도 (m/s)", "소모율 (/m)",
+                                  "충전 임계치 (%)", "폭 (m)", "길이 (m)", "가동")
 MODE_SELECT: str = "select"
 MODE_PATH: str = "path"
 
@@ -243,7 +245,9 @@ class EdgeItem(QGraphicsLineItem):
         color = QColor(c.CRITICAL if blocked else c.HIGHLIGHT)
         color.setAlpha(200 if blocked else 150)
         self.setPen(QPen(color, 2.0, Qt.PenStyle.DashLine if blocked else Qt.PenStyle.SolidLine))
-        self.setToolTip("장애물로 차단된 엣지" if blocked else f"엣지 {self.edge.from_node} ↔ {self.edge.to_node}")
+        direction = "↔" if self.edge.is_bidirectional else "→"
+        self.setToolTip(f"통로 {self.edge.from_node} {direction} {self.edge.to_node} · 폭 {self.edge.width:g}m"
+                        + ("\n장애물로 차단됨" if blocked else "\n선택하여 폭과 통행 방향을 편집하세요."))
 
 
 _EDITABLE_ITEMS = (EditableStation, EditableCharger, EditableElevator, EditableObstacle)
@@ -359,6 +363,15 @@ class ConfigEditorDialog(QDialog):
     """공장 설정 에디터."""
 
     saved = Signal(int)  # 변경된 레코드 수
+
+    def showEvent(self, event: QShowEvent) -> None:  # noqa: N802 — Qt override
+        """실제 뷰 크기가 결정된 뒤 도면을 맞춰 처음 열 때 작아지는 현상을 막는다."""
+        super().showEvent(event)
+        QTimer.singleShot(0, self._fit_scene)
+
+    def _fit_scene(self) -> None:
+        if self.isVisible():
+            self._view.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def __init__(self, service: FactoryService, parent: QWidget | None = None) -> None:
         """에디터를 생성하고 DB 구성을 불러온다.
@@ -518,6 +531,7 @@ class ConfigEditorDialog(QDialog):
         self._props.addWidget(self._build_obstacle_form())
         self._props.addWidget(self._build_node_form())
         self._props.addWidget(self._build_elevator_form())
+        self._props.addWidget(self._build_edge_form())
         group = QGroupBox("선택 항목 속성", box)
         group_layout = QVBoxLayout(group)
         group_layout.addWidget(self._props)
@@ -637,13 +651,67 @@ class ConfigEditorDialog(QDialog):
         self._n_id = QLabel(page)
         self._n_x, self._n_y = _spin(), _spin()
         self._n_link = QLabel(page)
+        self._n_kind = QComboBox(page)
+        self._n_kind.addItems(["waypoint", "intersection"])
         form.addRow("노드 ID", self._n_id)
         form.addRow("X", self._n_x)
         form.addRow("Y", self._n_y)
         form.addRow("연결 설비", self._n_link)
+        form.addRow("노드 유형", self._n_kind)
+        self._n_kind.currentTextChanged.connect(self._apply_node_form)
         self._n_x.valueChanged.connect(self._apply_node_form)
         self._n_y.valueChanged.connect(self._apply_node_form)
         return page
+
+    def _build_edge_form(self) -> QWidget:
+        """통로 폭과 방향을 기존 경로 엣지에 저장하는 폼을 만든다."""
+        page = QWidget(self)
+        form = QFormLayout(page)
+        self._edge_id = QLabel(page)
+        self._edge_direction = QLabel(page)
+        self._edge_width = _spin(maximum=50, decimals=2, minimum=0.01, step=0.1)
+        self._edge_two_way = QCheckBox("양방향 통행", page)
+        reverse = QPushButton("시작·끝 방향 뒤집기", page)
+        form.addRow("통로 ID", self._edge_id)
+        form.addRow("시작 → 끝", self._edge_direction)
+        form.addRow("통로 폭 (m)", self._edge_width)
+        form.addRow(self._edge_two_way)
+        form.addRow(reverse)
+        notice = QLabel("양방향을 끄면 시작 → 끝 방향만 허용합니다.\n"
+                        "로봇 폭 + 벽 여유 + 측면 여유보다 좁으면 통행할 수 없습니다.\n"
+                        "자원 대기는 진입 직전 노드에서 FIFO로 처리합니다.", page)
+        notice.setWordWrap(True)
+        form.addRow(notice)
+        self._edge_width.valueChanged.connect(self._apply_edge_form)
+        self._edge_two_way.toggled.connect(self._apply_edge_form)
+        reverse.clicked.connect(self._reverse_edge)
+        return page
+
+    def _apply_edge_form(self) -> None:
+        """통로 폼 값을 선택된 엣지에 반영한다."""
+        item = self._selected
+        if self._loading or not isinstance(item, EdgeItem):
+            return
+        item.edge.width = self._edge_width.value()
+        item.edge.is_bidirectional = self._edge_two_way.isChecked()
+        self._refresh_selected_edge(item)
+        self._mark_dirty()
+
+    def _reverse_edge(self) -> None:
+        """선택된 일방통행의 시작·끝을 뒤집는다."""
+        item = self._selected
+        if not isinstance(item, EdgeItem):
+            return
+        item.edge.from_node, item.edge.to_node = item.edge.to_node, item.edge.from_node
+        self._refresh_selected_edge(item)
+        self._mark_dirty()
+
+    def _refresh_selected_edge(self, item: EdgeItem) -> None:
+        start, end = self._node_items[item.edge.from_node], self._node_items[item.edge.to_node]
+        blocked = edge_blocked((start.node.x, start.node.y), (end.node.x, end.node.y),
+                               [obstacle for obstacle in self._factory.obstacles if obstacle.floor == self._floor])
+        item.set_geometry(start.pos(), end.pos(), blocked)
+        self._edge_direction.setText(f"{item.edge.from_node} → {item.edge.to_node}")
 
     def _build_robot_tab(self) -> QWidget:
         """로봇 관리 탭."""
@@ -1034,7 +1102,7 @@ class ConfigEditorDialog(QDialog):
     # ------------------------------------------------------------------
     def _on_selection_changed(self) -> None:
         """선택 변경 → 속성 폼 표시."""
-        selected = [i for i in self._scene.selectedItems() if isinstance(i, (*_EDITABLE_ITEMS, NodeItem))]
+        selected = [i for i in self._scene.selectedItems() if isinstance(i, (*_EDITABLE_ITEMS, NodeItem, EdgeItem))]
         self._selected = selected[0] if len(selected) == 1 else None
         if self._selected is None:
             self._props.setCurrentIndex(0)
@@ -1084,7 +1152,20 @@ class ConfigEditorDialog(QDialog):
                 self._props.setCurrentIndex(4)
                 self._n_id.setText(str(node.id) + (" (저장 전)" if node.id < 0 else ""))
                 self._n_link.setText(node.linked_station_id or "-")
-                self._set_values([(self._n_x, node.x), (self._n_y, node.y)])
+                self._n_kind.blockSignals(True)
+                self._n_kind.clear()
+                self._n_kind.addItems(["waypoint", "intersection"])
+                if node.node_type not in ("waypoint", "intersection"):
+                    self._n_kind.addItem(node.node_type)
+                self._n_kind.blockSignals(False)
+                self._n_kind.setEnabled(not node.linked_station_id and node.node_type in ("waypoint", "intersection"))
+                self._set_values([(self._n_x, node.x), (self._n_y, node.y), (self._n_kind, node.node_type)])
+            elif isinstance(item, EdgeItem):
+                self._props.setCurrentIndex(6)
+                self._edge_id.setText(str(item.edge.id))
+                self._edge_direction.setText(f"{item.edge.from_node} → {item.edge.to_node}")
+                self._set_values([(self._edge_width, item.edge.width),
+                                  (self._edge_two_way, item.edge.is_bidirectional)])
         finally:
             self._loading = False
 
@@ -1180,6 +1261,8 @@ class ConfigEditorDialog(QDialog):
         if self._loading or not isinstance(item, NodeItem):
             return
         item.node.x, item.node.y = self._n_x.value(), self._n_y.value()
+        if not item.node.linked_station_id and self._n_kind.currentText() in ("waypoint", "intersection"):
+            item.node.node_type = self._n_kind.currentText()
         self._apply_silently(item, lambda: item.setPos(QPointF(item.node.x, item.node.y)))
         self._rebuild_edges()
         self._mark_dirty()
@@ -1260,7 +1343,7 @@ class ConfigEditorDialog(QDialog):
         row = table.rowCount()
         table.insertRow(row)
         values = (robot.id, robot.robot_type, robot.battery_capacity, robot.move_speed, robot.battery_drain_rate,
-                  robot.charge_threshold)
+                  robot.charge_threshold, robot.width, robot.length)
         for column, value in enumerate(values):
             item = QTableWidgetItem(str(value))
             if column == 0:
@@ -1282,7 +1365,8 @@ class ConfigEditorDialog(QDialog):
         robot_id = self._next_code("R", self._robot_ids_in_table())
         self._robot_table.blockSignals(True)
         self._append_robot_row(RobotConfig(robot_id, base.robot_type, base.battery_capacity, base.move_speed,
-                                           base.battery_drain_rate, base.charge_threshold, True))
+                                           base.battery_drain_rate, base.charge_threshold, True,
+                                           base.width, base.length))
         self._robot_table.blockSignals(False)
         self._mark_dirty()
 
@@ -1304,7 +1388,17 @@ class ConfigEditorDialog(QDialog):
                 robots.append(RobotConfig(
                     cells[0], cells[1] or config.DEFAULT_ROBOT_TYPE, float(cells[2]), float(cells[3]), float(cells[4]),
                     float(cells[5]), table.item(row, len(ROBOT_COLUMNS) - 1).checkState() == Qt.CheckState.Checked,
+                    float(cells[6]), float(cells[7]),
                 ))
+                robot = robots[-1]
+                values = (robot.battery_capacity, robot.move_speed, robot.battery_drain_rate,
+                          robot.charge_threshold, robot.width, robot.length)
+                if any(not math.isfinite(value) for value in values):
+                    raise ValueError("유한한 숫자가 필요합니다.")
+                if min(robot.battery_capacity, robot.move_speed, robot.width, robot.length) <= 0:
+                    raise ValueError("용량·속도·로봇 크기는 양수여야 합니다.")
+                if robot.battery_drain_rate < 0 or not 0 <= robot.charge_threshold <= 100:
+                    raise ValueError("소모율은 비음수, 충전 임계치는 0~100%여야 합니다.")
             except ValueError as exc:
                 raise ValueError(f"{cells[0]} 로봇 파라미터가 숫자가 아닙니다: {exc}") from exc
         return robots

@@ -375,7 +375,8 @@ class SimulationEngine:
             usable = self._usable_stations(task)
             if usable:
                 task.station_id = min(
-                    usable, key=lambda s: self.path_graph.distance_to_facility(robot.x, robot.y, s, robot.floor))
+                    usable, key=lambda s: self.path_graph.distance_to_facility(
+                        robot.x, robot.y, s, robot.floor, robot.cfg.width))
         task.assigned_at = self.now
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is not None and order.detected_at is not None and not order.responded:
@@ -851,14 +852,16 @@ class SimulationEngine:
             != [(c.id, c.x, c.y, c.floor) for c in factory.chargers]
         )
         self.factory = factory
-        self.path_graph = PathGraph(factory)
-        self.corridors = CorridorNetwork(self.env, factory)
+        if geometry_changed:
+            self.path_graph = PathGraph(factory)
+            self.corridors = CorridorNetwork(self.env, factory)
         self.layout_version += 1
 
         summary += self._apply_station_configs(factory.stations)
         summary += self._apply_charger_configs(factory.chargers)
         summary += self._apply_elevator_configs(self._elevator_configs())
         summary += self._apply_robot_configs(factory.robots)
+        self.corridors.update_robot_widths([robot.width for robot in factory.robots if robot.is_active])
         self._clamp_robot_floors()
         if geometry_changed:
             self._reroute_moving_robots()
@@ -1005,7 +1008,7 @@ class SimulationEngine:
     def _reroute_moving_robots(self) -> None:
         """경로망 변경 후 이동 중인 로봇의 경로를 다시 계산한다."""
         for robot in self.robots.values():
-            if robot.state != RobotState.MOVING:
+            if robot.state != RobotState.MOVING and not robot.wait_reason:
                 continue
             if robot.current_task is not None:
                 task = robot.current_task
@@ -1131,6 +1134,11 @@ class SimulationEngine:
                 floor=robot.floor,
                 floor_pos=robot.floor_position(),
                 route_floors=robot.remaining_route_floors(),
+                wait_reason=robot.wait_reason,
+                wait_resource=robot.wait_resource,
+                wait_seconds=round(self.now - robot.wait_since, 2) if robot.wait_since is not None else 0.0,
+                width=robot.cfg.width,
+                length=robot.cfg.length,
             ))
         return snapshots
 

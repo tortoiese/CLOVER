@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 
 import config
 from utils.config_models import ElevatorConfig, FactoryConfig, ObstacleConfig, PathEdgeConfig
+from simulation.traffic_rules import can_pass
 
 WALL_HALF_THICKNESS: float = 4.0
 DOOR_HALF_THICKNESS: float = 8.0
@@ -132,6 +133,9 @@ class PathGraph:
         self.implicit_elevators: list[ElevatorConfig] = []  # ElevatorConfig 없이 노드 그룹으로만 정의된 엘리베이터
         self.facility_nodes: dict[str, int] = {}  # 설비 ID → 접근 노드 (노드 ID는 저장 전 음수 임시 ID일 수 있음)
         self._dist_cache: dict[int, tuple[dict[int, float], dict[int, int]]] = {}
+        self._width_dist_cache: dict[tuple[int, float], tuple[dict[int, float], dict[int, int]]] = {}
+        self._edge_widths: dict[tuple[int, int], float] = {}
+        self._profile = factory.profile
         self.obstacles = list(factory.obstacles)
         self.floor_obstacles: dict[int, list[ObstacleConfig]] = {}
         for obstacle in factory.obstacles:
@@ -150,8 +154,10 @@ class PathGraph:
                 continue
             length = math.hypot(a[0] - b[0], a[1] - b[1])
             self.adjacency[edge.from_node].append((edge.to_node, length))
+            self._edge_widths[(edge.from_node, edge.to_node)] = edge.width
             if edge.is_bidirectional:
                 self.adjacency[edge.to_node].append((edge.from_node, length))
+                self._edge_widths[(edge.to_node, edge.from_node)] = edge.width
 
         self._link_elevators(factory)
 
@@ -197,7 +203,8 @@ class PathGraph:
             by_floor = {n.floor: n.id for n in factory.nodes
                         if n.node_type == "elevator" and n.linked_station_id == elevator.id}
             floors = sorted(by_floor)
-            hop_cost = (max(0.0, float(elevator.travel_time)) + factory.profile.door_time_sec) * config.ELEVATOR_PX_PER_SEC
+            hop_cost = ((max(0.0, float(elevator.travel_time)) + factory.profile.door_time_sec)
+                        * config.ELEVATOR_PX_PER_SEC)
             for lower, upper in zip(floors, floors[1:]):
                 if upper - lower != 1:
                     continue
@@ -223,9 +230,10 @@ class PathGraph:
             return None
         return min(pool, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
 
-    def _dijkstra(self, source: int) -> tuple[dict[int, float], dict[int, int]]:
+    def _dijkstra(self, source: int, robot_width: float | None = None) -> tuple[dict[int, float], dict[int, int]]:
         """단일 출발 Dijkstra (결과 캐시)."""
-        cached = self._dist_cache.get(source)
+        key = (source, robot_width)
+        cached = self._width_dist_cache.get(key) if robot_width is not None else self._dist_cache.get(source)
         if cached is not None:
             return cached
         dist: dict[int, float] = {source: 0.0}
@@ -236,27 +244,35 @@ class PathGraph:
             if d > dist.get(node, math.inf):
                 continue
             for neighbor, weight in self.adjacency.get(node, []):
+                width = self._edge_widths.get((node, neighbor))
+                if robot_width is not None and width is not None and not can_pass(width, robot_width, self._profile):
+                    continue
                 nd = d + weight
                 if nd < dist.get(neighbor, math.inf):
                     dist[neighbor] = nd
                     prev[neighbor] = node
                     heapq.heappush(heap, (nd, neighbor))
-        self._dist_cache[source] = (dist, prev)
+        if robot_width is None:
+            self._dist_cache[source] = (dist, prev)
+        else:
+            self._width_dist_cache[key] = (dist, prev)
         return dist, prev
 
-    def shortest_path(self, source: int, target: int) -> tuple[list[int], float] | None:
+    def shortest_path(self, source: int, target: int,
+                      robot_width: float | None = None) -> tuple[list[int], float] | None:
         """노드 간 최단경로.
 
         Args:
             source: 출발 노드
             target: 도착 노드
+            robot_width: 로봇 폭(m). None이면 기존 폭 제한 없는 조회.
 
         Returns:
             (노드 ID 리스트, 거리) 또는 도달 불가 시 None
         """
         if source not in self.nodes or target not in self.nodes:
             return None
-        dist, prev = self._dijkstra(source)
+        dist, prev = self._dijkstra(source, robot_width)
         if target not in dist:
             return None
         path = [target]
@@ -265,7 +281,8 @@ class PathGraph:
         path.reverse()
         return path, dist[target]
 
-    def route_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> Route | None:
+    def route_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1,
+                          robot_width: float | None = None) -> Route | None:
         """현재 위치에서 설비 접근 노드까지 경로. 다른 층이면 엘리베이터를 경유한다.
 
         연속된 같은 엘리베이터 구간은 한 번의 탑승(마지막 층 도착점)으로 합쳐진다.
@@ -275,6 +292,7 @@ class PathGraph:
             y: 현재 Y
             facility_id: 스테이션/충전소 ID
             floor: 현재 층
+            robot_width: 로봇 폭(m). 지정하면 좁은 통로를 탐색에서 제외한다.
 
         Returns:
             Route 또는 도달 불가 시 None
@@ -282,10 +300,10 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return None
-        start = self._accessible_start(x, y, floor, target)
+        start = self._accessible_start(x, y, floor, target, robot_width)
         if start is None:
             return None
-        result = self.shortest_path(start, target)
+        result = self.shortest_path(start, target, robot_width)
         if result is None:
             return None
         node_path, length = result
@@ -312,7 +330,8 @@ class PathGraph:
         return Route(points=points, length=length + start_gap, floors=floors, lifts=lifts, nodes=nodes_out,
                      prev_nodes=prev_nodes)
 
-    def distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> float:
+    def distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1,
+                             robot_width: float | None = None) -> float:
         """현재 위치에서 설비까지의 경로 거리 (도달 불가 시 inf). 엘리베이터 이동은 환산 거리로 더해진다.
 
         Args:
@@ -320,6 +339,7 @@ class PathGraph:
             y: 현재 Y
             facility_id: 스테이션/충전소 ID
             floor: 현재 층
+            robot_width: 로봇 폭(m). 지정하면 좁은 통로를 탐색에서 제외한다.
 
         Returns:
             거리 (px)
@@ -327,26 +347,26 @@ class PathGraph:
         target = self.facility_nodes.get(facility_id)
         if target not in self.nodes:
             return math.inf
-        start = self._accessible_start(x, y, floor, target)
+        start = self._accessible_start(x, y, floor, target, robot_width)
         if start is None:
             return math.inf
-        dist, _ = self._dijkstra(start)
+        dist, _ = self._dijkstra(start, robot_width)
         if target not in dist:
             return math.inf
         sx, sy = self.nodes[start]
         return dist[target] + math.hypot(sx - x, sy - y)
 
-    def _accessible_start(self, x: float, y: float, floor: int, target: int) -> int | None:
-        """같은 층에서 장애물 없이 연결할 수 있고 목적지에 도달 가능한 최근접 노드를 반환한다."""
+    def _accessible_start(self, x: float, y: float, floor: int, target: int,
+                          robot_width: float | None = None) -> int | None:
+        """최근접 가시 노드로 진입한다. 먼 노드에 붙어 일방통행·폭 제한을 우회하지 않는다."""
         pool = self.floor_nodes.get(floor, [])
         obstacles = self.floor_obstacles.get(floor, [])
         candidates = sorted(pool, key=lambda n: math.hypot(self.nodes[n][0] - x, self.nodes[n][1] - y))
         for node in candidates:
             if edge_blocked((x, y), self.nodes[node], obstacles):
                 continue
-            distances, _ = self._dijkstra(node)
-            if target in distances:
-                return node
+            distances, _ = self._dijkstra(node, robot_width)
+            return node if target in distances else None
         return None
 
     def facility_point(self, facility_id: str) -> Point | None:

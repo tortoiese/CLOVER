@@ -10,12 +10,14 @@ import math
 from collections import defaultdict
 from collections.abc import Generator
 from contextlib import ExitStack
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
 import simpy
 
 import config
 from simulation.path_graph import Route
+from simulation.traffic_rules import LaneRequest, TrafficBlocked
 from utils.config_models import RobotConfig
 from utils.event_types import RobotState
 from utils.metrics import RobotTimeUsage
@@ -85,6 +87,11 @@ class Robot:
         self._charge_step: tuple[float, float] | None = None
         self._wake: simpy.Event | None = None
         self._riding: Elevator | None = None
+        self.wait_reason = ""
+        self.wait_resource = ""
+        self.wait_since: float | None = None
+        self._traffic_section_active = False
+        self._pending_dimensions: tuple[float, float] | None = None
         self.process = self.env.process(self.run_process())
 
     # ------------------------------------------------------------------
@@ -226,8 +233,13 @@ class Robot:
         Returns:
             변경 여부
         """
-        if cfg == self.cfg:
+        if cfg == self.cfg and self._pending_dimensions is None:
             return False
+        if self._traffic_section_active:
+            self._pending_dimensions = (cfg.width, cfg.length)
+            cfg = replace(cfg, width=self.cfg.width, length=self.cfg.length)
+        else:
+            self._pending_dimensions = None
         ratio = self.battery / self.capacity
         self.cfg = cfg
         self.battery = ratio * self.capacity
@@ -319,6 +331,14 @@ class Robot:
                 self._handle_interrupt(interrupt.cause)
             except BatteryDepleted:
                 self._depleted = True
+            except TrafficBlocked:
+                self._settle()
+                if self.current_task is not None:
+                    task = self.current_task
+                    self.current_task = None
+                    self.engine.report_unreachable(task, self)
+                self._set_state(RobotState.IDLE)
+                yield self.env.timeout(config.DISPATCH_INTERVAL)
         self._set_state(RobotState.IDLE)
 
     def _handle_interrupt(self, cause: Any) -> None:
@@ -363,32 +383,25 @@ class Robot:
             self._clear_route()
             raise BatteryDepleted()
 
-    def _cross_edge(self, edge_id: int, tx: float, ty: float) -> Generator[Any, Any, None]:
-        """통로 엣지를 차선 공유자원 제약 하에 통과한다 (층간 이동은 _ride_process가 맡는다)."""
-        corridors = self.engine.corridors
-        resource = corridors.edge_resource(edge_id) if corridors.edge_kind(edge_id) == "corridor" else None
-        if resource is None:
-            yield from self._move_point(tx, ty)
-            return
-        need = corridors.lanes_needed(edge_id, float(self.cfg.width))
-        wait_start = self.env.now
-        with ExitStack() as stack:
-            requests = [stack.enter_context(resource.request()) for _ in range(need)]
-            for request in requests:
-                yield request
-            wait = self.env.now - wait_start
-            self.engine.metrics.record_corridor_wait(wait)
-            if wait > config.DEADLOCK_THRESHOLD_SEC:
-                self.engine.metrics.record_deadlock()
-            yield from self._move_point(tx, ty)
-
-    def _pass_intersection(self, node_id: int) -> Generator[Any, Any, None]:
-        """교차점을 상호배제(capacity=1)로 통과한다. 통과시간 = 로봇길이/속도 + 여유."""
-        resource = self.engine.corridors.intersection_resource(node_id)
-        pass_time = float(self.cfg.length) / max(0.05, float(self.cfg.move_speed)) + config.INTERSECTION_MARGIN_SEC
-        with resource.request() as request:
+    def _wait_for_traffic(self, request: LaneRequest, reason: str,
+                          identifier: str) -> Generator[Any, Any, None]:
+        """자원 확보 전에는 진입점에서 대기하고 중단 시에도 대기 계측을 정리한다."""
+        started = float(self.env.now)
+        if not request.triggered:
+            self.wait_reason, self.wait_resource, self.wait_since = reason, identifier, started
+            self._set_state(RobotState.WAITING)
+        try:
             yield request
-            yield self.env.timeout(pass_time)
+        finally:
+            elapsed = float(self.env.now) - started
+            if identifier.startswith("edge:"):
+                self.engine.metrics.record_corridor_wait(elapsed)
+            else:
+                self.engine.metrics.record_intersection_wait(elapsed)
+            if elapsed > config.DEADLOCK_THRESHOLD_SEC:
+                self.engine.metrics.record_deadlock()
+            self.wait_reason, self.wait_resource, self.wait_since = "", "", None
+        self._set_state(RobotState.MOVING)
 
     def _ride_process(self, lift_id: str, tx: float, ty: float, floor: int) -> Generator[Any, Any, None]:
         """엘리베이터를 타고 floor층의 (tx, ty)로 이동한다. 도중에 중단되면 도착 층으로 옮겨진다."""
@@ -419,24 +432,73 @@ class Robot:
         self.route = list(route.points)
         self.route_floors = list(route.floors) if len(route.floors) == count else [self.floor] * count
         self.route_lifts = list(route.lifts) if len(route.lifts) == count else [None] * count
-        has_graph = bool(route.nodes) and len(route.nodes) == count
+        has_graph = len(route.nodes) == count and len(route.prev_nodes) == count and count > 0
+        lift_flags = list(self.route_lifts)
         corridors = self.engine.corridors
-        for index in range(count):
+        index = 0
+        while index < count:
             tx, ty = self.route[0]
             lift, floor = self.route_lifts[0], self.route_floors[0]
-            node_id = route.nodes[index] if has_graph else None
-            prev_node = route.prev_nodes[index] if has_graph else None
             if lift is not None and floor != self.floor:
                 yield from self._ride_process(lift, tx, ty, floor)
-            else:
-                edge_id = corridors.edge_between(prev_node, node_id) if has_graph else None
+                self._pop_route()
+                index += 1
+                continue
+            end = index
+            if has_graph:
+                while end + 1 < count and not lift_flags[end + 1]:
+                    incoming = corridors.edge_between(route.prev_nodes[end], route.nodes[end])
+                    outgoing = corridors.edge_between(route.prev_nodes[end + 1], route.nodes[end + 1])
+                    if not corridors.continues_controlled_section(route.nodes[end], incoming, outgoing):
+                        break
+                    end += 1
+            yield from self._travel_section(route, index, end, has_graph)
+            index = end + 1
+
+    def _travel_section(self, route: Route, start: int, end: int,
+                        has_graph: bool) -> Generator[Any, Any, None]:
+        """진입점에서 자원을 일정한 순서로 확보하고 교차로/좁은 구간을 빠져나온다.
+
+        모든 로봇은 같은 자원 ID 순서를 사용한다. 부분 요청을 잡은 채 서로
+        반대 순서로 요청하는 순환 대기를 방지한다. 점유 중에도 실제 위치는 이동한다.
+        """
+        corridors = self.engine.corridors
+        reservations = {}
+        if has_graph:
+            for index in range(start, end + 1):
+                node, previous = route.nodes[index], route.prev_nodes[index]
+                edge_id = corridors.edge_between(previous, node)
+                if previous is not None and edge_id is None:
+                    raise TrafficBlocked("통행 방향에 맞는 경로 엣지가 없습니다.")
                 if edge_id is not None:
-                    yield from self._cross_edge(edge_id, tx, ty)
-                else:
-                    yield from self._move_point(tx, ty)
-            self._pop_route()
-            if corridors.is_intersection(node_id):
-                yield from self._pass_intersection(node_id)
+                    units = corridors.lanes_needed(edge_id, self.cfg.width)
+                    resource = corridors.edge_resource(edge_id)
+                    if resource is None:
+                        raise TrafficBlocked("사용 가능한 통로 자원이 없습니다.")
+                    reservations[f"edge:{edge_id}"] = (resource, units, "통로 진입 대기")
+                if corridors.is_intersection(node):
+                    reservations[f"node:{node}"] = (corridors.intersection_resource(node), 1, "교차로 진입 대기")
+        with ExitStack() as stack:
+            self._traffic_section_active = True
+            stack.callback(self._finish_traffic_section)
+            for identifier, (resource, units, reason) in sorted(reservations.items()):
+                request = stack.enter_context(resource.request(units, self.robot_id))
+                yield from self._wait_for_traffic(request, reason, identifier)
+            for index in range(start, end + 1):
+                tx, ty = self.route[0]
+                yield from self._move_point(tx, ty)
+                self._pop_route()
+                if has_graph and corridors.is_intersection(route.nodes[index]):
+                    duration = self.cfg.length / max(0.05, self.cfg.move_speed) + config.INTERSECTION_MARGIN_SEC
+                    yield self.env.timeout(duration)
+
+    def _finish_traffic_section(self) -> None:
+        """통로 점유 해제 후에만 새 로봇 크기를 적용한다."""
+        self._traffic_section_active = False
+        if self._pending_dimensions is not None:
+            width, length = self._pending_dimensions
+            self.cfg = replace(self.cfg, width=width, length=length)
+            self._pending_dimensions = None
 
     def _task_process(self) -> Generator[Any, Any, None]:
         """배정된 작업 1건을 수행한다: 이동 → 대기열 → 작업."""
@@ -447,7 +509,7 @@ class Robot:
         if station is None or not station.active:
             self._requeue_current()
             return
-        route = engine.path_graph.route_to_facility(self.x, self.y, station.id, self.floor)
+        route = engine.path_graph.route_to_facility(self.x, self.y, station.id, self.floor, self.cfg.width)
         if route is None:
             self.current_task = None
             engine.report_unreachable(task, self)
@@ -489,7 +551,8 @@ class Robot:
         """충전소로 이동하여 목표 잔량까지 충전한다."""
         engine = self.engine
         charger = engine.scheduler.choose_charger(self, engine)
-        route = engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor) if charger else None
+        route = (engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor, self.cfg.width)
+                 if charger else None)
         if charger is None or route is None:
             self.forced_charge = False
             self._set_state(RobotState.IDLE)

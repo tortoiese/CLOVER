@@ -51,6 +51,7 @@ class RobotItem(QGraphicsItem):
         self.order_id: str | None = None
         self.emergency = False
         self.blink_on = False
+        self.wait_reason = ""
         self.setZValue(20)
         self.setAcceptHoverEvents(True)
 
@@ -65,22 +66,31 @@ class RobotItem(QGraphicsItem):
             snap: 로봇 스냅샷
             blink_on: 긴급배정 깜빡임 위상
         """
-        self.setPos(QPointF(snap.x, snap.y))
+        position = QPointF(snap.x, snap.y)
+        if self.pos() != position:
+            self.setPos(position)
+        blink_on = blink_on if snap.emergency_order else False
         changed = (
             self.state != snap.state or abs(self.battery - snap.battery_pct) >= 0.5 or self.order_id != snap.order_id
             or self.emergency != bool(snap.emergency_order) or self.blink_on != blink_on
+            or self.wait_reason != snap.wait_reason
         )
         self.state = snap.state
         self.battery = snap.battery_pct
         self.order_id = snap.order_id
         self.emergency = bool(snap.emergency_order)
         self.blink_on = blink_on
+        self.wait_reason = snap.wait_reason
         order_text = snap.order_id or ("일반 작업" if snap.task_id else "-")
-        self.setToolTip(
+        tooltip = (
             f"{snap.id} ({snap.robot_type})\n상태: {RobotState.LABELS.get(snap.state, snap.state)}\n"
             f"배터리: {snap.battery_pct:.0f}%\n작업: {order_text}\n목표: {snap.target_id or '-'}\n"
-            f"완료 작업: {snap.tasks_done}" + (f"\n🚨 긴급 배정: {snap.emergency_order}" if snap.emergency_order else "")
+            f"완료 작업: {snap.tasks_done}\n크기: {snap.width:g} × {snap.length:g}m"
+            + (f"\n{snap.wait_reason}: {snap.wait_resource} · {snap.wait_seconds:.1f}s" if snap.wait_reason else "")
+            + (f"\n🚨 긴급 배정: {snap.emergency_order}" if snap.emergency_order else "")
         )
+        if tooltip != self.toolTip():
+            self.setToolTip(tooltip)
         if changed:
             self.update()
 
@@ -88,6 +98,10 @@ class RobotItem(QGraphicsItem):
         """로봇을 그린다."""
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         radius = c.ROBOT_RADIUS
+        if self.wait_reason:
+            painter.setPen(QPen(QColor(c.WARNING), 2, Qt.PenStyle.DashLine))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawEllipse(QPointF(0, 0), radius + 5, radius + 5)
         fill = QColor(c.ROBOT_STATE_COLORS.get(self.state, c.TEXT_MUTED))
         if self.emergency and self.blink_on:
             fill = QColor(c.EMERGENCY_COLOR)

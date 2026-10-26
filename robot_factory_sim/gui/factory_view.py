@@ -9,6 +9,7 @@ Ctrl+휠로 축척(1 : N)을 격자에 딱 떨어지는 단계(SCALE_RATIOS)로 
 from __future__ import annotations
 
 import math
+import time
 
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import (
@@ -38,6 +39,7 @@ from gui.widgets.elevator_item import ElevatorItem
 from gui.widgets.obstacle_item import ObstacleItem
 from gui.widgets.robot_item import RobotItem
 from gui.widgets.station_item import ChargerItem, StationItem
+from gui.widgets.traffic_item import TrafficItem
 from simulation.path_graph import PathGraph
 from simulation.state import RobotSnapshot, SimState
 from utils.config_models import FactoryConfig
@@ -154,6 +156,13 @@ class FactoryView(QGraphicsView):
         self._elevators: dict[str, ElevatorItem] = {}
         self._robots: dict[str, RobotItem] = {}
         self._routes: dict[str, QGraphicsPathItem] = {}
+        self._route_signatures: dict[str, tuple] = {}
+        self._traffic_items: dict[str, TrafficItem] = {}
+        self._traffic_state: SimState | None = None
+        self._traffic_updated_at = -math.inf
+        self._show_traffic = True
+        self.route_rebuilds = 0
+        self.traffic_refreshes = 0
         self._last_robots: list[RobotSnapshot] = []
         self._show_network = True
         self._fit_mode = True
@@ -201,6 +210,8 @@ class FactoryView(QGraphicsView):
             elevator.set_view_floor(floor)
         for number, item in self._network_items.items():
             item.setVisible(self._show_network and number == floor)
+        for item in self._traffic_items.values():
+            item.setVisible(self._show_traffic and item.floor == floor)
 
     def set_layout(self, factory: FactoryConfig) -> None:
         """정적 레이아웃(바닥/설비/장애물/경로망)을 다시 그린다.
@@ -217,6 +228,11 @@ class FactoryView(QGraphicsView):
         self._stations.clear()
         self._chargers.clear()
         self._elevators.clear()
+        for item in self._traffic_items.values():
+            self._scene.removeItem(item)
+        self._traffic_items.clear()
+        self._route_signatures.clear()
+        self._traffic_updated_at = -math.inf
         self._layout = factory
         self._floor = max(1, min(factory.floor_count, self._floor))
 
@@ -261,6 +277,39 @@ class FactoryView(QGraphicsView):
         self._show_network = visible
         self._apply_floor_visibility()
 
+    def set_traffic_visible(self, visible: bool) -> None:
+        """통행 방향·병목 오버레이를 켜거나 끈다.
+
+        Args:
+            visible: 표시 여부.
+        """
+        self._show_traffic = visible
+        self._update_traffic(force=True)
+        self._apply_floor_visibility()
+
+    def _update_traffic(self, force: bool = False) -> None:
+        """최대 5Hz로 변경된 교통 아이템만 갱신한다."""
+        if self._traffic_state is None or not self._show_traffic:
+            return
+        now = time.monotonic()
+        if not force and (not self.isVisible() or now - self._traffic_updated_at < c.TRAFFIC_REFRESH_SECONDS):
+            return
+        self._traffic_updated_at = now
+        self.traffic_refreshes += 1
+        alive = {snap.id for snap in self._traffic_state.traffic}
+        for identifier in list(self._traffic_items):
+            if identifier not in alive:
+                self._scene.removeItem(self._traffic_items.pop(identifier))
+        for snap in self._traffic_state.traffic:
+            item = self._traffic_items.get(snap.id)
+            if item is None:
+                item = TrafficItem(snap)
+                self._scene.addItem(item)
+                self._traffic_items[snap.id] = item
+            elif snap.floor == self._floor:
+                item.apply_snapshot(snap)
+            item.setVisible(snap.floor == self._floor)
+
     # ------------------------------------------------------------------
     # 실시간 갱신
     # ------------------------------------------------------------------
@@ -286,6 +335,8 @@ class FactoryView(QGraphicsView):
             if item is not None:
                 item.apply_snapshot(snap)
         self._update_robots(state.robots)
+        self._traffic_state = state
+        self._update_traffic()
 
     def _update_robots(self, robots: list[RobotSnapshot]) -> None:
         """로봇 아이템과 이동 경로 점선을 갱신한다 (현재 층에 있는 로봇만 보인다)."""
@@ -294,6 +345,7 @@ class FactoryView(QGraphicsView):
         for robot_id in [rid for rid in self._robots if rid not in alive]:
             self._scene.removeItem(self._robots.pop(robot_id))
             self._scene.removeItem(self._routes.pop(robot_id))
+            self._route_signatures.pop(robot_id, None)
         for snap in robots:
             item = self._robots.get(snap.id)
             if item is None:
@@ -304,9 +356,13 @@ class FactoryView(QGraphicsView):
                 self._scene.addItem(item)
                 self._robots[snap.id] = item
                 self._routes[snap.id] = route
-            item.apply_snapshot(snap, self._blink_on)
-            item.setVisible(abs(snap.floor_pos - self._floor) < 0.5)
-            self._update_route(self._routes[snap.id], snap, item)
+            visible = abs(snap.floor_pos - self._floor) < 0.5
+            item.setVisible(visible)
+            if visible:
+                item.apply_snapshot(snap, self._blink_on)
+                self._update_route(self._routes[snap.id], snap, item)
+            else:
+                self._routes[snap.id].setVisible(False)
 
     def _update_routes_for_floor(self) -> None:
         """층을 바꾼 직후 로봇/경로 표시를 마지막 스냅샷으로 다시 맞춘다."""
@@ -314,10 +370,20 @@ class FactoryView(QGraphicsView):
             item = self._robots.get(snap.id)
             if item is not None:
                 item.setVisible(abs(snap.floor_pos - self._floor) < 0.5)
-                self._update_route(self._routes[snap.id], snap, item)
+                if item.isVisible():
+                    item.apply_snapshot(snap, self._blink_on)
+                    self._update_route(self._routes[snap.id], snap, item)
+                else:
+                    self._routes[snap.id].setVisible(False)
+        self._update_traffic(force=True)
 
     def _update_route(self, route_item: QGraphicsPathItem, snap: RobotSnapshot, robot_item: RobotItem) -> None:
         """이동 경로 점선 (현재 층에 있는 구간만)."""
+        signature = (self._floor, tuple(snap.route), tuple(snap.route_floors), snap.emergency_order)
+        if signature == self._route_signatures.get(snap.id) and (route_item.isVisible() or len(snap.route) < 2):
+            return
+        self._route_signatures[snap.id] = signature
+        self.route_rebuilds += 1
         if len(snap.route) < 2:
             route_item.setVisible(False)
             return
@@ -347,6 +413,9 @@ class FactoryView(QGraphicsView):
 
     def _animate(self) -> None:
         """경로 점선 흐름 + 긴급배정 깜빡임."""
+        if not self.isVisible():
+            return
+        self._update_traffic()
         self._ticks += 1
         self._dash_offset -= DASH_STEP
         for route in self._routes.values():

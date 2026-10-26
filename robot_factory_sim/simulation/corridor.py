@@ -19,6 +19,9 @@ import simpy
 
 import config
 from utils.config_models import FactoryConfig, FactoryProfile, PathEdgeConfig
+from simulation.traffic_rules import LaneResource, TrafficBlocked, can_pass
+from simulation.state import TrafficSnapshot
+from simulation.path_graph import edge_blocked
 
 EdgeKind = str  # "corridor" | "elevator"
 
@@ -31,11 +34,11 @@ def lane_capacity(edge_width: float, profile: FactoryProfile) -> int:
         profile: 공장 프로필 (clearance 값)
 
     Returns:
-        차선 수 (최소 1)
+        차선 수 (유효 폭이 없으면 0). 실제 로봇 통과 여부는 별도로 검사한다.
     """
     usable = edge_width - profile.edge_clearance
     per_lane = config.DEFAULT_ROBOT_WIDTH + profile.side_clearance
-    return max(1, int(usable // per_lane))
+    return max(1, math.floor((usable + 1e-9) / per_lane)) if usable > 0 else 0
 
 
 def lanes_consumed(robot_width: float, profile: FactoryProfile) -> int:
@@ -49,7 +52,7 @@ def lanes_consumed(robot_width: float, profile: FactoryProfile) -> int:
         점유 차선 수 (최소 1)
     """
     per_lane = config.DEFAULT_ROBOT_WIDTH + profile.side_clearance
-    return max(1, math.ceil((robot_width + profile.side_clearance) / per_lane))
+    return max(1, math.ceil((robot_width + profile.side_clearance - 1e-9) / per_lane))
 
 
 class CorridorNetwork:
@@ -64,24 +67,38 @@ class CorridorNetwork:
         """
         self.env = env
         self.profile = factory.profile
+        self._edges = {edge.id: edge for edge in factory.edges}
+        self._nodes = {node.id: node for node in factory.nodes}
+        self._robot_widths = [robot.width for robot in factory.robots if robot.is_active]
+        self._blocked_edges = set()
+        for edge in factory.edges:
+            start, end = self._nodes.get(edge.from_node), self._nodes.get(edge.to_node)
+            if start and end and start.floor == end.floor and edge_blocked(
+                    (start.x, start.y), (end.x, end.y), [o for o in factory.obstacles if o.floor == start.floor]):
+                self._blocked_edges.add(edge.id)
         self._node_type: dict[int, str] = {n.id: n.node_type for n in factory.nodes}
         self._node_floor: dict[int, int] = {n.id: n.floor for n in factory.nodes}
         self._node_group: dict[int, str | None] = {n.id: n.linked_station_id for n in factory.nodes}
         self._node_capacity: dict[int, int | None] = {n.id: n.capacity for n in factory.nodes}
+        self._neighbors: dict[int, set[int]] = {node.id: set() for node in factory.nodes}
+        for edge in factory.edges:
+            if edge.from_node in self._neighbors and edge.to_node in self._neighbors:
+                self._neighbors[edge.from_node].add(edge.to_node)
+                self._neighbors[edge.to_node].add(edge.from_node)
 
         self._by_pair: dict[tuple[int, int], int] = {}
         self._edge_kind: dict[int, EdgeKind] = {}
         self._edge_capacity: dict[int, int] = {}
         self._edge_floor_change: dict[int, int] = {}
         self._edge_group: dict[int, str] = {}
-        self._corridor_resource: dict[int, simpy.Resource] = {}
+        self._corridor_resource: dict[int, LaneResource] = {}
         self._elevator_resource: dict[str, simpy.Resource] = {}
 
         for edge in factory.edges:
             self._register_edge(edge)
 
-        self._intersection_resource: dict[int, simpy.Resource] = {
-            node_id: simpy.Resource(env, capacity=1)
+        self._intersection_resource: dict[int, LaneResource] = {
+            node_id: LaneResource(env, capacity=1)
             for node_id, node_type in self._node_type.items() if node_type == "intersection"
         }
 
@@ -111,7 +128,8 @@ class CorridorNetwork:
         capacity = lane_capacity(edge.width, self.profile)
         self._edge_kind[edge.id] = "corridor"
         self._edge_capacity[edge.id] = capacity
-        self._corridor_resource[edge.id] = simpy.Resource(self.env, capacity=capacity)
+        if capacity:
+            self._corridor_resource[edge.id] = LaneResource(self.env, capacity=capacity)
 
     def _elevator_capacity(self, group: str) -> int:
         """같은 엘리베이터 그룹의 노드 중 지정된 capacity가 있으면 그 값을, 없으면 fallback을 쓴다."""
@@ -150,7 +168,7 @@ class CorridorNetwork:
         """
         return self._edge_kind.get(edge_id, "corridor")
 
-    def edge_resource(self, edge_id: int) -> simpy.Resource | None:
+    def edge_resource(self, edge_id: int) -> LaneResource | None:
         """통로 차선 자원.
 
         Args:
@@ -162,7 +180,7 @@ class CorridorNetwork:
         return self._corridor_resource.get(edge_id)
 
     def lanes_needed(self, edge_id: int, robot_width: float) -> int:
-        """이 로봇이 이 통로에서 점유해야 할 차선 수 (통로 전체 차선 수로 clamp).
+        """필요 차선 수를 반환한다. 초과 로봇은 clamp해서 통과시키지 않는다.
 
         Args:
             edge_id: 엣지 ID
@@ -172,7 +190,11 @@ class CorridorNetwork:
             점유 차선 수
         """
         capacity = self._edge_capacity.get(edge_id, 1)
-        return min(lanes_consumed(robot_width, self.profile), capacity)
+        need = lanes_consumed(robot_width, self.profile)
+        edge = self._edges[edge_id]
+        if not capacity or not can_pass(edge.width, robot_width, self.profile):
+            raise TrafficBlocked(f"통로 {edge_id}: 로봇 폭 {robot_width:g}m 통행 불가")
+        return min(need, capacity)
 
     def elevator_resource(self, edge_id: int) -> simpy.Resource | None:
         """이 엘리베이터 엣지가 속한 샤프트(그룹)의 공유자원.
@@ -208,7 +230,7 @@ class CorridorNetwork:
         """
         return node_id is not None and self._node_type.get(node_id) == "intersection"
 
-    def intersection_resource(self, node_id: int) -> simpy.Resource:
+    def intersection_resource(self, node_id: int) -> LaneResource:
         """교차점 공유자원(capacity=1).
 
         Args:
@@ -218,6 +240,76 @@ class CorridorNetwork:
             Resource
         """
         return self._intersection_resource[node_id]
+
+    def update_robot_widths(self, widths: list[float]) -> None:
+        """통로 자원은 유지하면서 표시용 활성 로봇 폭 목록을 갱신한다.
+
+        Args:
+            widths: 활성 로봇 폭(m) 목록.
+        """
+        self._robot_widths = list(widths)
+
+    def continues_controlled_section(self, node_id: int, incoming: int | None, outgoing: int | None) -> bool:
+        """교차로와 분기 없는 좁은 통로는 빠져나갈 때까지 한 구간으로 확보한다.
+
+        Args:
+            node_id: 현재 경유 노드.
+            incoming: 진입 엣지 ID.
+            outgoing: 진출 엣지 ID.
+
+        Returns:
+            다음 엣지까지 함께 확보할지 여부.
+        """
+        if outgoing not in self._corridor_resource:
+            return False
+        if self.is_intersection(node_id):
+            return True
+        if self._node_type.get(node_id) != "waypoint" or len(self._neighbors.get(node_id, [])) != 2:
+            return False
+
+        def single_file(edge_id: int | None) -> bool:
+            capacity = self._edge_capacity.get(edge_id, 0)
+            edge = self._edges.get(edge_id)
+            if not edge or not capacity:
+                return False
+            needed = [min(lanes_consumed(width, self.profile), capacity) for width in self._robot_widths
+                      if can_pass(edge.width, width, self.profile)]
+            return bool(needed) and max(needed) == capacity
+
+        return single_file(incoming) and single_file(outgoing)
+
+    def snapshots(self) -> list[TrafficSnapshot]:
+        """통로·교차로 점유와 실제 요청 대기열의 스냅샷을 만든다.
+
+        Returns:
+            스레드 간 전달 가능한 통행 상태 목록.
+        """
+        snapshots = []
+        for edge_id, capacity in self._edge_capacity.items():
+            edge = self._edges[edge_id]
+            start, end = self._nodes[edge.from_node], self._nodes[edge.to_node]
+            resource = self._corridor_resource.get(edge_id)
+            passable = (edge_id not in self._blocked_edges
+                        and any(can_pass(edge.width, width, self.profile) for width in self._robot_widths))
+            snapshots.append(self._snapshot(f"edge:{edge_id}", "corridor", start.floor,
+                                            start.x, start.y, end.x, end.y, capacity, resource,
+                                            edge.width, edge.is_bidirectional, passable))
+        for node_id, resource in self._intersection_resource.items():
+            node = self._nodes[node_id]
+            snapshots.append(self._snapshot(f"node:{node_id}", "intersection", node.floor,
+                                            node.x, node.y, node.x, node.y, 1, resource))
+        return snapshots
+
+    def _snapshot(self, identifier: str, kind: str, floor: int, x: float, y: float, end_x: float, end_y: float,
+                  capacity: int, resource: LaneResource | None, width: float = 0,
+                  bidirectional: bool = True, passable: bool = True) -> TrafficSnapshot:
+        users = resource.users if resource else []
+        queue = resource.queue if resource else []
+        return TrafficSnapshot(identifier, kind, floor, x, y, end_x, end_y, capacity,
+                               resource.count if resource else 0, len(queue),
+                               [request.robot_id for request in users], [request.robot_id for request in queue],
+                               max((float(self.env.now) - request.created_at for request in queue), default=0.0),
+                               width, bidirectional, passable)
 
 
 if __name__ == "__main__":
