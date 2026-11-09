@@ -62,7 +62,7 @@ def radar_score(definition: KpiDefinition, value: float, other: float) -> float:
     return best / value if value > 1e-9 else 1.0
 
 
-def make_plot(parent: QWidget, x_label: str = "sim-time (분)", y_label: str = "") -> pg.PlotWidget:
+def make_plot(parent: QWidget, x_label: str = "시뮬레이션 시간 (분)", y_label: str = "") -> pg.PlotWidget:
     """테마를 적용한 PlotWidget.
 
     Args:
@@ -82,8 +82,10 @@ def make_plot(parent: QWidget, x_label: str = "sim-time (분)", y_label: str = "
     if y_label:
         plot.setLabel("left", y_label)
     for axis in ("left", "bottom"):
-        plot.getAxis(axis).setPen(pg.mkPen(c.GRID))
-        plot.getAxis(axis).setTextPen(pg.mkPen(c.TEXT_MUTED))
+        scale = plot.getAxis(axis)
+        scale.setPen(pg.mkPen(c.GRID))
+        scale.setTextPen(pg.mkPen(c.TEXT_MUTED))
+        scale.enableAutoSIPrefix(False)
     return plot
 
 
@@ -116,19 +118,23 @@ class DashboardPanel(QWidget):
         grid = QGridLayout()
         grid.setSpacing(6)
         self._cards: dict[str, KpiCard] = {}
+        for column in range(c.KPI_COLUMNS):
+            grid.setColumnStretch(column, 1)
         for index, definition in enumerate(KPI_DEFINITIONS):
             card = KpiCard(definition, kpi_box)
-            grid.addWidget(card, index // c.KPI_COLUMNS, index % c.KPI_COLUMNS)
+            row, column = divmod(index, c.KPI_COLUMNS)
+            grid.addWidget(card, row, column)
             self._cards[definition.key] = card
         kpi_layout.addLayout(grid)
         kpi_layout.addStretch(1)
 
         self._tabs = QTabWidget(splitter)
+        self._tabs.setUsesScrollButtons(True)
         self._plots = [make_plot(self._tabs) for _ in c.CHART_TABS]
         for plot, title in zip(self._plots, c.CHART_TABS, strict=True):
             self._tabs.addTab(plot, title)
         self._roi_panel = RoiPanel(self._tabs)
-        self._tabs.addTab(self._roi_panel, "💰 ROI 비교")
+        self._tabs.addTab(self._roi_panel, "ROI 비교")
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         self._setup_plots()
@@ -202,7 +208,12 @@ class DashboardPanel(QWidget):
         other_mode = next((m for m in state.engine_kpis if m != state.mode), None)
         other = state.engine_kpis.get(other_mode, {}) if other_mode else {}
         label = SchedulerModeLabel.LABELS.get(other_mode or "", "비교")
-        self._kpi_title.setText(f"📊 성능 KPI — {SchedulerModeLabel.LABELS.get(state.mode, state.mode)} 모드")
+        mode = SchedulerModeLabel.LABELS.get(state.mode, state.mode)
+        title = f"📊 성능 KPI — {mode}"
+        if other_mode:
+            title += f" · {label} 대비"
+        if self._kpi_title.text() != title:
+            self._kpi_title.setText(title)
         for key, card in self._cards.items():
             card.set_values(state.kpis.get(key, math.nan), other.get(key, math.nan), label)
 
@@ -213,12 +224,13 @@ class DashboardPanel(QWidget):
         """차트별 고정 요소를 만든다."""
         throughput = self._plots[0]
         throughput.setLabel("left", "처리량 (건/분)")
+        throughput.setLimits(xMin=0, yMin=0, minXRange=c.THROUGHPUT_START_RANGE, minYRange=c.THROUGHPUT_START_RANGE)
         throughput.addLegend(offset=(10, 10))
         self._throughput_curves = {
             mode: throughput.plot([], [], pen=pg.mkPen(color, width=2), name=SchedulerModeLabel.LABELS[mode])
             for mode, color in c.ENGINE_COLORS.items()
         }
-        self._plots[1].setLabel("bottom", "sim-time (초)")
+        self._plots[1].setLabel("bottom", "시뮬레이션 시간 (초)")
         self._plots[2].setLabel("left", "대기 작업 (건)")
         self._plots[2].addLegend(offset=(10, 10))
         self._plots[3].setLabel("left", "배터리 (%)")
@@ -231,7 +243,7 @@ class DashboardPanel(QWidget):
         radar.showGrid(x=False, y=False)
         radar.addLegend(offset=(10, 10))
         self._plots[5].setLabel("bottom", "주문 경과 + 예상 소요 (분)")
-        self._plots[6].setLabel("bottom", "sim-time (분)")
+        self._plots[6].setLabel("bottom", "시뮬레이션 시간 (분)")
         self._plots[6].getAxis("left").setTicks(
             [[(row, label) for row, _, _, label in c.TIMELINE_STYLE.values()]])
         self._plots[6].setYRange(-0.5, len(c.TIMELINE_STYLE) - 0.5)

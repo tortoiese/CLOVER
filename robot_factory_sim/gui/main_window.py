@@ -16,16 +16,19 @@ from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtGui import QAction, QCloseEvent
 from PySide6.QtWidgets import (
     QComboBox,
+    QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMenu,
     QMessageBox,
-    QSizePolicy,
     QSplitter,
+    QStackedWidget,
     QToolBar,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -34,6 +37,7 @@ import config
 from agent.base import BaseAgent
 from agent.models import AgentAction, AgentResponse
 from agent.orchestration import is_comparison_request
+from agent.rag_agent import RagAgent
 from gui import constants as c
 from gui.agent_bridge import AgentBridge
 from gui.alert_banner import AlertBanner
@@ -50,7 +54,6 @@ from utils.event_types import ActionKind, ChangeType, SchedulerModeLabel, Severi
 
 THREAD_STOP_TIMEOUT_MS: int = 3000
 SHUTDOWN_POLL_INTERVAL_MS: int = 100
-SPLITTER_SIZES: tuple[int, int, int] = (620, 420, 560)
 
 
 class MainWindow(QMainWindow):
@@ -66,10 +69,8 @@ class MainWindow(QMainWindow):
         """
         super().__init__(parent)
         self.setWindowTitle(c.APP_TITLE)
-        self.resize(1680, 960)
         self._service = service
         self._state: SimState | None = None
-        self._running = False
         self._watchers_started = False
         self._pending_config_tables: set[str] = set()
         self._pending_config_by = "system"
@@ -82,7 +83,9 @@ class MainWindow(QMainWindow):
         self._shutdown_timer.timeout.connect(self._finish_shutdown)
 
         self._build_toolbar()
-        self._build_body()
+        self._build_body(search_enabled=isinstance(agent, RagAgent))
+        available = self.screen().availableGeometry().size() - QSize(*c.WINDOW_FRAME_MARGIN)
+        self.resize(QSize(*c.WINDOW_PREFERRED_SIZE).boundedTo(available))
         self._optimization = OptimizationPanel(self)
         self._optimization.run_requested.connect(lambda: self._on_user_message("/최적화"))
 
@@ -109,34 +112,36 @@ class MainWindow(QMainWindow):
         self._set_db_status(service.ping())
         self._agent_bridge.start()
         self._worker.start()
-        self._console.add_system_message(f"DB 연결: {service.db_path}\n[▶ 시작]을 누르면 시뮬레이션과 DB 감시가 시작됩니다.")
-        if self._comparison_enabled:
-            self._console.add_system_message("RAG 운영안 비교: [운영안 비교]에서 조건 입력 → /최적화 → /추천. "
-                                             "문서 질문은 /검색 ROI 산식. 결과는 자동 적용되지 않습니다.")
+        self._console.add_system_message(c.CONSOLE_START_HINT)
 
     # ------------------------------------------------------------------
     # UI
     # ------------------------------------------------------------------
     def _build_toolbar(self) -> None:
         """상단 툴바."""
-        toolbar = QToolBar("시뮬레이션 제어", self)
+        toolbar = QToolBar("공장 운영 도구", self)
+        toolbar.setObjectName("OperationsToolbar")
         toolbar.setMovable(False)
+        toolbar.setFloatable(False)
         self.addToolBar(toolbar)
 
-        self._act_start = self._action(toolbar, "▶ 시작", self._start, "시뮬레이션 + DB 감시 시작")
-        self._act_pause = self._action(toolbar, "⏸ 일시정지", lambda: self._worker.send_command(ActionKind.PAUSE))
-        self._act_stop = self._action(toolbar, "⏹ 정지", self._stop, "정지 후 초기 상태로")
-        toolbar.addWidget(QLabel(" ⏩ 배속 ", self))
-        self._speed = QComboBox(self)
+        self._act_start = self._action(toolbar, "시작", self._start, "시뮬레이션을 시작하거나 이어서 실행합니다.")
+        toolbar.widgetForAction(self._act_start).setObjectName("StartSimulation")
+        self._act_pause = self._action(toolbar, "일시정지", lambda: self._worker.send_command(ActionKind.PAUSE),
+                                       "현재 상태에서 잠시 멈춥니다.")
+        self._act_stop = self._action(toolbar, "정지", self._stop, "실행을 끝내고 초기 상태로 돌아갑니다.")
+        toolbar.addSeparator()
+        toolbar.addWidget(QLabel("배속", toolbar))
+        self._speed = QComboBox(toolbar)
+        self._speed.setAccessibleName("시뮬레이션 배속")
         for speed in config.SPEED_OPTIONS:
             self._speed.addItem(f"{speed}x", speed)
         self._speed.currentIndexChanged.connect(
             lambda _: self._worker.send_command(ActionKind.SET_SPEED, {"speed": self._speed.currentData()}))
         toolbar.addWidget(self._speed)
-        self._action(toolbar, "↺ 리셋", lambda: self._worker.send_command(ActionKind.RESET), "DB 최신 구성으로 재구성")
-        toolbar.addSeparator()
-        toolbar.addWidget(QLabel(" 스케줄러 ", self))
-        self._mode = QComboBox(self)
+        toolbar.addWidget(QLabel("표시 정책", toolbar))
+        self._mode = QComboBox(toolbar)
+        self._mode.setAccessibleName("화면에 표시할 운영 정책")
         for mode in config.SCHEDULER_MODES:
             self._mode.addItem(SchedulerModeLabel.LABELS[mode], mode)
         self._mode.setCurrentIndex(config.SCHEDULER_MODES.index(config.DEFAULT_SCHEDULER_MODE))
@@ -145,53 +150,88 @@ class MainWindow(QMainWindow):
             lambda _: self._worker.send_command(ActionKind.SET_MODE, {"mode": self._mode.currentData()}))
         toolbar.addWidget(self._mode)
         toolbar.addSeparator()
-        self._action(toolbar, "⚙ 공장 설정", self._open_config_editor)
-        self._action(toolbar, "📋 주문 관리", self._open_order_dialog)
-        self._action(toolbar, "🛗 엘리베이터 시연", self._start_elevator_demo,
-                     "2층 이상 스테이션만 쓰는 주문을 넣고 1층 도크에서 다시 시작합니다")
-        comparison_action = self._action(toolbar, "운영안 비교", lambda: self._optimization.show(),
+        self._action(toolbar, "공장 설정", self._open_config_editor, "층과 설비, 로봇, 충전소를 설정합니다.")
+        self._action(toolbar, "주문 관리", self._open_order_dialog, "주문을 등록하고 진행 상황을 확인합니다.")
+        comparison_action = self._action(toolbar, "운영안 비교", self._open_comparison,
                                          "현재 구성으로 베이스라인·MILP 배정을 비교합니다.")
         comparison_action.setEnabled(self._comparison_enabled)
         if not self._comparison_enabled:
             comparison_action.setToolTip("CLOVER_RAG_ENABLED=1로 실행하면 활성화됩니다.")
 
-        spacer = QWidget(self)
-        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        toolbar.addWidget(spacer)
-        self._db_status = QLabel("DB: ● 확인 중", self)
-        self._db_status.setObjectName("DbStatus")
-        toolbar.addWidget(self._db_status)
+        more = QToolButton(toolbar)
+        more.setText("더 보기")
+        more.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu = QMenu(more)
+        menu.setToolTipsVisible(True)
+        self._action(menu, "공장 구성 다시 불러오기", lambda: self._worker.send_command(ActionKind.RESET),
+                     "저장된 최신 공장 구성으로 실행 상태를 초기화합니다.")
+        self._action(menu, "엘리베이터 시연", self._start_elevator_demo,
+                     "상층 전용 주문을 등록하고 로봇을 1층에서 다시 출발시킵니다.")
+        more.setMenu(menu)
+        toolbar.addWidget(more)
         self._act_pause.setEnabled(False)
+        self._act_stop.setEnabled(False)
 
-    def _action(self, toolbar: QToolBar, text: str, slot: Any, tip: str = "") -> QAction:
-        """툴바 액션 추가."""
+    def _action(self, parent: QToolBar | QMenu, text: str, slot: Any, tip: str = "") -> QAction:
+        """툴바 또는 메뉴에 액션을 추가한다."""
         action = QAction(text, self)
         action.triggered.connect(slot)
         if tip:
             action.setToolTip(tip)
-        toolbar.addAction(action)
+        parent.addAction(action)
         return action
 
-    def _build_body(self) -> None:
-        """본문: 3분할 스플리터 + 하단 배너."""
+    def _build_body(self, *, search_enabled: bool) -> None:
+        """크기를 직접 조절할 수 있는 작업 영역과 고정 높이 상태 영역을 구성한다."""
         central = QWidget(self)
         layout = QVBoxLayout(central)
-        layout.setContentsMargins(8, 8, 8, 0)
+        layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(6)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, central)
+        splitter.setObjectName("WorkspaceSplitter")
+        splitter.setHandleWidth(c.WORKSPACE_HANDLE_WIDTH)
         self._factory = FactoryPanel(splitter)
-        self._console = ConsolePanel(splitter)
+        self._factory.setMinimumWidth(c.WORKSPACE_MIN_FACTORY_WIDTH)
+        self._console = ConsolePanel(splitter, search_enabled=search_enabled,
+                                     comparison_enabled=self._comparison_enabled)
         self._dashboard = DashboardPanel(splitter)
-        splitter.setSizes(list(SPLITTER_SIZES))
+        self._dashboard.setMinimumWidth(c.WORKSPACE_MIN_DASHBOARD_WIDTH)
+        splitter.setSizes(list(c.WORKSPACE_PANE_SIZES))
         splitter.setChildrenCollapsible(False)
         layout.addWidget(splitter, 1)
 
-        self._banner = AlertBanner(central)
-        self._banner.clicked.connect(self._console.focus_console)
-        layout.addWidget(self._banner)
+        self._build_footer(central, layout)
         self._console.message_submitted.connect(self._on_user_message)
         self.setCentralWidget(central)
+
+    def _build_footer(self, parent: QWidget, layout: QVBoxLayout) -> None:
+        footer = QStackedWidget(parent)
+        footer.setFixedHeight(c.WORKSPACE_STATUS_HEIGHT)
+        status = QWidget(footer)
+        status.setObjectName("WorkspaceStatus")
+        status.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        row = QHBoxLayout(status)
+        row.setContentsMargins(12, 0, 12, 0)
+        self._sim_status = QLabel("시뮬레이션 준비", status)
+        self._sim_status.setObjectName("SimulationStatus")
+        self._db_status = QLabel("DB 연결 확인 중", status)
+        self._db_status.setObjectName("DbStatus")
+        row.addWidget(self._sim_status)
+        row.addStretch(1)
+        row.addWidget(self._db_status, alignment=Qt.AlignmentFlag.AlignVCenter)
+
+        self._banner = AlertBanner(footer)
+        self._banner.clicked.connect(self._console.focus_console)
+        footer.addWidget(status)
+        footer.addWidget(self._banner)
+        self._banner.active_changed.connect(lambda active: footer.setCurrentWidget(self._banner if active else status))
+        layout.addWidget(footer)
+
+    def _open_comparison(self) -> None:
+        self._optimization.show()
+        self._optimization.raise_()
+        self._optimization.activateWindow()
 
     # ------------------------------------------------------------------
     # 시뮬레이션 제어
@@ -202,7 +242,6 @@ class MainWindow(QMainWindow):
             self._config_watcher.start()
             self._event_watcher.start()
             self._watchers_started = True
-            self._console.add_system_message("ConfigWatcher / ProductionEventWatcher 시작 (1초 폴링)")
         self._worker.send_command(ActionKind.START)
 
     def _start_elevator_demo(self) -> None:
@@ -229,14 +268,21 @@ class MainWindow(QMainWindow):
 
     def _on_running_changed(self, running: bool) -> None:
         """실행 상태 → 버튼 활성화."""
-        self._running = running
         self._act_start.setEnabled(not running)
         self._act_pause.setEnabled(running)
-        self._console.add_system_message("▶ 시뮬레이션 실행" if running else "⏸ 시뮬레이션 일시정지")
 
     def _on_state(self, state: SimState) -> None:
         """스냅샷 수신 → 각 패널 갱신."""
         self._state = state
+        paused = not state.running and state.sim_time > 0
+        status = "시뮬레이션 준비"
+        if state.running:
+            status = "시뮬레이션 실행 중"
+        elif paused:
+            status = "시뮬레이션 일시정지"
+        self._act_start.setText("계속" if paused else "시작")
+        self._act_stop.setEnabled(state.running or paused)
+        self._sim_status.setText(status)
         self._factory.update_state(state)
         self._dashboard.update_state(state)
         self._sync_combo(self._speed, state.speed)
@@ -257,8 +303,11 @@ class MainWindow(QMainWindow):
 
     def _set_db_status(self, connected: bool) -> None:
         """DB 연결 상태 표시."""
-        self._db_status.setText("DB: ● 연결됨" if connected else "DB: ● 연결 끊김")
-        self._db_status.setProperty("connected", "true" if connected else "false")
+        flag = "true" if connected else "false"
+        if self._db_status.property("connected") == flag:
+            return
+        self._db_status.setText("DB 연결됨" if connected else "DB 연결 끊김")
+        self._db_status.setProperty("connected", flag)
         self._db_status.style().unpolish(self._db_status)
         self._db_status.style().polish(self._db_status)
 
@@ -332,6 +381,7 @@ class MainWindow(QMainWindow):
             self._comparison_request_id = uuid.uuid4().hex
             context["_request_id"] = self._comparison_request_id
             self._optimization.set_busy(True)
+            self._console.add_system_message("운영안 비교를 시작했습니다. 완료되면 이곳에 결과를 표시합니다.")
         self._agent_bridge.message_requested.emit(text, context)
 
     def _on_agent_response(self, response: AgentResponse) -> None:

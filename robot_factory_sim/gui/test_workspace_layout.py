@@ -1,0 +1,61 @@
+"""알림 상태가 바뀌어도 메인 작업 영역과 도면 배율이 유지되는지 검증한다."""
+
+from pathlib import Path
+
+from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtWidgets import QApplication, QPushButton, QSplitter
+
+import config
+from agent.mock_agent import MockAgent
+from gui import constants as c
+from gui.main_window import MainWindow
+from simulation.factory_service import FactoryService
+from utils.event_types import Severity
+
+
+def _wait(ms: int) -> None:
+    loop = QEventLoop()
+    QTimer.singleShot(ms, loop.quit)
+    loop.exec()
+
+
+def test_alert_keeps_workspace_size_and_selected_floor(tmp_path: Path) -> None:
+    """좁은 화면에서 긴 알림을 열고 닫아도 패널 배치와 도면이 움직이지 않는다."""
+    app = QApplication.instance() or QApplication([])
+    service = FactoryService(tmp_path / "factory.db")
+    service.ensure_database()
+    window = MainWindow(service, MockAgent())
+    window.setStyleSheet(config.QSS_PATH.read_text(encoding="utf-8"))
+    window.resize(1024, 700)
+    window.show()
+    try:
+        _wait(250)
+        assert window.width() == 1024
+        splitter = window.findChild(QSplitter, "WorkspaceSplitter")
+        stage = window._factory.stage
+        stage.select_floor(2)
+        _wait(c.BUILDING_ANIMATION_MS + 100)
+        assert stage.detail_mode and stage.current_floor == 2
+        sizes = splitter.sizes()
+        plan_geometry = stage.plan.geometry()
+        scale = stage.plan.transform()
+
+        window._banner.show_alert("긴급 주문 감지", "긴 주문 정보 " * 60, Severity.WARNING)
+        _wait(50)
+        assert window._banner.isVisible()
+        assert splitter.sizes() == sizes
+        assert stage.plan.geometry() == plan_geometry
+        assert stage.plan.transform() == scale
+
+        window._banner.findChild(QPushButton, "BannerView").click()
+        _wait(50)
+        assert not window._banner.isVisible()
+        assert splitter.sizes() == sizes
+        assert stage.plan.geometry() == plan_geometry
+        assert stage.plan.transform() == scale
+        assert stage.current_floor == 2
+    finally:
+        window.close()
+        window._worker.wait(5000)
+        window._agent_bridge.wait(5000)
+        app.processEvents()

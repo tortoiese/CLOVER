@@ -148,7 +148,6 @@ class OptimizationPanel(QDialog):
         self._details.setPlainText("\n".join(lines + result["notes"]))
         self._save.setEnabled(True)
         self._tabs.setCurrentIndex(1)
-        self.show()
 
     def show_evidence(self, text: str) -> None:
         """RAG가 반환한 출처와 문서 내용을 표시한다."""

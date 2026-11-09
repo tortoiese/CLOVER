@@ -2,7 +2,6 @@
    배경 #1a1a2e / 패널 #16213e / 강조 #0f3460 / 긴급 #e74c3c, #f39c12 */
 
 * {
-    font-family: "Malgun Gothic", "Segoe UI", "Noto Sans KR", sans-serif;
     font-size: 10pt;
     color: #e6e9f5;
 }
@@ -39,8 +38,8 @@ QToolBar {
     background: #16213e;
     border: none;
     border-bottom: 1px solid #22304f;
-    padding: 4px 6px;
-    spacing: 6px;
+    padding: 7px 8px;
+    spacing: 5px;
 }
 
 QToolBar QToolButton, QPushButton {
@@ -53,6 +52,16 @@ QToolBar QToolButton, QPushButton {
 QToolBar QToolButton:hover, QPushButton:hover {
     background: #1a4a80;
     border-color: #4f8cff;
+}
+
+QToolBar QToolButton:focus, QPushButton:focus, QToolButton#QuickCommand:focus {
+    border-color: #8fb5ff;
+}
+
+QToolBar::separator {
+    background: #2a3b63;
+    width: 1px;
+    margin: 4px 3px;
 }
 
 QToolBar QToolButton:pressed, QPushButton:pressed {
@@ -70,10 +79,16 @@ QToolBar QToolButton:disabled, QPushButton:disabled {
     border-color: #22304f;
 }
 
-QPushButton#Primary {
-    background: #4f8cff;
-    border-color: #8fb5ff;
+QPushButton#Primary:enabled, QToolButton#StartSimulation:enabled {
+    background: #285db8;
+    border-color: #5888d9;
+    color: #ffffff;
     font-weight: 700;
+}
+
+QPushButton#Primary:hover:enabled, QToolButton#StartSimulation:hover:enabled {
+    background: #316bcb;
+    border-color: #8fb5ff;
 }
 
 QPushButton#Danger {
@@ -93,6 +108,31 @@ QLabel#DbStatus[connected="true"] {
 
 QLabel#DbStatus[connected="false"] {
     color: #e74c3c;
+}
+
+QMenu {
+    background: #16213e;
+    border: 1px solid #33466f;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 6px 18px 6px 10px;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background: #0f3460;
+}
+
+QMenu::item:disabled {
+    color: #8b93b5;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #2a3b63;
+    margin: 4px 6px;
 }
 
 /* ---------------- 입력 ---------------- */
@@ -125,6 +165,21 @@ QSplitter::handle {
 
 QSplitter::handle:hover {
     background: #4f8cff;
+}
+
+QSplitter#WorkspaceSplitter::handle:horizontal {
+    background: #2a3b63;
+    border-left: 3px solid #1a1a2e;
+    border-right: 3px solid #1a1a2e;
+    margin: 8px 0;
+}
+
+QSplitter#WorkspaceSplitter::handle:horizontal:hover {
+    background: #4f8cff;
+}
+
+QWidget#FloorHeader QPushButton {
+    padding: 3px 7px;
 }
 
 QScrollArea {
@@ -187,6 +242,15 @@ QTabBar::tab:selected {
 
 QTabBar::tab:hover {
     color: #e6e9f5;
+}
+
+QTabBar QToolButton {
+    background: #16213e;
+    border: 1px solid #33466f;
+}
+
+QWidget#RoiScrollContent {
+    background: #16213e;
 }
 
 /* ---------------- 표 / 리스트 ---------------- */
@@ -309,7 +373,7 @@ QFrame#Bubble[role="system"] {
 }
 
 QLabel#BubbleText {
-    font-family: "Malgun Gothic", "Consolas", monospace;
+    font-size: 10pt;
 }
 
 QLabel#BubbleMeta {
@@ -325,30 +389,42 @@ QLabel#Badge {
     font-size: 9pt;
 }
 
-QPushButton#QuickCommand {
+QToolButton#QuickCommand, QPushButton#LatestMessages {
     background: #0f1a33;
     border: 1px solid #2a3b63;
-    border-radius: 11px;
-    padding: 3px 10px;
+    border-radius: 6px;
+    padding: 4px 8px;
     font-size: 9pt;
 }
 
-QPushButton#QuickCommand:hover {
+QToolButton#QuickCommand:hover, QPushButton#LatestMessages:hover {
     border-color: #4f8cff;
 }
 
-/* ---------------- 긴급 배너 ---------------- */
+/* ---------------- 상태 영역 / 긴급 배너 ---------------- */
+QWidget#WorkspaceStatus {
+    background: #16213e;
+    border: 1px solid #22304f;
+    border-radius: 8px;
+}
+
+QLabel#SimulationStatus {
+    font-weight: 600;
+    color: #b9c5e1;
+}
+
 QFrame#AlertBanner {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
 }
 
 QFrame#AlertBanner[severity="critical"] {
-    background: #e74c3c;
+    background: #4e2431;
 }
 
 QFrame#AlertBanner[severity="warning"] {
-    background: #f39c12;
+    background: #4b351f;
+    border-color: #f39c12;
 }
 
 QLabel#BannerTitle {
@@ -367,6 +443,12 @@ QPushButton#BannerClose {
     font-size: 13pt;
     color: #ffffff;
     padding: 0 6px;
+}
+
+QPushButton#BannerView {
+    background: #16213e;
+    border-color: #596a92;
+    padding: 4px 10px;
 }
 
 QToolTip {

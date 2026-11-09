@@ -9,8 +9,9 @@ ROI 관련 화면은 전부 이 탭 하나에 모은다:
 from __future__ import annotations
 
 import pyqtgraph as pg
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDoubleSpinBox, QFrame, QGridLayout, QGroupBox, QLabel, QScrollArea, QVBoxLayout, QWidget
 
 import config
 from gui import constants as c
@@ -25,7 +26,9 @@ _PANELS: tuple[tuple[str, str, str, bool], ...] = (
     ("net_profit", "총순이익", "원", True),
     ("roi_pct", "ROI", "%", True),
 )
-_TICKS: list[tuple[float, str]] = [(0, "베이스라인"), (1, "최적화안")]
+_TICKS: list[tuple[float, str]] = [(0, "기준안"), (1, "최적화")]
+_COLUMNS: int = 2
+_CHART_MIN_HEIGHT: int = 132
 
 # 숫자 요약 카드 5종 (KpiCard 재사용)
 _CARD_DEFS: tuple[KpiDefinition, ...] = (
@@ -37,9 +40,10 @@ _CARD_DEFS: tuple[KpiDefinition, ...] = (
 )
 
 
-def _spin(value: float, minimum: float, maximum: float, step: float, decimals: int = 3) -> QDoubleSpinBox:
+def _spin(parent: QWidget, value: float, minimum: float, maximum: float, step: float,
+          decimals: int = 3) -> QDoubleSpinBox:
     """ROI 파라미터 입력용 스핀박스 (config 기본값으로 시작)."""
-    spin = QDoubleSpinBox()
+    spin = QDoubleSpinBox(parent)
     spin.setRange(minimum, maximum)
     spin.setDecimals(decimals)
     spin.setSingleStep(step)
@@ -64,64 +68,84 @@ class RoiPanel(QWidget):
         self._opt_d = 0.0
 
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(4, 4, 4, 4)
-        outer.setSpacing(8)
-        outer.addWidget(self._build_params())
-        outer.addWidget(self._build_summary())
-        outer.addWidget(self._build_charts(), 1)
+        outer.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea(self)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        outer.addWidget(scroll)
+        content = QWidget(scroll)
+        content.setObjectName("RoiScrollContent")
+        content.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(8)
+        layout.addWidget(self._build_params(content))
+        layout.addWidget(self._build_summary(content))
+        layout.addWidget(self._build_charts(content), 1)
+        scroll.setWidget(content)
 
         self._recompute()
 
     # ------------------------------------------------------------------
     # 구성
     # ------------------------------------------------------------------
-    def _build_params(self) -> QWidget:
+    def _build_params(self, parent: QWidget) -> QWidget:
         """사용자 입력 파라미터(소비효율·전력 단가·기타 비용·건당 가치) 영역."""
-        box = QGroupBox("ROI 파라미터 (조정 가능 — 기본값은 config.py)", self)
-        layout = QHBoxLayout(box)
-        self._wh_per_m = _spin(config.WH_PER_M, 0.001, 10.0, 0.001)
-        self._power_price = _spin(config.POWER_PRICE_PER_WH, 0.001, 100.0, 0.01)
-        self._other_cost = _spin(config.OTHER_COST_KRW, 0.0, 10_000_000.0, 1000.0, decimals=0)
-        self._revenue_per_unit = _spin(config.REVENUE_PER_UNIT_KRW, 0.0, 1_000_000.0, 100.0, decimals=0)
-        for label, spin, unit in (
+        box = QGroupBox("ROI 계산 조건", parent)
+        layout = QGridLayout(box)
+        self._wh_per_m = _spin(box, config.WH_PER_M, 0.001, 10.0, 0.001)
+        self._power_price = _spin(box, config.POWER_PRICE_PER_WH, 0.001, 100.0, 0.01)
+        self._other_cost = _spin(box, config.OTHER_COST_KRW, 0.0, 10_000_000.0, 1000.0, decimals=0)
+        self._revenue_per_unit = _spin(box, config.REVENUE_PER_UNIT_KRW, 0.0, 1_000_000.0, 100.0, decimals=0)
+        fields = (
             ("소비효율", self._wh_per_m, "Wh/m"),
             ("전력 단가", self._power_price, "원/Wh"),
             ("기타 비용", self._other_cost, "원"),
             ("건당 가치", self._revenue_per_unit, "원"),
-        ):
-            layout.addWidget(QLabel(label, box))
-            layout.addWidget(spin)
-            layout.addWidget(QLabel(unit, box))
+        )
+        for index, (label, spin, unit) in enumerate(fields):
+            row, column = divmod(index, _COLUMNS)
+            label_widget = QLabel(label, box)
+            label_widget.setBuddy(spin)
+            spin.setSuffix(f" {unit}")
+            layout.addWidget(label_widget, row * 2, column)
+            layout.addWidget(spin, row * 2 + 1, column)
             spin.valueChanged.connect(self._recompute)
-        layout.addStretch(1)
+        for column in range(_COLUMNS):
+            layout.setColumnStretch(column, 1)
         return box
 
-    def _build_summary(self) -> QWidget:
+    def _build_summary(self, parent: QWidget) -> QWidget:
         """숫자 요약 카드(5종, KpiCard 재사용) + baseline 대비 개선 요약 라벨."""
-        box = QWidget(self)
+        box = QWidget(parent)
         layout = QVBoxLayout(box)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
-        cards_row = QHBoxLayout()
+        cards = QGridLayout()
+        for column in range(_COLUMNS):
+            cards.setColumnStretch(column, 1)
         self._cards: dict[str, KpiCard] = {}
-        for definition in _CARD_DEFS:
+        for index, definition in enumerate(_CARD_DEFS):
             card = KpiCard(definition, box)
-            cards_row.addWidget(card)
+            row, column = divmod(index, _COLUMNS)
+            cards.addWidget(card, row, column)
             self._cards[definition.key] = card
-        layout.addLayout(cards_row)
+        layout.addLayout(cards)
         self._summary = QLabel("—", box)
+        self._summary.setWordWrap(True)
         layout.addWidget(self._summary)
         return box
 
-    def _build_charts(self) -> QWidget:
+    def _build_charts(self, parent: QWidget) -> QWidget:
         """베이스라인 vs 최적화안 2x2 막대 그래프 영역."""
-        box = QWidget(self)
+        box = QWidget(parent)
         layout = QGridLayout(box)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
         self._plots: dict[str, pg.PlotWidget] = {}
         for index, (key, title, unit, _) in enumerate(_PANELS):
             plot = pg.PlotWidget(parent=box)
+            plot.setMinimumHeight(_CHART_MIN_HEIGHT)
             plot.setBackground(c.PANEL)
             plot.showGrid(y=True, alpha=0.15)
             plot.setMenuEnabled(False)
