@@ -9,10 +9,16 @@ from __future__ import annotations
 import heapq
 import math
 from dataclasses import dataclass, field
+from itertools import pairwise
 
 import config
-from utils.config_models import ElevatorConfig, FactoryConfig, ObstacleConfig, PathEdgeConfig
-from simulation.traffic_rules import can_pass
+from simulation.traffic_rules import can_pass, corridor_identity, physical_point
+from utils.config_models import (
+    ElevatorConfig,
+    FactoryConfig,
+    ObstacleConfig,
+    PathEdgeConfig,
+)
 
 WALL_HALF_THICKNESS: float = 4.0
 DOOR_HALF_THICKNESS: float = 8.0
@@ -136,10 +142,23 @@ class PathGraph:
         self._width_dist_cache: dict[tuple[int, float], tuple[dict[int, float], dict[int, int]]] = {}
         self._edge_widths: dict[tuple[int, int], float] = {}
         self._profile = factory.profile
+        self._width_views: dict[float, WidthGraph] = {}
         self.obstacles = list(factory.obstacles)
         self.floor_obstacles: dict[int, list[ObstacleConfig]] = {}
         for obstacle in factory.obstacles:
             self.floor_obstacles.setdefault(obstacle.floor, []).append(obstacle)
+
+        # Duplicate/reversed records describe one footprint, hence one minimum width.
+        physical_widths: dict[str, float] = {}
+        edge_keys: dict[int, str] = {}
+        for edge in factory.edges:
+            if edge.from_node not in self.nodes or edge.to_node not in self.nodes:
+                continue
+            a = physical_point(self.node_floor[edge.from_node], *self.nodes[edge.from_node])
+            b = physical_point(self.node_floor[edge.to_node], *self.nodes[edge.to_node])
+            key = corridor_identity(a, b)
+            edge_keys[edge.id] = key
+            physical_widths[key] = min(edge.width, physical_widths.get(key, edge.width))
 
         for edge in factory.edges:
             if edge.from_node not in self.nodes or edge.to_node not in self.nodes:
@@ -154,10 +173,10 @@ class PathGraph:
                 continue
             length = math.hypot(a[0] - b[0], a[1] - b[1])
             self.adjacency[edge.from_node].append((edge.to_node, length))
-            self._edge_widths[(edge.from_node, edge.to_node)] = edge.width
+            self._edge_widths[(edge.from_node, edge.to_node)] = physical_widths[edge_keys[edge.id]]
             if edge.is_bidirectional:
                 self.adjacency[edge.to_node].append((edge.from_node, length))
-                self._edge_widths[(edge.to_node, edge.from_node)] = edge.width
+                self._edge_widths[(edge.to_node, edge.from_node)] = physical_widths[edge_keys[edge.id]]
 
         self._link_elevators(factory)
 
@@ -205,7 +224,7 @@ class PathGraph:
             floors = sorted(by_floor)
             hop_cost = ((max(0.0, float(elevator.travel_time)) + factory.profile.door_time_sec)
                         * config.ELEVATOR_PX_PER_SEC)
-            for lower, upper in zip(floors, floors[1:]):
+            for lower, upper in pairwise(floors):
                 if upper - lower != 1:
                     continue
                 a, b = by_floor[lower], by_floor[upper]
@@ -381,6 +400,16 @@ class PathGraph:
         node = self.facility_nodes.get(facility_id)
         return self.nodes.get(node) if node is not None else None
 
+    def for_robot(self, width: float) -> WidthGraph:
+        """Expose the same width-aware query through the shared planner/runtime API."""
+        from simulation.traffic_rules import demand_mm
+        demand_mm(width, self._profile)
+        if width not in self._width_views:
+            if len(self._width_views) >= 128:
+                self._width_views.clear()
+            self._width_views[width] = WidthGraph(self, width)
+        return self._width_views[width]
+
     def facility_floor(self, facility_id: str) -> int | None:
         """설비 접근 노드가 있는 층.
 
@@ -392,6 +421,37 @@ class PathGraph:
         """
         node = self.facility_nodes.get(facility_id)
         return self.node_floor.get(node) if node is not None else None
+
+
+class WidthGraph:
+    """Read-only width-bound route view; changes create a new owning PathGraph."""
+
+    def __init__(self, graph: PathGraph, width: float) -> None:
+        self.graph = graph
+        self.width = width
+
+    def route_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> Route | None:
+        """Return a route satisfying the common mm clearance test."""
+        return self.graph.route_to_facility(x, y, facility_id, floor, self.width)
+
+    def distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> float:
+        """Return the graph's route cost, including elevator surrogate costs."""
+        return self.graph.distance_to_facility(x, y, facility_id, floor, self.width)
+
+    def physical_distance_to_facility(self, x: float, y: float, facility_id: str, floor: int = 1) -> float:
+        """Return horizontal metres; cabin time is never converted into physical travel."""
+        route = self.route_to_facility(x, y, facility_id, floor)
+        if route is None:
+            return math.inf
+        distance = 0.0
+        px, py, previous_floor = x, y, floor
+        for index, (tx, ty) in enumerate(route.points):
+            target_floor = route.floors[index] if route.floors else previous_floor
+            lift = route.lifts[index] if route.lifts else None
+            if lift is None and target_floor == previous_floor:
+                distance += math.hypot(tx - px, ty - py) * config.METERS_PER_PIXEL
+            px, py, previous_floor = tx, ty, target_floor
+        return distance
 
 
 if __name__ == "__main__":

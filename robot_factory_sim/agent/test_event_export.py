@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import tempfile
 import os
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import unittest
+from contextlib import ExitStack
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -26,7 +27,7 @@ class EventExportTests(unittest.TestCase):
     """이벤트 처리 상태를 건드리지 않고 출처를 보존하는지 검사한다."""
 
     def test_export_includes_processed_and_unprocessed_without_consuming(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, ExitStack() as resources:
             root = Path(directory)
             db = DBManager(root / "factory.db")
             db.initialize()
@@ -47,7 +48,7 @@ class EventExportTests(unittest.TestCase):
             reader = DBManager(root / "factory.db", read_only=True)
             self.assertEqual([event["id"] for event in reader.fetch_unprocessed_events()], [second])
             reader.close()
-            service = RagService(ChromaStore(root / "vectors", HashEmbedder()))
+            service = RagService(resources.enter_context(ChromaStore(root / "vectors", HashEmbedder())))
             service.ingest(documents)
             answer = service.ask("도장 설비 고장", where={"dataset_id": "dataset-A"}, top_k=1)
             self.assertEqual(answer.sources[0].chunk.metadata["event_id"], first)

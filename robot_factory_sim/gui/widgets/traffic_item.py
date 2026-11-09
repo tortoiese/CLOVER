@@ -52,7 +52,8 @@ class TrafficItem(QGraphicsPathItem):
             snap: 새 통행 자원 상태.
         """
         signature = (snap.capacity, snap.occupied, snap.waiting, tuple(snap.queue), tuple(snap.occupants),
-                     int(snap.longest_wait), snap.passable, snap.width, snap.bidirectional)
+                     int(snap.longest_wait), snap.passable, snap.width, snap.bidirectional,
+                     snap.unit, snap.draining, snap.resource_id)
         if signature == self._signature:
             return
         self._signature = signature
@@ -66,10 +67,14 @@ class TrafficItem(QGraphicsPathItem):
         width = c.TRAFFIC_BUSY_WIDTH if snap.waiting or snap.occupied or not snap.passable else c.TRAFFIC_IDLE_WIDTH
         self.setPen(QPen(QColor(color), width,
                         Qt.PenStyle.DashLine if not snap.passable else Qt.PenStyle.SolidLine))
-        self._label.setText(f"대기 {snap.waiting}" if snap.waiting else "통행 불가" if not snap.passable else "")
+        self._label.setText("변경 적용 대기" if snap.draining else
+                            f"대기 {snap.waiting}" if snap.waiting else "통행 불가" if not snap.passable else "")
         direction = "양방향" if snap.bidirectional else "시작 → 끝 일방통행"
         kind = "교차로" if snap.kind == "intersection" else f"통로 폭 {snap.width:g}m · {direction}"
-        self.setToolTip(f"{snap.id} · {kind}\n확보 {snap.occupied}/{snap.capacity} (진입 예약 포함) · 대기 {snap.waiting}대\n"
+        amount = (f"{snap.occupied / 1000:g}/{snap.capacity / 1000:g}m" if snap.unit == "mm"
+                  else f"{snap.occupied}/{snap.capacity}대")
+        draining = " · 기존 점유 해제 대기, 신규 진입 금지" if snap.draining else ""
+        self.setToolTip(f"{snap.id} · {kind}\n확보 {amount} (진입 예약 포함){draining} · 대기 {snap.waiting}대\n"
                         f"확보 로봇: {', '.join(snap.occupants) or '-'}\n"
                         f"대기 순서(FIFO): {', '.join(snap.queue) or '-'}\n최장 대기 {snap.longest_wait:.1f}s\n"
                         "대기 위치: 진입 직전 노드. 통행 불가는 폭·장애물 조건을 확인하세요.")

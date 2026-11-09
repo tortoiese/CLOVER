@@ -113,6 +113,10 @@ def test_live_queue_and_wait_reason_are_visible_and_serializable() -> None:
         waiting = next(robot for robot in state.robots if robot.wait_reason)
         assert waiting.wait_reason in view._robots[waiting.id].toolTip()
         assert state_to_context(state)["traffic"][0]["waiting"] == 1
+        context = state_to_context(state)["traffic"][0]
+        assert context["unit"] == "mm" and context["contract"] == "traffic-mm-bundle-v1"
+        assert "0.9/0.9m" in item.toolTip()
+        assert context["resource_id"] == engine.corridors.resource_id(1)
         view.set_traffic_visible(False)
         assert not item.isVisible()
         view.set_traffic_visible(True)
@@ -123,6 +127,19 @@ def test_live_queue_and_wait_reason_are_visible_and_serializable() -> None:
         assert item._label.text() == ""
     finally:
         view.close()
+
+
+def test_draining_traffic_explains_closed_admission() -> None:
+    """The operator can distinguish a pending layout change from ordinary FIFO wait."""
+    from gui.widgets.traffic_item import TrafficItem
+    engine = SimulationEngine(traffic_factory(), comparison_seed=1)
+    pool = engine.corridors.edge_resource(1)
+    request = pool.request(900, "R1")
+    engine.corridors.pause_admission()
+    item = TrafficItem(next(s for s in engine.corridors.snapshots() if s.id == "edge:1"))
+    assert item._label.text() == "변경 적용 대기"
+    assert "신규 진입 금지" in item.toolTip() and "0.9/0m" in item.toolTip()
+    request.release()
 
 
 def test_same_routes_are_not_rebuilt_on_identical_snapshots(monkeypatch: Any) -> None:

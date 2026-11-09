@@ -9,15 +9,15 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from collections.abc import Generator
-from contextlib import ExitStack
 from dataclasses import replace
+from itertools import pairwise
 from typing import TYPE_CHECKING, Any
 
 import simpy
 
 import config
 from simulation.path_graph import Route
-from simulation.traffic_rules import LaneRequest, TrafficBlocked
+from simulation.traffic_rules import LaneRequest, TrafficBlocked, tail_clearance_seconds
 from utils.config_models import RobotConfig
 from utils.event_types import RobotState
 from utils.metrics import RobotTimeUsage
@@ -91,6 +91,8 @@ class Robot:
         self.wait_resource = ""
         self.wait_since: float | None = None
         self._traffic_section_active = False
+        self._traffic_granted = False
+        self._pending_control: dict[str, Any] | None = None
         self._pending_dimensions: tuple[float, float] | None = None
         self.process = self.env.process(self.run_process())
 
@@ -221,6 +223,10 @@ class Robot:
         """
         if not self.process.is_alive or self.env.active_process is self.process:
             return False
+        if self._traffic_granted or self._riding is not None:
+            # A control cancellation cannot make an occupied footprint disappear.
+            self._defer_control({"kind": kind, "task": task})
+            return True
         self.process.interrupt({"kind": kind, "task": task})
         return True
 
@@ -404,11 +410,10 @@ class Robot:
         self._set_state(RobotState.MOVING)
 
     def _ride_process(self, lift_id: str, tx: float, ty: float, floor: int) -> Generator[Any, Any, None]:
-        """엘리베이터를 타고 floor층의 (tx, ty)로 이동한다. 도중에 중단되면 도착 층으로 옮겨진다."""
+        """실제 캐빈 도착·하차 후 점유를 해제하고 보류한 제어 명령을 처리한다."""
         elevator = self.engine.elevators.get(lift_id)
         if elevator is None or not elevator.active:
-            self.x, self.y, self.floor = tx, ty, floor
-            return
+            raise TrafficBlocked("사용 가능한 실제 엘리베이터 자원이 없습니다.")
         wait_start = self.env.now
         with elevator.resource.request() as request:
             self._set_state(RobotState.WAITING)
@@ -418,25 +423,42 @@ class Robot:
             self._set_state(RobotState.MOVING)
             self._riding = elevator
             try:
-                yield from elevator.carry(floor)
-            except simpy.Interrupt:
-                self.x, self.y, self.floor = tx, ty, floor
-                raise
+                while True:
+                    try:
+                        yield from elevator.carry(floor)
+                        break
+                    except simpy.Interrupt as interruption:
+                        self._defer_control(interruption.cause)
             finally:
                 self._riding = None
         self.x, self.y, self.floor = tx, ty, floor
+        self._raise_pending_control()
 
-    def _travel_route(self, route: Route) -> Generator[Any, Any, None]:
+    def _travel_route(self, route: Route, not_before: tuple[float, ...] = ()) -> Generator[Any, Any, None]:
         """경로를 따라 이동한다. 층이 바뀌는 점은 엘리베이터 탑승, 그 외에는 통로 차선·교차점 제약을 지킨다."""
+        gate = self.engine._traffic_ready
+        if gate is not None and not gate.triggered:
+            yield gate
+            raise simpy.Interrupt({"kind": InterruptKind.STATION_DOWN})
         count = len(route.points)
+        if not_before and (len(not_before) != count or not all(math.isfinite(t) for t in not_before) or
+                           any(a > b for a, b in pairwise(not_before))):
+            raise ValueError("one finite planned start is required per route segment")
         self.route = list(route.points)
         self.route_floors = list(route.floors) if len(route.floors) == count else [self.floor] * count
         self.route_lifts = list(route.lifts) if len(route.lifts) == count else [None] * count
         has_graph = len(route.nodes) == count and len(route.prev_nodes) == count and count > 0
-        lift_flags = list(self.route_lifts)
         corridors = self.engine.corridors
         index = 0
         while index < count:
+            # A layout change may start while the previous section is occupied.
+            # Wait outside it, then let the normal control path re-plan the task.
+            gate = self.engine._traffic_ready
+            if gate is not None and not gate.triggered:
+                yield gate
+                raise simpy.Interrupt({"kind": InterruptKind.STATION_DOWN})
+            if not_before and self.env.now < not_before[index]:
+                yield self.env.timeout(not_before[index] - self.env.now)
             tx, ty = self.route[0]
             lift, floor = self.route_lifts[0], self.route_floors[0]
             if lift is not None and floor != self.floor:
@@ -444,57 +466,93 @@ class Robot:
                 self._pop_route()
                 index += 1
                 continue
-            end = index
-            if has_graph:
-                while end + 1 < count and not lift_flags[end + 1]:
-                    incoming = corridors.edge_between(route.prev_nodes[end], route.nodes[end])
-                    outgoing = corridors.edge_between(route.prev_nodes[end + 1], route.nodes[end + 1])
-                    if not corridors.continues_controlled_section(route.nodes[end], incoming, outgoing):
-                        break
-                    end += 1
-            yield from self._travel_section(route, index, end, has_graph)
+            end = corridors.section_end(route, index) if has_graph else index
+            yield from self._travel_section(route, index, end, has_graph, not_before)
             index = end + 1
 
     def _travel_section(self, route: Route, start: int, end: int,
-                        has_graph: bool) -> Generator[Any, Any, None]:
-        """진입점에서 자원을 일정한 순서로 확보하고 교차로/좁은 구간을 빠져나온다.
-
-        모든 로봇은 같은 자원 ID 순서를 사용한다. 부분 요청을 잡은 채 서로
-        반대 순서로 요청하는 순환 대기를 방지한다. 점유 중에도 실제 위치는 이동한다.
-        """
+                        has_graph: bool, not_before: tuple[float, ...] = ()) -> Generator[Any, Any, None]:
+        """Atomically acquire the whole section and release only after tail clearance."""
         corridors = self.engine.corridors
         reservations = {}
+        labels = {}
         if has_graph:
+            demands = corridors.section_demands(route, start, end, self.cfg.width)
+            reservations = {corridors.demand_resource(demand): demand.amount for demand in demands}
             for index in range(start, end + 1):
                 node, previous = route.nodes[index], route.prev_nodes[index]
                 edge_id = corridors.edge_between(previous, node)
-                if previous is not None and edge_id is None:
-                    raise TrafficBlocked("통행 방향에 맞는 경로 엣지가 없습니다.")
                 if edge_id is not None:
-                    units = corridors.lanes_needed(edge_id, self.cfg.width)
                     resource = corridors.edge_resource(edge_id)
-                    if resource is None:
-                        raise TrafficBlocked("사용 가능한 통로 자원이 없습니다.")
-                    reservations[f"edge:{edge_id}"] = (resource, units, "통로 진입 대기")
+                    labels[resource] = (f"edge:{edge_id}", "통로 진입 대기")
                 if corridors.is_intersection(node):
-                    reservations[f"node:{node}"] = (corridors.intersection_resource(node), 1, "교차로 진입 대기")
-        with ExitStack() as stack:
+                    labels[corridors.intersection_resource(node)] = (f"node:{node}", "교차로 진입 대기")
+        request = corridors.arbiter.request(reservations, self.robot_id) if reservations else None
+        try:
             self._traffic_section_active = True
-            stack.callback(self._finish_traffic_section)
-            for identifier, (resource, units, reason) in sorted(reservations.items()):
-                request = stack.enter_context(resource.request(units, self.robot_id))
+            if request is not None:
+                blocker = corridors.arbiter.blocker(request)
+                identifier, reason = labels.get(blocker, ("", "통로 진입 대기"))
                 yield from self._wait_for_traffic(request, reason, identifier)
+                self._traffic_granted = True
             for index in range(start, end + 1):
+                if not_before and self.env.now < not_before[index]:
+                    yield from self._protected_delay(not_before[index] - self.env.now)
                 tx, ty = self.route[0]
-                yield from self._move_point(tx, ty)
+                remaining = (list(self.route), list(self.route_floors), list(self.route_lifts))
+                while True:
+                    try:
+                        yield from self._move_point(tx, ty)
+                        break
+                    except simpy.Interrupt as interruption:
+                        if request is None or not request.granted:
+                            raise
+                        if self._segment is not None:
+                            *_, t0, t1, _ = self._segment
+                            self._apply_segment(self._segment_fraction(t0, t1))
+                        self._defer_control(interruption.cause)
+                    except BatteryDepleted:
+                        if request is None or not request.granted:
+                            raise
+                        # The stalled robot still owns the physical corridor.
+                        self.route, self.route_floors, self.route_lifts = map(list, remaining)
+                        yield from self._fault_process(protected=True)
+                        if not self._pending_control or self._pending_control.get("kind") != InterruptKind.RETIRE:
+                            self._pending_control = {"kind": InterruptKind.CHARGE}
+                        self._set_state(RobotState.MOVING)
                 self._pop_route()
                 if has_graph and corridors.is_intersection(route.nodes[index]):
                     duration = self.cfg.length / max(0.05, self.cfg.move_speed) + config.INTERSECTION_MARGIN_SEC
-                    yield self.env.timeout(duration)
+                    yield from self._protected_delay(duration)
+            if request is not None:
+                yield from self._protected_delay(tail_clearance_seconds(self.cfg.length, self.cfg.move_speed))
+        finally:
+            if request is not None:
+                request.release()
+            self._finish_traffic_section()
+        self._raise_pending_control()
+
+    def _protected_delay(self, seconds: float) -> Generator[Any, Any, None]:
+        deadline = self.env.now + seconds
+        while self.env.now < deadline:
+            try:
+                yield self.env.timeout(deadline - self.env.now)
+            except simpy.Interrupt as interruption:
+                self._defer_control(interruption.cause)
+
+    def _defer_control(self, cause: Any) -> None:
+        if self._pending_control is None or self._pending_control.get("kind") != InterruptKind.RETIRE:
+            self._pending_control = cause if isinstance(cause, dict) else {"kind": str(cause)}
+
+    def _raise_pending_control(self) -> None:
+        if self._pending_control is not None:
+            cause, self._pending_control = self._pending_control, None
+            raise simpy.Interrupt(cause)
 
     def _finish_traffic_section(self) -> None:
         """통로 점유 해제 후에만 새 로봇 크기를 적용한다."""
         self._traffic_section_active = False
+        self._traffic_granted = False
         if self._pending_dimensions is not None:
             width, length = self._pending_dimensions
             self.cfg = replace(self.cfg, width=width, length=length)
@@ -591,12 +649,15 @@ class Robot:
         self.forced_charge = False
         self.target_id = None
 
-    def _fault_process(self) -> Generator[Any, Any, None]:
+    def _fault_process(self, protected: bool = False) -> Generator[Any, Any, None]:
         """방전 → 구조 대기 → 최소 잔량으로 복구 후 충전소행."""
         self._set_state(RobotState.FAULT)
         self._requeue_current()
         self.engine.on_robot_fault(self)
-        yield self.env.timeout(config.FAULT_RECOVERY_TIME)
+        if protected:
+            yield from self._protected_delay(config.FAULT_RECOVERY_TIME)
+        else:
+            yield self.env.timeout(config.FAULT_RECOVERY_TIME)
         self.battery = self.capacity * config.RESCUE_BATTERY_LEVEL / 100.0
         self._depleted = False
         self.forced_charge = True

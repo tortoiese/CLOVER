@@ -9,8 +9,9 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any
 
-from utils.config_models import FactoryConfig
 import config
+from simulation.resource_pool import SLOT_UNIT, TRAFFIC_CONTRACT
+from utils.config_models import FactoryConfig
 
 Point = tuple[float, float]
 
@@ -63,6 +64,10 @@ class TrafficSnapshot:
     width: float = 0.0
     bidirectional: bool = True
     passable: bool = True
+    unit: str = SLOT_UNIT
+    resource_id: str = ""
+    contract: str = TRAFFIC_CONTRACT
+    draining: bool = False
 
 
 @dataclass

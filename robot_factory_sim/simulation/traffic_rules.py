@@ -1,98 +1,97 @@
-"""통행 폭 판정과 차선 일괄 확보. 단위는 m, 대기 순서는 FIFO다."""
+"""Shared traffic contract: metres at input, conservative integer mm in admission."""
 
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
-import simpy
-from simpy.resources.resource import Request
-
+from simulation.resource_pool import (
+    TRAFFIC_CONTRACT,
+    CapacityPool,
+    CapacityRequest,
+    TrafficBlocked,
+)
 from utils.config_models import FactoryProfile
 
-WIDTH_TOLERANCE = 1e-9
+LaneResource = CapacityPool
+LaneRequest = CapacityRequest
+__all__ = ["LaneRequest", "LaneResource", "TrafficBlocked", "can_pass", "capacity_mm", "demand_mm"]
 
 
-class TrafficBlocked(ValueError):
-    """현재 로봇이 통로의 물리 조건을 만족하지 못한다."""
+@dataclass(frozen=True)
+class TrafficDemand:
+    """Immutable planner/runtime demand for the complete controlled section interval."""
+
+    resource: str
+    amount: int
+    unit: str
+    contract: str = TRAFFIC_CONTRACT
+
+
+@dataclass(frozen=True)
+class TrafficReservation:
+    """Shared half-open [start, end) section reservation in simulation seconds."""
+
+    resource: str
+    amount: int
+    unit: str
+    start: float
+    end: float
+    contract: str = TRAFFIC_CONTRACT
+
+
+def physical_point(floor: int, x: float, y: float) -> tuple[int, float, float]:
+    """Identify a footprint without DB numbering or signed-zero aliases."""
+    if not math.isfinite(x) or not math.isfinite(y):
+        raise ValueError("traffic coordinates must be finite")
+    return floor, float(x) if x else 0.0, float(y) if y else 0.0
+
+
+def corridor_identity(a: tuple[int, float, float], b: tuple[int, float, float]) -> str:
+    """Share one budget for both directions and duplicate physical edges."""
+    return "corridor:" + repr(tuple(sorted((a, b))))
+
+
+def tail_clearance_seconds(length: float, speed: float) -> float:
+    """Hold after the centre reaches the exit until the rear half has cleared."""
+    if not math.isfinite(length) or not math.isfinite(speed) or length <= 0 or speed <= 0:
+        raise ValueError("robot length and speed must be finite positive numbers")
+    return length / (2 * max(.05, speed))
+
+
+def _decimal(value: float) -> Decimal:
+    if isinstance(value, bool) or not math.isfinite(value):
+        raise ValueError("traffic dimensions must be finite numbers")
+    return Decimal(str(value))
 
 
 def required_width(robot_width: float, profile: FactoryProfile) -> float:
-    """로봇 폭과 벽·측면 여유를 포함한 최소 통로 폭을 반환한다.
+    """Return robot width plus total wall and per-robot side reserves."""
+    values = tuple(_decimal(v) for v in (robot_width, profile.edge_clearance, profile.side_clearance))
+    if values[0] <= 0 or any(value < 0 for value in values):
+        raise ValueError("robot width must be positive and clearances nonnegative")
+    return float(sum(values))
 
-    Args:
-        robot_width: 로봇 폭(m).
-        profile: 여유 폭 설정.
 
-    Returns:
-        필요한 통로 폭(m).
-    """
-    values = (robot_width, profile.edge_clearance, profile.side_clearance)
-    if any(not math.isfinite(value) or value < 0 for value in values) or robot_width <= 0:
-        raise ValueError("로봇 폭은 양수, 여유 폭은 유한한 비음수여야 합니다.")
-    return sum(values)
+def capacity_mm(edge_width: float, profile: FactoryProfile) -> int:
+    """Floor usable width after subtracting the total wall reserve exactly once."""
+    width, wall = _decimal(edge_width), _decimal(profile.edge_clearance)
+    if width < 0 or wall < 0:
+        raise ValueError("edge width and wall reserve must be nonnegative")
+    return max(0, int(((width - wall) * 1000).to_integral_value(rounding=ROUND_FLOOR)))
+
+
+def demand_mm(robot_width: float, profile: FactoryProfile) -> int:
+    """Ceil one robot's width and side separation; never clamp to capacity."""
+    required_width(robot_width, profile)
+    return int(((_decimal(robot_width) + _decimal(profile.side_clearance)) * 1000)
+               .to_integral_value(rounding=ROUND_CEILING))
 
 
 def can_pass(edge_width: float, robot_width: float, profile: FactoryProfile) -> bool:
-    """통로가 로봇과 여유 폭을 수용하는지 판정한다.
-
-    Args:
-        edge_width: 통로 폭(m).
-        robot_width: 로봇 폭(m).
-        profile: 여유 폭 설정.
-
-    Returns:
-        통행 가능 여부.
-    """
-    return math.isfinite(edge_width) and edge_width + WIDTH_TOLERANCE >= required_width(robot_width, profile)
-
-
-class LaneRequest(Request):
-    """로봇 하나가 필요한 차선을 원자적으로 요청하는 이벤트."""
-
-    def __init__(self, resource: LaneResource, units: int, robot_id: str) -> None:
-        """점유량과 요청 시각을 기록한다.
-
-        Args:
-            resource: 차선 또는 교차로 자원.
-            units: 동시에 확보할 차선 수.
-            robot_id: 요청 로봇 ID.
-        """
-        self.units = units
-        self.robot_id = robot_id
-        self.created_at = float(resource._env.now)
-        super().__init__(resource)
-
-
-class LaneResource(simpy.Resource):
-    """여러 차선을 부분 점유하지 않고 한 번에 확보하는 FIFO 자원.
-
-    상위 Resource의 취소·해제 컨텍스트를 사용한다. 큰 로봇 두 대가
-    각각 차선 일부만 잡은 채 서로 기다리는 상황을 방지한다.
-    """
-
-    @property
-    def count(self) -> int:
-        """현재 점유 중인 차선 수를 반환한다."""
-        return sum(request.units for request in self.users)
-
-    def request(self, units: int = 1, robot_id: str = "") -> LaneRequest:
-        """차선을 일괄 요청한다. 확보 불가능한 크기는 즉시 거부한다.
-
-        Args:
-            units: 필요한 차선 수.
-            robot_id: 요청 로봇 ID.
-
-        Returns:
-            컨텍스트 관리가 가능한 요청 이벤트.
-        """
-        if isinstance(units, bool) or int(units) != units or not 1 <= units <= self.capacity:
-            raise ValueError("필요한 차선 수가 통로 용량을 초과했습니다.")
-        return LaneRequest(self, int(units), robot_id)
-
-    def _do_put(self, event: LaneRequest) -> bool | None:
-        if self.count + event.units <= self.capacity:
-            self.users.append(event)
-            event.usage_since = self._env.now
-            event.succeed()
-            return True
-        return None
+    """Use the same integer width inequality as runtime and planning."""
+    required = demand_mm(robot_width, profile)
+    if not math.isfinite(edge_width) or edge_width < 0:
+        return False
+    return required <= capacity_mm(edge_width, profile)
