@@ -66,7 +66,12 @@ class _AgentRunner(QObject):
 
     def close(self) -> None:
         """이벤트 루프 종료."""
-        self._loop.close()
+        try:
+            close = getattr(self._agent, "close", None)
+            if callable(close):
+                close()
+        finally:
+            self._loop.close()
 
 
 class AgentBridge(QThread):

@@ -100,6 +100,9 @@ class FloorHeader(QWidget):
         self.network_toggle = QCheckBox("경로망", self)
         self.network_toggle.setChecked(True)
         bottom.addWidget(self.network_toggle)
+        self.traffic_toggle = QCheckBox("통행·병목", self)
+        self.traffic_toggle.setChecked(True)
+        bottom.addWidget(self.traffic_toggle)
         hint = QLabel("Ctrl+휠: 축척 · 드래그: 이동", self)
         hint.setObjectName("Muted")
         bottom.addWidget(hint, 1)
@@ -186,6 +189,7 @@ class FloorStage(QWidget):
         self.header.zoom_out.clicked.connect(lambda: self.plan.zoom_step(-1))
         self.header.fit_button.clicked.connect(self.plan.fit_to_view)
         self.header.network_toggle.toggled.connect(self.plan.set_network_visible)
+        self.header.traffic_toggle.toggled.connect(self.plan.set_traffic_visible)
         self.plan.scale_changed.connect(self._on_scale_changed)
         self._relayout()
 

@@ -57,11 +57,12 @@ class RollingMilpScheduler(OptimizedScheduler):
                         continue
                     if any(r.target_id == station_id for r in engine.robot_list() if not r.is_available()):
                         continue
-                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id, robot.floor)
+                    distance = engine.path_graph.distance_to_facility(
+                        robot.x, robot.y, station_id, robot.floor, robot.cfg.width)
                     if not math.isfinite(distance):
                         continue
                     if not any(math.isfinite(engine.path_graph.distance_to_facility(
-                            station.cfg.x, station.cfg.y, charger.id, station.cfg.floor))
+                            station.cfg.x, station.cfg.y, charger.id, station.cfg.floor, robot.cfg.width))
                                for charger in engine.chargers.values() if charger.active):
                         continue
                     energy = self._energy_needed(robot, engine, station_id, distance)

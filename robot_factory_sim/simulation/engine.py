@@ -6,8 +6,9 @@ SimWorker는 Baseline / 최적화 엔진 2개를 같은 시드·같은 작업 �
 
 from __future__ import annotations
 
-import itertools
+import copy
 import hashlib
+import itertools
 import math
 from collections import deque
 from collections.abc import Callable, Generator
@@ -42,7 +43,13 @@ from utils.config_models import (
     RobotConfig,
     WorkStationConfig,
 )
-from utils.event_types import OrderStatus, ProductionEventType, RobotState, Severity, TimelineKind
+from utils.event_types import (
+    OrderStatus,
+    ProductionEventType,
+    RobotState,
+    Severity,
+    TimelineKind,
+)
 from utils.metrics import MetricsCollector
 
 Point = tuple[float, float]
@@ -133,6 +140,8 @@ class SimulationEngine:
         self.factory = factory
         self.path_graph = PathGraph(factory)
         self.corridors = CorridorNetwork(self.env, factory)
+        self._pending_traffic_config: FactoryConfig | None = None
+        self._traffic_ready: simpy.Event | None = None
         self.layout_version = 0
         self.stations: dict[str, WorkStation] = {}
         self.chargers: dict[str, ChargingStation] = {}
@@ -156,6 +165,7 @@ class SimulationEngine:
             self._create_charger(charger_cfg)
         for elevator_cfg in self._elevator_configs():
             self._create_elevator(elevator_cfg)
+        self.corridors.bind_elevators({key: elevator.resource for key, elevator in self.elevators.items()})
         for robot_cfg in factory.robots:
             if robot_cfg.is_active:
                 self._create_robot(robot_cfg)
@@ -375,7 +385,8 @@ class SimulationEngine:
             usable = self._usable_stations(task)
             if usable:
                 task.station_id = min(
-                    usable, key=lambda s: self.path_graph.distance_to_facility(robot.x, robot.y, s, robot.floor))
+                    usable, key=lambda s: self.path_graph.distance_to_facility(
+                        robot.x, robot.y, s, robot.floor, robot.cfg.width))
         task.assigned_at = self.now
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is not None and order.detected_at is not None and not order.responded:
@@ -850,22 +861,48 @@ class SimulationEngine:
             or [(c.id, c.x, c.y, c.floor) for c in old.chargers]
             != [(c.id, c.x, c.y, c.floor) for c in factory.chargers]
         )
+        if geometry_changed and self._traffic_occupied():
+            self._pending_traffic_config = copy.deepcopy(factory)
+            if self._traffic_ready is None or self._traffic_ready.triggered:
+                self._traffic_ready = self.env.event()
+            # Old owners continue to the exit. Waiting actors drop every claim
+            # before any new geometry or direction can become active.
+            for robot in self.robots.values():
+                if (not robot._traffic_granted and robot._riding is None and
+                        robot.state in (RobotState.MOVING, RobotState.WAITING)):
+                    robot.interrupt(InterruptKind.STATION_DOWN)
+            self.corridors.pause_admission()
+            return ["통행 자원 해제 후 설정 적용 대기"]
+        pending_gate = self._traffic_ready
+        self._pending_traffic_config = None
+        self._traffic_ready = None
         self.factory = factory
-        self.path_graph = PathGraph(factory)
-        self.corridors = CorridorNetwork(self.env, factory)
+        if geometry_changed:
+            self.path_graph = PathGraph(factory)
+            self.corridors.reconfigure(factory)
+        elif pending_gate is not None:
+            self.corridors.reconfigure(factory)
         self.layout_version += 1
 
         summary += self._apply_station_configs(factory.stations)
         summary += self._apply_charger_configs(factory.chargers)
         summary += self._apply_elevator_configs(self._elevator_configs())
+        self.corridors.bind_elevators({key: elevator.resource for key, elevator in self.elevators.items()})
         summary += self._apply_robot_configs(factory.robots)
+        self.corridors.update_robot_widths([robot.width for robot in factory.robots if robot.is_active])
         self._clamp_robot_floors()
         if geometry_changed:
             self._reroute_moving_robots()
             summary.append("경로 그래프 재계산")
         if summary:
             self._timeline(TimelineKind.CONFIG, "설정 반영: " + ", ".join(summary))
+        if pending_gate is not None and not pending_gate.triggered:
+            pending_gate.succeed()
         return summary
+
+    def _traffic_occupied(self) -> bool:
+        return (any(pool.users for pool in self.corridors._pools.values()) or
+                any(elevator.resource.count for elevator in self.elevators.values()))
 
     def _apply_station_configs(self, configs: list[WorkStationConfig]) -> list[str]:
         """스테이션 diff 반영."""
@@ -966,6 +1003,9 @@ class SimulationEngine:
                 summary.append(f"{cfg.id} 추가")
             elif elevator.cfg != cfg:
                 elevator.update_config(cfg)
+                if elevator.resource.capacity != max(1, int(cfg.capacity)):
+                    # Geometry updates reach here only after old owners drain.
+                    elevator.resource = simpy.Resource(self.env, capacity=max(1, int(cfg.capacity)))
                 summary.append(f"{cfg.id} 수정")
             elevator = self.elevators[cfg.id]
             elevator.door_time = self.factory.profile.door_time_sec
@@ -975,8 +1015,7 @@ class SimulationEngine:
         """층 수가 줄어 사라진 층에 있는 로봇을 최상층으로 옮긴다."""
         top = self.factory.floor_count
         for robot in self.robots.values():
-            if robot.floor > top:
-                robot.floor = top
+            robot.floor = min(robot.floor, top)
 
     def _evacuate_charger(self, charger_id: str) -> None:
         """사용 불가 충전소로 가거나 충전 중인 로봇을 다른 충전소로 보낸다."""
@@ -1005,7 +1044,7 @@ class SimulationEngine:
     def _reroute_moving_robots(self) -> None:
         """경로망 변경 후 이동 중인 로봇의 경로를 다시 계산한다."""
         for robot in self.robots.values():
-            if robot.state != RobotState.MOVING:
+            if robot.state != RobotState.MOVING and not robot.wait_reason:
                 continue
             if robot.current_task is not None:
                 task = robot.current_task
@@ -1019,7 +1058,11 @@ class SimulationEngine:
     def _dispatch_process(self) -> Generator[Any, Any, None]:
         """주기적으로 스케줄러를 호출한다."""
         while True:
-            self.scheduler.dispatch(self)
+            if self._pending_traffic_config is not None:
+                if not self._traffic_occupied():
+                    self.apply_config(self._pending_traffic_config)
+            else:
+                self.scheduler.dispatch(self)
             yield self.env.timeout(config.DISPATCH_INTERVAL)
 
     def _monitor_process(self) -> Generator[Any, Any, None]:
@@ -1131,6 +1174,11 @@ class SimulationEngine:
                 floor=robot.floor,
                 floor_pos=robot.floor_position(),
                 route_floors=robot.remaining_route_floors(),
+                wait_reason=robot.wait_reason,
+                wait_resource=robot.wait_resource,
+                wait_seconds=round(self.now - robot.wait_since, 2) if robot.wait_since is not None else 0.0,
+                width=robot.cfg.width,
+                length=robot.cfg.length,
             ))
         return snapshots
 
