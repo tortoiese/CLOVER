@@ -93,11 +93,14 @@ class _RagRequest(BaseHTTPRequestHandler):
         prompt = body.get("input")
         if not isinstance(prompt, str) or EVIDENCE_SEPARATOR not in prompt:
             raise ValueError("검색 근거가 포함된 요청이 필요합니다.")
-        evidence = json.loads(prompt.rpartition(EVIDENCE_SEPARATOR)[2])
+        question, _, raw_evidence = prompt.rpartition(EVIDENCE_SEPARATOR)
+        evidence = json.loads(raw_evidence)
         first = evidence[0] if isinstance(evidence, list) and evidence else None
         if not isinstance(first, dict) or first.get("citation") != 1 or not isinstance(first.get("text"), str):
             raise ValueError("첫 번째 검색 근거와 인용 번호가 필요합니다.")
-        excerpt = " ".join(first["text"].split())[:160]
+        terms = question.removeprefix("질문: ").casefold().split()
+        lines = (line.strip() for line in first["text"].splitlines() if line.strip())
+        excerpt = max(lines, key=lambda line: sum(term in line.casefold() for term in terms), default="")
         # 예시 응답에 원문 속 인용 표기가 섞이지 않도록 괄호를 바꾼다.
         excerpt = excerpt.replace("[", "(").replace("]", ")")
         content = {"type": "output_text", "text": f"{MOCK_ANSWER_PREFIX} {excerpt} [1]", "annotations": []}

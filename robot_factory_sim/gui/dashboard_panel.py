@@ -143,7 +143,7 @@ class DashboardPanel(QWidget):
         kpi_layout.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignLeft)
         detail_scroll = QScrollArea(kpi_box)
         detail_scroll.setObjectName("KpiDetails")
-        detail_scroll.setMaximumHeight(c.KPI_DETAILS_MAX_HEIGHT)
+        detail_scroll.setFixedHeight(c.KPI_DETAILS_HEIGHT)
         detail_scroll.setWidgetResizable(True)
         detail_panel = self._build_metrics(detail_scroll, details, c.KPI_COLUMNS)
         detail_panel.setObjectName("KpiDetailContent")

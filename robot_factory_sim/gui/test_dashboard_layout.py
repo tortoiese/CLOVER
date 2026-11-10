@@ -3,6 +3,7 @@
 from PySide6.QtWidgets import QApplication, QScrollArea, QToolButton
 
 import config
+from gui import constants as c
 from gui.dashboard_panel import DashboardPanel
 
 
@@ -28,6 +29,7 @@ def test_dashboard_stays_narrow_when_values_grow() -> None:
         toggle.click()
         app.processEvents()
         assert details.isVisible() and panel.width() == 390
+        assert details.height() == c.KPI_DETAILS_HEIGHT
         assert details.verticalScrollBar().maximum() > 0
         toggle.click()
         app.processEvents()

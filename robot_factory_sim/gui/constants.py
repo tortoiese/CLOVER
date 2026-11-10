@@ -116,7 +116,7 @@ EDITOR_NODE_RADIUS: Final[float] = 6.0
 ROUTE_DASH: Final[tuple[float, float]] = (4.0, 4.0)
 
 KPI_COLUMNS: Final[int] = 3
-KPI_DETAILS_MAX_HEIGHT: Final[int] = 192
+KPI_DETAILS_HEIGHT: Final[int] = 176
 CHART_REFRESH_MS: Final[int] = 500
 ANIMATION_INTERVAL_MS: Final[int] = 80
 BLINK_INTERVAL_TICKS: Final[int] = 5
