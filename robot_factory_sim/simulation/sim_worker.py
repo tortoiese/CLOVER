@@ -207,6 +207,7 @@ class _SimController(QObject):
             params=params,
             events=list(engine.timeline),
             elevators=engine.elevator_snapshots(),
+            traffic=engine.corridors.snapshots(),
         )
         self.state_ready.emit(state)
 

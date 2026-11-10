@@ -6,7 +6,8 @@ import json
 import re
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
 
 from agent.rag.documents import Chunk, Document, chunk_document
 from agent.rag.providers import Answerer
@@ -36,6 +37,19 @@ class RagService:
         self.store = store
         self.answerer = answerer
         self.min_score = min_score
+
+    def close(self) -> None:
+        """Close the owned vector store after pending queries have finished."""
+        self.store.close()
+
+    def __enter__(self) -> Self:
+        """Return the service for an explicitly bounded storage lifetime."""
+        return self
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None,
+                 traceback: TracebackType | None) -> None:
+        """Release vector-store handles at the end of the resource scope."""
+        self.close()
 
     def ingest(self, documents: list[Document]) -> int:
         """입력에 포함된 각 출처를 최신 버전으로 등록한다.
@@ -91,6 +105,6 @@ class RagService:
                     text, generated = candidate, True
                 else:
                     text = "생성 답변의 출처를 확인할 수 없어 검색 근거를 표시합니다.\n" + text
-            except Exception:
+            except Exception:  # noqa: BLE001 — keep retrieved evidence when the optional answerer fails
                 text = "답변 생성에 실패해 검색 근거를 표시합니다.\n" + text
         return RagAnswer(text + "\n\n출처:\n" + "\n".join(citations), hits, generated)

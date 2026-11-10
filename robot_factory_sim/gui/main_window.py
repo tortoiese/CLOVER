@@ -45,12 +45,18 @@ from gui.config_editor import ConfigEditorDialog
 from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
 from gui.factory_panel import FactoryPanel
-from gui.order_dialog import OrderDialog
 from gui.optimization_panel import OptimizationPanel
+from gui.order_dialog import OrderDialog
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
-from utils.event_types import ActionKind, ChangeType, SchedulerModeLabel, Severity, Tables
+from utils.event_types import (
+    ActionKind,
+    ChangeType,
+    SchedulerModeLabel,
+    Severity,
+    Tables,
+)
 
 THREAD_STOP_TIMEOUT_MS: int = 3000
 SHUTDOWN_POLL_INTERVAL_MS: int = 100
@@ -491,7 +497,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # 종료
     # ------------------------------------------------------------------
-    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 — Qt override
+    def closeEvent(self, event: QCloseEvent) -> None:
         """스레드 종료를 요청하고 모두 종료되기 전에는 창을 유지한다."""
         threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
         if not self._closing:
@@ -510,6 +516,7 @@ class MainWindow(QMainWindow):
             self._shutdown_timer.start()
             return
         self._shutdown_timer.stop()
+        self._service.close()
         super().closeEvent(event)
 
     def _finish_shutdown(self) -> None:
