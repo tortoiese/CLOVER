@@ -144,4 +144,5 @@ RAG_ALLOW_NETWORK: bool = os.environ.get("CLOVER_RAG_ALLOW_NETWORK", "0") == "1"
 RAG_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
 RAG_EMBEDDING_MODEL: str = os.environ.get("CLOVER_RAG_EMBEDDING_MODEL", "text-embedding-3-small")
 RAG_CHAT_MODEL: str = os.environ.get("CLOVER_RAG_CHAT_MODEL", "")
+RAG_API_TIMEOUT: float = float(os.environ.get("CLOVER_RAG_API_TIMEOUT", "30"))
 RAG_MIN_SCORE: float = float(os.environ.get("CLOVER_RAG_MIN_SCORE", "0.15"))

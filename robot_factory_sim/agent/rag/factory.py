@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import config
@@ -29,8 +29,10 @@ def build_service(path: Path | None = None) -> RagService:
     if config.RAG_PROVIDER == "local":
         embedder = HashEmbedder()
     elif config.RAG_PROVIDER == "openai":
-        embedder = OpenAIEmbedder(config.RAG_API_KEY, config.RAG_EMBEDDING_MODEL, config.RAG_ALLOW_NETWORK)
-        answerer = OpenAIAnswerer(config.RAG_API_KEY, config.RAG_CHAT_MODEL, config.RAG_ALLOW_NETWORK)
+        embedder = OpenAIEmbedder(config.RAG_API_KEY, config.RAG_EMBEDDING_MODEL, config.RAG_ALLOW_NETWORK,
+                                  timeout=config.RAG_API_TIMEOUT)
+        answerer = OpenAIAnswerer(config.RAG_API_KEY, config.RAG_CHAT_MODEL, config.RAG_ALLOW_NETWORK,
+                                  timeout=config.RAG_API_TIMEOUT)
     else:
         raise ValueError("CLOVER_RAG_PROVIDER는 local 또는 openai여야 합니다.")
     return RagService(ChromaStore(path or config.RAG_DATA_PATH, embedder), answerer, config.RAG_MIN_SCORE)
@@ -38,12 +40,16 @@ def build_service(path: Path | None = None) -> RagService:
 
 def _build_gui_service() -> RagService:
     service = build_service()
-    if service.store.count() == 0:
-        source = config.RAG_DOCUMENT_PATH or config.BASE_DIR.parent / "README.md"
-        service.ingest(load_documents(source))
-    policy = Path(__file__).with_name("operating_policy.md")
-    service.ingest([Document(policy.read_text(encoding="utf-8"), str(policy), "운영안 비교 기준 v1",
-                             {"knowledge_type": "operating_policy", "version": "1"})])
+    try:
+        if service.store.count() == 0:
+            source = config.RAG_DOCUMENT_PATH or config.BASE_DIR.parent / "README.md"
+            service.ingest(load_documents(source))
+        policy = Path(__file__).with_name("operating_policy.md")
+        service.ingest([Document(policy.read_text(encoding="utf-8"), str(policy), "운영안 비교 기준 v1",
+                                 {"knowledge_type": "operating_policy", "version": "1"})])
+    except Exception:
+        service.close()
+        raise
     return service
 
 

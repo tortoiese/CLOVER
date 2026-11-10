@@ -8,6 +8,7 @@ from dataclasses import asdict, replace
 from typing import Any
 
 from agent.models import AgentResponse
+from agent.rag.providers import ProviderRequestError
 from agent.rag.service import RagService
 from agent.rag_agent import RagAgent
 from utils.comparison_models import ComparisonConditions
@@ -91,10 +92,13 @@ class OrchestrationAgent(RagAgent):
         self._last_result: dict[str, Any] | None = None
 
     def _evidence(self, question: str) -> str:
-        if callable(self._service):
-            self._service = self._service()
-        hits = self._service.store.search(question, 3, {"knowledge_type": "operating_policy"},
-                                          self._service.min_score)
+        try:
+            if callable(self._service):
+                self._service = self._service()
+            hits = self._service.store.search(question, 3, {"knowledge_type": "operating_policy"},
+                                              self._service.min_score)
+        except ProviderRequestError as exc:
+            return f"운영 근거를 불러오지 못했습니다. {exc}"
         if not hits:
             return "등록된 운영 근거를 찾지 못했습니다. 문서를 등록해 주세요."
         return "운영 근거 (계산 결과와 별개인 문서):\n" + "\n\n".join(

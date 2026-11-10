@@ -8,7 +8,9 @@ from typing import Any
 from agent.base import BaseAgent
 from agent.mock_agent import MockAgent
 from agent.models import AgentResponse, BottleneckReport, ProductionEvent
+from agent.rag.providers import ProviderRequestError
 from agent.rag.service import RagService
+from utils.event_types import Severity
 
 
 class RagAgent(BaseAgent):
@@ -53,9 +55,12 @@ class RagAgent(BaseAgent):
         question = message[len(prefix):].strip()
         if not question:
             return AgentResponse("사용법: /검색 충전 대기시간을 줄이는 방법", source="rag")
-        if callable(self._service):
-            self._service = self._service()
-        answer = self._service.ask(question)
+        try:
+            if callable(self._service):
+                self._service = self._service()
+            answer = self._service.ask(question)
+        except ProviderRequestError as exc:
+            return AgentResponse(str(exc), severity=Severity.WARNING, source="rag")
         return AgentResponse(answer.text, source="rag")
 
     async def handle_production_event(self, event: ProductionEvent, sim_context: dict[str, Any]) -> AgentResponse:
