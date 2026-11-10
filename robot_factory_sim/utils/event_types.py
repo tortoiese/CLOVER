@@ -133,7 +133,7 @@ class ActionKind:
 class SchedulerModeLabel:
     """스케줄러 모드 표시 이름."""
 
-    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "최적화"}
+    LABELS: Final[dict[str, str]] = {"baseline": "라운드로빈", "optimized": "가중합"}
 
 
 class Tables:

@@ -13,7 +13,17 @@ import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import QPointF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QPen, QPolygonF
-from PySide6.QtWidgets import QGraphicsPolygonItem, QGridLayout, QLabel, QSplitter, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QGraphicsPolygonItem,
+    QGridLayout,
+    QLabel,
+    QScrollArea,
+    QSplitter,
+    QTabWidget,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from gui import constants as c
 from gui.widgets.kpi_card import KpiCard
@@ -27,6 +37,7 @@ GANTT_BAR_HEIGHT: float = 0.7
 ORDER_BAR_HEIGHT: float = 0.55
 RADAR_RINGS: tuple[float, ...] = (0.25, 0.5, 0.75, 1.0)
 RADAR_LABEL_RADIUS: float = 1.22
+FEATURED_METRICS: tuple[str, ...] = ("throughput", "avg_wait")
 PRIORITY_COLORS: dict[str, str] = {"critical": c.CRITICAL, "high": c.WARNING, "normal": c.INFO, "low": c.TEXT_MUTED}
 
 
@@ -112,20 +123,36 @@ class DashboardPanel(QWidget):
         kpi_box = QWidget(splitter)
         kpi_layout = QVBoxLayout(kpi_box)
         kpi_layout.setContentsMargins(0, 0, 0, 0)
-        self._kpi_title = QLabel("📊 성능 KPI", kpi_box)
-        self._kpi_title.setObjectName("PanelTitle")
-        kpi_layout.addWidget(self._kpi_title)
-        grid = QGridLayout()
-        grid.setSpacing(6)
+        title = QLabel("운영 성과", kpi_box)
+        title.setObjectName("PanelTitle")
+        kpi_layout.addWidget(title)
+        self._comparison_caption = QLabel("표시 정책 확인 중", kpi_box)
+        self._comparison_caption.setObjectName("Muted")
+        kpi_layout.addWidget(self._comparison_caption)
+
+        featured = tuple(definition for definition in KPI_DEFINITIONS if definition.key in FEATURED_METRICS)
+        details = tuple(definition for definition in KPI_DEFINITIONS if definition.key not in FEATURED_METRICS)
         self._cards: dict[str, KpiCard] = {}
-        for column in range(c.KPI_COLUMNS):
-            grid.setColumnStretch(column, 1)
-        for index, definition in enumerate(KPI_DEFINITIONS):
-            card = KpiCard(definition, kpi_box)
-            row, column = divmod(index, c.KPI_COLUMNS)
-            grid.addWidget(card, row, column)
-            self._cards[definition.key] = card
-        kpi_layout.addLayout(grid)
+        kpi_layout.addWidget(self._build_metrics(kpi_box, featured, len(FEATURED_METRICS), featured=True))
+        toggle = QToolButton(kpi_box)
+        toggle.setObjectName("KpiDetailsToggle")
+        toggle.setText("세부 지표")
+        toggle.setCheckable(True)
+        toggle.setArrowType(Qt.ArrowType.RightArrow)
+        toggle.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        kpi_layout.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignLeft)
+        detail_scroll = QScrollArea(kpi_box)
+        detail_scroll.setObjectName("KpiDetails")
+        detail_scroll.setMaximumHeight(c.KPI_DETAILS_MAX_HEIGHT)
+        detail_scroll.setWidgetResizable(True)
+        detail_panel = self._build_metrics(detail_scroll, details, c.KPI_COLUMNS)
+        detail_panel.setObjectName("KpiDetailContent")
+        detail_scroll.setWidget(detail_panel)
+        detail_scroll.hide()
+        toggle.toggled.connect(detail_scroll.setVisible)
+        toggle.toggled.connect(lambda shown: toggle.setArrowType(Qt.ArrowType.DownArrow if shown
+                                                                 else Qt.ArrowType.RightArrow))
+        kpi_layout.addWidget(detail_scroll)
         kpi_layout.addStretch(1)
 
         self._tabs = QTabWidget(splitter)
@@ -144,6 +171,21 @@ class DashboardPanel(QWidget):
         self._timer.setInterval(c.CHART_REFRESH_MS)
         self._timer.timeout.connect(self._refresh_charts)
         self._timer.start()
+
+    def _build_metrics(self, parent: QWidget, definitions: tuple[KpiDefinition, ...], columns: int,
+                       *, featured: bool = False) -> QWidget:
+        panel = QWidget(parent)
+        grid = QGridLayout(panel)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(6)
+        for column in range(columns):
+            grid.setColumnStretch(column, 1)
+        for index, definition in enumerate(definitions):
+            card = KpiCard(definition, panel, featured=featured)
+            row, column = divmod(index, columns)
+            grid.addWidget(card, row, column)
+            self._cards[definition.key] = card
+        return panel
 
     # ------------------------------------------------------------------
     # 히스토리
@@ -209,11 +251,11 @@ class DashboardPanel(QWidget):
         other = state.engine_kpis.get(other_mode, {}) if other_mode else {}
         label = SchedulerModeLabel.LABELS.get(other_mode or "", "비교")
         mode = SchedulerModeLabel.LABELS.get(state.mode, state.mode)
-        title = f"📊 성능 KPI — {mode}"
+        caption = f"표시 {mode}"
         if other_mode:
-            title += f" · {label} 대비"
-        if self._kpi_title.text() != title:
-            self._kpi_title.setText(title)
+            caption += f"  /  비교 {label}"
+        if self._comparison_caption.text() != caption:
+            self._comparison_caption.setText(caption)
         for key, card in self._cards.items():
             card.set_values(state.kpis.get(key, math.nan), other.get(key, math.nan), label)
 

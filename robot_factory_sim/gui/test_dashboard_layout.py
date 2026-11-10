@@ -1,6 +1,6 @@
 """좁은 대시보드에서 수치가 갱신돼도 패널 폭이 유지되는지 검증한다."""
 
-from PySide6.QtWidgets import QApplication, QScrollArea
+from PySide6.QtWidgets import QApplication, QScrollArea, QToolButton
 
 import config
 from gui.dashboard_panel import DashboardPanel
@@ -21,6 +21,16 @@ def test_dashboard_stays_narrow_when_values_grow() -> None:
         card = panel._cards["throughput"]
         card.set_values(7.7, 4.3, "라운드로빈")
         assert card._value.text() == "7.7"
+        assert card._reference.text() == "라운드로빈 4.3 건/분"
+        details = panel.findChild(QScrollArea, "KpiDetails")
+        toggle = panel.findChild(QToolButton, "KpiDetailsToggle")
+        assert not details.isVisible()
+        toggle.click()
+        app.processEvents()
+        assert details.isVisible() and panel.width() == 390
+        assert details.verticalScrollBar().maximum() > 0
+        toggle.click()
+        app.processEvents()
 
         roi.update_kpis(1, 100, 4_000_000, 7_000_000)
         card.set_values(123_456_789.0, 0.00001, "긴 이름을 가진 비교 운영 정책")

@@ -16,17 +16,17 @@ TRAFFIC_IDLE_WIDTH: float = 1.0
 # ---------------------------------------------------------------------------
 # 테마 색상
 # ---------------------------------------------------------------------------
-BG: Final[str] = "#1a1a2e"
-PANEL: Final[str] = "#16213e"
-ACCENT: Final[str] = "#0f3460"
-HIGHLIGHT: Final[str] = "#4f8cff"
-TEXT: Final[str] = "#e6e9f5"
-TEXT_MUTED: Final[str] = "#8b93b5"
-GRID: Final[str] = "#22304f"
-FLOOR: Final[str] = "#121a33"
+BG: Final[str] = "#151a1e"
+PANEL: Final[str] = "#20272b"
+ACCENT: Final[str] = "#293632"
+HIGHLIGHT: Final[str] = "#73b8a3"
+TEXT: Final[str] = "#eef2f1"
+TEXT_MUTED: Final[str] = "#acb9b8"
+GRID: Final[str] = "#343e43"
+FLOOR: Final[str] = "#171d20"
 CRITICAL: Final[str] = "#e74c3c"
 WARNING: Final[str] = "#f39c12"
-SUCCESS: Final[str] = "#2ecc71"
+SUCCESS: Final[str] = "#8bcda3"
 INFO: Final[str] = "#3498db"
 ELEVATOR: Final[str] = "#5dade2"
 
@@ -38,7 +38,7 @@ SEVERITY_COLORS: Final[dict[str, str]] = {
 
 ROBOT_STATE_COLORS: Final[dict[str, str]] = {
     RobotState.MOVING: "#3498db",
-    RobotState.WORKING: "#2ecc71",
+    RobotState.WORKING: "#8bcda3",
     RobotState.WAITING: "#27ae60",
     RobotState.CHARGING: "#f1c40f",
     RobotState.CHARGE_WAIT: "#d4ac0d",
@@ -71,11 +71,11 @@ OBSTACLE_COLORS: Final[dict[str, str]] = {
 # ---------------------------------------------------------------------------
 # 3D 건물 뷰 (BuildingView)
 # ---------------------------------------------------------------------------
-BUILDING_SLAB: Final[str] = "#24365f"          # 층 바닥판
-BUILDING_SLAB_EDGE: Final[str] = "#3d5a99"
-BUILDING_SLAB_SIDE: Final[str] = "#0f1a38"
-BUILDING_BG_TOP: Final[str] = "#1b2646"
-BUILDING_BG_BOTTOM: Final[str] = "#10172e"
+BUILDING_SLAB: Final[str] = "#2e4144"          # 층 바닥판
+BUILDING_SLAB_EDGE: Final[str] = "#527075"
+BUILDING_SLAB_SIDE: Final[str] = "#18282c"
+BUILDING_BG_TOP: Final[str] = "#263035"
+BUILDING_BG_BOTTOM: Final[str] = "#192126"
 BUILDING_WALL_HEIGHT: Final[float] = 26.0
 BUILDING_STATION_HEIGHT: Final[float] = 24.0
 BUILDING_FLOOR_GAP: Final[float] = 340.0       # 층 간격 (월드 단위)
@@ -102,7 +102,7 @@ TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
     TimelineKind.INFO: (0, TEXT_MUTED, "d", "ℹ 정보"),
 }
 
-ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7"}
+ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9baab5"}
 
 # ---------------------------------------------------------------------------
 # 크기
@@ -116,6 +116,7 @@ EDITOR_NODE_RADIUS: Final[float] = 6.0
 ROUTE_DASH: Final[tuple[float, float]] = (4.0, 4.0)
 
 KPI_COLUMNS: Final[int] = 3
+KPI_DETAILS_MAX_HEIGHT: Final[int] = 192
 CHART_REFRESH_MS: Final[int] = 500
 ANIMATION_INTERVAL_MS: Final[int] = 80
 BLINK_INTERVAL_TICKS: Final[int] = 5

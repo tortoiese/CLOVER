@@ -7,11 +7,26 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QAbstractItemView, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QFormLayout,
-    QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton, QSpinBox,
-    QTableWidget, QTableWidgetItem, QTabWidget, QTextBrowser, QVBoxLayout, QWidget,
+    QAbstractItemView,
+    QComboBox,
+    QDialog,
+    QDoubleSpinBox,
+    QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextBrowser,
+    QVBoxLayout,
+    QWidget,
 )
 
 from agent.orchestration import COMPARISON_METRICS, format_value
@@ -41,7 +56,7 @@ class OptimizationPanel(QDialog):
     def __init__(self, parent: QWidget) -> None:
         """조건 양식과 비교표를 생성한다."""
         super().__init__(parent)
-        self.setWindowTitle("운영안 비교 · RAG")
+        self.setWindowTitle("운영안 비교")
         self.resize(960, 760)
         self._result: dict[str, Any] | None = None
         layout = QVBoxLayout(self)
@@ -75,7 +90,9 @@ class OptimizationPanel(QDialog):
         result_widget = QWidget(self._tabs)
         result_layout = QVBoxLayout(result_widget)
         self._table = QTableWidget(len(COMPARISON_METRICS), 4, result_widget)
-        self._table.setHorizontalHeaderLabels(["지표 (반복 평균)", "베이스라인", "MILP 배정안", "차이 (추천−기존)"])
+        self._table.setHorizontalHeaderLabels(["지표 (반복 평균)", "라운드로빈", "MILP 운영안", "차이 (MILP−기준)"])
+        self._table.setAlternatingRowColors(True)
+        self._table.verticalHeader().hide()
         self._table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         result_layout.addWidget(self._table, 2)
@@ -134,7 +151,14 @@ class OptimizationPanel(QDialog):
             values = (label, format_value(baseline, unit), format_value(candidate, unit),
                       format_value(delta, "%p" if key == "roi" else unit))
             for column, text in enumerate(values):
-                self._table.setItem(row, column, QTableWidgetItem(text))
+                item = QTableWidgetItem(text)
+                if column:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                if key in {"throughput", "avg_wait", "net_profit"}:
+                    font = item.font()
+                    font.setBold(True)
+                    item.setFont(font)
+                self._table.setItem(row, column, item)
         solver = result["solver"]
         gap = solver["max_dispatch_gap"]
         lines = [f"실험 ID: {result['experiment_id']}", f"수요: {result['workload']}",

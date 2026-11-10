@@ -1,19 +1,18 @@
-/* Robot Factory Simulator — 다크 관제 테마
-   배경 #1a1a2e / 패널 #16213e / 강조 #0f3460 / 긴급 #e74c3c, #f39c12 */
+/* CLOVER 관제 화면. 중립 표면 위에 주 동작과 경고를 구분한다. */
 
 * {
     font-size: 10pt;
-    color: #e6e9f5;
+    color: #eef2f1;
 }
 
 QMainWindow, QDialog {
-    background: #1a1a2e;
+    background: #151a1e;
 }
 
 QWidget#Panel, QFrame#Panel {
-    background: #16213e;
-    border: 1px solid #22304f;
-    border-radius: 10px;
+    background: #20272b;
+    border: 1px solid #343e43;
+    border-radius: 4px;
 }
 
 QLabel#PanelTitle {
@@ -23,72 +22,72 @@ QLabel#PanelTitle {
 }
 
 QLabel#Muted {
-    color: #8b93b5;
+    color: #acb9b8;
 }
 
 QLabel#InfoChip {
-    background: #0f3460;
-    border-radius: 8px;
+    background: #293632;
+    border-radius: 3px;
     padding: 3px 8px;
     font-size: 9pt;
 }
 
 /* ---------------- 툴바 ---------------- */
 QToolBar {
-    background: #16213e;
+    background: #20272b;
     border: none;
-    border-bottom: 1px solid #22304f;
+    border-bottom: 1px solid #343e43;
     padding: 7px 8px;
     spacing: 5px;
 }
 
 QToolBar QToolButton, QPushButton {
-    background: #0f3460;
-    border: 1px solid #1d4b85;
-    border-radius: 7px;
+    background: #293632;
+    border: 1px solid #405650;
+    border-radius: 4px;
     padding: 5px 12px;
 }
 
 QToolBar QToolButton:hover, QPushButton:hover {
-    background: #1a4a80;
-    border-color: #4f8cff;
+    background: #344943;
+    border-color: #73b8a3;
 }
 
 QToolBar QToolButton:focus, QPushButton:focus, QToolButton#QuickCommand:focus {
-    border-color: #8fb5ff;
+    border-color: #9bccbd;
 }
 
 QToolBar::separator {
-    background: #2a3b63;
+    background: #39454a;
     width: 1px;
     margin: 4px 3px;
 }
 
 QToolBar QToolButton:pressed, QPushButton:pressed {
-    background: #0b2748;
+    background: #22332e;
 }
 
 QToolBar QToolButton:checked, QPushButton:checked {
-    background: #4f8cff;
-    border-color: #8fb5ff;
+    background: #326455;
+    border-color: #9bccbd;
 }
 
 QToolBar QToolButton:disabled, QPushButton:disabled {
-    color: #5c6488;
-    background: #16213e;
-    border-color: #22304f;
+    color: #7d8a8c;
+    background: #20272b;
+    border-color: #343e43;
 }
 
 QPushButton#Primary:enabled, QToolButton#StartSimulation:enabled {
-    background: #285db8;
-    border-color: #5888d9;
+    background: #326455;
+    border-color: #559780;
     color: #ffffff;
     font-weight: 700;
 }
 
 QPushButton#Primary:hover:enabled, QToolButton#StartSimulation:hover:enabled {
-    background: #316bcb;
-    border-color: #8fb5ff;
+    background: #3b7563;
+    border-color: #9bccbd;
 }
 
 QPushButton#Danger {
@@ -99,11 +98,11 @@ QPushButton#Danger {
 QLabel#DbStatus {
     padding: 3px 10px;
     border-radius: 8px;
-    background: #0f3460;
+    background: #293632;
 }
 
 QLabel#DbStatus[connected="true"] {
-    color: #2ecc71;
+    color: #8bcda3;
 }
 
 QLabel#DbStatus[connected="false"] {
@@ -111,8 +110,8 @@ QLabel#DbStatus[connected="false"] {
 }
 
 QMenu {
-    background: #16213e;
-    border: 1px solid #33466f;
+    background: #20272b;
+    border: 1px solid #425052;
     padding: 4px;
 }
 
@@ -122,35 +121,35 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background: #0f3460;
+    background: #293632;
 }
 
 QMenu::item:disabled {
-    color: #8b93b5;
+    color: #acb9b8;
 }
 
 QMenu::separator {
     height: 1px;
-    background: #2a3b63;
+    background: #39454a;
     margin: 4px 6px;
 }
 
 /* ---------------- 입력 ---------------- */
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit {
-    background: #0f1a33;
-    border: 1px solid #2a3b63;
+    background: #181e22;
+    border: 1px solid #39454a;
     border-radius: 6px;
     padding: 4px 6px;
-    selection-background-color: #4f8cff;
+    selection-background-color: #73b8a3;
 }
 
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
-    border-color: #4f8cff;
+    border-color: #73b8a3;
 }
 
 QComboBox QAbstractItemView {
-    background: #16213e;
-    selection-background-color: #0f3460;
+    background: #20272b;
+    selection-background-color: #293632;
 }
 
 QCheckBox::indicator {
@@ -160,22 +159,22 @@ QCheckBox::indicator {
 
 /* ---------------- 스플리터 / 스크롤 ---------------- */
 QSplitter::handle {
-    background: #1a1a2e;
+    background: #151a1e;
 }
 
 QSplitter::handle:hover {
-    background: #4f8cff;
+    background: #73b8a3;
 }
 
 QSplitter#WorkspaceSplitter::handle:horizontal {
-    background: #2a3b63;
-    border-left: 3px solid #1a1a2e;
-    border-right: 3px solid #1a1a2e;
+    background: #39454a;
+    border-left: 3px solid #151a1e;
+    border-right: 3px solid #151a1e;
     margin: 8px 0;
 }
 
 QSplitter#WorkspaceSplitter::handle:horizontal:hover {
-    background: #4f8cff;
+    background: #73b8a3;
 }
 
 QWidget#FloorHeader QPushButton {
@@ -193,7 +192,7 @@ QScrollBar:vertical {
 }
 
 QScrollBar::handle:vertical {
-    background: #2a3b63;
+    background: #39454a;
     border-radius: 4px;
     min-height: 24px;
 }
@@ -204,7 +203,7 @@ QScrollBar:horizontal {
 }
 
 QScrollBar::handle:horizontal {
-    background: #2a3b63;
+    background: #39454a;
     border-radius: 4px;
     min-width: 24px;
 }
@@ -219,51 +218,51 @@ QScrollBar::add-line, QScrollBar::sub-line {
 
 /* ---------------- 탭 ---------------- */
 QTabWidget::pane {
-    border: 1px solid #22304f;
+    border: 1px solid #343e43;
     border-radius: 8px;
-    background: #16213e;
+    background: #20272b;
     top: -1px;
 }
 
 QTabBar::tab {
-    background: #1a1a2e;
-    border: 1px solid #22304f;
+    background: #151a1e;
+    border: 1px solid #343e43;
     padding: 5px 10px;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     margin-right: 2px;
-    color: #8b93b5;
+    color: #acb9b8;
 }
 
 QTabBar::tab:selected {
-    background: #0f3460;
-    color: #e6e9f5;
+    background: #293632;
+    color: #eef2f1;
 }
 
 QTabBar::tab:hover {
-    color: #e6e9f5;
+    color: #eef2f1;
 }
 
 QTabBar QToolButton {
-    background: #16213e;
-    border: 1px solid #33466f;
+    background: #20272b;
+    border: 1px solid #425052;
 }
 
-QWidget#RoiScrollContent {
-    background: #16213e;
+QWidget#RoiScrollContent, QWidget#KpiDetailContent {
+    background: #20272b;
 }
 
 /* ---------------- 표 / 리스트 ---------------- */
 QTableWidget, QListWidget, QTreeWidget {
-    background: #0f1a33;
-    alternate-background-color: #131f3d;
-    border: 1px solid #22304f;
+    background: #181e22;
+    alternate-background-color: #242e32;
+    border: 1px solid #343e43;
     border-radius: 6px;
-    gridline-color: #22304f;
+    gridline-color: #343e43;
 }
 
 QHeaderView::section {
-    background: #0f3460;
+    background: #293632;
     border: none;
     padding: 4px;
     font-weight: 700;
@@ -275,15 +274,15 @@ QListWidget::item {
 }
 
 QListWidget::item:hover {
-    background: #0f3460;
+    background: #293632;
 }
 
 QListWidget::item:selected {
-    background: #1a4a80;
+    background: #344943;
 }
 
 QGroupBox {
-    border: 1px solid #22304f;
+    border: 1px solid #343e43;
     border-radius: 8px;
     margin-top: 12px;
     padding-top: 6px;
@@ -292,22 +291,46 @@ QGroupBox {
 QGroupBox::title {
     subcontrol-origin: margin;
     left: 10px;
-    color: #8b93b5;
+    color: #acb9b8;
 }
 
 /* ---------------- KPI 카드 ---------------- */
 QFrame#KpiCard {
-    background: #0f1a33;
-    border: 1px solid #22304f;
-    border-radius: 10px;
+    background: #181e22;
+    border: 1px solid #343e43;
+    border-radius: 3px;
 }
 
-QFrame#KpiCard:hover {
-    border-color: #4f8cff;
+QFrame#KpiCard[featured="true"] {
+    background: #252f30;
+    border: 1px solid #465552;
+    border-top: 2px solid #73b8a3;
+}
+
+QFrame#KpiCard[featured="true"] QLabel#KpiValue {
+    font-size: 26pt;
+}
+
+QLabel#KpiReference {
+    color: #acb9b8;
+    font-size: 9pt;
+}
+
+QToolButton#KpiDetailsToggle {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: #ccd6d3;
+    padding: 3px 6px;
+}
+
+QToolButton#KpiDetailsToggle:hover, QToolButton#KpiDetailsToggle:focus {
+    background: #293632;
+    border-color: #559780;
 }
 
 QLabel#KpiTitle {
-    color: #8b93b5;
+    color: #acb9b8;
     font-size: 9pt;
 }
 
@@ -317,7 +340,7 @@ QLabel#KpiValue {
 }
 
 QLabel#KpiUnit {
-    color: #8b93b5;
+    color: #acb9b8;
     font-size: 9pt;
 }
 
@@ -327,15 +350,15 @@ QLabel#KpiDelta {
 }
 
 QLabel#KpiDelta[trend="better"] {
-    color: #2ecc71;
+    color: #8bcda3;
 }
 
 QLabel#KpiDelta[trend="worse"] {
-    color: #e74c3c;
+    color: #f19788;
 }
 
 QLabel#KpiDelta[trend="flat"] {
-    color: #8b93b5;
+    color: #acb9b8;
 }
 
 /* ---------------- 채팅 ---------------- */
@@ -344,18 +367,18 @@ QWidget#ChatArea {
 }
 
 QFrame#Bubble {
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 2px;
 }
 
 QFrame#Bubble[role="user"] {
-    background: #1d4b85;
-    border: 1px solid #4f8cff;
+    background: #405650;
+    border: 1px solid #73b8a3;
 }
 
 QFrame#Bubble[role="agent"] {
-    background: #0f1a33;
-    border: 1px solid #2a3b63;
+    background: #181e22;
+    border: 1px solid #39454a;
 }
 
 QFrame#Bubble[role="agent"][severity="warning"] {
@@ -369,7 +392,7 @@ QFrame#Bubble[role="agent"][severity="critical"] {
 
 QFrame#Bubble[role="system"] {
     background: transparent;
-    border: 1px dashed #2a3b63;
+    border: 1px dashed #39454a;
 }
 
 QLabel#BubbleText {
@@ -377,7 +400,7 @@ QLabel#BubbleText {
 }
 
 QLabel#BubbleMeta {
-    color: #8b93b5;
+    color: #acb9b8;
     font-size: 8pt;
 }
 
@@ -390,27 +413,27 @@ QLabel#Badge {
 }
 
 QToolButton#QuickCommand, QPushButton#LatestMessages {
-    background: #0f1a33;
-    border: 1px solid #2a3b63;
+    background: #181e22;
+    border: 1px solid #39454a;
     border-radius: 6px;
     padding: 4px 8px;
     font-size: 9pt;
 }
 
 QToolButton#QuickCommand:hover, QPushButton#LatestMessages:hover {
-    border-color: #4f8cff;
+    border-color: #73b8a3;
 }
 
 /* ---------------- 상태 영역 / 긴급 배너 ---------------- */
 QWidget#WorkspaceStatus {
-    background: #16213e;
-    border: 1px solid #22304f;
+    background: #20272b;
+    border: 1px solid #343e43;
     border-radius: 8px;
 }
 
 QLabel#SimulationStatus {
     font-weight: 600;
-    color: #b9c5e1;
+    color: #ccd6d3;
 }
 
 QFrame#AlertBanner {
@@ -446,14 +469,14 @@ QPushButton#BannerClose {
 }
 
 QPushButton#BannerView {
-    background: #16213e;
-    border-color: #596a92;
+    background: #20272b;
+    border-color: #657476;
     padding: 4px 10px;
 }
 
 QToolTip {
-    background: #0f3460;
-    border: 1px solid #4f8cff;
-    color: #e6e9f5;
+    background: #293632;
+    border: 1px solid #73b8a3;
+    color: #eef2f1;
     padding: 4px;
 }
