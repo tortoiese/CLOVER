@@ -1,0 +1,13 @@
+{
+  "horizon": 20,
+  "step": 2,
+  "max_tasks": 4,
+  "max_routes": 20000,
+  "sigma": 0,
+  "interval": 5,
+  "timeout": 15,
+  "watchdog": 20,
+  "max_arcs": 30000,
+  "max_tail_ticks": 1200,
+  "memory_limit_mib": 1024
+}

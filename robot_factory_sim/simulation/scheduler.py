@@ -12,6 +12,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import config
+from simulation.travel import estimate_trip
 from utils.event_types import RobotState
 
 if TYPE_CHECKING:
@@ -47,9 +48,11 @@ class BaseScheduler(ABC):
         for robot in idle:
             order_id = robot.emergency_order
             task = engine.take_task(lambda t, oid=order_id: t.order_id == oid) if order_id else None
-            if task is not None:
-                engine.assign(task, robot)
+            if task is not None and engine.assign(task, robot):
+                pass
             else:
+                if task is not None:
+                    engine.requeue_task(task)
                 remaining.append(robot)
         return remaining
 
@@ -112,7 +115,7 @@ class BaselineScheduler(BaseScheduler):
         for task in sorted(engine.pending_tasks, key=lambda t: t.task_id):
             if not idle_ids:
                 break
-            if not engine.station_available(task.station_id):
+            if task.station_id not in engine._usable_stations(task):
                 continue
             for step in range(len(order)):
                 robot_id = order[(self._pointer + step) % len(order)]
@@ -185,15 +188,16 @@ class OptimizedScheduler(BaseScheduler):
     def _energy_needed(self, robot: Robot, engine: SimulationEngine, station_id: str, distance: float) -> float:
         """작업 수행 + 가장 가까운 충전소 복귀까지 필요한 배터리량."""
         station = engine.stations[station_id]
-        sx, sy = station.cfg.x, station.cfg.y
+        sx, sy = engine.path_graph.facility_point(station_id) or (station.cfg.x, station.cfg.y)
+        floor = engine.path_graph.facility_floor(station_id) or station.cfg.floor
         back = min(
-            (engine.path_graph.distance_to_facility(sx, sy, c.id, station.cfg.floor, robot.cfg.width)
+            (estimate_trip(engine, robot, c.id, origin=(sx, sy, floor)).horizontal_m
              for c in engine.chargers.values() if c.active),
-            default=0.0,
+            default=math.inf,
         )
         back = float(back)
-        travel = (distance + back) * config.METERS_PER_PIXEL * float(robot.cfg.battery_drain_rate)
-        work = station.cfg.avg_process_time * config.WORK_DRAIN_PER_SEC
+        travel = (distance + back) * float(robot.cfg.battery_drain_rate)
+        work = station.cfg.avg_process_time * engine.plant.work_drain_per_sec
         return travel + work
 
     def _dispatch(self, engine: SimulationEngine, idle: list[Robot]) -> None:
@@ -201,13 +205,13 @@ class OptimizedScheduler(BaseScheduler):
         free = list(idle)
         low_battery: set[str] = set()
         profile = engine.factory.profile
-        diagonal = max(1.0, math.hypot(profile.floor_width, profile.floor_height))
+        diagonal = max(1.0, math.hypot(profile.floor_width, profile.floor_height) * config.METERS_PER_PIXEL)
         pending_by_station = engine.pending_count_by_station()
 
         for task in sorted(engine.pending_tasks, key=self._task_key(engine)):
             if not free:
                 break
-            candidates = [s for s in (task.allowed_stations or (task.station_id,)) if engine.station_available(s)]
+            candidates = engine._usable_stations(task)
             if not candidates:
                 continue
             best: tuple[float, Robot, str] | None = None
@@ -215,8 +219,7 @@ class OptimizedScheduler(BaseScheduler):
             for robot in free:
                 reserve = robot.capacity * config.BATTERY_RESERVE / 100.0
                 for station_id in candidates:
-                    distance = engine.path_graph.distance_to_facility(
-                        robot.x, robot.y, station_id, robot.floor, robot.cfg.width)
+                    distance = estimate_trip(engine, robot, station_id).horizontal_m
                     if math.isinf(distance):
                         continue
                     if robot.battery - self._energy_needed(robot, engine, station_id, distance) < reserve:
@@ -303,18 +306,16 @@ class OptimizedScheduler(BaseScheduler):
     def choose_charger(self, robot: Robot, engine: SimulationEngine) -> ChargingStation | None:
         """이동시간 + 예상 대기시간이 가장 짧은 충전소."""
         best: tuple[float, ChargingStation] | None = None
-        speed_px = max(0.05, float(robot.cfg.move_speed)) / config.METERS_PER_PIXEL
         for charger in engine.chargers.values():
             if not charger.active:
                 continue
-            distance = engine.path_graph.distance_to_facility(
-                robot.x, robot.y, charger.id, robot.floor, robot.cfg.width)
-            if math.isinf(distance):
+            trip = estimate_trip(engine, robot, charger.id)
+            if math.isinf(trip.seconds):
                 continue
             ahead = len(charger.occupants) + charger.waiting + len(charger.incoming)
             queued = max(0, ahead - charger.capacity + 1)
-            per_session = EXPECTED_CHARGE_AMOUNT / max(0.01, float(charger.cfg.charge_rate))
-            cost = distance / speed_px + queued * per_session / charger.capacity
+            per_session = robot.capacity * EXPECTED_CHARGE_AMOUNT / 100 / max(1e-9, float(charger.cfg.charge_rate))
+            cost = trip.seconds + queued * per_session / charger.capacity
             if best is None or cost < best[0]:
                 best = (cost, charger)
         return best[1] if best else None
@@ -334,5 +335,14 @@ def create_scheduler(mode: str) -> BaseScheduler:
             return BaselineScheduler()
         case "optimized":
             return OptimizedScheduler()
+        case "rh_milp_grid" | "rh_cpsat_linear" | "rh_cpsat_interval" | "rh_cpsat_native":
+            from simulation.planning.contracts import ALL_RH_BACKENDS
+            from simulation.planning.controller import RollingHorizonScheduler
+            scheduler = RollingHorizonScheduler(backend=ALL_RH_BACKENDS[mode])
+            scheduler.name = mode
+            return scheduler
+        case "assignment_milp_legacy":
+            from simulation.milp_scheduler import RollingMilpScheduler
+            return RollingMilpScheduler()
         case _:
             raise ValueError(f"알 수 없는 스케줄러 모드: {mode}")

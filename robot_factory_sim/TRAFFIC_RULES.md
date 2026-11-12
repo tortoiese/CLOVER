@@ -1,5 +1,9 @@
 # 통행 자원 계약 및 GUI 적용 명세
 
+최신 실패 계측·동일 문제 구성 개선·profile CLI는 `NATIVE_PROFILE_AND_BUDGETS.md`를 참고한다.
+
+최신 자유 시작시각 CP-SAT의 해상도·전체/제한 domain은 `NATIVE_SCHEDULING.md`를 참고한다.
+
 계약 버전: **`traffic-mm-bundle-v1`**. 경로 탐색, 실제 SimPy 진입,
 관측 스냅샷 및 후속 계획기의 예약 변환은 아래 단위와 수명 규칙을 공유한다.
 기본 스케줄러는 기존 **가중치 휴리스틱(`optimized`)**을 유지한다.

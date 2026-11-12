@@ -1,0 +1,5 @@
+{
+  "horizon": 40, "step": 2, "sigma": 0, "max_tasks": 4,
+  "interval": 5, "timeout": 10, "watchdog": 12,
+  "joint_cabins": true, "max_cabin_states": 30000
+}

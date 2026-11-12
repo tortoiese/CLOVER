@@ -1,0 +1,29 @@
+{
+  "schema": "clover-staged-d1-functional-validation-v1",
+  "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+  "tests": {
+    "311": {
+      "passed": 430,
+      "junit_sha256": "73798f13a07bf2452966c4dbf10af6fc30c0ce186b85346a7b80ccf7722a741b"
+    },
+    "314": {
+      "passed": 430,
+      "junit_sha256": "6b9c061faf3cbfc5399e736960eda0b4149bad89184cb0f2546c5550f0101152"
+    }
+  },
+  "physical_runs": 134,
+  "replay_matches": 134,
+  "raw_metric_matches": 134,
+  "previous_D0_physical_digests_preserved": 36,
+  "paired_inputs": true,
+  "scope": "functional acceptance; P4 pilot and P5/P6 held-out selection are separate",
+  "startup_faults_included": [
+    "forced startup timeout",
+    "forced startup RSS limit"
+  ],
+  "operational_publication_allowance_seconds": 0.1,
+  "correctness_test_publication_allowance_seconds": 0.5,
+  "default_policy": "optimized",
+  "default_timing": "D0",
+  "platform": "macOS; Python 3.11 and 3.14"
+}

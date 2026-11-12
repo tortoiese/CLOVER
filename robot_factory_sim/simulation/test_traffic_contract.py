@@ -425,8 +425,10 @@ def test_elevator_reference_and_retire_wait_for_real_arrival() -> None:
     assert robot.floor == 2 and not robot.alive and elevator.resource.count == 0
     resized = copy.deepcopy(cfg)
     resized.elevators[0].capacity = 2
-    engine.apply_config(resized)
-    assert elevator.resource.capacity == 2
+    with pytest.raises(ValueError, match="UNSUPPORTED_CABIN_CAPACITY"):
+        engine.apply_config(resized)
+    assert elevator.resource.capacity == 1
+    assert engine.factory.elevators[0].capacity == 1
     assert all(r is elevator.resource for r in engine.corridors._elevator_resource.values())
 
 
