@@ -1,0 +1,331 @@
+{
+  "schema": "clover-p4-training-freeze-v1",
+  "source_hash": "0ea116fafed44b4c1d02b73ca40992d956e488d6324d36d037459c300fa61779",
+  "generator_sha256": "47ad219a687caee626ba5122361aa958788e112d4f5b8f84b95ca28fe787c0f5",
+  "seeds": [
+    1001,
+    1002
+  ],
+  "policies": [
+    "baseline",
+    "optimized",
+    "assignment_milp_legacy",
+    "rh_milp_grid",
+    "rh_cpsat_linear",
+    "rh_cpsat_interval",
+    "rh_cpsat_native"
+  ],
+  "inputs": [
+    {
+      "family": "S00",
+      "kind": "stream",
+      "id": "P4_S00_open",
+      "path": "robot_factory_sim/examples/p4/P4_S00_open.json",
+      "scenario_hash": "6815cf24d0ddf77b21d723c61307dd520c85497f22c3301ca99b3d4b3b5628aa",
+      "file_sha256": "439df80a4d9dbf0d3420f8d379b8a00056859ae79aed9ebced24cf992d9e5354",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 4,
+      "nodes": 3,
+      "edges": 2
+    },
+    {
+      "family": "S01",
+      "kind": "batch",
+      "id": "P4_S01_joint",
+      "path": "robot_factory_sim/examples/p4/P4_S01_joint.json",
+      "scenario_hash": "7b0e2efff0321768284fe102a1683054fa37f26e6715d243f8ac586c69d90ba0",
+      "file_sha256": "1fe7b33c3f7d234f5ddd8d2e12e519eec6bb1d7d177897f7305a5a050c6719a7",
+      "duration": 30,
+      "warmup": 0,
+      "robots": 2,
+      "nodes": 6,
+      "edges": 5
+    },
+    {
+      "family": "S02",
+      "kind": "burst",
+      "id": "P4_S02_narrow",
+      "path": "robot_factory_sim/examples/p4/P4_S02_narrow.json",
+      "scenario_hash": "d94e2c2c8599f575b7c3625fc5620540c2cbf26f297a98083081c2545f45c5e8",
+      "file_sha256": "fec8a6116b444ec685cfb0a12edfc195768b509f6f38675320604bdb73a7297f",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 2,
+      "nodes": 3,
+      "edges": 2
+    },
+    {
+      "family": "S02",
+      "kind": "burst",
+      "id": "P4_S02_wide",
+      "path": "robot_factory_sim/examples/p4/P4_S02_wide.json",
+      "scenario_hash": "7ac1cbff316d13411288b22f1ee3a0d5d0f6a91ca27f16171a56662a2088e717",
+      "file_sha256": "549e3422ea0aab047f464b7e80d1453b414baa674e6743579f988ca37d60c127",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 2,
+      "nodes": 3,
+      "edges": 2
+    },
+    {
+      "family": "S03",
+      "kind": "burst",
+      "id": "P4_S03_junction",
+      "path": "robot_factory_sim/examples/p4/P4_S03_junction.json",
+      "scenario_hash": "6965f42f4dec90f2f1343331a95368d99771d888777728a991ed6358580b3a43",
+      "file_sha256": "fa243e95a370817c77dbc64afb3658c09488e683150930133ac01feb0582f71b",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 3,
+      "nodes": 8,
+      "edges": 7
+    },
+    {
+      "family": "S03",
+      "kind": "burst",
+      "id": "P4_S03_no_junction",
+      "path": "robot_factory_sim/examples/p4/P4_S03_no_junction.json",
+      "scenario_hash": "9f73c2f2ca892a59b402f7cb4de88de1593784a5e9b163c909e0ed676a99481c",
+      "file_sha256": "6c456aff07f787790049971eb0fa7ee74b3eb45ce1a1957fde6c4bdc7c8ea971",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 3,
+      "nodes": 8,
+      "edges": 7
+    },
+    {
+      "family": "S04",
+      "kind": "stream",
+      "id": "P4_S04_one_slot",
+      "path": "robot_factory_sim/examples/p4/P4_S04_one_slot.json",
+      "scenario_hash": "c22545b5e1cbfa8e135c097909bb098c3ad650af62dfd77b0a0994655b376b99",
+      "file_sha256": "e62983b3d2a68df64025dd611e1f63e3dd8c75eac45ab1bb7e9ff6a02905ed22",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 4,
+      "nodes": 3,
+      "edges": 2
+    },
+    {
+      "family": "S04",
+      "kind": "stream",
+      "id": "P4_S04_four_slots",
+      "path": "robot_factory_sim/examples/p4/P4_S04_four_slots.json",
+      "scenario_hash": "cd6ac2e3fa647da50263c9bd3d9c6416d48d05d22c42f59365579954e0f2ef9d",
+      "file_sha256": "609cbc66bf34dd7e3f312ab1ab3d2447737565d6b84d6a436fd1bb9ce2fab2e9",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 4,
+      "nodes": 3,
+      "edges": 2
+    },
+    {
+      "family": "S08",
+      "kind": "burst",
+      "id": "P4_S08_one_cabin",
+      "path": "robot_factory_sim/examples/p4/P4_S08_one_cabin.json",
+      "scenario_hash": "13d07c867697df8e7922ebaf2f686993a864fc306b767a7df3710a0b62a6dc9a",
+      "file_sha256": "464a21ad08f01854bc5dc08eeb1c9ff52edfd1c552b89f15b4c0ab180f7f4189",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 2,
+      "nodes": 10,
+      "edges": 11
+    },
+    {
+      "family": "S08",
+      "kind": "burst",
+      "id": "P4_S08_two_cabins",
+      "path": "robot_factory_sim/examples/p4/P4_S08_two_cabins.json",
+      "scenario_hash": "19d71ce6d42ddf21397b11f6f8317bbda417663113169bb1cae44b8b45f33122",
+      "file_sha256": "dfa4a9b661b6b082c913e13c4852869536debdd068f108d5044e649e30b9d3a5",
+      "duration": 180,
+      "warmup": 0,
+      "robots": 2,
+      "nodes": 10,
+      "edges": 11
+    }
+  ],
+  "math_settings": {
+    "horizon": 40,
+    "step": 2,
+    "max_tasks": 8,
+    "max_routes": 20000,
+    "sigma": 0,
+    "interval": 5,
+    "timeout": 2,
+    "watchdog": 3,
+    "max_arcs": 30000,
+    "max_tail_ticks": 1200,
+    "memory_limit_mib": 1024,
+    "timing_mode": "D0",
+    "warm_start": true,
+    "warm_start_seconds": 0.05,
+    "joint_cabins": true,
+    "max_cabin_states": 30000,
+    "formulation": "grid",
+    "native_step": 0.1,
+    "native_actions": 4,
+    "native_pruning": true,
+    "native_cache": true
+  },
+  "decision_settings": {
+    "timing_protocol": "d1-staged-budget-v1",
+    "startup_mode": "on_demand",
+    "startup_timeout_seconds": 10,
+    "end_to_end_soft_deadline_seconds": 2,
+    "publication_allowance_seconds": 0.2,
+    "max_admission_attempts": 2,
+    "max_worker_restarts": 2,
+    "restart_backoff_seconds": [
+      0.1,
+      1.0
+    ],
+    "fallback_budget_seconds": 0.1,
+    "memory_limit_mib": 1024,
+    "request_watchdog_seconds": 3
+  },
+  "per_run_wall_limit_seconds": 240,
+  "simultaneous_solver_workers": 1,
+  "scope": "small executable diagnostic graphs adapted from team families; not the team's final 64/256-node layouts",
+  "interpretation": "batch makespan, finite burst and short Poisson stream are separate; no CI or general policy recommendation",
+  "heldout": "not executed; P5 requires new layouts/traces and locked final protocol before opening E2",
+  "code_commit": "b618506d556f5e94bd0916dcf6e07985dc01a6b0",
+  "status": "P4 handoff frozen; E1/E2/E3 not executed",
+  "seed_splits": {
+    "discovery": [
+      1001,
+      1002,
+      1003
+    ],
+    "tuning": [
+      10001,
+      10002,
+      10003,
+      10004,
+      10005
+    ],
+    "validation": [
+      11001,
+      11002,
+      11003,
+      11004,
+      11005,
+      11006,
+      11007,
+      11008,
+      11009,
+      11010
+    ],
+    "held_out_reserved": [
+      20001,
+      20002,
+      20003,
+      20004,
+      20005,
+      20006,
+      20007,
+      20008,
+      20009,
+      20010,
+      20011,
+      20012,
+      20013,
+      20014,
+      20015,
+      20016,
+      20017,
+      20018,
+      20019,
+      20020,
+      20021,
+      20022,
+      20023,
+      20024,
+      20025,
+      20026,
+      20027,
+      20028,
+      20029,
+      20030
+    ],
+    "stress_reserved": [
+      30001,
+      30002,
+      30003,
+      30004,
+      30005
+    ]
+  },
+  "candidate_settings": [
+    {
+      "id": "parity",
+      "horizon": 40,
+      "step": 2,
+      "max_tasks": 8,
+      "native_step": 2,
+      "native_actions": 0
+    },
+    {
+      "id": "native_fine_b4",
+      "horizon": 40,
+      "step": 2,
+      "max_tasks": 8,
+      "native_step": 0.1,
+      "native_actions": 4
+    },
+    {
+      "id": "native_fine_b8",
+      "horizon": 40,
+      "step": 2,
+      "max_tasks": 8,
+      "native_step": 0.1,
+      "native_actions": 8
+    },
+    {
+      "id": "grid_finer",
+      "horizon": 40,
+      "step": 1,
+      "max_tasks": 8,
+      "native_step": 1,
+      "native_actions": 0
+    },
+    {
+      "id": "longer_H",
+      "horizon": 60,
+      "step": 2,
+      "max_tasks": 8,
+      "native_step": 2,
+      "native_actions": 0
+    },
+    {
+      "id": "larger_cohort",
+      "horizon": 40,
+      "step": 2,
+      "max_tasks": 16,
+      "native_step": 2,
+      "native_actions": 0
+    }
+  ],
+  "budgets_seconds": [
+    0.5,
+    2,
+    10
+  ],
+  "single_factor_screening": true,
+  "warmup_seconds_candidate": 600,
+  "measurement_seconds_candidate": 7200,
+  "window_status": "Training candidate, not demonstrated steady state. E1 pilot must confirm multiple per-robot energy cycles and WIP/rate stability for each workload.",
+  "E2_enabled": false,
+  "E2_inputs": null,
+  "E2_open_requirements": [
+    "final six team maps/control variants with immutable hashes",
+    "new held-out layouts/directions/distances in addition to reserved seeds",
+    "E1 training/validation finished, settings and selection rules frozen",
+    "common W/T/drain protocol validated and frozen for each workload family",
+    "no timing coverage violations in calibration; all-policy guard amendment if violated",
+    "sufficient paired samples/support; retain failed/unfinished runs and censoring",
+    "capacity and route-use audits; no future noise leak; hardware manifest and runtime budget"
+  ]
+}

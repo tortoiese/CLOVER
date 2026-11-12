@@ -1,29 +1,114 @@
 {
-  "schema": "clover-staged-d1-functional-validation-v1",
-  "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
-  "tests": {
+  "schema": "clover-p4-validation-v2",
+  "date": "2026-11-13",
+  "branch": "feat/prd-p4-d1-startup",
+  "implementation_commit_A": "b8ef5b9e127ac7d58d3674c3a565ea77b288567a",
+  "implementation_commit_B": "b618506d556f5e94bd0916dcf6e07985dc01a6b0",
+  "source_A_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+  "source_B_hash": "0ea116fafed44b4c1d02b73ca40992d956e488d6324d36d037459c300fa61779",
+  "source_B_difference": "Output legacy_scope description and regression assertion only; no math/physical change.",
+  "source_B_tests": {
     "311": {
       "passed": 430,
-      "junit_sha256": "73798f13a07bf2452966c4dbf10af6fc30c0ce186b85346a7b80ccf7722a741b"
+      "junit_sha256": "a2d9c40dd33c2dc61bdd69f368fada8e37e835e5359992d62a36840000e54c53"
     },
     "314": {
       "passed": 430,
-      "junit_sha256": "6b9c061faf3cbfc5399e736960eda0b4149bad89184cb0f2546c5550f0101152"
+      "junit_sha256": "efac8515ce0b2ee819c7ec6c40a3e2835e20037372c30b42eafdd45ff3d39b22"
     }
   },
-  "physical_runs": 134,
-  "replay_matches": 134,
-  "raw_metric_matches": 134,
-  "previous_D0_physical_digests_preserved": 36,
-  "paired_inputs": true,
-  "scope": "functional acceptance; P4 pilot and P5/P6 held-out selection are separate",
-  "startup_faults_included": [
-    "forced startup timeout",
-    "forced startup RSS limit"
-  ],
-  "operational_publication_allowance_seconds": 0.1,
-  "correctness_test_publication_allowance_seconds": 0.5,
+  "physical_runs_total": 591,
+  "successful_runs": 590,
+  "retained_timing_coverage_violations": 1,
+  "replay_matches": 591,
+  "raw_metric_matches": 591,
+  "A_functional": {
+    "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+    "runs": 134,
+    "replay_matches": 134,
+    "raw_matches": 134,
+    "paired_inputs": true,
+    "failures": [],
+    "foundation_physical_digests_preserved": 36
+  },
+  "A_pilot": {
+    "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+    "runs": 380,
+    "statuses": {
+      "SUCCESS": 379,
+      "TIMING_COVERAGE_VIOLATION": 1
+    },
+    "paired_inputs": true,
+    "replay_matches": 380,
+    "raw_matches": 380,
+    "failures": [],
+    "interpretation": "Known timing-coverage failure retained and replayed; not a valid successful D1 performance run."
+  },
+  "B_release": {
+    "source_hash": "0ea116fafed44b4c1d02b73ca40992d956e488d6324d36d037459c300fa61779",
+    "runs": 21,
+    "replay_matches": 21,
+    "raw_matches": 21,
+    "statuses": {
+      "SUCCESS": 21
+    },
+    "decision_settings": {
+      "timing_protocol": "d1-staged-budget-v1",
+      "startup_mode": "on_demand",
+      "startup_timeout_seconds": 10,
+      "end_to_end_soft_deadline_seconds": 2,
+      "publication_allowance_seconds": 0.2,
+      "max_admission_attempts": 2,
+      "max_worker_restarts": 2,
+      "restart_backoff_seconds": [
+        0.1,
+        1.0
+      ],
+      "fallback_budget_seconds": 0.1,
+      "memory_limit_mib": 1024,
+      "request_watchdog_seconds": 3
+    },
+    "math_settings": {
+      "horizon": 40,
+      "step": 2,
+      "max_tasks": 8,
+      "max_routes": 20000,
+      "sigma": 0,
+      "interval": 5,
+      "timeout": 2,
+      "watchdog": 3,
+      "max_arcs": 30000,
+      "max_tail_ticks": 1200,
+      "memory_limit_mib": 1024,
+      "timing_mode": "D0",
+      "warm_start": true,
+      "warm_start_seconds": 0.05,
+      "joint_cabins": true,
+      "max_cabin_states": 30000,
+      "formulation": "grid",
+      "native_step": 0.1,
+      "native_actions": 4,
+      "native_pruning": true,
+      "native_cache": true
+    }
+  },
+  "B_corrected_junction": {
+    "source_hash": "0ea116fafed44b4c1d02b73ca40992d956e488d6324d36d037459c300fa61779",
+    "runs": 56,
+    "replay_matches": 56,
+    "raw_matches": 56,
+    "statuses": {
+      "SUCCESS": 56
+    }
+  },
+  "excluded_A_control": "A S03 node_type unchanged; retain all raw runs but exclude junction treatment comparison.",
+  "lint": {
+    "runtime_hazard_rules": "E9,F63,F7,F82: passed",
+    "full_workspace_rules": 59,
+    "interpretation": "24 import ordering, 13 broad boundary catches, 13 synchronous loop closures, 9 style/exception/noqa findings; not a full lint pass"
+  },
+  "scope": "macOS arm64 Python 3.11/3.14; sequential native workers; diagnostic evidence, no held-out policy recommendation",
   "default_policy": "optimized",
   "default_timing": "D0",
-  "platform": "macOS; Python 3.11 and 3.14"
+  "core_version": "common-model-v2.0-staged-d1"
 }
