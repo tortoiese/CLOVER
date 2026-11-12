@@ -36,6 +36,8 @@ def test_all_policy_latency_real_execution_and_recorded_replay(policy: str, star
     )
     assert result["status"] == "SUCCESS", result["failure"]
     assert result["schema"] == "clover-headless-run-v5" and result["final_audit"]["ok"]
+    if policy == "assignment_milp_legacy":
+        assert "recorded validated decisions" in result["legacy_scope"]
     assert result["completed_total"] == 2, result["control"]
     decisions = result["control"]["decisions"]
     for decision in decisions:

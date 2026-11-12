@@ -440,7 +440,9 @@ def run_case(
             and decision_settings is None else None
         ),
         "legacy_scope": (
-            "assignment only; soft 0.25s native limit; replay reruns solver, not a recorded-decision guarantee"
+            ("assignment only; soft 0.25s native limit; staged D1 replay uses recorded validated decisions"
+             if control is not None else
+             "assignment only; soft 0.25s native limit; replay reruns solver, not a recorded-decision guarantee")
             if policy == "assignment_milp_legacy"
             else None
         ),
