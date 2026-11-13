@@ -90,11 +90,26 @@ class FactoryPanel(QWidget):
         active = sum(1 for o in state.orders if o.status in OrderStatus.ACTIVE)
         self._orders.setText(f"활성 주문 {active}")
         self._pending.setText(f"대기 작업 {state.pending_tasks}")
-        self._mode.setText(f"모드 {SchedulerModeLabel.LABELS.get(state.mode, state.mode)}")
+        mode = SchedulerModeLabel.LABELS.get(state.mode, state.mode)
         traffic_waiting = sum(bool(robot.wait_reason) for robot in state.robots)
         bottlenecks = sum(item.waiting > 0 for item in state.traffic)
         oldest = max((robot.wait_seconds for robot in state.robots if robot.wait_reason), default=0.0)
         text = f"통행 대기 {traffic_waiting}대 · 병목 {bottlenecks}곳 · 최장 대기 {oldest:.0f}s · 노란 점선: 통행 대기"
         if self._traffic.text() != text:
             self._traffic.setText(text)
+        if state.mode in state.planning:
+            planning = state.planning[state.mode]
+            report = planning.get("report") or {}
+            scope = "교통·캐빈 포함" if planning["scope"] == "traffic" else "작업장·충전기"
+            display = f"{scope} · {mode} · {planning['execution_status']}"
+            description = ("작업장·충전기·통로·교차점·단일 캐빈 계획" if planning["scope"] == "traffic" else
+                           "작업장·충전기 계획 / 교통 자원은 실행 시 제어")
+            self._mode.set_content(
+                display,
+                f"{display}\n{description}\n"
+                f"1단계 {report.get('phase1_status', '대기')} · 2단계 {report.get('phase2_status', '대기')}\n"
+                f"계산 {report.get('total_seconds', 0):.3f}초 · 모델 {report.get('model_hash', '')[:12]}\n"
+                f"채택 {planning['accepted']} · 대체 {planning['fallbacks']} · 지연 {planning['overruns']}")
+        else:
+            self._mode.setText(f"모드 {mode}")
         self.stage.update_state(state)

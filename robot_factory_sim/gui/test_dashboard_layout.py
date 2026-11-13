@@ -46,11 +46,16 @@ def test_dashboard_stays_narrow_when_values_grow() -> None:
         assert panel.width() == 390
         assert panel.minimumSizeHint().width() == minimum_width
         assert "123456789.0" in card._value.toolTip()
-        assert panel._tabs.count() == 9
+        assert panel._tabs.count() == 10
         assert panel._tabs.tabText(0) == "지표"
+        assert panel._tabs.tabText(9) == "계획·예약"
         scroll = roi.findChild(QScrollArea)
         assert scroll.horizontalScrollBar().maximum() == 0
         assert scroll.verticalScrollBar().maximum() > 0
+        assert [roi._chart_grid.getItemPosition(i)[:2] for i in range(4)] == [(i, 0) for i in range(4)]
+        panel.resize(600, 640)
+        app.processEvents()
+        assert [roi._chart_grid.getItemPosition(i)[:2] for i in range(4)] == [(i // 2, i % 2) for i in range(4)]
     finally:
         panel.close()
 

@@ -1,0 +1,3435 @@
+{
+  "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+  "runs": 380,
+  "statuses": {
+    "SUCCESS": 379,
+    "TIMING_COVERAGE_VIOLATION": 1
+  },
+  "paired_inputs": true,
+  "replay_matches": 380,
+  "raw_matches": 380,
+  "failures": [],
+  "rows": [
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4521e5183bfa284d8799f2ea47b6dda5ed70d91fbde09f9e70bffa17bc0e8b8f"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fe0eb7fb3106617cb7e9ba82f39f94f1f2fd839bbea4e0e3b1e864bb2d8ba9da"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "445b0d49cc322d70615db01ff4283634ed6ba5174183afa49abff48e3fd00298"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c862120a67315763082e824429b5ef51f602bafbc8f12f608cd6ae11d22843d7"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "136389ca002bbbedbc13ba730f13c7b3a7ce27885d139e35bd65197d7eedcc45"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d5b9751d2e192212747f58e11b7527730c1f8ffe7b554f8e605f649f2f30a486"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "joint_batch__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3cc4de80ad3a95c418b63c959e5a877fd63d5be67950afa8b754e76a63c451c2"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "03114684a0637411c731258e97ebfa7c32ef8e4fbbbf25450e53083f4614ff42"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9821ffd2f358c75de3b28e221631321cfc58b5122395b28707fbec8ecb824d20"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5bbf9845fb39e5a10442790ad78b036b95839716e58206fb7f59e393e3f1cf63"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0473118f6db6ae31d0ece62b69953c74728346c8e78dbea592792c28cd4f0f10"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "78d430d75dfee08fdb3357b475f8dcf756fa0aed3fc6726accebe426807bdc5b"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5dc9652c791efbdc2c97f023828847649cb3952fd9166df1687ef5bcecb59211"
+    },
+    {
+      "group": "budget_0.5_eager",
+      "case_id": "charging__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8e25b58369dfbb53f1209a3dff0567f00c43b3a217e72456062503127f95afe3"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "51bd684082cd9b90f8894a70a2c4d3bf4c03cc37c0afb07404e528edd3ffe76b"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "24684584caa0727d2ccada02b8f222c2391c0ab10f9191f0c210b9c82b63d4ad"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "823073dbcea03ee12a70c78badfb28a0d80c0305852cd9ec45c15f9bdca245d5"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7ea2e0a2cd9b97788a073c33a67b9e2e87eb5353362753e9917e4f0ba5b22b56"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a3be142e0c8c59fa27f31aff72953adacc87992a9574c5c9d780a03a473004cd"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4192a467f0644b31d72431bc55e1eda8c855aad58ad55b08a2cd1f55adad63de"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "joint_batch__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "11fa65bb0de3b9694440d6ddf716a86262971ead7ca0526c52f8f46dcca8854e"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "44fbd952903690bd78954394ee0a593ffe2b573326f54e2c793e7a705adb9abb"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ff46148e3bc641d2810cdf40e4ea757f58fb24c9b39ca0d4d3131d8a946f4520"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "beda8f346dbf05804d37e3041d2e56c591861b00aea7ac45e7a9b50f3d78d718"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ca2a432ef61e5219f82584d6e613fedc671e838b5f2f07fb42cdffa038f643fd"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7acb5980e65a60c46ee386c9e4028b2eb1d919af724c8ae4c0eea43b5a2ad7e5"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4ad5268a842d3b7cb4451c67e9d024ea69f569e0484a28c1b14888cad908afaf"
+    },
+    {
+      "group": "budget_0.5_on_demand",
+      "case_id": "charging__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "95e9fd2764a376a7d268221e79947f30bb42c6142193c9185808d53c6ffb3b6e"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "02d8b09b5530227e1de17fb9946f0b4b207d7c4750d95b9764275c2b404892ba"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "07910fb22bd7be3dce455ebf9878d32a5c27990877b7542718006f730de5ed31"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2dd64f87ad911892f73f47e871be4c9ac1b268881a789be16951772cdcfe85da"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "56fcb78d7fb0552289e6b4caed9d17a2da6e75569efb10a680506f54ce01df2d"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b0d262d3ee6c030b0147d7fb0178ef430e7fe392583b2efe96cae2c4c40082eb"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "700ddb1883f0ab9b9f37c957944e354bfcc1017e9badc2c896ee8dbdd88ae092"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "joint_batch__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e45473eb4c0daee723f43fdb776f2b91662df64ae1ff04f755d1e772dda067a4"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f33122a5a3d1d44df0a7036946f5ecaad276b065ff9bf2335527dd6432c599df"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "13295ddcd98a5beb3215c2594e56d484ab54a540d89e028e0eef5b69fa46c9ba"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9bcf9939a9f28466961a2fc7c3102f56ecdbb9464609a21fe4900318586cee77"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e44d56a381f6f1355f985c8837d0e3a764bd51c71f6b7b9a20f3929dad9e6eab"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a58bf70ca825a3c287efd7549e3ecaab592bb65a944ee294d1003291a1b52a86"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2751de10987883a8b5c77951084585461887b4fca0395ee78caa37232f7e90ec"
+    },
+    {
+      "group": "budget_10_eager",
+      "case_id": "charging__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c512d61e29e3b14a67059e189bcb3a302794220af967ce927b5c07a06e58bae6"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "182b42c817eea48d7b534b17b8d39406605128fceb3e63d57c3b9d66c973af03"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3c30233b6762f52d792ae0880d2df90ede56ddcab36580c18f562f55982c5d07"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "230e483d982e92cd44784e084e788525c2879acf70134a7e1d276c8e0e9daafe"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f68715b67b976c0dc3286fd1b9123cd3ccb7eda180229ea1b534464262374251"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4d65f0368be9b929cf17ddf21d477dcb2d8069d51992bbeff7de9da9861b7fc6"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b4634b2a8c24a6dbe862b7ff52ecc372e7dbdff2e6ec06ec6ffc770297cbbd01"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "joint_batch__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3e312535bc7e084920c7492fa6c226452f28ff078ebd411949a4d8bbb8cc2b9c"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "de76fa9a2ce04bf1be9584592c886874c1bbddf1cb3400feed721d2099f8e2ad"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6a700320a1aa62ecfe8fb27e8abdbe023d169df254b1715cc0c340b89fc487b2"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8ab318876fbc099136c5d3f11149a78564fa0ff90a34bcb42bd4af102cafdc16"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "38537c87afe029725d47ca09f4c6c11f063fdea7eacf8939b85b30c0a80231fe"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f45d1e8dfc0ac8e68f90cccf02dc2b9cb67921416bd1d4c24b4b0c93b610b8dd"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a2cad3df3e9a60828dbc2885d1c1eb24e374fedf8ddf081ad784e601a8109350"
+    },
+    {
+      "group": "budget_10_on_demand",
+      "case_id": "charging__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ed47cb326eaad761dcf284e9c968102d36218082e7f8faeef5eb93cddfb6965d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f8738e6070db124c451d1f26bd74856832ac0a2cf5ef830289ca6fc11a0c34e5"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0aa6cab8b670d80388f79d0a8a7fb0283c742c41cd40bea77ffd4dce8515c9ad"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2c67149c2349b02a818e0f96c7098844e9f358217392e6d52ad0d8d84af1a1d9"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "25981fc807a54ea74e3e245fc80ba9e254ebd90de31202fa23a889f183751a20"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d5b41a7aff007b602c4f3263f6be72f6f42ead7f0f8d7b97f813b9ded0f8ea62"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7633fbb8dd954fbd6ad250e750618cbbbe396545fb634acf42827e2f1c758893"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "14eebbfc853bc63a9bb49cb6542d39467e7a36e108524e8bda9e1b7ad6aca234"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4f9bacb435e217c823c67f2a3f5e8fb3a0f5571864b025e19b73fae918b98976"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9bd81b9599ce142b8d57398660e07907ebcd7166021b93a96996d11fbf565c79"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "44ef1d8156ff896cdd0ea7c3664d95f431f2a622d23077f754343abd2f7d6d76"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "54d3ba6ce9f15bbe37e54e017c4cd6777aeea33f356dd6dffbab0d27bc5dcba9"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fb3c00274c12b39f5850523b91188da548c4607d877da7a88dd2884b848d0db2"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "49a662b5e95e3e1a53c52f7e6d4d4fce30ddd2c9b5534aa7028c09e491b42ed2"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S00_open__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "925a3a015282f7b73b28419130e9f3c1b3073a415760ab27d8870a225dbff7ca"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "cb5db21f688e91378b7002803b5667b3577a86545fbd2dadfa98892a3ee01274"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a2b648f35d5914f7aac5628048679b4c5bc177d99a79b1650ee76d3f0f53d47b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "01afa41c7c9e6d5a266886369bf40ec07a30993e5037d20acca1d98da30aa873"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3b75cc76ffbffeddd631d673dbec52128093ad811660658295512de6d6e86f4c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ac5b35d9521ff1e54ed8c1392050eb633c9cffb8fb4d56b1d04ab41d8ee2f4c6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f4e3b72af192ba965863077493734d530a74f4ff6195d3fa622880bf950407c8"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "59187e712c67b5aa955f398e54e47490f40b11be9cb91088d4c408148603b0c1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e36f96767be667cc9999046337e245bdb430aa55c589320522f912488a94bc3f"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7bd0afc042b6bfc551d3f173b625b2073476d32e16b569f728a5bcc8072e674d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "22b2f84cb130b9d27504742056f85d76a7debf367d3a131299e0c884696af9af"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "07dc827bd345dc71ce72089bee949c01f3d84418f5b3c6d94366979c7b8695ec"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4d14276ba2665a847d5b5f41da77043838756824cc45c01225d2735dbed2f16d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5760170441992119e1bedf91bb9b8461fda3c464d1a8eb477e97ce8db6b8df39"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S01_joint__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "27895e9234f083d3350a4403a5880cf670fbb988953dc3d56f72948c16f84bb9"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f8226f4f026da6f38af51bc331109fcf263bc64f4cb23448dc7bbd4e52d066a5"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b8de6a816f67af4811d75e6ad813f8f8e685199b1629c24a9a057b566ddf54f0"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "47c2cca509609acec3d58050e0e2cb7ea412068cbad6b9b9dcc990f97bff9be1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9e13561860d9c753e7a376b6c20b9bda5e0aff4117cf6a2e0084407a30a70de0"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f8b528f0baaefb7ba03a8454af54d2413a95b7829ce33fb99046000c662b6b38"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2dd395e77c411ea7d0f785200bd5d6457d82fc82acc70f86a3cff5bfd6c1ed61"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bb434daa081147ccea704a914725309b83bc11ba817f0485f4ca8ec94ae764de"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "58e6486c3eb043955b3f3fd2c72c68beb8bad9033129fec021c75606edea05bc"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d30bdd50b7327f463f3681920e02a3c9a45f5e93c1b72b4e5d866b0754919dab"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "130e7957931c671b0da36a0ebb27bfc2ee0af0a60f3f07822d6fa7a4a21a4500"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "26216fe0486f700fef5625df63074af0682bde0e34cd31f06fa0e257dd9d0937"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "03a4c6e08b0e738738fff6c88061353a3946216b1ef78a1abc3d1a4c9de84b8f"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f5323b953e6b152cba95a57950f9103d8c765dbdf15265ffa4fe384c129083aa"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_narrow__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "df12713d2d757ba181d653985094e6701f503390990d5fcb4f0545f4d17cbaca"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b89cf33f5570688e459cf52eca39259451938e7cb462ce4e1c0130cbfd82f2dc"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3c19e7d86ad62c560b09a5ab6900dccb176ce2ecccee5d1e0d811cd63983b9c1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b100ee1ae8ddf4ec0923b492fc11e0534f1738dab6ca3fe8e2b33720ce043b4a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "836d22e0eeef4ac2dc21151d6f2792ab1c903a37f8d35a233254fcab7b797720"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e370336bffd8179e593d8b3ded1a4396fab80237b86c938781c596df4c7dc53d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f63cf2acac4e7039fdc772944f2981f0dcd4c2042dcf56b708c1ab7911e3a04a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "17898f7e837ef39e7a5a177811d72cc85eed9f429a8f699ac6534419b1ff6b5c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b9c4e2a0f8004a88d9d52b157662c01ae2c9fafda70aee71a7681a15e932a03a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6bf69b10229b2c22d1c930c306283052e7d588fe7900bc55e9d151d348230708"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b016155640f9461bbcfa5c7decbea5cf12495337892705507218ce50c790f52d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e60a34ef6768d021b6099b9cc15162adcf8028c7fbf5b537822b178df1ba345c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0d635c2716c13fd6a4110428c92c39d20a86bd63afb22a4f2724d3f4ffc1b88e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5cf94b5c3d8b9d024388df33fe93ff864e2d873181ee71ed47bd2a6f1d3cf83e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S02_wide__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ce91d27f83eba05d166b8a0463d0676995139fa60d01df2035c9df2d6d59e1c6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b65f1feaa82ddcc88161de4d803ea0121b99a55e7e65f32774abac64569bd8a7"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b6b2f0f94fdf65bdc682416dd1db6e1fa422c538f2eb20d3478df6c93dc8484f"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d0a75a5737e913c78d9c41c8b2e3006809dd0670befa54d0f6d428b8d20812ac"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7a36550af0e0fd4b4ad0d8438debeab79dacb42f4a6d4cd5bf78dfab505adb97"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d2cfa4ad1652cd499396ea0e1843d344ff5f29f623e621f01fd98541949eee3b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9cb95156a70c7258cf0d6152b544292d989f651f11cf41ea8eb5746590676ad7"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "593088fcd1727623d12e6dc4177e7a60eb75184bee8e19bc60d0b47985b6f940"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "eabf10b5157bead259327e50ae642aaed808dc4e4fe3a49cd9c6c6d4416e619b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7bbb886ba4a28f5de736d30b7e41a1b76b6feb5ec626450fb8a0cb31d4136d5c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "305ab320537fba2858885eb4738e1409855a5a7c1cb523a5da7d682f102393fe"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0c8887ee422e777b9719fa394248935753799a9f02cc1ce14cfcbde87aa6494b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8ed610e999f3ad37cd6e32086c1892e166d3c185e9179abb59802e7991162d74"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e63f11d47e7d5d20d2f491ad6e511ed74f2590136f821c325458d116ed53ef79"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_junction__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d6c0d90f930a78f35d5d0dedc5c8d4654a10f2fe595eee2dc83e5b712a8b56b6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1957d40aca434f4366f2a751f8e4fae9652a531ce1a641f61b2a7ecb51de47ce"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d5ded2e0530b03a1c88d63958a84b3f089027c336f278d67d4ace177cc55e678"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fc170f61c587a603fd8b2c0dc573fc9883a234fcc431361b59131d6be6123af6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "68c678ae9a2d326d40d1fc8351dacffc7cf24b42a31fab8f55d429d934220a65"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "afb78f346806e9a7a4eaf918b769e760ef54ac5411d0e1fb7a91d84f49f5422a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "56216a3af3b5edacfccc0054e9534929042ef83098bd41d915513704d5d1b500"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3fc3862413200721a12d363835101d5e8da97ce57aa2c67a21b19a8802492d9d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b0b56665c9c8820973f65e3c2904d65f8a84be86f199b92c26d4466c720d8660"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2286bd336a08ef37cc49a7f98b53793a3e5af772f6abcb5de3c5111e1fc2294b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1d923b23a7d5648539f713cd7bed6c8426759e378f3c300da0df465f1b6930c9"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "dc028148ef4f887f34047428678c3691790bf34b05d68bb4baa5ae8f1826a5b4"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4218b2ab73d84fd00c1fa52ec0eb117cea1854069982c5a8745e6b66089bb194"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9cbea992740d0b8515be68fc36711f17394a320c8b6f7d5cf458b6140fc981af"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "54e8643ae8b99b2a0d71f94121dcd99069092b8873da744abacffaca7d3c70ef"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9285ce5a1a1c9c31a3761b1965c8b89960fb85a28ad41ffe8942fb9ba69a326d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "15f5cd45a4c1070fb9b4d71e48d81101263a2c9415703308c1aee792d522c462"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c320cb2114cdb59ac39fc0b5902eaaad087bf9b07f9b416f8603e85393c034ca"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7614cada5314e08672cb730c268a0f089b48dcfdd0e753fd505b07e19cb38f58"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2547f0440f07412b0bd4805cc973dcddaa438e5a3153dff5e670869742ecedd1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f57f8125f9376d55ab28ca6d95546611b2547c9d45a92990108bed4f24c4a84e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7de75deaa25ccad45ccf691c4b8a2b4fd563c77497130b2df481862c924a8b8e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1bbb66048d3b6cf13d80213d3ff70e415c0e287c596110869e02e9afcb37c0e6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0dab68d926158451e506850e2b6752b15cf566e760fcba2600470ac90f4238de"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "54bce835ad72e284b5693d860d4ee2e24713f71175e7cf2688ef3aa1b1aea7bf"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4f286443f36f566ec0bc9fdd99726207b030f6c84368270f60b1e0f886bf94a6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4eadc71f0cfdf532dec52b4beeb4fb28fb0d71fbc1b45917ebec1a1732ff6c43"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "95e68f0dc35da19624b9831dfe8985e160e4f7a19d57697cd529bf0c43fe36f5"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_one_slot__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7df2de802d54101bee3cd42a22e904863267cdd1251349303b228dd2c1850019"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "37af0d97a58cc2348ad8d8cc0d97192c4589e1c500fca4c9129846279be73ab2"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "cb3c7987e28989582c2f29d4fd161843fc75d43d4ae9a597f692430fdf6ee41a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "dc83cd0c11830f7a2a95abd2c255322372e179eda2442e86fb53daff946a444e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "346063f7337cbd95fa578a0beb42ee6f36739881239dce60d646bca344c52680"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e5265be2c5e197489d0396616da19cd3d05c71c44929dbda519dbed28621ad5e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c0e524632fd37d56f379c8a41e748088119c53d780ad26bcd160a0837157cade"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5fda482a0410b0b992a0b163fd95f3f42cdd7da2aec51e4c073c62cf2c8ca4e8"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7b68c0a77ccf7d9e6a22953f884b12cbdc445478ca74888bb44df4ee82f22ec8"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "882e6baa9b09718a03d7d1788b88328abd903308fed7c8e87ba991d12bc82e58"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1d39b775eb20fdbec31d7c61f2ab190365c806c3e8bc00a0476ad33572dec40a"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4f21555de51b7e17a7440c3417910848df72a57ef9c760859fa4d6a65d41de86"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5c7dbc4777563f83f3b963cc11b9eea490baaa5ac021d820b86820bce10ef6ae"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7da34b0eb9cec9fc37f7317dce154d79c2545a68561570df3dc4cf11a5a5865d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S04_four_slots__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e4079cb537102fa53762a943a0fe4bdc72a949e008377319e845e270956173eb"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "94c20ed74adc9f9d9400a6e2b2e97b05dadc5074f68b1b41547f8fa564060706"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7bdd48f5062742079d51c5d32f15d621dfcf0684b1ad0e553f9da479445d2a9e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f42a43bab1ef002d066ecbb27fa23f3f85cdcc6f018b8cb2ca39cd5d86b1a609"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "08e77d96e963a7785f5494d8ddc85f58f9a5a8dc09c67f69085063cf494d1cd1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "13079bb7d24b9359bf6a450aeb6d92f66836dea298f0758e4a4b7f551418440e"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "792bb08797bf32384e6cbd8beaa30561a1c9866523a7444842b7094b695ff2a1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "265b874210b9f257ba891b33c98c0b7b69a6a3fcd580ef6f7a70994d5fb710a0"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "07c9c300a8f751d4f4938fec5dd7212514d998a26032b4bf8ea71578df3c6e07"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "47cf17726a0bff6e1db690c553681987538b300d34023dfd034311990db7f231"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "813602e2b7994a10983f708496c0d02e783d950fc22370aaf004317c283950cb"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9b87cb76278a31fbf063fe82e6ceee5be0b22c44a2a3f029f5d2ca60a35a166c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f7236db2673069d0c47740a321feb627303c0a6bd7e2ae22fbbb28538fbd4de6"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6d679bc9b2ecd70168b95e4db505210b8a029f54e61d38978f5f3259a92ee71f"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_one_cabin__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2469f1380fb7b5cc12cafd192db510f6a33520f9a30b92e11e29e91113fca401"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "efdce1e3cb48cf7b2ce77bea2409e2087c6585d74c02be51288f6d3cd887f743"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "099122d51795eb54f35acc43cabb02d384009a72df20c8598048b3fd61d468b9"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "123209ed193e2983ee98081dbef71ff5ea25a38d03706b7ec14ccd65390e2a55"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d87a0040ac83038da33afea3906e8a3ec555f2eeda3a5e36159ff7e46362c9d1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ac58c20bf8df7a2132bce0ebfa34f4d253dafaf63c742e814f653f1acc6ad25d"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a042226741a80170f3cd1d757b78835afbb15ba4de533214cbeeff9e4967f020"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b7dcb9957f9cfefc0bb96cf5e20b3b1074f34fb5c88835638c853195a3cdb0f5"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c35afb64a8e8836b91b4cb4c9c59a191f5de682f8ac75f88b8a15dc44442e07c"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "186b726909c8612626456481f8cab383cc8ee0004caf5c4c388414ad7e063a06"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "28d15b5955e210785ef8d8e2fa0e8bce007424b1d38fd2fe8d5a122612fb6ee1"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d1cb4e6dfa3cebfe76fbf1936e7e49ca7975f5b115cc85a6b3c09583da2be6cf"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f93c05611c0126e682c2db4f36bbeb4958a6dbe06b3c6e745c414794c465238b"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bbcd768e03e8b64d313eb52a1f9cff3d88745e30bdb7450ea5f5e99d3b93a091"
+    },
+    {
+      "group": "d0",
+      "case_id": "P4_S08_two_cabins__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "76569f581842d06a3696b6c971d44a1e947e7ca6673ced4f3af16d53308dc097"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bacbd20f7946347c97fbf1cb097262f9de276ec7197d541ebc099c185b5a0d57"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ccee9fbc9868efccd1293dd6b00a41e65e417d582e94cfbdda8bc61b22181b5d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4fe60754568f1818f757dac84528491b38a825299583a7c407022f97123e270e"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c2127b59493032b5c64e4f91849a359917f7ce8c37e0d0597825666b1ad1e49e"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "810d3272d7eafef3205481bad7ee06b39065ffdeac2f7159b343f60c08c46a6f"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4b5cbd99aa4b548b2e7997bad2375fa8ffbbf1f24c9bfbefb3bda941851e1fa2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f2fe17300ea3a601c22ffc77033dbc95b810f413b7011ec140d89351bec018fe"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fb1131572946a1aeb4ce8b784c47714f8e12a48fb3fe6f9549ffea7e31f2361c"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4a858cac9869b1579d92ff7fac32b93ea058336230b07f019904600961c6c179"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ba472f33b1a7f0232c3c5e87a74070680d68c11d18dbf1b38b80978f7f2267af"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6e70c422a11cfaec397c2ab2187517bdb7c55019445666ebdf6ecb7961260429"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9984c332f9be67f10d54de39d1ac99218a5aa7f52be7b0dd5d24bfe843299dda"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "63d2bbc222856a05e7e8d2f81bb76b119e0ae1a65b93f294ffce3f78739245e7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S00_open__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "71668ff9a4eef2edb7dd2a5276e72d4e9b0ab13c3102e8f6e46dc18c731e1f57"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8ce19e7862878aa03109918ae481e501d14cd87eeafe030c238616b82c198ac6"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "21378822aab25e76fe6a7ab3adade281566bd24ee5dbb6680d225b3fcc597ff5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ed86b7c67286184c531ba5b6bb3f0d0bb55c9e0d6f56e22e14e84fa60b94d841"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "09a9eb5c747c5c0f6487577756bb63e564052c744a815f39cc0ec0c3ffee684c"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "39bd6d185a0e2707bf4905fcefea90de68b9f7b0f36ca6a94e0c549b14fbb084"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5f39d0fc2a57ea5e82127cc0743c5f6a82a11ed52e2230f72bf24f3a58eca74d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3bfbe8fd1672860b345d39245a8a7d60b9e49babd6ff625aba4358f1213942f2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "15302102bb34bbbff7f58eaa4830355479327215e2f6868d2909aba3b77afccd"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b7fc7dd1ec15ab213f4f92d85d7ade3775cd067d883cf45545af46d4758891ff"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "080ac0cc938fd6f5b82adae37bc54264d93c4a9bd0bcaa7730f56c02240563a7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "2803d2aad136ca8338a2f0640b7604a94235e953ac830d1111363b5e15b62428"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1b66f91ca5bc9df51139f35398c1f9a11eec86be9f1aa5fe42efb39c904aec96"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a2bebff011f812bd310ecaf1bc8b734f6bc60fe5d970cdec4ecc4a44423d1ed5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S01_joint__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "985cea2f37f9f48f73b095d7ff6c0a406c45a7df87599efe189eb39b5d33fae5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4e9bf4460b5c62636d4370e54bf083a1c3b93ffa852873aa8b45f0783eb666e7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c02b7402ce3fbb58ff177ca071e023fc19c43fe551138271519dfe42395cf569"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "18cda9d13089af9a45e2a3e70bafaaa945b30ba042b32f232d798a2360a14199"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "231a80d859aef30285f27763509ae5ee4a069df4ffc9c7a86d0e9a160eb30b81"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3c3175342a05aa685546975794885ad8b95f6111ee1f08ac478b74ce085e69e5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5d1782abe4764a294c0c248574c5c4a0d75aa50580ac7cfa6be61b728cefdb67"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b0e5b9b44d8015a98a3cd3cc07fe1f553938dba3e26cf75a57b1dad3c2342ae0"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fe8f11b6a9adc0d88ff798937185611086238014b51edea82a75e3d5b1e9caa2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f7473203fa45f55d7273d2c32e3efd10d0d1d42c66fa6e34d8dc35f8f1e3b0fa"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "326e729476999e069df7b4a35159ae795d331be820d32744d0ec1d113725777d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9b1a3bfb7496bc62359ce5bc1afdbe5fd36a726dfe21c0627d8c03d14e14a275"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f78c2bd6f4d53eee5913a29fa88800a3a1819f83bfe60eddb7435db5f86a8c85"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f825c6c8082fa58b268c376ead01591bd2b0f19f1a858652a41c560bb59f2087"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_narrow__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "dc52ca0e485c2ceba0434b421bd5809739175860fe49707b68263c812aed8c67"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d599442ad4b34795494a1333765f17dd45f6222d78d4f43593ebec8635cdbf05"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c7a43e8d23869d147f719e547e9d6fb49ba7fd5dd785c19865d73fabcbf1cff7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "593f411a3e0a4088be4666e022ae50ef2a617ad41a9b5a1631c98e5f2f784eb2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "71b60c66674fe2712bb66797924a1cda0849b29f81c3e8892eff2b16e8135929"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "16ced4acd4ab9ddceadfa9dcb0f3be788dd375d141056f42e92ce5ba7db183e8"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b1589a209b99663c88f54df868cca974ebb00693eb6920b2eee955b4222df4fa"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "097125bbd89afe4951fa05594cd330db6ad63cfbe82826b6200d00f20d9ec665"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "61fd4385e818628b57a5a0a38c6332ec6732c0f8d0738a87ce7694e01c49599f"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f57040b21a72f8398b3d2bbfc8aee26ead0c9a65b27693cff35eeeffa81aa93b"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9bcab13521b7292e6b4fb3f3d81d6e66e237da2d785d3c309171bd448a4b3e73"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "16829e2f66fa67ff49e09cd20fb7657919bd6ae0448a865cf22a02073f1a8bad"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "644502b7123f56e8fe179de51fc4a8323ccb9e80de44d4eebbde533e63911cd1"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "638bb7a76e8c20fbb1a222a605392a75a349278bbd92c66a967a902e7ca5a154"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S02_wide__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a914329283f0eb1c1eed3bff95baa2777c40c8789afa5e3d90ad76cbad40e58b"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e18f6c9c802a38df38cd9fd7985c1a581fa70c1ae9ed1117359c03afc6dd97e2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a8ec5229e8d2f9593aa6b19215279908d52a6d9957ab2fc422801d10d060f798"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8b162a4fc764dba929ed7731a375f583549eb9d73335c2946ef3b6626f45e04c"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0c0538a0ad80aaac1d41f97e1671cbbb4f3946ed828796524966fc1a6af302c2"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9fc5bd7fdb5b6e8a35d0f93611691fad0c54256109c905582807b4a0858c42ba"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1e023ecae4ca10c4e00af2c3cde8c1e70e85fe985974240f31cfea778e7b57c8"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "63a7c4605d8d95d6c19bfce76ab8919413d1c2cbaae4ede18898df5ea0c123c1"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1ca23a1dcabbc4711c03d9c0d6f189613d76b917384c1b434ffd43bced13eead"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5c8bddb557449488e663fdcf99bfbbae554c0128e2f25696846700e6f3882be4"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "cba4aced62ba8b28f4b56386f8e41365747f709efc49cb3596a8e061dc6de539"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4fd9cb2fbc45bee095b20ce2e2984edfb37ef5869519e581eaf2d86934d2b0fc"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a1165c284b597f73f1b00381d8928e0c7c09b6652711f70094be031edb9c3bee"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f49b830923b831ab28c90368dd5bcde66e9f366c86e9e473ebe7f26f53fac585"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_junction__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d7a2e943837b90629ecdcbff9e01db1bc0ce0a87031c6a056fdb51d24575d529"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a14eca68f3ee44bae442c66e86d5eb0b092e7addb3720458e66a138b05e54d86"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "57c569499ff30c6eb915e20dadedad79cae808650242778e060c0f2d26e64612"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3e7e3d55539aa590a18d557a8a6518425da3178d71679ee7699784857ebe60e4"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f64c6e659bec49845f32957f00dbbde57a4aa2c38f1e28e823374f1726e9c971"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e97550623637e94de0474d3a862ac1c401688d2d687dd3d3e77a88f2de53b160"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f5484be6af1b1f695807ece0c06a468f3404dfd8e30fb8a4dc7a7108e805a9fa"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f88d7e965c89b8de15e2fef4ae41c9e7f8590289dd4398dfd9264e7c7a5a9fab"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "87d85e75c0591a4b9f0e42d9a842650a3ddae4bafcb9373c9ca5aa1851b280aa"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "55259e5a697d30f0457c42ec6aeb2d8c18acbc7a41457b9aa2874eb3be59493d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "944adfe734b15c047f76365a0096ec817385c8b90cc0308b88adbfb786facf51"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "08b924216f00846ce1db5941c33ffe18816240b10ac0c7d70af5657bf16925bb"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "15eb10f33ac0ad04ffb9fbdcb37925cf12a08ba428790758b2286009c3421dba"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7003ef6d4866067dbbbc5700daad1e4c87911f3f05691c8721ebb042ebaae3f4"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5469f3e296119c3756b4c3904bb4941640ef1d30b88a02a90c3fdc1dc90f5bef"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bba491b650fb4ebcd345497db5d6550281b8050ff24922d31f74cb80b0c924f9"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5d7466b46dcedf5592041ebfa28ef264268d7012bfd8da22bee2eb2ed95dd570"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "be90bf8bb32bc95337d550505d786668cb2088b9588a5149e4cf39940de262f8"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fc2cb7bc9417b91bda61cc877bbd537cf7340d0c5ad265bfddef2c1531951563"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8f962890ddf90ec9484252e4491d4c65a50d7731001cb5ac3b7179502ecf8acc"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8a3610303d7a2092ef2c2e917908da8f6ba50921478acec67b0e4588e993b228"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1960443888a19e465037833c29b1858583c7a813624da55735ab2c3eb0c3ab67"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4086cc783f25749e6e6c52deb0366861403d45d95babe4920ab039c9f12951b5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "25f41c9f6523ea6af28fc1a6f2fcab3c61ea8141eee53600fa21dc43b674d0cc"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "70a96fce9eb40b6c8ae3ad949fc6b115b03800db4a42ff5558e4b3d7b390690d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "679edc6faf66d41908d4c8f6df03a0caab4285d8700390fd5b558a190f50434e"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "405dc6476cd0e2f536ed72faaf2026cfa80335525d56aad89db7c68f8c273bcd"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7397b81bcc572b91cda6f92880a16b9b6dc135b9a8503ab40aeb7bd297f41c44"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_one_slot__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "49f54b6d6c9ceaa88a551290174a1a2fc1d777fce469a0dac372150634a1e679"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bfe570baf04d96ac23ee3740a938a54d71a053dbaf0894c332f4bc9eda2a74b7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d5bbde35f2f6f0f9c65d1f9d5101fd2f479511261414e4f1ef63562b4d4ef1a5"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3fa99127c96a396fbd7f91ba8af5e2a7a9c67735e7785082066b3720347c3193"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "331414a3db84e240cfc55bec61d823a51aade6bfafb11e8e682ff606331b7ce0"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "14acb41ee38da419fd1a6071f94c5441fb898ecf9b12fd1e308e09d887051ca8"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0cd994dfe139a0900002b9f6543899c69b1f17b486fb6fd9f3e265de8e85d280"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e5955581b72effa125220d18c2ff0d195959c18eb03ce0c684443cdcddb4478d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d6a4288f16fa58cd70b65e8ea8243bbd9a7a7e0be144c0a5bfdcd7bbc9794149"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e889aa8e5d0d27a458ac3144a17d0be012c2684cceb45c6a0bc601a620692b56"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a186d8b57c75365f8b5b323097537f304f2780935d8620b74a085510a5c5c2be"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fbf06355aff52b4ce292a965c72cac3419f67ad128dc9ff6868caf76064236ed"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ed78b5a9af8fdff1649a3d8919c43adc0399b9f9843ae9d2075d6d2d8ed72e4f"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "306215d8ab09fa64cb4e60ecb9e539d2ce07e96ef3908ec9507e0e259c07554d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S04_four_slots__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "16cfa5fcaa65a04a35aa8a17a4572b6076c12a0d4e543bff3d109b103c758e1e"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "40005c5ec65b1f83f851d71f044180b4595635654e75eff90d9aaec7945d8421"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4933d2f5a03fa98181364105f4889af0d0d9a43eb43f8cdada3363a863324ce0"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "72928c18c3ef6b502af0d2220929b90e88fe53490ec6f1beb567678b75ab9187"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "950cbc72cefce26d3a9d1a65592b4cdf88124eef5c3465416429a4080cbd9a40"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f58cb3a58644bed1e0a91a3540a217cf0ac045b935bcde1e1dab7bd4554b5e92"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ae1e65e32fe6447df76cb63515283eae04ffd14c2bc3558a19e4c5f048e40b5c"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3d747811af86e05a9abe96bc3cf10da7b47bd1f76efaef67ed8020e250352595"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b8629d16e80578e41bd47ca60fd3c922fc19fd2e5cb403d94e4daf5da872923d"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fa2b299f4ef7daf5554466b63b7f2d65123f84bf7b75ac3429eddd89efd0be3a"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "43fa2835a82a58e1e81776c5936bd442ba1e2090cffa997375cf64cabe4136a7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "db721cfb18cfb84092a10fac0c18d63a65c64d78c7227b8ad77637bc7930b871"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e087f68b9310dacc1e44bce2d2a00fbd5be23a49807389796dc5cde58464f07c"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3281a0b0aa8ed935cf59b9da5beb1dab4a380d8257bb848b828973081aa9681a"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_one_cabin__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "adf4ad948760941aeb0c03c85c93941b9275e06d840c16b4984c93e9c42a9387"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "58a5d0749c6303337005b0970fcdf1d78da53546f77d98017a979df3b9db5843"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "464fe9fbfe2b7298a91566d1ea9e2fec189745c185c0049efe60fe91676f2178"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "709a0db2c37ec4922e4db7842ea1a85478733c383424fe8664ef55790bee21ae"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9b32313b8d35a7966e28fe0bcb8f0cb222b81304b30025a9e2b653f8d98607c7"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "af7c97a35f21e728a91525edbd3ab55687d05bc8a221ef2bfb76890b5985ae3e"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8b96e0e2e9f0353d6038dd9178d258b06d8131db9b6c3a7565d0ebe9ab8888ea"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "492724e31e06c0135560e7a1aefffcfad10a376be61bbdf6a7bf2a40d917643b"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "214b0e3e711922d83b6f921dfd9a000359f911df1cba834ec01a2909c22eafdc"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8cbbdb1026da1b72ae23e6ce55ecc45e0008c1619e0e421462c9dd6d2268ad6b"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "71ed26610222492c9321c0892bf008192467ffa0d5811552a41d05c081ba3038"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f327b269c3248b48e36dcc9d36100faa32a9859cec822fa0bbae9e1d49dcfb2f"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "95f14ab87f8b56633496b6a4f59f05645bd87dafd113e0eaf837569d7c98f9ae"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__baseline__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f95f51399ba1daed34acf8f19d0955ed2f162f70fa4897d19c540668dba9c08a"
+    },
+    {
+      "group": "d1",
+      "case_id": "P4_S08_two_cabins__optimized__1002",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "5a35aaece1e683439fd66dab1337ff63f1b1cb3f48756f100f953284e39b97c0"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "596bed58c41506e70ee57ed10ccfe7dfeaca788e97ceaa57268d75ab4e2334a9"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4bd8c4e38298be5efddfbca34d9f91f4dfc66bcfb89bd5b6c2b728918055fbec"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "d0b83ee4cf27671a1c4a59d59bcbdba4cd135106bebea90f1e928d49557b3ee1"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f54f44c446d21ba9622d1109d2f6f45916f2d42011ba3a270522e6e7276c6ae9"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "958210f2ba3882914ed2b5e163163524babda408e0690b33e597b8f4cf19705a"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7ebef983609074c1aee830584bf942ec404221b3da2cf046360c01fd4efa1434"
+    },
+    {
+      "group": "duration_4_1800",
+      "case_id": "P4_charge_rate04_T1800__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a1cef452bb97a453ab201ea5514c8cab7c9713cca8fabb62bf1c8e7c480e2b3c"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "42e562cb470ff0c7277dd858929c141cba8dbb3be99bcfdc1f149967da75f1af"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "fda7fbd077099a4a2de27923404c424950be39a9c756eab4ce946f34bce74866"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "01657f5b0663aed13c2849dab01aab2961dbcbd3b2fc64ed5abf5835a7d4f858"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b66ddc9b54c98aaccf73e2da160ba52f1da7adbff23de272cb8af7ec3c5bc4ca"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "1e1855288f960ef4a601acf78e9bf28c6781e41cdaca2b5924aa7adc9656939b"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "bb21bd4f2f1ee3ae784be8b5872a7baa800b9b49148b014d3c3c10459807a340"
+    },
+    {
+      "group": "duration_4_600",
+      "case_id": "P4_charge_rate04_T600__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "0d7287d92eee14f4db8bcfef5a412a56f3d7cf92767ab2e2053f3b5a2926c533"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "e349a4f4c17b7d22e5020334d2d696227336db5399de76420458cf8b5d4b8614"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "f59731dc1ba50fa21367430381790b77d21d3c15d100f14e70fc777d642fba37"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "538903c21c79a52940a194f89c074aadf6568c510d030f178093a536d7bf74ad"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "9f140c4c95fb4669a09a463c500902770c6c90ea7b9221e5c344e230a652f285"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "7ce1c8ce36881c31eedb738eacad0ef26edd1f27a690bb2528b22c81a7a3dae8"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8e73e9bb497676437353b0ac48969d789fa298a0eaee19e0e6e997aa06603eaf"
+    },
+    {
+      "group": "duration_8_1800",
+      "case_id": "P4_charge_rate08_T1800__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "41b53c6a129b82cb1ece7e67d4d124d6392ff363ea31a19fd774de95af68723b"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6a3d406a4bdce772d0f264cb2407e06f4f20ffbb03766151e0e3b5696ea21c78"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_native__1001",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "570c29231f0232c61e8d84f633db6d65a89741c5fa2d9a65cc44248bbba57630"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "910afa3d85277279ffad2b0820a34c7f1a0a36909ca8012ea79a991ac4af370b"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "de2007d8de7c1b74d7e4ff5d833c3aa72da8be296d9c6cf79046b059eb614592"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "abc23d1c238c729c1c8802225e6aa49f91edb45d697abafae2987609c3436959"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8b8dba54f8e9692144e4bda6017ef6f32c8b2e6ec5d42c367a72ac538d363d53"
+    },
+    {
+      "group": "duration_8_600",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "17d357bf1e44ee87fadca334d0694ef6117e50728df96889ad3aa11a26840257"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3dc6ef0abeefa4791a49e0f145b21bec9153287fa0fa46cc8db0ce9cc616199e"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "c517c62eeab92dff5ce9159509490f65bee2dd7f5a3f3b550807c7a1b0c882d3"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__baseline__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4d1f6db34875fe7cb87dac36ea7fd01f8b5b9d95f5e9939c084e56a9ff63df61"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "6d8c9262966fde91d7cee1a72a527748a8bf1a2b49793d69ae28693f941f78c5"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "048239d3ac985e2dfb770891c093be03ff426d5408128ce7a592df561252433d"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "38b564112a368e58f98c5dd5bbace7b3115801876fb4f4e82de08b133918fefa"
+    },
+    {
+      "group": "duration_8_600_guard02",
+      "case_id": "P4_charge_rate08_T600__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "a4ae8815e76337b629e5b9e25a1d2bdd272d298be1707ea72ca5d1e684f453e0"
+    },
+    {
+      "group": "scope_coarse_b4",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "ad5af3a88912096885cbc9f9ac8ecae10697faa8d1318fddbcc85f5343b80085"
+    },
+    {
+      "group": "scope_coarse_b4",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "b6afc7104dbeb23091e6f0cedc9cc40dfd769e76d716ca417e34e48cb613a535"
+    },
+    {
+      "group": "scope_coarse_b4",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "8f4f0fbdb62b2927014cba7c0626009cc84d551b5e53e529ce52c05e4b2d9ccc"
+    },
+    {
+      "group": "scope_coarse_complete",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "3c09fd58aa201cdeaa4f3d1c4e5f5428b38bc1dc52ad8659493f7f7d4fc3ce4d"
+    },
+    {
+      "group": "scope_coarse_complete",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4a48ec22fefed31f2a22b48748e2e56536fccbf8fa26f38314a5ec9fe6fb89eb"
+    },
+    {
+      "group": "scope_coarse_complete",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4eef66ef2b8136e137abea5bcc198065d1238910195ea3edb7b2178cd164c423"
+    },
+    {
+      "group": "scope_fine_b4",
+      "case_id": "charging__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "4d43d52a744ec147f6e63b8df22927a8af9cf30de6246578cc5f48fd88d158b6"
+    },
+    {
+      "group": "scope_fine_b4",
+      "case_id": "charging__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "db91cfbeaf45329966e2b4b9513fd5310f92623e6d157d054abe6fe4f955a740"
+    },
+    {
+      "group": "scope_fine_b4",
+      "case_id": "charging__optimized__1001",
+      "status": "SUCCESS",
+      "errors": [],
+      "replay": true,
+      "raw_match": true,
+      "result_sha256": "83827d806309016b5d9705611aa1362229549d8acffd8326a46f0c70a3842ee4"
+    }
+  ],
+  "interpretation": "Known timing-coverage failure retained and replayed; not a valid successful D1 performance run."
+}

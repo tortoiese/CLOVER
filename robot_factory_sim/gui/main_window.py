@@ -11,7 +11,9 @@
 from __future__ import annotations
 
 import math
+import time
 import uuid
+from collections import deque
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
@@ -51,6 +53,7 @@ from gui.optimization_panel import OptimizationPanel
 from gui.order_dialog import OrderDialog
 from gui.widgets.elided_label import ElidedLabel
 from simulation.factory_service import FactoryService
+from simulation.planning.live import LIVE_POLICIES
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
 from utils.event_types import (
@@ -90,6 +93,8 @@ class MainWindow(QMainWindow):
         self._comparison_pending = False
         self._period_worker: PeriodWorker | None = None
         self._comparison_request_id: str | None = None
+        self.gui_response_ms: deque[float] = deque(maxlen=1000)
+        self._last_response_seq = 0
         self._shutdown_timer = QTimer(self)
         self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
         self._shutdown_timer.timeout.connect(self._finish_shutdown)
@@ -154,13 +159,14 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(QLabel("표시 정책", toolbar))
         self._mode = QComboBox(toolbar)
         self._mode.setAccessibleName("화면에 표시할 운영 정책")
-        for mode in config.SCHEDULER_MODES:
+        for mode in LIVE_POLICIES:
             self._mode.addItem(SchedulerModeLabel.LABELS[mode], mode)
-        self._mode.setCurrentIndex(config.SCHEDULER_MODES.index(config.DEFAULT_SCHEDULER_MODE))
-        self._mode.setToolTip("두 스케줄러는 항상 병렬 실행되며, 선택한 쪽이 화면·AI 조치 대상이 됩니다.")
+        self._mode.setCurrentIndex(LIVE_POLICIES.index(config.DEFAULT_SCHEDULER_MODE))
+        self._mode.setToolTip("선택은 화면·조치 대상을 바꿉니다. 비활성 정책을 처음 선택하면 비교를 0초부터 다시 시작합니다.")
         self._mode.currentIndexChanged.connect(
             lambda _: self._worker.send_command(ActionKind.SET_MODE, {"mode": self._mode.currentData()}))
         toolbar.addWidget(self._mode)
+        self._action(toolbar, "RH 설정", self._edit_planning, "계획 구간·격자·예산·후보·메모리 설정")
         toolbar.addSeparator()
         self._action(toolbar, "공장 설정", self._open_config_editor, "층과 설비, 로봇, 충전소를 설정합니다.")
         self._action(toolbar, "주문 관리", self._open_order_dialog, "주문을 등록하고 진행 상황을 확인합니다.")
@@ -358,6 +364,18 @@ class MainWindow(QMainWindow):
         self._dashboard.update_state(state)
         self._sync_combo(self._speed, state.speed)
         self._sync_combo(self._mode, state.mode)
+        sequence = state.diagnostics.get("command_seq", 0)
+        if sequence and sequence != self._last_response_seq:
+            self.gui_response_ms.append((time.perf_counter() - state.diagnostics["command_sent"]) * 1000)
+            self._last_response_seq = sequence
+
+    def _edit_planning(self) -> None:
+        from gui.planning_settings import PlanningSettingsDialog
+        from simulation.planning.contracts import Settings
+        values = (self._state.planning.get(self._state.mode, {}).get("settings") if self._state else None)
+        dialog = PlanningSettingsDialog(values or asdict(Settings(horizon=30, step=2, max_tasks=8, native_actions=4, timeout=2, watchdog=3)), self)
+        if dialog.exec():
+            self._worker.send_command(ActionKind.SET_PLANNING, dialog.values())
 
     @staticmethod
     def _sync_combo(combo: QComboBox, value: Any) -> None:

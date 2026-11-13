@@ -35,7 +35,7 @@ REPORT_METRICS: tuple[tuple[str, str, int], ...] = (
     ("distance_m", "로봇 이동거리 (m)", 1),
     ("unfinished_orders", "미완료 주문 (건)", 0),
     ("background_arrivals", "일반 작업 요청 (건)", 0),
-    ("background_rejected", "대기 한도 초과로 미수용 (건)", 0),
+    ("background_rejected", "미수용 일반 작업 (건)", 0),
 )
 
 

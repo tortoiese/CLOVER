@@ -1,0 +1,10 @@
+{
+  "horizon": 20,
+  "step": 2,
+  "max_tasks": 8,
+  "sigma": 0,
+  "interval": 5,
+  "timeout": 5,
+  "watchdog": 7,
+  "timing_mode": "D1"
+}

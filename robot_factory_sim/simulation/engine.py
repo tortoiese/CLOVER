@@ -10,10 +10,12 @@ import copy
 import hashlib
 import itertools
 import math
+import uuid
 from collections import deque
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from time import perf_counter
 from typing import Any
 
 import numpy as np
@@ -22,7 +24,10 @@ import simpy
 import config
 from simulation.corridor import CorridorNetwork
 from simulation.elevator import Elevator
+from simulation.ledger import EventLedger
 from simulation.path_graph import PathGraph
+from simulation.plant import PlantSettings, RobotInitial, validate_cabins
+from simulation.resource_pool import CapacityRequest
 from simulation.robot import InterruptKind, Robot
 from simulation.scheduler import BaseScheduler, create_scheduler
 from simulation.state import (
@@ -34,7 +39,7 @@ from simulation.state import (
     TimelineEvent,
 )
 from simulation.station import ChargingStation, WorkStation
-from simulation.task_generator import Task, TaskGenerator
+from simulation.task_generator import Task, TaskGenerator, TaskState
 from utils.config_models import (
     ChargingStationConfig,
     ElevatorConfig,
@@ -117,6 +122,17 @@ class SimulationEngine:
         epoch: datetime | None = None,
         params: dict[str, float] | None = None,
         comparison_seed: int | None = None,
+        *,
+        demand_source: str | None = None,
+        plant: PlantSettings | None = None,
+        initial_robots: dict[str, RobotInitial] | None = None,
+        initial_cabins: dict[str, int] | None = None,
+        event_sink: Callable[[dict[str, Any]], None] | None = None,
+        execution_epoch: str | None = None,
+        planning_settings: dict[str, Any] | None = None,
+        replay_decisions: list[dict[str, Any]] | None = None,
+        decision_settings: dict[str, Any] | None = None,
+        replay_controls: list[dict[str, Any]] | None = None,
     ) -> None:
         """엔진을 생성하고 SimPy 프로세스를 등록한다.
 
@@ -127,19 +143,50 @@ class SimulationEngine:
             epoch: sim-time 0에 해당하는 실제 시각 (주문 납기 환산용)
             params: 초기 파라미터 (task_rate, min_charge_mode)
         """
+        validate_cabins(factory)
+        self.plant = plant or PlantSettings(config.WORK_DRAIN_PER_SEC, config.FAULT_RECOVERY_TIME,
+                                            config.RESCUE_BATTERY_LEVEL)
+        self.plant.validate()
+        self.demand_source = demand_source or ("stochastic" if comparison_seed is None else "external")
+        if self.demand_source not in {"stochastic", "external", "disabled"}:
+            raise ValueError("unsupported demand source")
+        self._initial_robots = dict(initial_robots or {})
+        self._initial_cabins = dict(initial_cabins or {})
+        active_ids = {r.id for r in factory.robots if r.is_active}
+        if set(self._initial_robots) - active_ids:
+            raise ValueError("initial state contains an unknown/inactive robot")
+        for initial in self._initial_robots.values():
+            initial.validate(factory)
         self.env = simpy.Environment()
+        self.execution_epoch = execution_epoch or uuid.uuid4().hex
+        self.ledger = EventLedger(lambda: self.now, event_sink)
         self.comparison_seed = comparison_seed
         self._comparison_counts: dict[str, int] = {}
         self.mode = mode
-        self.scheduler: BaseScheduler = create_scheduler(mode)
+        self.scheduler: BaseScheduler = create_scheduler(mode) if decision_settings is None else None
+        if decision_settings is not None:
+            if replay_decisions is not None:
+                raise ValueError("prototype RH replay conflicts with staged D1")
+        elif mode in {"rh_milp_grid", "rh_cpsat_linear", "rh_cpsat_interval", "rh_cpsat_native"}:
+            from simulation.planning.contracts import Settings
+            if planning_settings is not None:
+                self.scheduler.settings = Settings(**{**planning_settings,
+                    "formulation": "native" if mode == "rh_cpsat_native" else "grid"})
+                self.scheduler.settings.validate()
+            self.scheduler.replay_records = replay_decisions
+        elif planning_settings is not None or replay_decisions is not None:
+            raise ValueError("planning options require an RH policy")
         self.epoch = epoch or datetime.now()
         self.params: dict[str, float] = {"task_rate": config.DEFAULT_TASK_RATE, "min_charge_mode": 0.0}
         if params:
             self.params.update(params)
         self.metrics = MetricsCollector()
+        self.metrics.sample_sink = lambda channel, value: self.ledger.emit(
+            "metric_sample", channel=channel, value=value)
         self.factory = factory
         self.path_graph = PathGraph(factory)
         self.corridors = CorridorNetwork(self.env, factory)
+        self.corridors.arbiter.observer = self._traffic_event
         self._pending_traffic_config: FactoryConfig | None = None
         self._traffic_ready: simpy.Event | None = None
         self.layout_version = 0
@@ -149,12 +196,15 @@ class SimulationEngine:
         self.robots: dict[str, Robot] = {}
         self.retired: list[Robot] = []
         self.pending_tasks: list[Task] = []
+        self.tasks: dict[int, Task] = {}
+        self._tasks_by_uid: dict[str, Task] = {}
         self.orders: dict[str, OrderProgress] = {}
         self.timeline: deque[TimelineEvent] = deque(maxlen=TIMELINE_LIMIT)
         self._alerts: list[EngineAlert] = []
         self._notices: list[tuple[str, str]] = []
         self._task_ids = itertools.count(1)
         self._color_ids = itertools.count()
+        self._elevator_instances = 0
         self._surge_flagged = False
         self._unreachable_warned: set[tuple[int, str]] = set()
         self._process_rng = np.random.default_rng(seed + 1)
@@ -171,11 +221,33 @@ class SimulationEngine:
                 self._create_robot(robot_cfg)
 
         self.generator = TaskGenerator(self, np.random.default_rng(seed))
-        if comparison_seed is None:
-            self.env.process(self.generator.poisson_process())
-        self.env.process(self.generator.order_release_process())
-        self.env.process(self._dispatch_process())
-        self.env.process(self._monitor_process())
+        self._background_processes: list[simpy.Process] = []
+        if self.demand_source == "stochastic":
+            self._background_processes.append(self.env.process(self.generator.poisson_process()))
+        if self.demand_source != "disabled":
+            self._background_processes.append(self.env.process(self.generator.order_release_process()))
+        self._background_processes.append(self.env.process(self._dispatch_process()))
+        self._background_processes.append(self.env.process(self._monitor_process()))
+        if decision_settings is not None:
+            from simulation.decisions.controller import DecisionScheduler
+            self.scheduler = DecisionScheduler(self,decision_settings,planning_settings,replay_controls)
+        elif replay_controls is not None:
+            raise ValueError("recorded control decisions require decision settings")
+
+    def close(self) -> None:
+        """Dispose a stopped environment after its final snapshot, without sim-time progress.
+
+        SimPy has no public process-close API. Its generator is closed only at
+        this ownership boundary; normal control uses safe Robot.interrupt.
+        """
+        self.ledger.sink = None
+        self.corridors.arbiter.observer = None
+        if hasattr(self.scheduler, "close"):
+            self.scheduler.close()
+        processes = [r.process for r in [*self.robots.values(), *self.retired]] + self._background_processes
+        for process in processes:
+            if process.is_alive:
+                process._generator.close()
 
     # ------------------------------------------------------------------
     # 팩토리 메서드
@@ -194,7 +266,15 @@ class SimulationEngine:
 
     def _create_elevator(self, cfg: ElevatorConfig) -> Elevator:
         """엘리베이터를 생성·등록한다."""
-        elevator = Elevator(self.env, cfg, self.factory.profile.door_time_sec)
+        instance = self._elevator_instances
+        self._elevator_instances = instance + 1
+        elevator = Elevator(self.env, cfg, self.factory.profile.door_time_sec,
+                            observer=self.ledger.emit, instance=instance)
+        if cfg.id in self._initial_cabins:
+            floor = self._initial_cabins[cfg.id]
+            if isinstance(floor, bool) or not isinstance(floor, int) or not 1 <= floor <= self.factory.floor_count:
+                raise ValueError("initial cabin floor is outside factory")
+            elevator._floor = float(floor)
         self.elevators[cfg.id] = elevator
         return elevator
 
@@ -206,7 +286,10 @@ class SimulationEngine:
         """로봇을 생성·등록한다 (충전소 근처에 배치)."""
         index = next(self._color_ids)
         point, floor = self._spawn_point(index)
-        robot = Robot(self, cfg, point, index, floor)
+        initial = self._initial_robots.pop(cfg.id, None)
+        if initial is not None:
+            point, floor = (initial.x, initial.y), initial.floor
+        robot = Robot(self, cfg, point, index, floor, soc_pct=initial.soc_pct if initial else 100)
         self.robots[cfg.id] = robot
         return robot
 
@@ -301,13 +384,11 @@ class SimulationEngine:
         """
         return sum(1 for t in self.pending_tasks if t.order_id is None)
 
-    def skip_background_arrival(self) -> None:
-        """쌍대 실험에서 대기 한도로 수용하지 못한 일반 작업의 난수 순번을 넘긴다."""
-        self._comparison_counts["background"] = self._comparison_counts.get("background", 0) + 1
-
     def _usable_stations(self, task: Task) -> list[str]:
         """작업이 지금 처리될 수 있는 스테이션."""
-        return [s for s in (task.allowed_stations or (task.station_id,)) if self.station_available(s)]
+        return [s for s in (task.allowed_stations or (task.station_id,)) if self.station_available(s)
+                and self.stations[s].cfg.task_type == task.operation
+                and self.stations[s].dedicated_order in (None, task.order_id)]
 
     def _remove_pending(self, task: Task) -> bool:
         """대기열에서 작업을 제거한다 (동일성 비교)."""
@@ -331,11 +412,52 @@ class SimulationEngine:
             return None
         task = min(candidates, key=lambda t: (t.priority, t.created_at))
         self._remove_pending(task)
+        self.task_state(task, TaskState.RESERVED)
         return task
 
     # ------------------------------------------------------------------
     # 작업 생명주기
     # ------------------------------------------------------------------
+    def _task_event(self, task: Task, kind: str, **values: Any) -> None:
+        self.ledger.emit(kind, uid=task.external_uid, task_id=task.task_id, status=task.status,
+                         robot=task.robot_id, station=task.station_id, operation=task.operation,
+                         created=task.created_at, deadline=task.deadline, **values)
+
+    def _traffic_event(self, action: str, request: CapacityRequest) -> None:
+        self.ledger.emit("traffic", action=action, robot=request.robot_id, request_id=request.request_id,
+            bundle=[{"resource": pool.resource_id, "unit": pool.unit, "demand": demand,
+                     "capacity": pool.capacity, "occupied": pool.count}
+                    for pool, demand in request.demands.items()])
+
+    def task_state(self, task: Task, state: str, reason: str = "") -> bool:
+        """Transition a live logical job once and publish its detached state."""
+        if task.status in TaskState.TERMINAL:
+            return False
+        old, task.status = task.status, state
+        if state in TaskState.TERMINAL:
+            task.terminal_reason = reason
+            task.terminal_at = self.now
+        self._task_event(task, "task_state", previous=old, reason=reason)
+        return True
+
+    def cancel_task(self, uid: str | None, reason: str = "external_cancel") -> bool:
+        """Cancel once; existing traffic ownership drains at its safe boundary."""
+        task = self._tasks_by_uid.get(uid)
+        if task is None or task.status in TaskState.TERMINAL:
+            return False
+        self._remove_pending(task)
+        self.task_state(task, TaskState.CANCELLED, reason)
+        order = self.orders.get(task.order_id)
+        if order is not None:
+            order.in_flight = max(0, order.in_flight - 1)
+        for robot in [*self.robots.values(), *self.retired]:
+            pending = robot._pending_control
+            if pending is not None and pending.get("task") is task:
+                pending["task"] = None
+            if robot.current_task is task:
+                robot.interrupt(InterruptKind.STATION_DOWN)
+        return True
+
     def add_task(
         self,
         product: str,
@@ -344,6 +466,10 @@ class SimulationEngine:
         allowed_stations: tuple[str, ...] = (),
         order_id: str | None = None,
         deadline: float | None = None,
+        *,
+        external_uid: str | None = None,
+        operation: str | None = None,
+        admit: bool = True,
     ) -> Task:
         """작업을 대기열에 추가한다.
 
@@ -358,6 +484,15 @@ class SimulationEngine:
         Returns:
             생성된 작업
         """
+        if external_uid is not None and external_uid in self._tasks_by_uid:
+            raise ValueError("duplicate external task uid")
+        if station_id not in self.stations:
+            raise ValueError("unknown task station")
+        operation = operation or self.stations[station_id].cfg.task_type
+        eligible = tuple(s for s in (allowed_stations or (station_id,))
+                         if s in self.stations and self.stations[s].cfg.task_type == operation)
+        if station_id not in eligible:
+            raise ValueError("task station is incompatible with its operation")
         task = Task(
             task_id=next(self._task_ids),
             station_id=station_id,
@@ -365,10 +500,25 @@ class SimulationEngine:
             priority=priority,
             created_at=self.now,
             order_id=order_id,
-            allowed_stations=tuple(allowed_stations),
+            allowed_stations=eligible,
             deadline=deadline,
+            external_uid=external_uid,
+            operation=operation,
+            status=TaskState.QUEUED if admit else TaskState.REJECTED,
         )
-        self.pending_tasks.append(task)
+        task.external_uid = external_uid or f"job:{task.task_id}"
+        if task.external_uid in self._tasks_by_uid:
+            raise ValueError("duplicate external task uid")
+        self.tasks[task.task_id] = task
+        self._tasks_by_uid[task.external_uid] = task
+        if admit:
+            self.pending_tasks.append(task)
+        else:
+            task.terminal_reason = "admission_limit"
+            task.terminal_at = self.now
+        self._task_event(task, "task_offered")
+        if not admit:
+            self._task_event(task, "task_rejected", reason=task.terminal_reason)
         if self.comparison_seed is not None:
             key = order_id or "background"
             index = self._comparison_counts.get(key, 0)
@@ -377,26 +527,53 @@ class SimulationEngine:
             task.process_noise = float(np.random.default_rng(int.from_bytes(digest[:8], "little")).normal())
         return task
 
-    def assign(self, task: Task, robot: Robot) -> None:
+    def reject_background_demand(self, reason: str) -> None:
+        """Keep offered/rejected accounting even when no destination is configured."""
+        tid = next(self._task_ids)
+        uid = f"job:{tid}"
+        if uid in self._tasks_by_uid:
+            raise ValueError("duplicate external task uid")
+        task = Task(tid, "", config.BACKGROUND_PRODUCT, config.BACKGROUND_PRIORITY, self.now,
+                    external_uid=uid, status=TaskState.REJECTED, terminal_at=self.now, terminal_reason=reason)
+        self.tasks[tid] = task
+        self._tasks_by_uid[uid] = task
+        self._task_event(task, "task_offered")
+        self._task_event(task, "task_rejected", reason=reason)
+
+    def assign(self, task: Task, robot: Robot, *, wake: bool = True) -> bool:
         """작업을 로봇에 배정한다.
 
         Args:
             task: 작업
             robot: 로봇
         """
+        if task.status in TaskState.TERMINAL:
+            return False
+        if task.status not in (TaskState.QUEUED, TaskState.RESERVED):
+            raise ValueError("task already assigned")
+        if robot.current_task is not None or not robot.alive:
+            raise ValueError("robot already owns a task or is retired")
+        usable = self._usable_stations(task)
+        if not usable:
+            return False
         self._remove_pending(task)
-        if not self.station_available(task.station_id):
+        if task.station_id not in usable:
             usable = self._usable_stations(task)
             if usable:
                 task.station_id = min(
                     usable, key=lambda s: self.path_graph.distance_to_facility(
                         robot.x, robot.y, s, robot.floor, robot.cfg.width))
         task.assigned_at = self.now
+        if task.first_assigned_at is None:
+            task.first_assigned_at = self.now
+        task.attempts += 1
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is not None and order.detected_at is not None and not order.responded:
             order.responded = True
             self.metrics.record_response(self.now - order.detected_at)
-        robot.assign(task)
+        robot.assign(task, wake=wake)
+        self.task_state(task, TaskState.ASSIGNED)
+        return True
 
     def requeue_task(self, task: Task) -> None:
         """중단된 작업을 대기열로 되돌린다.
@@ -404,15 +581,20 @@ class SimulationEngine:
         Args:
             task: 작업
         """
+        if task.status in TaskState.TERMINAL:
+            return
         task.robot_id = None
         task.assigned_at = None
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is not None and not order.is_active:
-            order.in_flight = max(0, order.in_flight - 1)
+            self.cancel_task(task.external_uid, "order_inactive")
             return
         if not self.station_available(task.station_id):
             self._rehome_task(task)
-        self.pending_tasks.append(task)
+        if task not in self.pending_tasks:
+            self.pending_tasks.append(task)
+        task.started_at = None
+        self.task_state(task, TaskState.QUEUED)
 
     def on_task_started(self, task: Task, robot: Robot) -> None:
         """스테이션에서 작업이 시작됐을 때 호출된다.
@@ -422,7 +604,10 @@ class SimulationEngine:
             robot: 로봇
         """
         task.started_at = self.now
-        self.metrics.record_wait(self.now - task.created_at)
+        self.task_state(task, TaskState.PROCESSING)
+        if task.first_started_at is None:
+            task.first_started_at = self.now
+            self.metrics.record_wait(self.now - task.created_at)
 
     def complete_task(self, task: Task, robot: Robot) -> None:
         """작업 완료를 처리한다.
@@ -431,8 +616,13 @@ class SimulationEngine:
             task: 작업
             robot: 로봇
         """
-        started = task.assigned_at if task.assigned_at is not None else task.created_at
-        self.metrics.record_task_completed(self.now, self.now - started)
+        if task.status in TaskState.TERMINAL:
+            return
+        if task.robot_id != robot.robot_id:
+            raise ValueError("completion owner mismatch")
+        task.completed_at = self.now
+        self.task_state(task, TaskState.COMPLETED)
+        self.metrics.record_task_completed(self.now, self.now - task.created_at)
         order = self.orders.get(task.order_id) if task.order_id else None
         if order is None:
             return
@@ -455,7 +645,8 @@ class SimulationEngine:
         key = (self.layout_version, task.station_id)
         if key not in self._unreachable_warned:
             self._unreachable_warned.add(key)
-            self._notify(Severity.WARNING, f"{robot.robot_id} → {task.station_id} 경로 없음 (벽/장애물 차단). 경로망을 확인하세요.")
+            self._notify(Severity.WARNING,
+                         f"{robot.robot_id} → {task.station_id} 경로 없음 (벽/장애물 차단). 경로망을 확인하세요.")
 
     def on_robot_fault(self, robot: Robot) -> None:
         """로봇 방전 시 호출된다.
@@ -463,7 +654,8 @@ class SimulationEngine:
         Args:
             robot: 로봇
         """
-        message = f"{robot.robot_id} 배터리 방전 — 구조 대기 ({config.FAULT_RECOVERY_TIME:.0f}s)"
+        self.ledger.emit("robot_fault", robot=robot.robot_id)
+        message = f"{robot.robot_id} 배터리 방전 — 구조 대기 ({self.plant.fault_recovery_time:.0f}s)"
         self._timeline(TimelineKind.FAILURE, message)
         self._notify(Severity.WARNING, f"⚫ {message}")
 
@@ -473,14 +665,14 @@ class SimulationEngine:
         if usable:
             task.station_id = usable[0]
             return
-        original = self.stations.get(task.station_id)
-        task_type = original.cfg.task_type if original else None
+        task_type = task.operation
         alternatives = [
             sid for sid, s in self.stations.items()
             if self.station_available(sid) and s.dedicated_order in (None, task.order_id)
         ]
         same_type = [sid for sid in alternatives if self.stations[sid].cfg.task_type == task_type]
-        choices = same_type or alternatives
+        choices = [sid for sid in same_type if self.stations[sid].cfg.task_type == task.operation
+                   and sid in task.allowed_stations]
         if not choices:
             return
         loads = self.pending_count_by_station()
@@ -517,9 +709,12 @@ class SimulationEngine:
         Returns:
             선점 여부
         """
-        self._remove_pending(task)
+        if task.status in TaskState.TERMINAL or not self._remove_pending(task):
+            return False
+        self.task_state(task, TaskState.RESERVED)
+        task.robot_id = robot.robot_id
         if not robot.interrupt(InterruptKind.PREEMPT, task):
-            self.pending_tasks.append(task)
+            self.requeue_task(task)
             return False
         task.robot_id = robot.robot_id
         return True
@@ -565,7 +760,7 @@ class SimulationEngine:
         if key not in TUNABLE_PARAMS:
             raise KeyError(f"변경할 수 없는 파라미터: {key}")
         if key == "task_rate":
-            value = min(config.TASK_RATE_MAX, max(config.TASK_RATE_MIN, float(value)))
+            value = min(config.TASK_RATE_MAX, max(0.0, float(value)))
         else:
             value = 1.0 if value else 0.0
         self.params[key] = value
@@ -645,9 +840,9 @@ class SimulationEngine:
         """주문 취소 처리."""
         order.status = OrderStatus.CANCELLED
         order.finished_at = self.now
-        before = len(self.pending_tasks)
-        self.pending_tasks = [t for t in self.pending_tasks if t.order_id != order.order_id]
-        order.in_flight = max(0, order.in_flight - (before - len(self.pending_tasks)))
+        for task in list(self.tasks.values()):
+            if task.order_id == order.order_id:
+                self.cancel_task(task.external_uid, "order_cancelled")
         self._release_emergency(order.order_id)
         self._timeline(TimelineKind.INFO, f"주문 취소 {order.order_id} (잔량 {order.remaining}개 해제)")
 
@@ -657,7 +852,9 @@ class SimulationEngine:
         order.finished_at = self.now
         on_time = order.deadline is None or self.now <= order.deadline
         self.metrics.record_order_finished(on_time)
-        self.pending_tasks = [t for t in self.pending_tasks if t.order_id != order.order_id]
+        for task in list(self.tasks.values()):
+            if task.order_id == order.order_id and task.status not in TaskState.TERMINAL:
+                self.cancel_task(task.external_uid, "order_fulfilled")
         order.in_flight = 0
         self._release_emergency(order.order_id)
         verdict = "납기 내" if on_time else "납기 초과"
@@ -691,7 +888,7 @@ class SimulationEngine:
             chosen = [sid for sid in order.required_stations if sid in free or sid in dedicated_here]
             if not chosen and not any(self.station_available(s) for s in order.required_stations):
                 types = {self.stations[s].cfg.task_type for s in order.required_stations if s in self.stations}
-                chosen = [sid for sid in free if self.stations[sid].cfg.task_type in types] or free
+                chosen = [sid for sid in free if self.stations[sid].cfg.task_type in types]
         else:
             chosen = free
         return list(dict.fromkeys([*dedicated_here, *chosen]))
@@ -710,7 +907,8 @@ class SimulationEngine:
                 continue
             for task in self.pending_tasks:
                 if task.order_id == order.order_id:
-                    task.allowed_stations = tuple(stations)
+                    task.allowed_stations = tuple(
+                        s for s in stations if self.stations[s].cfg.task_type == task.operation)
             loads = self.pending_count_by_station()
             for _ in range(max(0, min(need, limit - order.in_flight))):
                 station_id = min(stations, key=lambda s: loads.get(s, 0) + self.stations[s].waiting)
@@ -723,10 +921,10 @@ class SimulationEngine:
     def _trim_order_tasks(self, order: OrderProgress, excess: int) -> None:
         """수량 감소로 초과 릴리즈된 대기 작업을 제거한다."""
         kept: list[Task] = []
-        for task in reversed(self.pending_tasks):
+        for task in reversed(list(self.pending_tasks)):
             if excess > 0 and task.order_id == order.order_id:
                 excess -= 1
-                order.in_flight -= 1
+                self.cancel_task(task.external_uid, "quantity_reduced")
                 continue
             kept.append(task)
         kept.reverse()
@@ -855,6 +1053,7 @@ class SimulationEngine:
         Returns:
             변경 요약 문장 리스트
         """
+        validate_cabins(factory)
         old = self.factory
         summary: list[str] = []
         geometry_changed = (
@@ -926,7 +1125,10 @@ class SimulationEngine:
             if station.cfg == cfg:
                 continue
             was_active = station.active
+            operation_changed = station.cfg.task_type != cfg.task_type
             station.cfg = cfg
+            if operation_changed:
+                self._disable_station(station)
             if was_active and not station.active:
                 self._disable_station(station)
                 summary.append(f"{cfg.id} 비활성(고장)")
@@ -1066,7 +1268,9 @@ class SimulationEngine:
                 if not self._traffic_occupied():
                     self.apply_config(self._pending_traffic_config)
             else:
+                started = perf_counter()
                 self.scheduler.dispatch(self)
+                self.ledger.emit("dispatch", wall_seconds=perf_counter() - started)
             yield self.env.timeout(config.DISPATCH_INTERVAL)
 
     def _monitor_process(self) -> Generator[Any, Any, None]:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from types import MappingProxyType, TracebackType
 from typing import Self
@@ -51,6 +52,8 @@ class CapacityRequest(simpy.Event):
     def __init__(self, arbiter: TrafficArbiter, demands: dict[CapacityPool, int], robot_id: str) -> None:
         super().__init__(arbiter.env)
         self.arbiter = arbiter
+        self.request_id = arbiter.next_request_id
+        arbiter.next_request_id += 1
         self.demands = MappingProxyType(dict(demands))
         self.robot_id = robot_id
         self.created_at = float(arbiter.env.now)
@@ -83,6 +86,8 @@ class TrafficArbiter:
         self.env = env
         self.pending: list[CapacityRequest] = []
         self._draining = False
+        self.next_request_id = 0
+        self.observer: Callable[[str, CapacityRequest], None] | None = None
 
     def request(self, demands: dict[CapacityPool, int], robot_id: str = "") -> CapacityRequest:
         """Validate every demand before changing any resource's occupancy."""
@@ -92,9 +97,12 @@ class TrafficArbiter:
             if resource.arbiter is not self:
                 raise ValueError("all resources must use the same traffic arbiter")
             if isinstance(units, bool) or not isinstance(units, int) or not 1 <= units <= resource.capacity:
-                raise TrafficBlocked(f"{resource.resource_id}: demand {units} exceeds {resource.capacity} {resource.unit}")
+                raise TrafficBlocked(
+                    f"{resource.resource_id}: demand {units} exceeds {resource.capacity} {resource.unit}")
         request = CapacityRequest(self, demands, robot_id)
         self.pending.append(request)
+        if self.observer:
+            self.observer("requested", request)
         self.drain()
         return request
 
@@ -123,6 +131,8 @@ class TrafficArbiter:
                     request.closed = True
                     request.fail(TrafficBlocked("traffic capacity changed before entry; re-plan"))
                     request.defused = True
+                    if self.observer:
+                        self.observer("invalidated", request)
                     continue
                 if (earlier.intersection(request.demands) or
                         any(resource.count + units > resource.capacity for resource, units in request.demands.items())):
@@ -133,6 +143,10 @@ class TrafficArbiter:
                 request.usage_since = float(self.env.now)
                 for resource, claim in request.claims.items():
                     resource.users.append(claim)
+                if any(resource.count > resource.capacity for resource in request.demands):
+                    raise AssertionError("traffic grant exceeded capacity")
+                if self.observer:
+                    self.observer("granted", request)
                 request.succeed()
         finally:
             self._draining = False
@@ -149,6 +163,8 @@ class TrafficArbiter:
         for resource, claim in request.claims.items():
             if claim in resource.users:
                 resource.users.remove(claim)
+        if self.observer:
+            self.observer("released" if request.granted else "cancelled", request)
         self.drain()
 
     def resize(self, limits: dict[CapacityPool, int]) -> None:

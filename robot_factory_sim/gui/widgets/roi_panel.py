@@ -1,4 +1,4 @@
-"""RoiPanel — ROI 파라미터 입력 + 숫자 요약 + 베이스라인 vs 최적화안 2x2 막대 그래프.
+"""RoiPanel — ROI 파라미터 입력, 숫자 요약, 운영안 비교 그래프.
 
 ROI 관련 화면은 전부 이 탭 하나에 모은다:
 - 파라미터(사용자 입력, 조절 가능): 소비효율(Wh/m)·전력 단가·기타 비용·건당 가치. config 기본값으로 시작한다.
@@ -10,8 +10,18 @@ from __future__ import annotations
 
 import pyqtgraph as pg
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QDoubleSpinBox, QFrame, QGridLayout, QGroupBox, QLabel, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtGui import QColor, QResizeEvent
+from PySide6.QtWidgets import (
+    QDoubleSpinBox,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QScrollArea,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 import config
 from gui import constants as c
@@ -29,6 +39,7 @@ _PANELS: tuple[tuple[str, str, str, bool], ...] = (
 _TICKS: list[tuple[float, str]] = [(0, "기준안"), (1, "최적화")]
 _COLUMNS: int = 2
 _CHART_MIN_HEIGHT: int = 132
+_TWO_CHART_COLUMNS_WIDTH: int = 480
 
 # 숫자 요약 카드 5종 (KpiCard 재사용)
 _CARD_DEFS: tuple[KpiDefinition, ...] = (
@@ -49,6 +60,7 @@ def _spin(parent: QWidget, value: float, minimum: float, maximum: float, step: f
     spin.setSingleStep(step)
     spin.setValue(value)
     spin.setKeyboardTracking(False)
+    spin.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
     return spin
 
 
@@ -66,6 +78,7 @@ class RoiPanel(QWidget):
         self._base_d = 0.0
         self._opt_q = 0
         self._opt_d = 0.0
+        self._chart_columns = 0
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -105,9 +118,8 @@ class RoiPanel(QWidget):
         )
         for index, (label, spin, unit) in enumerate(fields):
             row, column = divmod(index, _COLUMNS)
-            label_widget = QLabel(label, box)
+            label_widget = QLabel(f"{label} ({unit})", box)
             label_widget.setBuddy(spin)
-            spin.setSuffix(f" {unit}")
             layout.addWidget(label_widget, row * 2, column)
             layout.addWidget(spin, row * 2 + 1, column)
             spin.valueChanged.connect(self._recompute)
@@ -133,18 +145,20 @@ class RoiPanel(QWidget):
         layout.addLayout(cards)
         self._summary = QLabel("—", box)
         self._summary.setWordWrap(True)
+        self._summary.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         layout.addWidget(self._summary)
         return box
 
     def _build_charts(self, parent: QWidget) -> QWidget:
-        """베이스라인 vs 최적화안 2x2 막대 그래프 영역."""
+        """폭에 맞춰 한 열 또는 두 열로 표시하는 막대 그래프 영역."""
         box = QWidget(parent)
-        layout = QGridLayout(box)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(6)
+        self._chart_grid = QGridLayout(box)
+        self._chart_grid.setContentsMargins(0, 0, 0, 0)
+        self._chart_grid.setSpacing(6)
         self._plots: dict[str, pg.PlotWidget] = {}
-        for index, (key, title, unit, _) in enumerate(_PANELS):
+        for key, title, unit, _ in _PANELS:
             plot = pg.PlotWidget(parent=box)
+            plot.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
             plot.setMinimumHeight(_CHART_MIN_HEIGHT)
             plot.setBackground(c.PANEL)
             plot.showGrid(y=True, alpha=0.15)
@@ -157,9 +171,23 @@ class RoiPanel(QWidget):
             for axis in ("left", "bottom"):
                 plot.getAxis(axis).setPen(pg.mkPen(c.GRID))
                 plot.getAxis(axis).setTextPen(pg.mkPen(c.TEXT_MUTED))
-            layout.addWidget(plot, index // 2, index % 2)
             self._plots[key] = plot
+        self._arrange_charts(1)
         return box
+
+    def resizeEvent(self, event: QResizeEvent) -> None:  # noqa: N802 — Qt override
+        """좁은 화면에서 차트가 가로 스크롤을 만들지 않도록 재배치한다."""
+        super().resizeEvent(event)
+        self._arrange_charts(_COLUMNS if event.size().width() >= _TWO_CHART_COLUMNS_WIDTH else 1)
+
+    def _arrange_charts(self, columns: int) -> None:
+        if columns == self._chart_columns:
+            return
+        self._chart_columns = columns
+        for index, plot in enumerate(self._plots.values()):
+            self._chart_grid.removeWidget(plot)
+            row, column = divmod(index, columns)
+            self._chart_grid.addWidget(plot, row, column)
 
     # ------------------------------------------------------------------
     # 갱신

@@ -14,6 +14,22 @@ if TYPE_CHECKING:
     from simulation.engine import SimulationEngine
 
 
+class TaskState:
+    """Logical task states; a retry keeps the same identity."""
+
+    QUEUED = "queued"
+    RESERVED = "reserved"
+    ASSIGNED = "assigned"
+    TRAVELING = "traveling"
+    WAITING = "waiting"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    REJECTED = "rejected"
+    FAILED = "failed"
+    TERMINAL = frozenset({COMPLETED, CANCELLED, REJECTED, FAILED})
+
+
 @dataclass
 class Task:
     """로봇이 수행할 작업 1건 (= 제품 1단위 공정)."""
@@ -30,6 +46,20 @@ class Task:
     started_at: float | None = None
     robot_id: str | None = None
     process_noise: float | None = None  # 비교 실험에서 작업별 공통 난수를 고정
+    external_uid: str | None = None
+    operation: str | None = None
+    status: str = TaskState.QUEUED
+    first_assigned_at: float | None = None
+    first_started_at: float | None = None
+    completed_at: float | None = None
+    terminal_at: float | None = None
+    attempts: int = 0
+    terminal_reason: str = ""
+
+    @property
+    def cancelled(self) -> bool:
+        """Return whether this logical job has been cancelled."""
+        return self.status == TaskState.CANCELLED
 
 
 class TaskGenerator:
@@ -45,33 +75,29 @@ class TaskGenerator:
         self.engine = engine
         self.rng = rng
 
-    def poisson_process(self, *, shared_input: bool = False) -> Generator[Any, Any, None]:
-        """포아송 작업을 생성한다. 장기 비교에서는 입력 후보를 두 정책에 공통으로 적용한다."""
+    def poisson_process(self) -> Generator[Any, Any, None]:
+        """포아송 도착 과정으로 일반(백그라운드) 작업을 생성한다."""
         env = self.engine.env
-        shared_stations = tuple(sorted(self.engine.background_station_ids())) if shared_input else ()
         while True:
-            rate = min(config.TASK_RATE_MAX, max(config.TASK_RATE_MIN, float(self.engine.params["task_rate"])))
+            rate = min(config.TASK_RATE_MAX, max(0.0, float(self.engine.params["task_rate"])))
+            if rate == 0:
+                yield env.timeout(config.ORDER_RELEASE_INTERVAL)
+                continue
             yield env.timeout(float(self.rng.exponential(1.0 / rate)))
             # 두 엔진의 난수 시퀀스를 맞추기 위해 조건과 무관하게 항상 뽑는다.
             pick = float(self.rng.random())
-            stations = shared_stations if shared_input else self.engine.background_station_ids()
+            # Availability changes service capacity, not the external offered load.
+            stations = sorted(self.engine.stations)
             if not stations:
+                self.engine.reject_background_demand("no_configured_station")
                 continue
             station_id = stations[min(len(stations) - 1, int(pick * len(stations)))]
-            full = self.engine.background_task_count() >= config.MAX_BACKGROUND_TASKS
-            if shared_input:
-                self.engine.metrics.background_arrivals += 1
-                if full:
-                    self.engine.metrics.background_rejected += 1
-                    # 미수용 작업도 난수 순번을 소비해 다음 공통 입력과 맞춘다.
-                    self.engine.skip_background_arrival()
-            if full:
-                continue
             self.engine.add_task(
                 product=config.BACKGROUND_PRODUCT,
                 station_id=station_id,
                 priority=config.BACKGROUND_PRIORITY,
                 allowed_stations=tuple(stations),
+                admit=self.engine.background_task_count() < config.MAX_BACKGROUND_TASKS,
             )
 
     def order_release_process(self) -> Generator[Any, Any, None]:

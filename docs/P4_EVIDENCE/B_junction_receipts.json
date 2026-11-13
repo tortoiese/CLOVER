@@ -1,0 +1,403 @@
+{
+  "source_hash": "0ea116fafed44b4c1d02b73ca40992d956e488d6324d36d037459c300fa61779",
+  "runs": 56,
+  "replay_matches": 56,
+  "raw_matches": 56,
+  "statuses": {
+    "SUCCESS": 56
+  },
+  "rows": [
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__baseline__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__optimized__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__optimized__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_junction__baseline__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__optimized__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__baseline__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__optimized__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__baseline__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d0",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__baseline__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__optimized__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__optimized__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_junction__baseline__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__optimized__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__baseline__1001",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__assignment_milp_legacy__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_native__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__optimized__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__baseline__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_milp_grid__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_interval__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    },
+    {
+      "mode": "d1",
+      "case_id": "P4_S03_no_junction__rh_cpsat_linear__1002",
+      "status": "SUCCESS",
+      "replay": true,
+      "raw_match": true
+    }
+  ]
+}
