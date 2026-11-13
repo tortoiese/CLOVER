@@ -47,8 +47,56 @@ def main(argv: list[str] | None = None) -> int:
     timing = commands.add_parser("profile", help="summarize timing/fallback records without mixing budgets or modes")
     timing.add_argument("--manifest", type=Path, required=True)
     timing.add_argument("--output", type=Path)
+    prepare = commands.add_parser("prepare-design", help="freeze design cells as executable reference scenarios")
+    prepare.add_argument("--design", type=Path, required=True)
+    reference = prepare.add_mutually_exclusive_group(required=True)
+    reference.add_argument("--synthetic-reference", action="store_true")
+    reference.add_argument("--references", type=Path)
+    prepare.add_argument("--phase", choices=("e0", "e1-candidate"), default="e0")
+    prepare.add_argument("--seeds", type=int, nargs="+", default=[1001])
+    prepare.add_argument("--cells", nargs="+")
+    prepare.add_argument("--rh-settings", type=Path)
+    prepare.add_argument("--decision-settings", type=Path)
+    prepare.add_argument("--output", type=Path, required=True)
+    execute = commands.add_parser("run-prepared", help="run paired frozen entries without multiplying demand seeds")
+    execute.add_argument("--prepared", type=Path, required=True)
+    execute.add_argument("--output", type=Path, required=True)
+    execute.add_argument("--timing", choices=("D0", "D1"), required=True)
+    execute.add_argument("--cells", nargs="+")
+    execute.add_argument("--policies", choices=POLICIES, nargs="+")
+    execute.add_argument("--decision-settings", type=Path)
+    execute.add_argument("--run-wall-limit", type=float, default=240)
+    execute.add_argument("--suite-wall-limit", type=float)
     args = parser.parse_args(argv)
     try:
+        if args.command == "prepare-design":
+            from simulation.evaluation.design import prepare_design
+            from simulation.evaluation.design_references import synthetic_references
+
+            design = json.loads(args.design.read_text(encoding="utf-8"))
+            references = synthetic_references() if args.synthetic_reference else json.loads(
+                args.references.read_text(encoding="utf-8"))
+            result = prepare_design(design, references, args.output, phase=args.phase, seeds=tuple(args.seeds),
+                                    cells=tuple(args.cells) if args.cells is not None else None,
+                                    planning_settings=json.loads(args.rh_settings.read_text(encoding="utf-8"))
+                                    if args.rh_settings else None,
+                                    decision_settings=json.loads(args.decision_settings.read_text(encoding="utf-8"))
+                                    if args.decision_settings else None)
+            print(json.dumps({"status": result["status"], "inputs": len(result["entries"]),
+                              "phase": result["phase"], "provenance": result["provenance"]}))
+            return 0
+        if args.command == "run-prepared":
+            from simulation.evaluation.prepared import run_prepared
+
+            result = run_prepared(args.prepared, args.output, timing=args.timing,
+                                  cells=tuple(args.cells) if args.cells is not None else None,
+                                  policies=tuple(args.policies) if args.policies is not None else None,
+                                  run_wall_limit=args.run_wall_limit, suite_wall_limit=args.suite_wall_limit,
+                                  decision_settings=json.loads(args.decision_settings.read_text(encoding="utf-8"))
+                                  if args.decision_settings else None)
+            print(json.dumps({"status": result["status"], "entries": len(result["entries"]),
+                              "planned_runs": result["planned_runs"]}))
+            return 0 if result["status"] == "SUCCESS" else 1
         if args.command == "profile":
             from simulation.evaluation.profiling import profile_manifest
 
