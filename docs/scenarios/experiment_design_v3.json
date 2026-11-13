@@ -74,7 +74,9 @@
       "decision/RH settings",
       "deadline slack definition",
       "resource exposure and audit acceptance thresholds"
-    ]
+    ],
+    "heuristic_weights": "fixed existing optimized weights; no heuristic tuning in this experiment",
+    "mechanism_audit_rule": "predeclared reference and route/resource availability audit; do not require positive waits or equal cabin use for every policy"
   },
   "lambda_candidates_from_teammate": {
     "S00": 0.03,
@@ -133,7 +135,8 @@
       "mechanism_gate": [
         "zero demand must create zero external jobs",
         "1.3m and 1.8m have equal admission budget in robot counts"
-      ]
+      ],
+      "evaluation_question": "Where is a simple policy sufficient relative to computation cost?"
     },
     {
       "id": "S01",
@@ -153,7 +156,8 @@
         "nominal target and all non-eligibility job attributes identical",
         "nominal belongs to every allowed set",
         "rotated allowed sets of same operation"
-      ]
+      ],
+      "evaluation_question": "Does joint planning gain value as station-assignment choice increases?"
     },
     {
       "id": "S02",
@@ -177,7 +181,8 @@
         "first cohort must cross shared corridor",
         "inspect real request/grant/release and width budget",
         "do not assert continuous stationary crossing demand"
-      ]
+      ],
+      "evaluation_question": "How do scheduling effects differ from increased corridor capacity?"
     },
     {
       "id": "S03",
@@ -192,8 +197,9 @@
       "mechanism_gate": [
         "mutate node_type, never unused kind attribute",
         "nonempty physical intersection resource exists only in on arm",
-        "confirm actual conflicting requests"
-      ]
+        "confirm contention exposure in predeclared reference; positive policy waits are not mandatory"
+      ],
+      "evaluation_question": "How does actual intersection resource contention affect each policy?"
     },
     {
       "id": "S04",
@@ -220,7 +226,8 @@
         "per-robot charging cycles and low initial SOC transients reported",
         "charged consumed rescue and final SOC reconcile",
         "slot change increases nominal total power at fixed slot rate"
-      ]
+      ],
+      "evaluation_question": "When do charging plans help beyond the initial energy transient?"
     },
     {
       "id": "S05",
@@ -238,8 +245,10 @@
       },
       "mechanism_gate": [
         "same physical resources across destination-share levels",
-        "inspect station exposure and robot-work bottleneck jointly"
-      ]
+        "inspect station exposure and robot-work bottleneck jointly",
+        "fixed-station capacity control; alternate-station reallocation is studied in S01"
+      ],
+      "evaluation_question": "Where is fixed-station capacity limiting regardless of assignment?"
     },
     {
       "id": "S06",
@@ -262,7 +271,8 @@
         "same realized job count and UID attributes for arrival-shape contrast",
         "same arrivals for priority-share contrast",
         "both urgent and nonurgent outcomes reported"
-      ]
+      ],
+      "evaluation_question": "Can urgency and bursts be handled without starving ordinary jobs?"
     },
     {
       "id": "S07",
@@ -292,7 +302,8 @@
         "all active robots have feasible required routes",
         "robot_type labels do not enforce skills",
         "current K=1 routing is recorded"
-      ]
+      ],
+      "evaluation_question": "How do physical speed/width differences affect allocation and reachability?"
     },
     {
       "id": "S08",
@@ -311,9 +322,10 @@
       },
       "mechanism_gate": [
         "both shaft geometries and links constant",
-        "two-car arm must actually use both cars under K=1",
+        "verify both cars usable and exposed in predeclared reference under K=1; record each policy use without selection",
         "do not call nominal floor share observed crossing share"
-      ]
+      ],
+      "evaluation_question": "How do cabin planning and adding a cabin affect batch completion separately?"
     },
     {
       "id": "S09",
@@ -325,14 +337,17 @@
         "event_start_s": 300,
         "event_end_s": 420,
         "absolute_lambda": "freeze_per_reference_block",
-        "target_ids": "freeze_before_runs"
+        "target_ids": "freeze_before_runs",
+        "eligible_station_rule": "multiple same-operation stations, identical allowed sets across all intervention arms and policies"
       },
       "mechanism_gate": [
         "same exogenous intervention time and ID",
         "no policy dependent retargeting",
         "retirement and cancellation are irreversible",
-        "record no-op applied outcome"
-      ]
+        "record no-op applied outcome",
+        "recovery only for reversible outages; permanent retirement/cancellation report service loss and adaptation"
+      ],
+      "evaluation_question": "How much service is lost after exogenous changes, and how does each policy adapt?"
     },
     {
       "id": "S10",
@@ -351,7 +366,8 @@
         "every job occupies one robot for at least 20s",
         "no task disappearance or post hoc thinning",
         "initial carry-in and finite-window boundary reported"
-      ]
+      ],
+      "evaluation_question": "How does backlog grow above the explicit resource-work bound?"
     },
     {
       "id": "S11",
@@ -371,8 +387,10 @@
         "budget sweep has same map and trace",
         "256-node map is separate topology cohort unless physical equivalence proven",
         "8-robot arm retains absolute offered demand",
-        "external watchdog differs from decision budget"
-      ]
+        "external watchdog differs from decision budget",
+        "record offered backlog, included/excluded candidates and model size; node count alone is not solver complexity"
+      ],
+      "evaluation_question": "Within which decision budget/model size does planning remain practical?"
     }
   ],
   "base_cells": [
@@ -1166,7 +1184,7 @@
       ],
       "mechanism_gates": [
         "same-floor allowed sets for nominal destination",
-        "verify real crossing and both car usage"
+        "verify crossing and both-car exposure in predeclared reference; policy usage is an outcome"
       ],
       "cells": [
         {
@@ -1294,7 +1312,9 @@
     "E2": "new layouts and demand seeds; preregister configuration before execution",
     "statistics": "paired differences within layout, preserve layout clustering, predeclare primary outcomes and practical margins; more seeds do not guarantee significance",
     "deterministic_repeats": "identical trace with renamed seed is not a new independent demand replicate",
-    "failures": "retain all statuses; report failure denominator and valid paired KPI scope"
+    "failures": "retain all statuses; report failure denominator and valid paired KPI scope",
+    "E3": "new preregistered stress inputs, separate from training; do not retune on results",
+    "final_analysis": "P6/R7: derive conditional policy choice and abstention from E2/E3; no result fixed in advance"
   },
   "counts": {
     "families": 12,
@@ -1311,5 +1331,257 @@
     "interaction_D1_core_runs": 192,
     "E1_example_runs": 735,
     "E0_example_runs": 126
+  },
+  "final_review_basis": "1b3aa068f949b49f836e07b1613c3bd2ee955a9c",
+  "policy_evaluation_scope": {
+    "baseline": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_interaction_blocks": [
+        "X01",
+        "X02",
+        "X03",
+        "X04"
+      ],
+      "scope": "primary_closed_loop"
+    },
+    "optimized": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_interaction_blocks": [
+        "X01",
+        "X02",
+        "X03",
+        "X04"
+      ],
+      "scope": "primary_closed_loop"
+    },
+    "assignment_milp_legacy": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [],
+      "screening_interaction_blocks": [],
+      "scope": "optional_mechanism_not_budgeted_at_scale"
+    },
+    "rh_milp_grid": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_interaction_blocks": [
+        "X01",
+        "X02",
+        "X03",
+        "X04"
+      ],
+      "scope": "primary_closed_loop"
+    },
+    "rh_cpsat_linear": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_interaction_blocks": [
+        "X01",
+        "X02",
+        "X03",
+        "X04"
+      ],
+      "scope": "primary_closed_loop"
+    },
+    "rh_cpsat_interval": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [],
+      "screening_interaction_blocks": [],
+      "scope": "optional_mechanism_not_budgeted_at_scale"
+    },
+    "rh_cpsat_native": {
+      "functional_families": [
+        "S00",
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "screening_performance_families": [
+        "S01",
+        "S04",
+        "S08",
+        "S11"
+      ],
+      "screening_interaction_blocks": [],
+      "scope": "additional_operating_candidate"
+    }
+  },
+  "comparison_tracks": {
+    "closed_loop": {
+      "purpose": "final operating performance including preparation, decision delay, fallback and failures",
+      "timing_primary": "common staged D1",
+      "same_input": "factory, initial state, workload and intervention trace",
+      "later_state": "policy-dependent outcome"
+    },
+    "same_snapshot_backend": {
+      "policies": [
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_interval"
+      ],
+      "same_conditions": [
+        "snapshot",
+        "candidates",
+        "grid",
+        "objective",
+        "hint",
+        "worker count",
+        "total budget"
+      ],
+      "status": "snapshot batch and aggregate analysis require preparation; small parity tests implemented"
+    },
+    "native_rule": "claim only tested families; scope/resolution/visits differences are configuration differences, not isolated solver speed",
+    "legacy_rule": "operating policy package comparison; not a controlled ablation of horizon alone"
+  },
+  "budget_scope": {
+    "counts_status": "screening examples, not execution receipts",
+    "E1_scope": "representative layout per cell and one selected settings bundle",
+    "excluded_from_735": [
+      "all hyperparameter trials",
+      "multiple-layout repetitions",
+      "same-snapshot batches",
+      "held-out E2",
+      "stress E3"
+    ],
+    "prior_PRD_2700": "historical initial total-budget proposal; not additive with v3 examples; final per-stage protocol not frozen"
   }
 }

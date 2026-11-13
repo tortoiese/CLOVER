@@ -1,0 +1,378 @@
+{
+  "schema": "clover-scenario-design-final-review-v1",
+  "date": "2026-11-13",
+  "status": "PASS",
+  "scope": "final documentation and matrix consistency, current tested source contracts, existing P4 input schemas; no new simulations",
+  "baseline_commit": "1b3aa068f949b49f836e07b1613c3bd2ee955a9c",
+  "runtime_source_hash": "5700d7d1c1ea4afb919a38759fd2140ecf2e7ee5a3c3b65d0007744e11b46281",
+  "checks": [
+    {
+      "name": "planning_schema_distinct_from_executable_scenario",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "planning_matrix_rejected_by_actual_scenario_loader",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "seven_policy_ids_match_current_main",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "core_comparators_are_supported",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "twelve_unique_families",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "core_eight_secondary_four",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "62_unique_safe_cell_ids",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "base_family_distribution",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all_cells_marked_not_execution_ready",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "X01_all_four_corners",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "X02_all_four_corners",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "X03_all_four_corners",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "X04_all_four_corners",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "pilot_budget_arithmetic",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "E0_budget_arithmetic",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "width_counts_use_actual_traffic_contract",
+      "status": "PASS",
+      "detail": {
+        "1.0": 0,
+        "1.3": 1,
+        "1.8": 1,
+        "2.2": 2,
+        "3.1": 3,
+        "5.0": 5
+      }
+    },
+    {
+      "name": "heterogeneous_width_route_feasibility",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "SOC_control_preserves_total_initial_energy",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "burst_2_mean_conserved",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "burst_2_inverse_CDF_preserves_count_order_bounds",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "burst_4_mean_conserved",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "burst_4_inverse_CDF_preserves_count_order_bounds",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "charger_lambda_counterexample",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "S08_units_correction",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "S10_explicit_robot_work_upper_bound",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "stream_window_duration",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "supported_intervention_set_and_irreversibility",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "ten_existing_P4_jsons_pass_actual_schema",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "cabin_control_has_actual_fixture",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "cabin_capacity_two_actually_rejected",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "duplicate_UID_control_fixture_is_trace",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "duplicate_UID_actually_rejected",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all_document_relative_links_resolve",
+      "status": "PASS",
+      "detail": [
+        "SCENARIO_EVALUATION_FINAL_REVIEW.md",
+        "P4_REVIEW.md",
+        "scenarios/experiment_design_v3.json",
+        "P4_REVIEW.md",
+        "../robot_factory_sim/D1_STARTUP.md"
+      ]
+    },
+    {
+      "name": "doc_counts_match_matrix",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "tested_source_commit_matches_checkout",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "source_bytes_match_tested_1b3aa06",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "no_tracked_runtime_changes",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "all_twelve_questions_defined",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all_core_policies_cover_all_families",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "all_core_policies_cover_four_interactions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "native_claim_scope_is_exactly_test_plan",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "auxiliary_policies_not_claimed_as_full_screening",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "functional_scope_all_seven_all_families",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "heuristic_weights_fixed",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "E3_is_stress_and_conclusion_is_P6_R7",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "backend_and_closed_loop_distinguished",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "fixed_station_vs_flexible_outage_distinguished",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "mechanism_audit_not_policy_outcome_filter",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "screening_budget_exclusions_explicit",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "summary_covers_all_family_rows",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "summary_covers_all_seven_policy_rows",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "summary_relative_links_resolve",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "PRD_has_final_mapping_and_budget_warning",
+      "status": "PASS",
+      "detail": null
+    }
+  ],
+  "checks_passed": 53,
+  "planned_counts": {
+    "families": 12,
+    "base_cells": 46,
+    "interaction_blocks": 4,
+    "interaction_cells": 16,
+    "planned_performance_cells": 62,
+    "deterministic_base_cells": 12,
+    "stochastic_base_cells": 34,
+    "base_pilot_paired_blocks": 114,
+    "base_D1_core_runs": 456,
+    "batch_D0_core_runs": 48,
+    "selected_native_additional_D1_runs": 39,
+    "interaction_D1_core_runs": 192,
+    "E1_example_runs": 735,
+    "E0_example_runs": 126
+  },
+  "burst_examples": [
+    {
+      "multiplier": 2,
+      "mean": 0.17,
+      "offpeak": 0.1511111111111111,
+      "peak": 0.34,
+      "actual_count_example": 1000
+    },
+    {
+      "multiplier": 4,
+      "mean": 0.17,
+      "offpeak": 0.11333333333333334,
+      "peak": 0.68,
+      "actual_count_example": 1000
+    }
+  ],
+  "existing_P4_schema_inputs": [
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S00_open.json",
+      "scenario_id": "P4_S00_open"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S01_joint.json",
+      "scenario_id": "P4_S01_joint"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S02_narrow.json",
+      "scenario_id": "P4_S02_narrow"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S02_wide.json",
+      "scenario_id": "P4_S02_wide"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S03_junction.json",
+      "scenario_id": "P4_S03_junction"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S03_no_junction.json",
+      "scenario_id": "P4_S03_no_junction"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S04_four_slots.json",
+      "scenario_id": "P4_S04_four_slots"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S04_one_slot.json",
+      "scenario_id": "P4_S04_one_slot"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S08_one_cabin.json",
+      "scenario_id": "P4_S08_one_cabin"
+    },
+    {
+      "path": "robot_factory_sim/examples/p4/P4_S08_two_cabins.json",
+      "scenario_id": "P4_S08_two_cabins"
+    }
+  ],
+  "reviewed_file_sha256": {
+    "docs/SCENARIO_DESIGN_v3.md": "fab0a1f02eee2ff35c70a5ac7f1a8a29b3f17a1476c9c96b1ce1c916629e1794",
+    "docs/scenarios/experiment_design_v3.json": "981d359aacd729d62fabc811a3cee17b46cad3ca5737c9037d79fd9b898a1fb0",
+    "docs/SCENARIO_EVALUATION_FINAL_REVIEW.md": "574490d3d19af7d48e20cb1541e1f5994d39db9b137430d50e4d2f2a3dd72b80",
+    "docs/PRD_ALGORITHM_EXPERIMENTS_v2.md": "c6ce57c6a4eca3ef24a10932e0748294269c49d1c3deb869feee2180938f7e3f"
+  },
+  "limitations": [
+    "actual two scenario detail MD files and lambda_calc.py not supplied",
+    "new 62 cells are plans, not executable scenarios or measured results",
+    "new layout/trace/calibration/timing settings and E0 still required",
+    "no performance ranking or statistical significance inferred"
+  ],
+  "reviewed_source_commit": "1b3aa068f949b49f836e07b1613c3bd2ee955a9c",
+  "core_baseline_commit": "b4861d0f0cf8f975243c802e1f597662a26cb948",
+  "historical_receipt": "design_review_v3.json at f614e21 (preserved)"
+}
