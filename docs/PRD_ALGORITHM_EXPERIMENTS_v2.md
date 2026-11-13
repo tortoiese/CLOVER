@@ -798,3 +798,9 @@ R2/R3는 설정 스크린 한 묶음까지 진행했으며 완료가 아니다. 
 ## 26. R2 공통 snapshot backend 비교 기반
 
 [R2 상세 계획](PRD_FROZEN_SNAPSHOT_R2.md)에 따라 같은 관측·후보·경로·정수 제약·목적·시작해의 MILP/CP-SAT linear 비교를 추가한다. native/interval 및 closed-loop 운영 비교와 구분한다. [사용법](../robot_factory_sim/FROZEN_SNAPSHOT_BENCHMARK.md)은 공통 준비/기동/IPC/독립 검사 비용과 backend의 compile/search 예산을 구분하고, 늦게 반환된 해·실패·미실행을 보존한다. 이전60회 원본을 변경하지 않으며 동결 소스에서 별도48arm 기능·비용 검수를 수행할 계획이다. 이 절은 착수 기록이며 결과·완료 경계는 검수 후 추가한다.
+
+### 26.1 공통 관측 비교 기반·첫 검수 완료
+
+최종 코드 `f43908a`에서 Python3.11 전체574검사·Python3.14 관련44검사를 통과했다. source freeze 이후4관측×2backend×2예산×기술 반복3회=48arm을 실행했다. 기한 내 OPTIMAL36·FEASIBLE9, 늦은 유효 해3을 보존해 실행 상태는 PARTIAL이다. 입력·모델·시작해 일치, 독립 계획 유효성, 모든 보고된 OPTIMAL 목적 일치, 해제·source·분모 감사는 PASS다. 최초48arm은 마지막 decode 비용이 빠지는 계측 문제를 확인해 별도 보존했고, 완전한 호출 계측으로 전체48arm을 다시 검수했다. 누적96arm의 두 소스를 합치지 않는다. 새 closed-loop/독립 수요 반복은0회다. [R2 검수 보고서](R2_SNAPSHOT_REVIEW_20261114.md)와 [수정본48arm 판정](scenarios/r2_snapshot_20261114/receipt.json)에 정확한 상태·원본 해시·제한을 남겼다.
+
+고정 S04/S11에서 MILP가 같은 최적 목적을 더 빨리 증명했고, S01/S08 일부 예산에서 CP가 더 좋은 목적/증명 비용을 보였다. 반환 기록에 조건부인4개 관측과 기술 반복을 일반적 운영 우열로 해석하지 않는다. R2 전체·R3 운영2초 예산의 검증/공개 여유, 미반환 timeout 관측의 보존 확대, 실제 입력 보정·training/validation·E2/E3·선택 규칙은 미완료다. 기본 optimized·가중치·기본 D0·운영 모델/목적은 유지한다.
