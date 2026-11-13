@@ -1,0 +1,144 @@
+{
+  "schema": "clover-reference-resource-exposure-v1",
+  "source_commit": "4f6dc5e748735318cdb4fa068b86f4e8db9b894c",
+  "git_source_files_checked": 157,
+  "git_source_mismatches": [],
+  "reference_policy": "baseline D0, declared before execution",
+  "corridor_peak_occupied_mm": {
+    "S02_width_1p3": 900,
+    "S02_width_2p2": 1800,
+    "S02_width_3p1": 2700
+  },
+  "physical_intersection_resources": {
+    "S03_off": {},
+    "S03_on": {
+      "intersection:(1, 200.0, 200.0)": 1
+    }
+  },
+  "loaded_cabin_floor_travel": {
+    "S08_anchor": {
+      "E0": 4.0
+    },
+    "S08_two_cars": {
+      "E0": 2.0,
+      "E1": 2.0
+    }
+  },
+  "long_charge_window_seconds": 900,
+  "long_charge": {
+    "S04_anchor": {
+      "offered": 27,
+      "completed": 21,
+      "charged_battery_units": 158.32500000000002,
+      "queue_robot_seconds": 541.6000000000003,
+      "rescue_battery_units": 24.0,
+      "faults": 8
+    },
+    "S04_slots_4": {
+      "offered": 27,
+      "completed": 21,
+      "charged_battery_units": 168.82500000000002,
+      "queue_robot_seconds": 0.0,
+      "rescue_battery_units": 24.0,
+      "faults": 9
+    }
+  },
+  "interventions_applied": {
+    "S09_station_active": [
+      {
+        "applied": true,
+        "at": 60,
+        "event": "intervention",
+        "kind": "station_active",
+        "target": "S0",
+        "time": 60.0,
+        "value": false
+      },
+      {
+        "applied": true,
+        "at": 90,
+        "event": "intervention",
+        "kind": "station_active",
+        "target": "S0",
+        "time": 90.0,
+        "value": true
+      }
+    ],
+    "S09_charger_active": [
+      {
+        "applied": true,
+        "at": 60,
+        "event": "intervention",
+        "kind": "charger_active",
+        "target": "C",
+        "time": 60.0,
+        "value": false
+      },
+      {
+        "applied": true,
+        "at": 90,
+        "event": "intervention",
+        "kind": "charger_active",
+        "target": "C",
+        "time": 90.0,
+        "value": true
+      }
+    ],
+    "S09_edge_width": [
+      {
+        "applied": true,
+        "at": 60,
+        "event": "intervention",
+        "kind": "edge_width",
+        "target": "1",
+        "time": 60.0,
+        "value": 1.3
+      },
+      {
+        "applied": true,
+        "at": 90,
+        "event": "intervention",
+        "kind": "edge_width",
+        "target": "1",
+        "time": 90.0,
+        "value": 5
+      }
+    ],
+    "S09_robot_retire": [
+      {
+        "applied": true,
+        "at": 60,
+        "event": "intervention",
+        "kind": "robot_retire",
+        "target": "R0",
+        "time": 60.0,
+        "value": true
+      }
+    ],
+    "S09_cancel_task": [
+      {
+        "applied": true,
+        "at": 60,
+        "event": "intervention",
+        "kind": "cancel_task",
+        "target": "probe:intervention",
+        "time": 60.0,
+        "value": true
+      }
+    ]
+  },
+  "graph_nodes_distinct_environment_cohorts": {
+    "S11_budget_2": 64,
+    "S11_graph_256": 256
+  },
+  "short_uniform_SOC_charge_units": {
+    "S04_anchor": 0.0,
+    "S04_slots_4": 0.0
+  },
+  "limitations": [
+    "synthetic fixtures; no calibrated capacity or general policy ranking",
+    "S09 events applied does not guarantee consequential exposure in every arm",
+    "S04 longer window exposes charge queue; completed task count remains equal",
+    "one-car/two-car usage in this baseline is not required for every policy"
+  ]
+}
