@@ -1,0 +1,522 @@
+[
+  {
+    "result": "charge_window_900_d0/E1_S04_anchor__s1001/E1_S04_anchor__s1001__baseline__1001.json",
+    "result_sha256": "85cc2cb65e4119c3b3c3d7a2eab2a2a3442226a302a71664609d4132003dd43c",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 27,
+    "completed": 21,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "charge_window_900_d0/E1_S04_slots_4__s1001/E1_S04_slots_4__s1001__baseline__1001.json",
+    "result_sha256": "fa990f228081fac4800658272104688e53934fd74792ff9f04d56a7d457814cc",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 27,
+    "completed": 21,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S00_width_1p3__s1001/E0_S00_width_1p3__s1001__baseline__1001.json",
+    "result_sha256": "119d2bd0ad3a39dad99d54ab9926345ad7b342b716cc8f269e3ee4db7a654e28",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S00_width_1p8__s1001/E0_S00_width_1p8__s1001__baseline__1001.json",
+    "result_sha256": "e6cd97d4442498df3a2190ec90112da54f80cec8d6707fb0867bb7560931f2e6",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S00_zero__fixed/E0_S00_zero__fixed__baseline__1001.json",
+    "result_sha256": "731e2095bf883e8b44711b068ec9142ab36dc193feaf822c0ec6d2850c7fbbc3",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 0,
+    "completed": 0,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S01_eligible_2__fixed/E0_S01_eligible_2__fixed__baseline__1001.json",
+    "result_sha256": "a8d671b3645359dbb16d4813b3d746ac9e0024c78fbd1d2c14b11460cf191a6d",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S01_eligible_4__fixed/E0_S01_eligible_4__fixed__baseline__1001.json",
+    "result_sha256": "7eb616925d8ac6fcaadfcff610a57b11658ff241369724e2062e186812850a5d",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S02_width_2p2__fixed/E0_S02_width_2p2__fixed__baseline__1001.json",
+    "result_sha256": "c2c4d0101aa0cbb1f1c1d5fb873997cf46677c2738c0d048be6e64080d457c1b",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S02_width_3p1__fixed/E0_S02_width_3p1__fixed__baseline__1001.json",
+    "result_sha256": "e5a66770e19376228d70f3d9c184f12cf1c2f1c7bf3816d55d7016587c7119d7",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S03_off__fixed/E0_S03_off__fixed__baseline__1001.json",
+    "result_sha256": "10cd7e22f2a08a2559df1a9eddb4f058b402c8e471fd2df835975b85428c2d98",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S04_mixed_soc__s1001/E0_S04_mixed_soc__s1001__baseline__1001.json",
+    "result_sha256": "49730d6f82ebc77d0dbe09f697ea5402f8aafe8ff0ce4220c2d9f5cc25ce5669",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S04_rate_0p125__s1001/E0_S04_rate_0p125__s1001__baseline__1001.json",
+    "result_sha256": "82ebf5b93d163cc98670c8ac7777ce73a3466216f813b5e827dcb26e0d17cba5",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S04_rate_0p5__s1001/E0_S04_rate_0p5__s1001__baseline__1001.json",
+    "result_sha256": "216209f07716a24b6f038e4e9f38ea079e8be23342070c1614332ac7e2c1492a",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S04_slots_2__s1001/E0_S04_slots_2__s1001__baseline__1001.json",
+    "result_sha256": "f9e8f34e14f683783f11aff30bd485727d478a751c1e486522ee2081b2b24c82",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S04_slots_4__s1001/E0_S04_slots_4__s1001__baseline__1001.json",
+    "result_sha256": "cbef94074de2a5fff9491a2d6f1f6a33d3d15d887f2fdcc46ecacdc22b8e30e2",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 5,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S05_hotspot_25__s1001/E0_S05_hotspot_25__s1001__baseline__1001.json",
+    "result_sha256": "a8858c5acf4620eb3a0a7b5cf77401cfdbb5ba340b87e21ce139000fcb4135bd",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 36,
+    "completed": 25,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S05_hotspot_70__s1001/E0_S05_hotspot_70__s1001__baseline__1001.json",
+    "result_sha256": "ad86e7f70b9db980473b0d89c280395d634118f24378c794704c9aa0e99b7523",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 36,
+    "completed": 27,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S06_anchor__s1001/E0_S06_anchor__s1001__baseline__1001.json",
+    "result_sha256": "2a7a0ec8b6a9933b84cce9538471ce62d3f8127ce828c988115fa495290e777b",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 35,
+    "completed": 30,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S06_burst_2__s1001/E0_S06_burst_2__s1001__baseline__1001.json",
+    "result_sha256": "01d987ecaf60e301ff40f6a088d67ff3e13afa6e96f4f28024a4cb55aff5424b",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 35,
+    "completed": 30,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S06_urgent_0__s1001/E0_S06_urgent_0__s1001__baseline__1001.json",
+    "result_sha256": "37d6c686c081f28775304573050acc991f7e9cddc27bdcca7820fc6aa933d9a4",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 35,
+    "completed": 30,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S06_urgent_20__s1001/E0_S06_urgent_20__s1001__baseline__1001.json",
+    "result_sha256": "2e4c57fe92de8608d4842499ca577bae6de764745dcc59013246e1f14c320431",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 35,
+    "completed": 30,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S07_anchor__s1001/E0_S07_anchor__s1001__baseline__1001.json",
+    "result_sha256": "6149ecb1a15a1b275904a3405d07955ccb86977899fc17f6b341d127e0540c5a",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 9,
+    "completed": 7,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S07_speed_mix__s1001/E0_S07_speed_mix__s1001__baseline__1001.json",
+    "result_sha256": "ce153efbacb95df30c8bc72af0c6af3c971881327b5b012f2cef21d45d0d5a74",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 9,
+    "completed": 7,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S08_anchor__fixed/E0_S08_anchor__fixed__baseline__1001.json",
+    "result_sha256": "6acc1cb2bd1e0f97252c02f001607128c806cf3031c15a7fd6e750332abd7662",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S08_initial_floor_2__fixed/E0_S08_initial_floor_2__fixed__baseline__1001.json",
+    "result_sha256": "8803fd335a1a87e629c651c8cb9da9c9605396e643bbf6b52e9225df486b755c",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 8,
+    "completed": 8,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S09_anchor__s1001/E0_S09_anchor__s1001__baseline__1001.json",
+    "result_sha256": "1657549115b6634ef6b8d6560a1b6f511c2c5c689e7de5c098ca4aecb623452f",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 12,
+    "completed": 5,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S09_cancel_task__s1001/E0_S09_cancel_task__s1001__baseline__1001.json",
+    "result_sha256": "a549c2f902a988dc7f4aa925e72be7d05e95a7b24ea5293e7d01d415becd90b0",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 12,
+    "completed": 4,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S09_charger_active__s1001/E0_S09_charger_active__s1001__baseline__1001.json",
+    "result_sha256": "b21741ee7f5c860748c4b4909e8ac2ae075799c51a72b45b8ed7d35cfde79c4c",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 12,
+    "completed": 5,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S09_edge_width__s1001/E0_S09_edge_width__s1001__baseline__1001.json",
+    "result_sha256": "ce10589a9a8e653056f85704cea65e2e7b735b18b31e763ebc047bf947e642df",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 12,
+    "completed": 5,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S09_robot_retire__s1001/E0_S09_robot_retire__s1001__baseline__1001.json",
+    "result_sha256": "a07f927a98b280fa6451c1ef4b9a0a437cde5ef9c8fb2603d1ffd2582f8c9d23",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 12,
+    "completed": 6,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S10_lambda_0p22__s1001/E0_S10_lambda_0p22__s1001__baseline__1001.json",
+    "result_sha256": "9a8a8559b2ea34486e733a134417626c9da8804771ae43f80f74e54438ed50c8",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 56,
+    "completed": 15,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S10_rho_0p7__s1001/E0_S10_rho_0p7__s1001__baseline__1001.json",
+    "result_sha256": "653f8a5b77f8f1d8fb71623dedf2ef6a1725b5de9f22dfa4ee6479c28196eb1f",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 36,
+    "completed": 14,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S11_budget_0p5__s1001/E0_S11_budget_0p5__s1001__baseline__1001.json",
+    "result_sha256": "9b9da84675d99d6861568971627156abe32bdaee16fe4d8ea20cd2b3acfe37ed",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 13,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S11_budget_10__s1001/E0_S11_budget_10__s1001__baseline__1001.json",
+    "result_sha256": "3ac86c37a720d7e37c7d425f6ef0ca9f668372c06f024f9c06192378c119c1ab",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 13,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S11_graph_256__s1001/E0_S11_graph_256__s1001__baseline__1001.json",
+    "result_sha256": "37329c5b2437a1870073485f7f192eb2c691911192c330f8d8a2196bd8e003cf",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 13,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_S11_robots_8__s1001/E0_S11_robots_8__s1001__baseline__1001.json",
+    "result_sha256": "5fe5042c00450ec57c14924375f7a8dfa42e76f96e695e0885621131184a009f",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 13,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X01_01__s1001/E0_X01_01__s1001__baseline__1001.json",
+    "result_sha256": "7bcf29baa7f8a6fc3ae406e629d689e404b6cfe719869d024b64b84b89c276fc",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 0,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X01_02__s1001/E0_X01_02__s1001__baseline__1001.json",
+    "result_sha256": "fce9a0a3b7e837925758f537fa49025fdf9ba7a9f23bc15d8ed21247f9174859",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X01_03__s1001/E0_X01_03__s1001__baseline__1001.json",
+    "result_sha256": "99a056564f187eda9fbdc431bae47d4b5b929386e42ac68d808fc59e0b174469",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 0,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X01_04__s1001/E0_X01_04__s1001__baseline__1001.json",
+    "result_sha256": "d4f9ba3f1b62a4ce261c32fdd87f16715b6cbd426b154a3b568fb93189c44414",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X02_01__s1001/E0_X02_01__s1001__baseline__1001.json",
+    "result_sha256": "156b678ea2b0567f925fc1f7a3f7daca5313b684ad0bae8c081a7ed66d9a5bea",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X02_02__s1001/E0_X02_02__s1001__baseline__1001.json",
+    "result_sha256": "721b1f97fdffe9ecd7b25864a3917af904d2e9ff7d2ef30efd4b7ed2ebf7e4b7",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X02_03__s1001/E0_X02_03__s1001__baseline__1001.json",
+    "result_sha256": "f3c66ce3d9ffc0efd4d84decee4d50d32a61eb61432c440cffa2b1e6a4862f36",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X02_04__s1001/E0_X02_04__s1001__baseline__1001.json",
+    "result_sha256": "84b34a5e4ba985dd08516d6d4070b661e09e31c818dabf248908806e54fb7007",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 3,
+    "completed": 3,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X03_01__s1001/E0_X03_01__s1001__baseline__1001.json",
+    "result_sha256": "b32bb8b1d02a411479818ad8650476928548a73cc8476531e073988eb237ddb2",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 12,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X03_02__s1001/E0_X03_02__s1001__baseline__1001.json",
+    "result_sha256": "5ff62ad17423b87baf24ff3d2eb079bbdbe628953f52230c6c195adfd300a0c3",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 10,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X03_03__s1001/E0_X03_03__s1001__baseline__1001.json",
+    "result_sha256": "6ed5d377201f7c56615aa7f11d42285cbdcce32594be63d27d7e98d73f9fa686",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 14,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X03_04__s1001/E0_X03_04__s1001__baseline__1001.json",
+    "result_sha256": "33d4338950e29c42679b101f012752a9e5d4f605e4870a9eb177f6015675a01f",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 16,
+    "completed": 13,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X04_01__s1001/E0_X04_01__s1001__baseline__1001.json",
+    "result_sha256": "67d76b2738d2571a5c9d6f09d3d3a1995e33b29d25a55edfc0ca5bf99785ce28",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 10,
+    "completed": 7,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X04_02__s1001/E0_X04_02__s1001__baseline__1001.json",
+    "result_sha256": "6eebc3bb12b738805cc802c6209608d840f178462a28f7e047f309c28b22af4a",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 13,
+    "completed": 12,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X04_03__s1001/E0_X04_03__s1001__baseline__1001.json",
+    "result_sha256": "ffa705c249051a7ce072495c129d1e5f5e3237752177003ff6764fa1342e97a2",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 10,
+    "completed": 7,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  },
+  {
+    "result": "controls_d0/E0_X04_04__s1001/E0_X04_04__s1001__baseline__1001.json",
+    "result_sha256": "a12d4ad5c18a45fd4cc4a8e8ecdf587b1aec145a0b15019598a21685a94ea29b",
+    "policy": "baseline",
+    "status": "SUCCESS",
+    "offered": 13,
+    "completed": 12,
+    "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+    "scope": "single-policy resource reference; no candidate-minus-control effect"
+  }
+]
