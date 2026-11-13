@@ -757,3 +757,9 @@ S09의 300~420초 사건을 일반 warmup600초 이전에 놓으면 교란을 �
 통로1/2/3대 점유, 실제 교차로 slot, 두 캐빈의 실제 loaded 이동과 교란 적용을 감사했다. 짧은 S04는 충전0이었으므로 원래 결과를 남기고 같은 seed·λ의900초 관측을 추가했다. 슬롯1/4에서 충전 대기541.6/0 robot·s였지만 완료 수는 모두21/27이고 구조 에너지24unit·fault8/9회가 있었다. 병목 노출 확인이며 지속 가능한 운용/처리량 우수성 근거가 아니다. λ·충전 반복·기간은 E1 보정 대상으로 남는다.
 
 실행 기준 소스는 `4f6dc5e748735318cdb4fa068b86f4e8db9b894c`다. [E0 검수 보고서](SCENARIO_EXECUTION_E0_REVIEW.md)와 [185회 판정](scenarios/e0_execution_20261113/receipt.json)에 정확한 소스/원시 파일 해시·프로토콜·제한을 보존한다. Linux CI에서 발견한 IPC 종료 경합은 `ddc94f4`에서 보완했다. 수정 후 Python3.11/3.14 각각487검사와 통로·충전·다층3조건×7정책×D0/D1의 별도42회 실행·원시 지표·replay를 통과했다. [수정 후 판정](scenarios/e0_execution_20261113/ipc_canary_receipt.json)은 별도 소스 기준이며 과거185회 결과의 소스 해시를 바꾸지 않았다. E0 결과로 일반적 알고리즘 우열·통계적 유의성·E2 완료를 주장하지 않는다.
+
+### 23.1 최신 main 통합·최종 기능 검수
+
+원격 PR #11·#12 병합 후 main `69bb83c`를 충돌 없이 기능 브랜치에 통합했고 PR #13의 base를 main으로 바꿨다. PR #13의 main 병합은 수행하지 않았다. 통합 코드 `aec9b53`는 Python3.11/3.14 전체 각각499검사, GitHub Ubuntu/macOS/Windows×두 버전의6개 조합 각각499검사를 통과했다. 최초 localhost 차단으로 실패한3검사도 보존하고 로컬 HTTP 모의 서버를 허용한 환경에서 전체 검사를 통과했다.
+
+통합 소스로 다시 준비한3조건×7정책×D0/D1의 추가42회도 모두 SUCCESS·원시 지표 재구성·replay·수요/에너지/자원 불변식·D1 coverage/해제를 통과했다. [통합42회 판정](scenarios/e0_execution_20261113/main_canary_receipt.json)과 [통합 CI](scenarios/e0_execution_20261113/ci_main_integration.json)를 분리해 보존했다. 총185+42+42=269회는 소스별 기능 검수 횟수이며 독립 반복 수가 아니다. R1의 실제 팀 입력 확정과 R2~R7의 보정·튜닝·통계·held-out 결론은 여전히 남는다.
