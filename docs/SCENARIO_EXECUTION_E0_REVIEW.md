@@ -33,7 +33,7 @@ E0 물리 실행185회는 모두 `SUCCESS`이고, 원시 로그에서 재구성�
 - D1 49회는 결정 coverage 및 process/connection/RPC thread/application process 해제를 확인했다.
 - [전체 판정·파일 해시](scenarios/e0_execution_20261113/receipt.json), [185회 관측 CSV](scenarios/e0_execution_20261113/summary.csv), [자원 노출 감사](scenarios/e0_execution_20261113/reference_exposure.json), [준비한226개 입력의 메타데이터](scenarios/e0_execution_20261113/prepared_index.json)를 보존한다. 입력 메타데이터는 E0 62+E1 후보162+충전 연장2이며 실행185회와 다른 분모다. CSV는 원시 관측 요약이며 신뢰구간·추천 표가 아니다.
 
-원시 결과는 로컬 `outputs/CLOVER_v3_experiments_20261113/`에 약504MB로 보존했다. Git에는 작은 판정·해시·요약만 넣었다. 원시 파일이 없는 환경에서 receipt만으로 replay가 된다고 표시하지 않는다.
+원시 결과·준비 입력은 로컬 `outputs/CLOVER_v3_experiments_20261113/`에 후속 검수까지 약644MB로 보존했다. Git에는 작은 판정·해시·요약만 넣었다. 원시 파일이 없는 환경에서 receipt만으로 replay가 된다고 표시하지 않는다.
 
 185회와 입력 묶음의 정확한 코드 commit은 `4f6dc5e748735318cdb4fa068b86f4e8db9b894c`, 소스 해시는 `ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30`이다. manifest의 기존 `base_commit`은 모델 계보 필드이며 이 작업의 실행 commit을 뜻하지 않는다. receipt의 commit과157개 소스 파일의 Git object 해시를 별도 대조했고 불일치는0개였다. 이후 수정 코드의 결과와 이 동결 결과를 같은 소스 실행으로 합치지 않는다.
 
@@ -59,9 +59,25 @@ S01의 사전 지정 작은 결정적 배치에서는8건 모두 완료했고 op
 
 공통 통신 교환에서 **실제로 닫힌 연결**의 `TypeError`만 transport 실패로 보존하도록 보완했다. 열린 연결의 실제 프로그래밍 오류는 계속 드러나게 했다. D0 solver/D1 RPC가 같은 처리를 사용하며, send/recv ×closed/open의4개 회귀 검사와 기존 대형 차단 실험을 통과했다.
 
-수정 commit은 `ddc94f457732ee3e85b6fa05c31ae35bbbfe6871`, 소스 해시는 `556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e`다. Python3.11/3.14 전체 검사에서 각각487개가 통과했고 unhandled thread warning을 오류로 취급했다. 의존 라이브러리의 deprecation warning은 남아 있다. [로컬 검증 판정](scenarios/e0_execution_20261113/local_validation.json)에 JUnit 해시를 기록했다.
+수정 commit은 `ddc94f457732ee3e85b6fa05c31ae35bbbfe6871`, 소스 해시는 `556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e`다. Python3.11/3.14 전체 검사에서 각각487개가 통과했고 unhandled thread warning을 오류로 취급했다. [GitHub Actions](https://github.com/tortoiese/CLOVER/actions/runs/43435970526)의 Ubuntu/macOS/Windows ×3.11/3.14도 각487개를 통과했고6개 job 모두 unhandled thread warning이 없다. 의존 라이브러리의 deprecation warning은 남아 있다. [로컬 검증 판정](scenarios/e0_execution_20261113/local_validation.json)과 [수정 CI 판정](scenarios/e0_execution_20261113/ci_ipc_fix.json)을 보존한다.
 
 수정 후 새 입력 묶음으로 S02 좁은 통로·S04 혼합SOC·S08 두 캐빈의3조건 ×7정책 ×D0/D1, **별도42회**를 실행했다. 입력 scenario/trace/initial 해시는 원래 조건과 같고 소스 해시만 새 코드에 연결했다. 전42회 SUCCESS·원시 지표·replay·불변식 검수를 통과했으며 D1 21회는 coverage/소유 자원 해제도 통과했다. D0 baseline3개의 물리 사건 digest도 수정 전과 같다. [사전 규약](scenarios/e0_execution_20261113/ipc_canary_protocol.json)과 [42회 판정](scenarios/e0_execution_20261113/ipc_canary_receipt.json)을 구분해 보존했다. 앞의185회 판정을 새 소스로 다시 이름 붙이지 않았다.
+
+## 최신 main 통합 검수
+
+작업 중 원격의 PR #11·#12가 병합되어 main이 `69bb83ccae87cc6fa95f89125b129d990188360c`로 바뀌었다. 해당 main을 기능 브랜치에 충돌 없이 merge했고 PR #13의 base도 main으로 변경했다. 이 작업에서 PR #13을 main에 병합한 것은 아니다.
+
+통합 코드 `aec9b5360e6580061712467ffba811fcf5e230d6`에서 Python3.11/3.14 전체 **각499개**가 통과했다. 처음 제한된 샌드박스에서는 추가된 HTTP 모의 서버3검사가 localhost bind의 `PermissionError`로 실패했다. 실패 기록을 남기고 로컬 서버를 허용한 환경에서 전체 검사를 통과했으며 코드를 바꿔 건너뛰지 않았다. [로컬 통합 판정](scenarios/e0_execution_20261113/local_main_integration.json)에 두 결과의 JUnit 해시가 있다. [GitHub 통합 CI](https://github.com/tortoiese/CLOVER/actions/runs/43436824192)의6개 조합도 각499개 통과·unhandled thread warning0이며 [CI 판정](scenarios/e0_execution_20261113/ci_main_integration.json)을 보존한다.
+
+통합 소스 해시는 `05722215372a262cd554a0e9c1a22327f5a2354934eb1cf79a115ef29298b41d`다. 새 입력을 준비해 같은3조건×7정책×D0/D1의 **추가42회**를 실행했고 전부 SUCCESS·수요/에너지/통행 불변식·원시 지표·replay가 일치했다. D1 21회의 coverage/자원 해제, D0 baseline3개의 원래 물리 digest 일치도 확인했다. [통합 사전 규약](scenarios/e0_execution_20261113/main_canary_protocol.json)과 [통합42회 판정](scenarios/e0_execution_20261113/main_canary_receipt.json)을 보존한다.
+
+| 검수 단계 | 정확한 코드 | 실행 횟수 | 판정 |
+|---|---|---:|---|
+| 시나리오 E0·노출 보완 | `4f6dc5e` | 185 | 원시/재생185회 일치 |
+| IPC 종료 보완 | `ddc94f4` | 42 | 원시/재생42회 일치 |
+| 최신 main 통합 | `aec9b53` | 42 | 원시/재생42회 일치 |
+
+총269회는 소스별 기능 검수 실행 수다. 269개의 독립 seed나 E1 본 실험으로 합치지 않는다. 마지막 통합 뒤의 판정·PRD 편집은 Python 소스를 바꾸지 않았다. 기본 optimized·휴리스틱 가중치·기본 D0는 유지한다.
 
 ## 다음 단계와 완료 조건
 

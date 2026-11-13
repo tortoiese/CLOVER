@@ -1,0 +1,32 @@
+{
+  "schema": "clover-main-integration-local-tests-v1",
+  "source_commit": "aec9b5360e6580061712467ffba811fcf5e230d6",
+  "main_commit": "69bb83ccae87cc6fa95f89125b129d990188360c",
+  "unhandled_thread_warning_policy": "error",
+  "tests": {
+    "311": {
+      "tests": 499,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "0b692d97ebed84c316e741598e68ac1371759ce96737854a8b8a9573ffc6f274",
+      "loopback_http_mock_allowed": true
+    },
+    "314": {
+      "tests": 499,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "414bd76c99b8a5bfcdb8fcee92b1a980d20e060f29f5248e14e95b72350d3fb9",
+      "loopback_http_mock_allowed": true
+    }
+  },
+  "prior_restricted_run": {
+    "tests": 499,
+    "passed": 496,
+    "failures": 3,
+    "reason": "127.0.0.1 bind denied by sandbox: PermissionError [Errno 1]",
+    "junit_sha256": "66819efb9543f51d09ec3f4cc9f2d9f9b4475adef644ffca9824edf38486f484",
+    "code_modified_to_skip_failures": false
+  }
+}
