@@ -15,6 +15,7 @@ from PySide6.QtCore import QObject, QThread, Signal, Slot
 
 from agent.base import BaseAgent
 from agent.models import AgentResponse, ProductionEvent
+from gui import constants as c
 from utils.event_types import Severity
 
 
@@ -90,6 +91,8 @@ class AgentBridge(QThread):
         """
         super().__init__(parent)
         self.agent = agent
+        # 첫 문서 검색에서 로드하는 ChromaDB는 macOS 기본 QThread 스택을 넘길 수 있다.
+        self.setStackSize(c.AGENT_STACK_BYTES)
 
     def run(self) -> None:
         """스레드 이벤트 루프."""

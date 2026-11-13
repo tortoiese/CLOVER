@@ -10,11 +10,12 @@ from __future__ import annotations
 from PySide6.QtCore import QEasingCurve, QRect, QVariantAnimation, Qt
 from PySide6.QtGui import QKeyEvent, QResizeEvent
 from PySide6.QtWidgets import (
-    QButtonGroup,
     QCheckBox,
+    QComboBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -22,11 +23,12 @@ from PySide6.QtWidgets import (
 from gui import constants as c
 from gui.building_view import BuildingView
 from gui.factory_view import FactoryView
+from gui.widgets.elided_label import ElidedLabel
 from simulation.state import SimState
 from utils.config_models import FactoryConfig
 
 MINI_WIDTH_RATIO: float = 0.40
-MINI_WIDTH_RANGE: tuple[int, int] = (190, 300)
+MINI_WIDTH_RANGE: tuple[int, int] = (140, 300)
 MINI_ASPECT: float = 0.80
 GAP: int = 8
 
@@ -53,46 +55,47 @@ class FloorHeader(QWidget):
         layout.setSpacing(5)
 
         top = QHBoxLayout()
-        self.title = QLabel("", self)
+        self.title = ElidedLabel("층 도면", self)
         self.title.setObjectName("PanelTitle")
         top.addWidget(self.title, 1)
-        self.back_button = QPushButton("↩ 전체 보기", self)
+        self.back_button = QPushButton("전체 보기", self)
         self.back_button.setToolTip("3D 건물 전체 보기로 돌아갑니다 (Esc)")
         top.addWidget(self.back_button)
         layout.addLayout(top)
 
-        self.stats = QLabel("", self)
+        self.stats = ElidedLabel("", self)
         self.stats.setObjectName("Muted")
-        self.stats.setWordWrap(True)
         layout.addWidget(self.stats)
 
-        self.floor_row = QHBoxLayout()
-        self.floor_row.setSpacing(4)
-        self.floor_group = QButtonGroup(self)
-        self.floor_group.setExclusive(True)
-        self.floor_row.addStretch(1)
-        layout.addLayout(self.floor_row)
+        floor_row = QHBoxLayout()
+        self.floor_picker = QComboBox(self)
+        self.floor_picker.setAccessibleName("볼 층 선택")
+        self.floor_picker.setToolTip("도면에 표시할 층을 선택합니다.")
+        floor_row.addWidget(self.floor_picker)
+        floor_row.addStretch(1)
+        layout.addLayout(floor_row)
 
         scale = QHBoxLayout()
         scale.setSpacing(4)
         self.zoom_out = QPushButton("－", self)
         self.zoom_out.setToolTip("축소 (Ctrl + 휠 아래로)")
-        self.ratio_label = QLabel("축척 1 : -", self)
-        self.ratio_label.setObjectName("InfoChip")
-        self.ratio_label.setMinimumWidth(110)
-        self.ratio_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.zoom_in = QPushButton("＋", self)
         self.zoom_in.setToolTip("확대 (Ctrl + 휠 위로)")
+        self.zoom_out.setAccessibleName("도면 축소")
+        self.zoom_in.setAccessibleName("도면 확대")
         self.fit_button = QPushButton("맞춤", self)
         self.fit_button.setToolTip("도면 전체가 보이도록 맞춥니다 (도면 더블클릭)")
-        for widget in (self.zoom_out, self.ratio_label, self.zoom_in, self.fit_button):
+        for widget in (self.zoom_out, self.zoom_in, self.fit_button):
             scale.addWidget(widget)
         for button in (self.zoom_out, self.zoom_in):
-            button.setFixedWidth(34)
+            button.setFixedWidth(30)
         scale.addStretch(1)
         layout.addLayout(scale)
 
-        self.cell_label = QLabel("", self)
+        self.ratio_label = ElidedLabel("축척 1 : -", self)
+        self.ratio_label.setObjectName("Muted")
+        layout.addWidget(self.ratio_label)
+        self.cell_label = ElidedLabel("", self)
         self.cell_label.setObjectName("Muted")
         layout.addWidget(self.cell_label)
 
@@ -107,24 +110,20 @@ class FloorHeader(QWidget):
         hint.setObjectName("Muted")
         bottom.addWidget(hint, 1)
         layout.addLayout(bottom)
+        hint.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        hint.setToolTip(hint.text())
         layout.addStretch(1)
 
-    def rebuild_floor_buttons(self, count: int) -> None:
-        """층 수에 맞게 층 버튼을 다시 만든다.
+    def set_floor_count(self, count: int) -> None:
+        """층 수에 맞게 선택 목록을 구성한다.
 
         Args:
             count: 층 수
         """
-        for button in self.floor_group.buttons():
-            self.floor_group.removeButton(button)
-            self.floor_row.removeWidget(button)
-            button.deleteLater()
-        for floor in range(count, 0, -1):
-            button = QPushButton(f"{floor}F", self)
-            button.setCheckable(True)
-            button.setFixedWidth(46)
-            self.floor_group.addButton(button, floor)
-            self.floor_row.insertWidget(self.floor_row.count() - 1, button)
+        self.floor_picker.clear()
+        for floor in range(1, count + 1):
+            self.floor_picker.addItem(f"{floor}층", floor)
+        self.floor_picker.setEnabled(count > 1)
 
     def set_floor(self, floor: int, title: str, stats: str) -> None:
         """현재 층 표시를 갱신한다.
@@ -134,9 +133,7 @@ class FloorHeader(QWidget):
             title: 층 제목
             stats: 요약 문장
         """
-        button = self.floor_group.button(floor)
-        if button is not None and not button.isChecked():
-            button.setChecked(True)
+        self.floor_picker.setCurrentIndex(self.floor_picker.findData(floor))
         self.title.setText(title)
         self.stats.setText(stats)
 
@@ -184,7 +181,8 @@ class FloorStage(QWidget):
 
         self.building.floor_clicked.connect(self.select_floor)
         self.header.back_button.clicked.connect(self.show_overview)
-        self.header.floor_group.idClicked.connect(self.select_floor)
+        self.header.floor_picker.activated.connect(
+            lambda index: self.select_floor(self.header.floor_picker.itemData(index)))
         self.header.zoom_in.clicked.connect(lambda: self.plan.zoom_step(1))
         self.header.zoom_out.clicked.connect(lambda: self.plan.zoom_step(-1))
         self.header.fit_button.clicked.connect(self.plan.fit_to_view)
@@ -253,7 +251,7 @@ class FloorStage(QWidget):
         self._layout = layout
         self._floor_count = count
         if count != previous:
-            self.header.rebuild_floor_buttons(count)
+            self.header.set_floor_count(count)
             self.header.back_button.setVisible(count > 1)
             if count == 1:
                 self._floor = 1
@@ -323,8 +321,9 @@ class FloorStage(QWidget):
         full = self.rect()
         mini = self._mini_rect()
         self.building.setGeometry(_lerp_rect(full, mini, self._progress))
-        self.header.setGeometry(QRect(mini.width() + GAP, 0, max(0, full.width() - mini.width() - GAP), mini.height()))
-        top = mini.height() + GAP
+        header_height = max(mini.height(), self.header.sizeHint().height())
+        self.header.setGeometry(QRect(mini.width() + GAP, 0, max(0, full.width() - mini.width() - GAP), header_height))
+        top = header_height + GAP
         self.plan.setGeometry(QRect(0, top, full.width(), max(0, full.height() - top)))
         self.building.raise_()
 

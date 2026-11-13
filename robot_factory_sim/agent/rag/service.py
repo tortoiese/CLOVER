@@ -10,7 +10,7 @@ from types import TracebackType
 from typing import Any, Self
 
 from agent.rag.documents import Chunk, Document, chunk_document
-from agent.rag.providers import Answerer
+from agent.rag.providers import Answerer, ProviderRequestError
 from agent.rag.store import ChromaStore, SearchHit
 
 
@@ -105,6 +105,8 @@ class RagService:
                     text, generated = candidate, True
                 else:
                     text = "생성 답변의 출처를 확인할 수 없어 검색 근거를 표시합니다.\n" + text
+            except ProviderRequestError as exc:
+                text = f"{exc} 검색 근거를 표시합니다.\n" + text
             except Exception:  # noqa: BLE001 — keep retrieved evidence when the optional answerer fails
                 text = "답변 생성에 실패해 검색 근거를 표시합니다.\n" + text
         return RagAnswer(text + "\n\n출처:\n" + "\n".join(citations), hits, generated)

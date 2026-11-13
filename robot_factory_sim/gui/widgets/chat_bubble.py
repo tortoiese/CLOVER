@@ -37,8 +37,11 @@ class ChatBubble(QFrame):
         meta.setObjectName("BubbleMeta")
         body = QLabel(text, self)
         body.setObjectName("BubbleText")
+        body.setTextFormat(Qt.TextFormat.PlainText)
         body.setWordWrap(True)
         body.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        # 긴 경로나 단일 토큰이 말풍선의 최소 너비를 키우지 않도록 한다.
+        body.setMinimumWidth(1)
         layout.addWidget(meta)
         layout.addWidget(body)
 
