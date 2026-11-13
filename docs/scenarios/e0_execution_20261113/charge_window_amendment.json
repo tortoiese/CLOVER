@@ -1,0 +1,39 @@
+{
+  "schema": "clover-e0-observation-amendment-v1",
+  "reason": "uniform-SOC baseline had no charge during the 180s S04 reference window",
+  "prior_results_retained": true,
+  "source_hash": "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30",
+  "same_seed": 1001,
+  "lambda_unchanged": 0.04,
+  "prefix_180s_exact": true,
+  "new_window_seconds": 900,
+  "long_reference": {
+    "cells": [
+      "S04_anchor",
+      "S04_slots_4"
+    ],
+    "policies": [
+      "baseline"
+    ],
+    "planned_runs": 2,
+    "timing": "D0"
+  },
+  "low_SOC_control": {
+    "cells": [
+      "S04_mixed_soc"
+    ],
+    "policies": [
+      "baseline",
+      "optimized",
+      "assignment_milp_legacy",
+      "rh_milp_grid",
+      "rh_cpsat_linear",
+      "rh_cpsat_interval",
+      "rh_cpsat_native"
+    ],
+    "planned_runs": 7,
+    "timing": "D1"
+  },
+  "driver_sha256": "414749ef431a572a3d1f3d45219140ffb242ac6392b850abfd8cbb007e1d40f5",
+  "scope": "extra functional/exposure checks, not a calibrated capacity estimate or policy ranking"
+}
