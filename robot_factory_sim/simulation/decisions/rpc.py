@@ -67,12 +67,15 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
             kinds = {"rh_milp_grid": "milp", "rh_cpsat_linear": "cpsat_linear"}
             if policy not in kinds:
                 raise ValueError("frozen grid comparison supports MILP and CP-SAT linear only")
+            backend_started = time.perf_counter()
             backend_cpu_started = time.process_time()
             plan = Backend(kinds[policy]).solve(
-                args["model"].input, model=args["model"], hint=args["hint"],
+                args["model"].input, started=backend_started, model=args["model"], hint=args["hint"],
                 budget_seconds=args["budget_seconds"],
             )
+            complete_backend_seconds = time.perf_counter() - backend_started
             plan = replace(plan, report=replace(plan.report,
+                                               total_seconds=complete_backend_seconds,
                                                worker_cpu_seconds=time.process_time() - backend_cpu_started))
             validation_started = time.perf_counter()
             errors = validate(plan, reconstruct_routes=False) if plan.report.status in {"OPTIMAL", "FEASIBLE"} else ()
