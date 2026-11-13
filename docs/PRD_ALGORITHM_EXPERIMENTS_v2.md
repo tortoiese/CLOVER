@@ -1,6 +1,6 @@
 # PRD v2.0 — 공장 로봇 공유자원 최적화와 환경별 알고리즘 선택
 
-작성일: 2026-11-10 · 상태: 구현·실험 착수용 명세 · 초점: GUI 없는 기능 구현, 모델 정확성, 최적화, 재현 실험.
+작성일: 2026-11-10 · 상태: 실행 명세 + 2026-11-13 구현 진척·잔여 작업 반영 · 초점: GUI 없는 기능 구현, 모델 정확성, 최적화, 재현 실험.
 
 ## 0. 이 작업의 최종 목적
 
@@ -14,14 +14,14 @@
 MILP나 CP-SAT의 우세를 완료 조건으로 미리 정하지 않는다. 특정 조건의 개선과 한계를 함께 남긴다.
 
 이 문서는 미래 작업의 요구사항이다. 아래 숫자형 실험 수준·SLA는 제안값이며 검증된 공장 기준이 아니다.
-이번 작성 단계에서는 소스 점검·반례 재현·기존 회귀 검사를 수행했으며 새 RH 성능 실험을 완료한 것은 아니다.
+아래 초기 점검은 2026-11-10 설계 당시 기록이다. 현재 기능·검수 완료 범위와 남은 작업은 [§20 최신 진척](#progress-20261113)을 따른다.
 
 동반 문서:
 
 - main 기능·알고리즘 점검 (선행 검토 문서; 본 저장소 밖의 원본): 재현 결과, 소스 근거, 수정 우선순위.
 - 변수·시나리오 목록 (선행 검토 문서; 본 저장소 밖의 원본): 환경 58개, 알고리즘 설정 16개, 12개 필수 시나리오와 부정 검사.
 
-## 1. 기준 코드와 현재 상태
+## 1. 2026-11-10 기준 코드와 초기 점검 상태 (보존)
 
 | 구분 | 확인한 상태 |
 |---|---|
@@ -607,3 +607,103 @@ python -m simulation.evaluation recommend --features observed.json --rules selec
 - [R5 NIST 실험 설계 안내](https://itl.nist.gov/div898/handbook/pri/section3/pri3.htm): 목표·변수·수준·설계·blocking과 부분 요인 실험의 구분.
 
 어떤 solver가 특정 공장 조건에서 더 좋을지는 이 자료만으로 확정하지 않는다. 그 질문에 답하는 것이 본 PRD의 실험 작업이다.
+
+<a id="progress-20261113"></a>
+
+## 20. 2026-11-13 구현 진척·보완 계획·병합 현황
+
+이 절은 설계 당시의 §1과 구분한 실제 진행 기록이다. **main에 반영된 상태가 아니라 기능 브랜치의 상태**다.
+검수한 기능 코드는 `b618506`, 실험·문서 정리 기준은 `7aa12dc`이며, 이번 변경은 PRD와 병합 검사 기록만 갱신한다.
+기존 검수의 소스·원시 결과·코드 hash를 새 실행 결과로 바꾸지 않는다.
+
+### 20.1 어디까지 구현됐는가
+
+| 단계 | 현재 상태 | 구현·검수 근거 | 남은 경계 |
+|---|---|---|---|
+| P0 공통 모델 | V1 범위 기능 완료 | mm/slot 계약, 묶음 확보·후미 해제, 작업·에너지 장부, 단일 승객 캐빈, 취소/중단 불변식 | 실제 로봇·연속 충돌·합승·pickup/drop 모델은 범위 밖 |
+| P1 headless 기반 | 기능 완료 | 외부 trace·초기 상태, run/suite/replay/analyze/profile, 전체 사건·검열·캐빈 단계 | suite 통계·별도 drain 관찰·최종 추천 CLI는 남음 |
+| P2 RH MILP | headless 기능 완료, 저장소 통합 미완료 | 공통 snapshot→SCIP 두 목적→독립 검사→첫 prefix→재계획, 충전·tail·자원 달력 | PR #10 충돌 해소/GUI 결합/실제 main 병합은 수행하지 않음 |
+| P3 CP-SAT | 지원 범위 기능 완료 | 공통 선형, 고정 격자 interval, 자유 시작 native, 작은 동일 문제 의미/최적값 검사 | 큰 팀 지도·전체 domain의 계산량/효과는 미검증 |
+| P4 profiling·pilot | 작은 진단 환경 완료 | 전체 7정책 D0/D1, 준비/재시작/실패, 예산·기간·범위 비교, training 후보/절차 동결 | 팀의 최종 64/256-node 지도·측정창·최종 E2 설정 동결은 남음 |
+| P5 본 실험·분석 | 미완료 | 진단용 입력 10개와 실행 기반 준비 | E1 튜닝/validation, 새 E2 지도·seed, E3 stress, paired 통계 |
+| P6 환경별 결론 | 미완료 | 유리·동률·불리한 작은 사례 정리 | 검증된 선택 규칙·불확실성·자동 선택기·최종 재현 package |
+
+P0~P4는 **지원한 추상 모델과 작은 headless 진단 범위의 구현/파일럿 진척**이다.
+P2의 저장소 통합이나 P4의 최종 본 실험 준비까지 모두 끝났다는 의미로 사용하지 않는다.
+단계 수만 세어 전체 진행률을 백분율로 표시하지 않는다.
+
+- 실제 Git checkout에서 Python 3.11·3.14 각각 **430 passed**. 이 수치는 직전 기능 검수이며 이번 문서 수정으로 재실행한 수치가 아니다.
+- 물리 실행 총 **591회**: A 기능 134 + A 파일럿/범위 비교 380 + B release 21 + B 수정 교차로 대조 56.
+- 591회 모두 저장 결정 기반 replay·원시 로그 지표 대조 일치. **590 SUCCESS + 시간 여유 초과 1회**이며 실패를 성공으로 세지 않는다.
+- 기존 D0 물리 사건 digest 36/36 보존. 기본 `optimized`·기본 D0 유지.
+- 시나리오 생성기의 `kind`/`node_type` 오류를 수정하고 교차로 유무만 바꾼 56회를 별도 검수했다. 기존 A의 잘못된 교차로 대조는 효과 근거에서 제외한다.
+- 공개 여유 0.1s 초과 1회는 보존했다. 같은 입력의 7정책 모두 0.2s로 다시 비교해 통과했고, 새 실험용 JSON은 0.2s다. 기본 설정을 변경한 것은 아니다.
+
+근거: [P4 상세 검수](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/P4_REVIEW.md), [판정 JSON](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/D1_VALIDATION.json), [training 후보 protocol](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/P4_TRAINING_PROTOCOL.json).
+공통 D1은 `d1-staged-budget-v1`의 측정 구간+선반영 공개 여유다. 실제 총 비용과 정확히 같은 지연이라는 의미는 아니다.
+
+### 20.2 무엇을 더 보완해야 하는가
+
+아래는 아직 완료하지 않은 실행 계획이다. 특정 solver의 승리가 아니라 같은 조건의 효과·실패·비용 확인이 완료 조건이다.
+
+| 우선순위 / ID | 남은 작업 | 구체적인 완료 조건 |
+|---|---|---|
+| 1 / R1 실제 시나리오 입력 | 팀 6개 시나리오의 지도·방향·거리·폭·설비·SOC·캐빈 층·외부 trace를 JSON으로 확정 | 4/8로봇·64/256노드 등의 실제 배치, 대응 대조군, generator/initial/trace hash를 고정. 실제 선택 경로·병목 통과 흐름·추가 자원 사용을 감사. 현재 10개 진단 입력으로 대체하지 않음 |
+| 2 / R2 알고리즘·비용 튜닝 | H·격자·후보 작업 수·native 시간 단위/방문 상한·예산·cold/eager를 E1에서 비교 | 공통 선형/격자 parity와 native 범위 차이를 분리. 같은 seed/입력/제한에서 build/solve/검사/공개·stale/fallback·RSS와 실행 품질을 함께 기록. 휴리스틱 가중치는 고정 |
+| 2 / R3 D1 규약 보정 | 큰 지도에서도 공개 여유와 반복 충전 판단의 비용을 점검 | 0.2s는 새 실험 시작값이며 보장이 아님. 초과는 무효로 보존하고 동일 block 전 정책을 공통 새 여유로 재실행. 고정 여유 합과 실제 측정 합을 별도로 보고해 solver 자체 성능과 혼동하지 않음 |
+| 3 / R4 기간·관측 설계 | warm-up·측정창·유한 batch·과부하·drain을 구분 | 시작안 W=600s, 측정 T=7200s를 E1에서 확인한 뒤 환경별 공통 창 고정. 로봇별 여러 충전 순환·구간별 rate/WIP를 확인. 전체 충전량/배터리 비만으로 안정 상태를 주장하지 않음. drain 사용 시 도착 중단/상한을 명시하고 runner 지원도 검증 |
+| 3 / R5 suite 통계 | paired 차이·신뢰구간·실패·미완료/검열을 분석하는 suite 기반 추가 | 독립 지도/seed block을 보존하고 실패 포함 분모·지연의 관측 완결률을 공개. 결정적 trace의 seed 이름 변경을 독립 반복으로 세지 않음. 단일 run analyze를 통계 분석 완료로 표시하지 않음 |
+| 4 / R6 E2·E3 본 실험 | E1 tuning/validation 뒤 최종 코드·설정·지도·창·주 지표를 동결하고 새 환경으로 실행 | 현재 protocol의 E2는 disabled, 실제 E2 입력은 미정. seed뿐 아니라 지도/거리/방향도 분리. 모든 정책의 같은 실행창·계산 예산·원시 결과와 실패/부분 실행을 보존 |
+| 5 / R7 환경별 선택 결론 | 선택 규칙·추천 보류 조건·추천 CLI를 구현 | held-out 개선·계산 비용·안전/납기 조건과 불확실성을 제시. 초안인 규칙 leaf당 다른 환경 3개·paired 30개 미충족이면 일반화 추천을 보류. 기본 정책 변경은 별도 결정 |
+| 별도 / R8 통합·품질 정리 | PR #10의 필요한 GUI/API만 최신 계약으로 재연결하고 환경별 검수 | 아래 충돌 감사에 따라 통합 계획 확정. main 통행 계약과 최신 planning/decision 계약 보존. 통합 후 전체 회귀·GUI 정책 전환/저장/재생·CI 검증. 이번 P4의 새 D1 경로는 macOS 검수이며 새 경로의 Linux/Windows·대규모 지원은 미검증 |
+
+전체 workspace lint의 검토 잔여 59건도 품질 정리 대상으로 남긴다.
+실행 오류 규칙 E9/F63/F7/F82와 새 생성기 lint는 통과했지만 전체 lint가 깨끗하다고 기록하지 않는다.
+먼저 시나리오 담당자는 R1을, 알고리즘 담당자는 R2~R5를 진행하고, 그 결과로 R6의 최종 실험 protocol을 확정한다.
+
+### 20.3 현재 말할 수 있는 알고리즘 차이
+
+공동 배정 작은 D0 배치에서 휴리스틱→MILP 완료 시각은 15.1→12.5s였다. 모두 2건 완료이므로 이를 처리량 증가율로 부르지 않는다.
+반대로 긴 충전 D1 파일럿 1800s·seed 1001에서는 optimized 128/130, MILP 126/130, native 128/130이었다.
+따라서 “MILP를 구현했으므로 더 좋다”는 결론은 내리지 않는다.
+계획 품질, 해상도/방문 범위, 준비·반복 제어·fallback, 관측창을 분리해 조건별로 판단해야 한다.
+
+### 20.4 병합 충돌: 최신 브랜치와 기존 PR을 구분
+
+2026-11-13 원격 fetch 및 GitHub 조회 후 `git merge-tree --write-tree --name-only --no-messages`로 확인했다.
+실제 checkout merge·rebase·main 변경은 하지 않았다. 명령의 가상 병합 tree만 검사했다.
+현재 main은 `a28522d`, P4 문서 갱신 전 head는 `7aa12dc`, 기존 PR #10 head는 `d63276d`다.
+
+| 비교 | 결과 | 의미 |
+|---|---|---|
+| 최신 main ↔ `feat/prd-p4-d1-startup` | 충돌 0파일 | main을 기준으로 만든 현재 작업 브랜치. 아직 main 병합/새 PR 생성은 하지 않음 |
+| 최신 main ↔ `feat/rh-milp-cpsat` (PR #10) | 충돌 12파일 | GitHub에서도 open·mergeable=false·dirty. 기존 PR이 충돌 중 |
+| 현재 P4 ↔ 기존 PR #10 브랜치 | 충돌 24파일 | 기존 planning 구현과 새 planning/decision 통합을 함께 바꿔 두 브랜치를 그대로 합치기 어려움 |
+
+**main과 PR #10 사이의 실제 충돌 파일**은 다음과 같다. 표의 구간 수는 가상 병합 결과의 conflict marker 묶음 수다.
+
+| 파일 (저장소 상대 경로) | 충돌 구간 수 |
+|---|---:|
+| `.github/workflows/tests.yml` | 1 |
+| `robot_factory_sim/gui/factory_panel.py` | 1 |
+| `robot_factory_sim/requirements.txt` | 1 |
+| `robot_factory_sim/simulation/corridor.py` | 6 |
+| `robot_factory_sim/simulation/engine.py` | 4 |
+| `robot_factory_sim/simulation/factory_service.py` | 1 |
+| `robot_factory_sim/simulation/path_graph.py` | 3 |
+| `robot_factory_sim/simulation/resource_pool.py` | 1 |
+| `robot_factory_sim/simulation/robot.py` | 10 |
+| `robot_factory_sim/simulation/scheduler.py` | 3 |
+| `robot_factory_sim/simulation/sim_worker.py` | 1 |
+| `robot_factory_sim/simulation/state.py` | 1 |
+
+통행 계층에서 main은 `traffic-mm-bundle-v1`의 mm/slot·원자적 확보·후미 해제를 쓰고,
+기존 PR #10은 그 이전 자원 처리와 RH 실행 연결을 함께 수정했다.
+특히 `resource_pool.py`와 `corridor.py`를 단순히 한쪽 파일로 선택하면 공통 계약을 잃을 수 있다.
+GUI는 통행 대기 표시와 계획 상태 표시가 겹치고, CI는 통행 검사 목록과 계획/평가 검사 목록이 겹친다.
+requirements에서는 OR-Tools/psutil 추가 위치가 충돌한다.
+
+권장 통합 기준은 **현재 P4의 공통 실행/계획 계약을 기준으로 PR #10에서 필요한 GUI/API를 선별 재연결**하는 것이다.
+이는 앞으로의 통합 계획이며 이번 문서 갱신에서 충돌 코드를 고치거나 PR을 병합한 것은 아니다.
+정확한 세 비교의 SHA·전체 파일 목록은 [병합 검사 JSON](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/P4_EVIDENCE/MERGE_STATUS_20261113.json)에 기록한다.
+텍스트 충돌 0건은 기능 인수·통합 회귀 통과와 구분한다.

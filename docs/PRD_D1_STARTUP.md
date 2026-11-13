@@ -1,14 +1,35 @@
 # 공개용 실행 PRD
 
-원본 PRD의 로컬 파일 링크를 저장소 경로로 정리한 사본이다. 요구사항은 구현 전 명세이며, 실제 완료 여부는 D1_STARTUP.md와 P4 검수 보고서로 확인한다.
-원본 문서 SHA-256: `49ee2cad4873bc7cc3dcd24e5d11d7c2137bac815aaf106acc76a3194ff89a4e`.
+원본 PRD의 로컬 파일 링크를 저장소 경로로 정리한 사본이다. 요구사항은 설계 기준이며, 실제 완료 여부는 §0·상위 PRD §20·P4 검수 보고서로 확인한다.
+설계 당시 원본 문서 SHA-256 (진척 갱신 전): `49ee2cad4873bc7cc3dcd24e5d11d7c2137bac815aaf106acc76a3194ff89a4e`.
 
 # PRD v1.0 — 전체 정책 D1과 초기화·시간초과 개선
 
 작성일: 2026-11-13 KST
 
-상태: **구현 전 실행 명세**. 이 문서의 요구사항·설정·테스트는 앞으로 구현할 내용이다.
-이번 문서 작성으로 D1 또는 worker 개선이 구현된 것으로 표시하지 않는다.
+상태: **실행 명세 및 구현·검수 현황 반영**. 설계 기준과 현재 구현 상태는 구분하며, 최신 진척은 §0과 상위 PRD §20에 기록한다.
+
+## 0. 2026-11-13 구현·검수 상태 갱신
+
+아래 요구사항은 설계 당시의 기준을 유지한다. 현재 지원한 headless 경로에서 M0~M6 구현과 작은 검수를 마쳤다.
+상위 PRD 전체와 실제 공장 환경 실험이 완료됐다는 뜻은 아니다. 기본 optimized/D0 유지, main 미병합이다.
+
+| 게이트 | 구현 결과 | 현재 검수/남은 범위 |
+|---|---|---|
+| M0 | 측정 phase·선반영 공개 여유·실패 비용·coverage 판정 | staged budget 규약. 실제 비용과 정확히 같은 지연은 아님 |
+| M1 | 불변 공통 입력·기존 selector adapter | 미래 noise 제외, RH 후보 수 제한을 다른 정책에 강요하지 않음 |
+| M2 | READY·policy/session/generation·timeout/RSS·bounded 재시작 | 준비 실패와 운영 실패를 구분하고 종료 회수 검사 |
+| M3/M4 | 7정책 배정/충전/목표·최신 검사·부분 적용·fallback/HOLD | 공개 여유 초과는 실행 무효. 큰 입력·반복 충전 제어 비용은 추가 보정 |
+| M5 | v5 결과·기록 결정 replay·원시 analyze/profile | 구 source의 결과는 해당 source에서 재생 |
+| M6 | 두 Python 전체 회귀·기전/실패·기간/예산·문서/입력 | 실제 팀 대규모 지도와 새 경로의 다른 OS, 통계/최종 선택은 남음 |
+
+직전 코드 검수는 Python 3.11/3.14 각각 430 passed, 물리 실행 591회 replay/원시 대조 일치다.
+590회 SUCCESS와 공개 여유 초과 1회를 구분한다. 이번 문서 변경으로 이 실험을 재실행한 것은 아니다.
+원래 0.1s 실행의 초과 기록은 보존하고, 같은 조건의 7정책을 0.2s로 재비교해 통과했다.
+현재 P4 브랜치는 main과 텍스트 충돌이 없고, 기존 PR #10은 12파일 충돌이다. 실제 병합은 수행하지 않았다.
+
+남은 작업의 우선순위·완료 조건·정확한 충돌 파일은 [상위 PRD §20](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/PRD_ALGORITHM_EXPERIMENTS_v2.md#progress-20261113)에 있다.
+검수 근거는 [P4 보고서](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/P4_REVIEW.md)와 [판정 JSON](https://github.com/tortoiese/CLOVER/blob/feat/prd-p4-d1-startup/docs/D1_VALIDATION.json)을 따른다.
 
 ## 1. 목적과 쉬운 설명
 
@@ -34,7 +55,7 @@
 재시작 상태 전이, 적용 비용의 선반영, 새 결과/replay 계약과 구체적 회귀 게이트를 묶은 명세는 없다.
 본 문서는 그 두 작업의 실행 명세를 보완한다. 상위 PRD 전체를 교체하지 않는다.
 
-### 2.1 기준 소스와 실제 확인 상태
+### 2.1 구현 전 기준 소스와 확인 상태 (설계 당시 기록)
 
 - 검수한 로컬 소스 (기준 로컬 산출물): `common-model-v1.9-native-profile`.
 - Python 소스 hash: `fdf37077ee32d75edb4154b2e0e24c374934a293658d5bb1095177c30ea7f289`.

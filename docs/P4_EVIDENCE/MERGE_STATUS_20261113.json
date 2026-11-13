@@ -1,0 +1,853 @@
+{
+  "schema": "clover-merge-status-v1",
+  "checked_date_kst": "2026-11-13",
+  "method": "git merge-tree --write-tree --name-only --no-messages",
+  "github_pr10": {
+    "number": 10,
+    "state": "open",
+    "mergeable": false,
+    "mergeable_state": "dirty",
+    "head": "d63276df044eb6eb8ac43737313d1c250a7b571b"
+  },
+  "comparisons": {
+    "main_vs_p4": {
+      "left": "a28522d9dd9aee238c27fdc2404cab2b1b10c60d",
+      "right": "7aa12dce878332224f7fcfeaa7260f8b33c2c0b4",
+      "exit_code": 0,
+      "merge_tree": "f40d8a1dc25d5e383fe8a78eef5d114098b64083",
+      "conflicts": [],
+      "merge_base": "a28522d9dd9aee238c27fdc2404cab2b1b10c60d"
+    },
+    "main_vs_pr10": {
+      "left": "a28522d9dd9aee238c27fdc2404cab2b1b10c60d",
+      "right": "d63276df044eb6eb8ac43737313d1c250a7b571b",
+      "exit_code": 1,
+      "merge_tree": "27eb9955d9848e381e05c7941e7da0bf7f97fe3c",
+      "conflicts": [
+        ".github/workflows/tests.yml",
+        "robot_factory_sim/gui/factory_panel.py",
+        "robot_factory_sim/requirements.txt",
+        "robot_factory_sim/simulation/corridor.py",
+        "robot_factory_sim/simulation/engine.py",
+        "robot_factory_sim/simulation/factory_service.py",
+        "robot_factory_sim/simulation/path_graph.py",
+        "robot_factory_sim/simulation/resource_pool.py",
+        "robot_factory_sim/simulation/robot.py",
+        "robot_factory_sim/simulation/scheduler.py",
+        "robot_factory_sim/simulation/sim_worker.py",
+        "robot_factory_sim/simulation/state.py"
+      ],
+      "merge_base": "841af64c2ef4684053d0aadeed0b5fee8df36ec7"
+    },
+    "p4_vs_pr10": {
+      "left": "7aa12dce878332224f7fcfeaa7260f8b33c2c0b4",
+      "right": "d63276df044eb6eb8ac43737313d1c250a7b571b",
+      "exit_code": 1,
+      "merge_tree": "a0eb1e161005d1a5523cc95c8b49adf1270e8f71",
+      "conflicts": [
+        ".github/workflows/tests.yml",
+        "robot_factory_sim/gui/factory_panel.py",
+        "robot_factory_sim/requirements.txt",
+        "robot_factory_sim/simulation/corridor.py",
+        "robot_factory_sim/simulation/engine.py",
+        "robot_factory_sim/simulation/factory_service.py",
+        "robot_factory_sim/simulation/path_graph.py",
+        "robot_factory_sim/simulation/planning/__init__.py",
+        "robot_factory_sim/simulation/planning/backend.py",
+        "robot_factory_sim/simulation/planning/contracts.py",
+        "robot_factory_sim/simulation/planning/controller.py",
+        "robot_factory_sim/simulation/planning/execution.py",
+        "robot_factory_sim/simulation/planning/model.py",
+        "robot_factory_sim/simulation/planning/process.py",
+        "robot_factory_sim/simulation/planning/replay.py",
+        "robot_factory_sim/simulation/planning/snapshot.py",
+        "robot_factory_sim/simulation/planning/validation.py",
+        "robot_factory_sim/simulation/resource_pool.py",
+        "robot_factory_sim/simulation/robot.py",
+        "robot_factory_sim/simulation/scheduler.py",
+        "robot_factory_sim/simulation/sim_worker.py",
+        "robot_factory_sim/simulation/state.py",
+        "robot_factory_sim/simulation/task_generator.py",
+        "robot_factory_sim/utils/metrics.py"
+      ],
+      "merge_base": "841af64c2ef4684053d0aadeed0b5fee8df36ec7"
+    }
+  },
+  "conflict_hunks": [
+    {
+      "comparison": "main_vs_pr10",
+      "file": ".github/workflows/tests.yml",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 47,
+          "merged_end": 61
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/gui/factory_panel.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 90,
+          "merged_end": 109
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/requirements.txt",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 7,
+          "merged_end": 11
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/corridor.py",
+      "conflict_hunks": 6,
+      "hunks": [
+        {
+          "merged_start": 15,
+          "merged_end": 33
+        },
+        {
+          "merged_start": 40,
+          "merged_end": 70
+        },
+        {
+          "merged_start": 88,
+          "merged_end": 95
+        },
+        {
+          "merged_start": 121,
+          "merged_end": 129
+        },
+        {
+          "merged_start": 191,
+          "merged_end": 252
+        },
+        {
+          "merged_start": 403,
+          "merged_end": 417
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/engine.py",
+      "conflict_hunks": 4,
+      "hunks": [
+        {
+          "merged_start": 9,
+          "merged_end": 12
+        },
+        {
+          "merged_start": 415,
+          "merged_end": 426
+        },
+        {
+          "merged_start": 990,
+          "merged_end": 999
+        },
+        {
+          "merged_start": 1014,
+          "merged_end": 1020
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/factory_service.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 54,
+          "merged_end": 58
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/path_graph.py",
+      "conflict_hunks": 3,
+      "hunks": [
+        {
+          "merged_start": 15,
+          "merged_end": 18
+        },
+        {
+          "merged_start": 233,
+          "merged_end": 238
+        },
+        {
+          "merged_start": 390,
+          "merged_end": 406
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/resource_pool.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 255
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/robot.py",
+      "conflict_hunks": 10,
+      "hunks": [
+        {
+          "merged_start": 12,
+          "merged_end": 16
+        },
+        {
+          "merged_start": 418,
+          "merged_end": 455
+        },
+        {
+          "merged_start": 472,
+          "merged_end": 476
+        },
+        {
+          "merged_start": 495,
+          "merged_end": 501
+        },
+        {
+          "merged_start": 506,
+          "merged_end": 514
+        },
+        {
+          "merged_start": 535,
+          "merged_end": 546
+        },
+        {
+          "merged_start": 551,
+          "merged_end": 679
+        },
+        {
+          "merged_start": 690,
+          "merged_end": 694
+        },
+        {
+          "merged_start": 742,
+          "merged_end": 746
+        },
+        {
+          "merged_start": 793,
+          "merged_end": 804
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/scheduler.py",
+      "conflict_hunks": 3,
+      "hunks": [
+        {
+          "merged_start": 119,
+          "merged_end": 128
+        },
+        {
+          "merged_start": 195,
+          "merged_end": 209
+        },
+        {
+          "merged_start": 232,
+          "merged_end": 238
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/sim_worker.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 247,
+          "merged_end": 255
+        }
+      ]
+    },
+    {
+      "comparison": "main_vs_pr10",
+      "file": "robot_factory_sim/simulation/state.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 178,
+          "merged_end": 184
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": ".github/workflows/tests.yml",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 47,
+          "merged_end": 61
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/gui/factory_panel.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 90,
+          "merged_end": 109
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/requirements.txt",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 7,
+          "merged_end": 11
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/corridor.py",
+      "conflict_hunks": 6,
+      "hunks": [
+        {
+          "merged_start": 15,
+          "merged_end": 33
+        },
+        {
+          "merged_start": 40,
+          "merged_end": 70
+        },
+        {
+          "merged_start": 88,
+          "merged_end": 95
+        },
+        {
+          "merged_start": 121,
+          "merged_end": 129
+        },
+        {
+          "merged_start": 191,
+          "merged_end": 252
+        },
+        {
+          "merged_start": 403,
+          "merged_end": 417
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/engine.py",
+      "conflict_hunks": 14,
+      "hunks": [
+        {
+          "merged_start": 9,
+          "merged_end": 12
+        },
+        {
+          "merged_start": 399,
+          "merged_end": 412
+        },
+        {
+          "merged_start": 490,
+          "merged_end": 497
+        },
+        {
+          "merged_start": 531,
+          "merged_end": 554
+        },
+        {
+          "merged_start": 563,
+          "merged_end": 580
+        },
+        {
+          "merged_start": 587,
+          "merged_end": 622
+        },
+        {
+          "merged_start": 629,
+          "merged_end": 635
+        },
+        {
+          "merged_start": 656,
+          "merged_end": 698
+        },
+        {
+          "merged_start": 708,
+          "merged_end": 716
+        },
+        {
+          "merged_start": 725,
+          "merged_end": 739
+        },
+        {
+          "merged_start": 828,
+          "merged_end": 839
+        },
+        {
+          "merged_start": 973,
+          "merged_end": 992
+        },
+        {
+          "merged_start": 1235,
+          "merged_end": 1244
+        },
+        {
+          "merged_start": 1259,
+          "merged_end": 1265
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/factory_service.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 54,
+          "merged_end": 58
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/path_graph.py",
+      "conflict_hunks": 3,
+      "hunks": [
+        {
+          "merged_start": 15,
+          "merged_end": 18
+        },
+        {
+          "merged_start": 233,
+          "merged_end": 238
+        },
+        {
+          "merged_start": 390,
+          "merged_end": 406
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/__init__.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 5
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/backend.py",
+      "conflict_hunks": 3,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 224
+        },
+        {
+          "merged_start": 231,
+          "merged_end": 368
+        },
+        {
+          "merged_start": 375,
+          "merged_end": 544
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/contracts.py",
+      "conflict_hunks": 15,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 5
+        },
+        {
+          "merged_start": 10,
+          "merged_end": 37
+        },
+        {
+          "merged_start": 42,
+          "merged_end": 152
+        },
+        {
+          "merged_start": 157,
+          "merged_end": 170
+        },
+        {
+          "merged_start": 176,
+          "merged_end": 188
+        },
+        {
+          "merged_start": 193,
+          "merged_end": 364
+        },
+        {
+          "merged_start": 369,
+          "merged_end": 373
+        },
+        {
+          "merged_start": 378,
+          "merged_end": 382
+        },
+        {
+          "merged_start": 387,
+          "merged_end": 502
+        },
+        {
+          "merged_start": 507,
+          "merged_end": 511
+        },
+        {
+          "merged_start": 519,
+          "merged_end": 531
+        },
+        {
+          "merged_start": 536,
+          "merged_end": 549
+        },
+        {
+          "merged_start": 554,
+          "merged_end": 581
+        },
+        {
+          "merged_start": 589,
+          "merged_end": 635
+        },
+        {
+          "merged_start": 640,
+          "merged_end": 655
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/controller.py",
+      "conflict_hunks": 2,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 56
+        },
+        {
+          "merged_start": 64,
+          "merged_end": 639
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/execution.py",
+      "conflict_hunks": 3,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 5
+        },
+        {
+          "merged_start": 15,
+          "merged_end": 25
+        },
+        {
+          "merged_start": 33,
+          "merged_end": 438
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/model.py",
+      "conflict_hunks": 8,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 5
+        },
+        {
+          "merged_start": 14,
+          "merged_end": 33
+        },
+        {
+          "merged_start": 38,
+          "merged_end": 42
+        },
+        {
+          "merged_start": 51,
+          "merged_end": 55
+        },
+        {
+          "merged_start": 60,
+          "merged_end": 63
+        },
+        {
+          "merged_start": 68,
+          "merged_end": 76
+        },
+        {
+          "merged_start": 83,
+          "merged_end": 249
+        },
+        {
+          "merged_start": 254,
+          "merged_end": 647
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/process.py",
+      "conflict_hunks": 2,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 140
+        },
+        {
+          "merged_start": 146,
+          "merged_end": 511
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/replay.py",
+      "conflict_hunks": 2,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 47
+        },
+        {
+          "merged_start": 53,
+          "merged_end": 147
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/snapshot.py",
+      "conflict_hunks": 4,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 5
+        },
+        {
+          "merged_start": 12,
+          "merged_end": 51
+        },
+        {
+          "merged_start": 56,
+          "merged_end": 68
+        },
+        {
+          "merged_start": 74,
+          "merged_end": 583
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/planning/validation.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 518
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/resource_pool.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 1,
+          "merged_end": 271
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/robot.py",
+      "conflict_hunks": 18,
+      "hunks": [
+        {
+          "merged_start": 12,
+          "merged_end": 16
+        },
+        {
+          "merged_start": 168,
+          "merged_end": 172
+        },
+        {
+          "merged_start": 228,
+          "merged_end": 232
+        },
+        {
+          "merged_start": 300,
+          "merged_end": 310
+        },
+        {
+          "merged_start": 380,
+          "merged_end": 388
+        },
+        {
+          "merged_start": 425,
+          "merged_end": 449
+        },
+        {
+          "merged_start": 521,
+          "merged_end": 563
+        },
+        {
+          "merged_start": 571,
+          "merged_end": 575
+        },
+        {
+          "merged_start": 581,
+          "merged_end": 603
+        },
+        {
+          "merged_start": 613,
+          "merged_end": 634
+        },
+        {
+          "merged_start": 664,
+          "merged_end": 680
+        },
+        {
+          "merged_start": 685,
+          "merged_end": 728
+        },
+        {
+          "merged_start": 849,
+          "merged_end": 855
+        },
+        {
+          "merged_start": 872,
+          "merged_end": 889
+        },
+        {
+          "merged_start": 905,
+          "merged_end": 928
+        },
+        {
+          "merged_start": 945,
+          "merged_end": 954
+        },
+        {
+          "merged_start": 989,
+          "merged_end": 996
+        },
+        {
+          "merged_start": 1007,
+          "merged_end": 1022
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/scheduler.py",
+      "conflict_hunks": 5,
+      "hunks": [
+        {
+          "merged_start": 122,
+          "merged_end": 131
+        },
+        {
+          "merged_start": 195,
+          "merged_end": 205
+        },
+        {
+          "merged_start": 209,
+          "merged_end": 217
+        },
+        {
+          "merged_start": 239,
+          "merged_end": 244
+        },
+        {
+          "merged_start": 360,
+          "merged_end": 378
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/sim_worker.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 247,
+          "merged_end": 255
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/state.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 178,
+          "merged_end": 184
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/simulation/task_generator.py",
+      "conflict_hunks": 1,
+      "hunks": [
+        {
+          "merged_start": 49,
+          "merged_end": 69
+        }
+      ]
+    },
+    {
+      "comparison": "p4_vs_pr10",
+      "file": "robot_factory_sim/utils/metrics.py",
+      "conflict_hunks": 2,
+      "hunks": [
+        {
+          "merged_start": 83,
+          "merged_end": 88
+        },
+        {
+          "merged_start": 175,
+          "merged_end": 181
+        }
+      ]
+    }
+  ],
+  "main_or_feature_ref_mutated_by_audit": false,
+  "runtime_validation": "Documentation-only update; prior b618506 tests and 591-run evidence retained, not re-executed.",
+  "integration_status": "Not resolved/merged. Main vs current P4 clean; old PR10 vs main conflicts12, P4 vs old PR10 conflicts24."
+}
