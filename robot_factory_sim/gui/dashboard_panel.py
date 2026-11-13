@@ -13,7 +13,16 @@ import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import QPointF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QPen, QPolygonF
-from PySide6.QtWidgets import QGraphicsPolygonItem, QGridLayout, QLabel, QSplitter, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QGraphicsPolygonItem,
+    QGridLayout,
+    QLabel,
+    QPlainTextEdit,
+    QSplitter,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from gui import constants as c
 from gui.widgets.kpi_card import KpiCard
@@ -129,6 +138,9 @@ class DashboardPanel(QWidget):
             self._tabs.addTab(plot, title)
         self._roi_panel = RoiPanel(self._tabs)
         self._tabs.addTab(self._roi_panel, "💰 ROI 비교")
+        self._planning_view = QPlainTextEdit(self._tabs)
+        self._planning_view.setReadOnly(True)
+        self._tabs.addTab(self._planning_view, "계획·예약")
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         self._setup_plots()
@@ -242,13 +254,19 @@ class DashboardPanel(QWidget):
             return
         index = self._tabs.currentIndex()
         drawers = (self._draw_throughput, self._draw_gantt, self._draw_queue, self._draw_battery, self._draw_radar,
-                   self._draw_orders, self._draw_events, self._draw_roi)
+                   self._draw_orders, self._draw_events, self._draw_roi, self._draw_planning)
         drawers[index]()
 
     def _draw_throughput(self) -> None:
         """Tab 1 — Baseline vs 최적화 처리량."""
         x = np.fromiter(self._times, float)
         for mode, curve in self._throughput_curves.items():
+            active = self._state is not None and mode in self._state.engine_kpis
+            curve.setVisible(active)
+            legend = self._plots[0].plotItem.legend
+            label = legend.getLabel(curve) if legend is not None else None
+            if label is not None:
+                label.setText(SchedulerModeLabel.LABELS[mode] + ("" if active else " (미실행)"))
             y = np.fromiter(self._throughput[mode], float)
             curve.setData(x, np.nan_to_num(y), connect="finite")
 
@@ -339,9 +357,9 @@ class DashboardPanel(QWidget):
             label.setFont(font)
             label.setPos(RADAR_LABEL_RADIUS * math.cos(angle), RADAR_LABEL_RADIUS * math.sin(angle))
             plot.addItem(label)
-        modes = list(c.ENGINE_COLORS)
+        modes = [m for m in c.ENGINE_COLORS if m in state.engine_kpis]
         for mode in modes:
-            other_mode = next(m for m in modes if m != mode)
+            other_mode = next((m for m in modes if m != mode), mode)
             values = state.engine_kpis.get(mode, {})
             others = state.engine_kpis.get(other_mode, {})
             scores = [radar_score(d, values.get(d.key, math.nan), others.get(d.key, math.nan)) for d in KPI_DEFINITIONS]
@@ -424,8 +442,37 @@ class DashboardPanel(QWidget):
         state = self._state
         assert state is not None
         base_kpis = state.engine_kpis.get("baseline", {})
-        opt_kpis = state.engine_kpis.get("optimized", {})
+        candidate = state.mode if state.mode != "baseline" else "optimized"
+        opt_kpis = state.engine_kpis.get(candidate, {})
         self._roi_panel.update_kpis(
             int(base_kpis.get("completed_units", 0.0)), base_kpis.get("distance_m", 0.0),
             int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("distance_m", 0.0),
         )
+
+    def _draw_planning(self) -> None:
+        """Show planning scope, bounds, candidates, failure reasons and actual commitments."""
+        state = self._state
+        if state is None:
+            return
+        lines = ["실행 중: " + ", ".join(SchedulerModeLabel.LABELS.get(m, m) for m in state.active_policies),
+                 "표시·개입 대상: " + SchedulerModeLabel.LABELS.get(state.mode, state.mode),
+                 "라이브 비동기 실행은 headless staged-D1 실험과 시간 규약이 다릅니다."]
+        for mode, plan in state.planning.items():
+            report = plan.get("report") or {}
+            lines += ["", SchedulerModeLabel.LABELS.get(mode, mode) + " · " + plan["execution_status"],
+                      f"계획 범위: {plan['scope']} · 후보 {plan.get('candidates', 0)}/{plan.get('total_pending', 0)}",
+                      "아래 해·경계는 마지막 반환 계획이며, 실제 채택은 적용 판정을 따릅니다.",
+                      f"1단계 {report.get('phase1_status', '대기')}: 해 {report.get('phase1_cost')} / 경계 {report.get('phase1_bound')}",
+                      f"2단계 {report.get('phase2_status', '대기')}: 해 {report.get('phase2_cost')} / 경계 {report.get('phase2_bound')}",
+                      f"모델 {report.get('version', '')} · {report.get('backend_version', '')}",
+                      "최근 적용 판정: " + (str(plan.get("reason", "")) or report.get("message") or "대기"),
+                      f"채택 {plan['accepted']} / 대체 {plan['fallbacks']} / 폐기 {plan.get('stale', 0)} / 지연 {plan['overruns']}",
+                      "확정한 첫 행동은 실제 통행 자원 승인 뒤 실행합니다."]
+            reservations = plan.get("reservations", [])
+            lines += [f"[{r['start']:.2f}, {r['end']:.2f}) {r['resource']} · {r['robot']} · {r['amount']}"
+                      for r in reservations[:100]]
+            if len(reservations) > 100:
+                lines.append(f"추가 {len(reservations) - 100}개 예약은 내보낸 결과에서 확인")
+        if not state.planning:
+            lines.append("RH 정책을 선택하면 계획과 예약이 표시됩니다.")
+        self._planning_view.setPlainText("\n".join(lines))

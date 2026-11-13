@@ -7,3 +7,6 @@ scipy>=1.14,<2
 chromadb>=1.5.9,<2
 openai>=2,<3
 pypdf>=5,<7
+
+# Optional RH policies are selectable in the GUI.
+-r requirements-planning.txt

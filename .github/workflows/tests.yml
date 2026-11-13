@@ -36,7 +36,7 @@ jobs:
           cache: pip
           cache-dependency-path: robot_factory_sim/requirements.txt
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt pytest ruff
+        run: python -m pip install -r requirements.txt -r requirements-legacy.txt pytest ruff
       - name: Install Linux Qt runtime libraries
         if: runner.os == 'Linux'
         run: >-
@@ -51,6 +51,11 @@ jobs:
           simulation/path_graph.py simulation/robot.py simulation/engine.py simulation/state.py
           simulation/test_traffic_contract.py gui/widgets/traffic_item.py gui/main_window.py
           agent/rag/store.py agent/rag/service.py agent/rag_agent.py gui/agent_bridge.py conftest.py
+          simulation/planning/live.py simulation/planning/test_live.py simulation/sim_worker.py
+          gui/planning_settings.py gui/test_rh_gui.py gui/factory_panel.py gui/dashboard_panel.py
+          gui/constants.py utils/event_types.py
+      - name: Check planner runtime errors
+        run: python -m ruff check --isolated --select E9,F63,F7,F82 simulation/planning simulation/decisions simulation/evaluation
       - name: Run acceptance and Qt regression tests
         run: python -B -m pytest -q -p no:cacheprovider --junitxml=acceptance.xml
       - name: Upload acceptance evidence

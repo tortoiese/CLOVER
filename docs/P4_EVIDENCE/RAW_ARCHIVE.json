@@ -1,0 +1,13 @@
+{
+  "schema": "clover-p4-raw-archive-v1",
+  "filename": "CLOVER_P4_raw_evidence_20261113.zip",
+  "sha256": "fc64dadebf80d68d89d12d65c3cb4bc3c2276819697d84ac9190cb5f8d82581f",
+  "bytes": 77501641,
+  "files_in_sha_manifest": 1281,
+  "runs": 591,
+  "crc_and_all_file_hashes_verified": true,
+  "runs_index_sha256": "af57e94cd02954e5dc659caaaf956fae4d3b73ca20acd0ee3895b8c6d4a351e6",
+  "location": "Local task outputs artifact; raw events not committed to Git. Compact receipts/index/metrics are committed.",
+  "A_source_replay": "source_A.zip is the exact d089747a source, also available at implementation commit b8ef5b9.",
+  "A_control_exclusion": "A S03 has identical node_type in both variants; excluded from junction-effect conclusions."
+}

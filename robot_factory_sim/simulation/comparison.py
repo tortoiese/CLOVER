@@ -150,7 +150,7 @@ def run_comparison(conditions: ComparisonConditions, context: dict[str, Any],
     if min_charge_mode not in (0, 1):
         raise ValueError("최소충전 모드는 0 또는 1이어야 합니다.")
     parameters = {"task_rate": rate, "min_charge_mode": min_charge_mode}
-    started = time.monotonic()
+    started = time.perf_counter()
     samples: dict[str, list[dict[str, Any]]] = {"baseline": [], "candidate": []}
     solver_records = []
     for offset in range(int(conditions.repeats)):
@@ -176,7 +176,7 @@ def run_comparison(conditions: ComparisonConditions, context: dict[str, Any],
             while engine.now < conditions.duration:
                 if cancelled and cancelled():
                     raise InterruptedError("비교 실험이 취소되었습니다.")
-                if time.monotonic() - started > EXPERIMENT_WALL_LIMIT:
+                if time.perf_counter() - started > EXPERIMENT_WALL_LIMIT:
                     raise TimeoutError("비교 실험 시간 제한입니다. 기간·반복 횟수·공장 규모를 줄여주세요.")
                 engine.env.run(until=min(conditions.duration, engine.now + 5))
             units, distance = _energy_distance(engine)

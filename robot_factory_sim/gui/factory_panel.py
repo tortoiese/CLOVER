@@ -93,4 +93,15 @@ class FactoryPanel(QWidget):
         text = f"통행 대기 {traffic_waiting}대 · 병목 {bottlenecks}곳 · 최장 대기 {oldest:.0f}s · 노란 점선: 통행 대기"
         if self._traffic.text() != text:
             self._traffic.setText(text)
+        if state.mode in state.planning:
+            planning = state.planning[state.mode]
+            report = planning.get("report") or {}
+            scope = "교통·캐빈 포함" if planning["scope"] == "traffic" else "작업장·충전기"
+            self._mode.setText(f"{SchedulerModeLabel.LABELS[state.mode]} · {scope} · {planning['execution_status']}")
+            self._mode.setToolTip(
+                ("작업장·충전기·통로·교차점·단일 캐빈 계획\n" if planning["scope"] == "traffic" else
+                 "작업장·충전기 계획 / 교통 자원은 실행 시 제어\n") +
+                f"1단계 {report.get('phase1_status', '대기')} · 2단계 {report.get('phase2_status', '대기')}\n"
+                f"계산 {report.get('total_seconds', 0):.3f}초 · 모델 {report.get('model_hash', '')[:12]}\n"
+                f"채택 {planning['accepted']} · 대체 {planning['fallbacks']} · 지연 {planning['overruns']}")
         self.stage.update_state(state)

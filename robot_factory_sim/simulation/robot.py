@@ -17,6 +17,8 @@ import simpy
 
 import config
 from simulation.path_graph import Route
+from simulation.task_generator import TaskState
+from simulation.telemetry import observe_wait
 from simulation.traffic_rules import LaneRequest, TrafficBlocked, tail_clearance_seconds
 from utils.config_models import RobotConfig
 from utils.event_types import RobotState
@@ -42,13 +44,22 @@ class InterruptKind:
     CHARGE = "charge"
     RETIRE = "retire"
     STATION_DOWN = "station_down"
+    REPLAN = "replan"
 
 
 class Robot:
     """AGV/AMR 로봇 1대."""
 
-    def __init__(self, engine: SimulationEngine, cfg: RobotConfig, position: Point, color_index: int,
-                 floor: int = 1) -> None:
+    def __init__(
+        self,
+        engine: SimulationEngine,
+        cfg: RobotConfig,
+        position: Point,
+        color_index: int,
+        floor: int = 1,
+        *,
+        soc_pct: float = 100,
+    ) -> None:
         """로봇을 생성하고 프로세스를 등록한다.
 
         Args:
@@ -64,7 +75,11 @@ class Robot:
         self.color_index = color_index
         self.x, self.y = position
         self.floor = floor
-        self.battery = float(cfg.battery_capacity)
+        self.battery = float(cfg.battery_capacity) * soc_pct / 100
+        self.initial_energy_units = self.battery
+        self.charged_energy_units = 0.0
+        self.rescue_energy_units = 0.0
+        self.capacity_adjustment_units = 0.0
         self.state = RobotState.IDLE
         self.state_since = self.env.now
         self.state_time: dict[str, float] = defaultdict(float)
@@ -76,12 +91,14 @@ class Robot:
         self.emergency_order: str | None = None
         self.forced_charge = False
         self.alive = True
+        self.retired_at: float | None = None
         self.charge_sessions = 0
         self.tasks_done = 0
         self.distance_m = 0.0
         self.travel_energy_units = 0.0
         self.work_energy_units = 0.0
         self._work_started: float | None = None
+        self._fault_holding = False
         self._depleted = False
         self._segment: tuple[float, float, float, float, float, float, float] | None = None
         self._charge_step: tuple[float, float] | None = None
@@ -94,6 +111,16 @@ class Robot:
         self._traffic_granted = False
         self._pending_control: dict[str, Any] | None = None
         self._pending_dimensions: tuple[float, float] | None = None
+        self.planned_action: Any = None
+        self._traffic_request: Any = None
+        self._traffic_release_at: float | None = None
+        self._planned_charge_until: float | None = None
+        self._completed_plan_route_key: Any = None
+        self._route_progress_key: Any = None
+        self._route_completed_segments = 0
+        self._cabin_request: Any = None
+        self._cabin_release_at: float | None = None
+        self._cabin_destination: int | None = None
         self.process = self.env.process(self.run_process())
 
     # ------------------------------------------------------------------
@@ -126,6 +153,8 @@ class Robot:
         if self._charge_step is not None:
             start, rate = self._charge_step
             return min(self.capacity, self.battery + rate * (self.env.now - start))
+        if self._work_started is not None:
+            return max(0.0, self.battery - self.engine.plant.work_drain_per_sec * (self.env.now - self._work_started))
         return self.battery
 
     def position(self) -> Point:
@@ -181,6 +210,7 @@ class Robot:
             and self.current_task is None
             and not self.forced_charge
             and not self._depleted
+            and self.planned_action is None
         )
 
     def usage(self) -> RobotTimeUsage:
@@ -190,13 +220,14 @@ class Robot:
             RobotTimeUsage
         """
         times = dict(self.state_time)
-        times[self.state] = times.get(self.state, 0.0) + (self.env.now - self.state_since)
+        now = self.env.now if self.retired_at is None else self.retired_at
+        times[self.state] = times.get(self.state, 0.0) + max(0, now - self.state_since)
         return RobotTimeUsage(times, self.charge_sessions, self.tasks_done)
 
     # ------------------------------------------------------------------
     # 외부 제어
     # ------------------------------------------------------------------
-    def assign(self, task: Task) -> None:
+    def assign(self, task: Task, *, wake: bool = True) -> None:
         """작업을 배정하고 대기 중이면 깨운다.
 
         Args:
@@ -204,7 +235,8 @@ class Robot:
         """
         self.current_task = task
         task.robot_id = self.robot_id
-        self.wake()
+        if wake:
+            self.wake()
 
     def wake(self) -> None:
         """대기(IDLE) 중인 프로세스를 깨운다."""
@@ -223,10 +255,9 @@ class Robot:
         """
         if not self.process.is_alive or self.env.active_process is self.process:
             return False
-        if self._traffic_granted or self._riding is not None:
+        if self._traffic_granted or self._riding is not None or self._fault_holding:
             # A control cancellation cannot make an occupied footprint disappear.
-            self._defer_control({"kind": kind, "task": task})
-            return True
+            return self._defer_control({"kind": kind, "task": task})
         self.process.interrupt({"kind": kind, "task": task})
         return True
 
@@ -247,8 +278,10 @@ class Robot:
         else:
             self._pending_dimensions = None
         ratio = self.battery / self.capacity
+        previous_battery = self.battery
         self.cfg = cfg
         self.battery = ratio * self.capacity
+        self.capacity_adjustment_units += self.battery - previous_battery
         return True
 
     # ------------------------------------------------------------------
@@ -267,6 +300,26 @@ class Robot:
         self.state = state
         self.state_since = now
 
+    def _plan_route_key(self) -> Any:
+        if self.planned_action is None:
+            return None
+        result, action = self.planned_action
+        snap = result.input.snapshot
+        return snap.epoch, snap.token, snap.now, action.arc
+
+    def _mark_planned_route_complete(self) -> None:
+        self._completed_plan_route_key = self._plan_route_key()
+
+    def planned_route_completed(self) -> bool:
+        """Confirm actual route completion for this exact committed prefix."""
+        key = self._plan_route_key()
+        return key is not None and key == self._completed_plan_route_key
+
+    def planned_route_progress(self) -> int:
+        """Return fully released segments for this exact committed route only."""
+        key = self._plan_route_key()
+        return self._route_completed_segments if key is not None and key == self._route_progress_key else 0
+
     def _apply_segment(self, fraction: float) -> None:
         """이동 구간 진행분을 위치/배터리에 반영한다."""
         if self._segment is None:
@@ -284,11 +337,24 @@ class Robot:
         if self._segment is not None:
             *_, t0, t1, _ = self._segment
             self._apply_segment(self._segment_fraction(t0, t1))
+        self._settle_charge()
+        self._settle_work()
+        self._clear_route()
+
+    def _settle_work(self) -> None:
+        if self._work_started is not None:
+            consumed = min(self.battery, self.engine.plant.work_drain_per_sec * (self.env.now - self._work_started))
+            self.work_energy_units += consumed
+            self.battery = max(0.0, self.battery - consumed)
+            self._work_started = None
+
+    def _settle_charge(self) -> None:
         if self._charge_step is not None:
             start, rate = self._charge_step
-            self.battery = min(self.capacity, self.battery + rate * (self.env.now - start))
+            gained = min(self.capacity - self.battery, max(0, rate * (self.env.now - start)))
+            self.battery += gained
+            self.charged_energy_units += gained
             self._charge_step = None
-        self._clear_route()
 
     def _clear_route(self) -> None:
         """남은 이동 경로를 비운다."""
@@ -316,10 +382,28 @@ class Robot:
         """로봇 메인 프로세스."""
         while self.alive:
             try:
+                if self.planned_action is not None:
+                    from simulation.planning.execution import execute
+
+                    yield from execute(self)
+                    continue
                 if self._depleted:
                     yield from self._fault_process()
                     continue
-                if self.forced_charge or (
+                if hasattr(self.engine.scheduler, "idle_charge_process") and self.current_task is None:
+                    self._wake = self.env.event()
+                    charging = yield from self.engine.scheduler.idle_charge_process(self)
+                    self._wake = None
+                    if self.planned_action is not None:
+                        continue
+                    if charging and self.current_task is None:
+                        try:
+                            yield from self._charge_process()
+                        finally:
+                            self.engine.scheduler.charge_finished(self)
+                        continue
+                    self.forced_charge = False
+                elif self.forced_charge or (
                     self.current_task is None and self.engine.scheduler.should_charge(self, self.engine)
                 ):
                     yield from self._charge_process()
@@ -349,10 +433,12 @@ class Robot:
 
     def _handle_interrupt(self, cause: Any) -> None:
         """인터럽트 원인별 처리."""
+        self.planned_action = None
         kind = cause.get("kind") if isinstance(cause, dict) else str(cause)
         task = cause.get("task") if isinstance(cause, dict) else None
         if kind == InterruptKind.RETIRE:
             self.alive = False
+            self.retired_at = self.env.now
             self._requeue_current()
             return
         if kind == InterruptKind.CHARGE:
@@ -361,7 +447,7 @@ class Robot:
         elif kind == InterruptKind.RECALL:
             self.forced_charge = False
             self.target_id = None
-        elif kind in (InterruptKind.PREEMPT, InterruptKind.STATION_DOWN):
+        elif kind in (InterruptKind.PREEMPT, InterruptKind.STATION_DOWN, InterruptKind.REPLAN):
             self._requeue_current()
         if task is not None:
             self.engine.assign(task, self)
@@ -389,15 +475,15 @@ class Robot:
             self._clear_route()
             raise BatteryDepleted()
 
-    def _wait_for_traffic(self, request: LaneRequest, reason: str,
-                          identifier: str) -> Generator[Any, Any, None]:
+    def _wait_for_traffic(self, request: LaneRequest, reason: str, identifier: str) -> Generator[Any, Any, None]:
         """자원 확보 전에는 진입점에서 대기하고 중단 시에도 대기 계측을 정리한다."""
         started = float(self.env.now)
         if not request.triggered:
             self.wait_reason, self.wait_resource, self.wait_since = reason, identifier, started
             self._set_state(RobotState.WAITING)
         try:
-            yield request
+            channel = "corridor" if identifier.startswith("edge:") else "intersection"
+            yield from observe_wait(self, request, channel, identifier)
         finally:
             elapsed = float(self.env.now) - started
             if identifier.startswith("edge:"):
@@ -405,11 +491,13 @@ class Robot:
             else:
                 self.engine.metrics.record_intersection_wait(elapsed)
             if elapsed > config.DEADLOCK_THRESHOLD_SEC:
-                self.engine.metrics.record_deadlock()
+                self.engine.metrics.record_long_wait()
             self.wait_reason, self.wait_resource, self.wait_since = "", "", None
         self._set_state(RobotState.MOVING)
 
-    def _ride_process(self, lift_id: str, tx: float, ty: float, floor: int) -> Generator[Any, Any, None]:
+    def _ride_process(
+        self, lift_id: str, tx: float, ty: float, floor: int, expected_source: float | None = None
+    ) -> Generator[Any, Any, None]:
         """실제 캐빈 도착·하차 후 점유를 해제하고 보류한 제어 명령을 처리한다."""
         elevator = self.engine.elevators.get(lift_id)
         if elevator is None or not elevator.active:
@@ -417,21 +505,41 @@ class Robot:
         wait_start = self.env.now
         with elevator.resource.request() as request:
             self._set_state(RobotState.WAITING)
-            yield request
+            yield from observe_wait(self, request, "cabin", "cabin:" + lift_id)
             self.engine.metrics.record_ev_wait(self.env.now - wait_start)
+            if expected_source is not None and abs(elevator.floor_position() - expected_source) > 1e-6:
+                self.engine.ledger.emit(
+                    "planning_cabin_source_changed",
+                    robot=self.robot_id,
+                    cabin=lift_id,
+                    expected=expected_source,
+                    actual=elevator.floor_position(),
+                )
+                raise simpy.Interrupt({"kind": InterruptKind.REPLAN})
             yield from elevator.arrive(self.floor)
             self._set_state(RobotState.MOVING)
             self._riding = elevator
+            self._cabin_request = request
+            self._cabin_destination = floor
+            travel_seconds = max(0.0, float(elevator.cfg.travel_time))
+            door_seconds = elevator.door_time / 2.0
+            distance = abs(float(floor) - elevator.floor_position())
+            self._cabin_release_at = float(self.env.now) + distance * travel_seconds + door_seconds
             try:
-                while True:
-                    try:
-                        yield from elevator.carry(floor)
-                        break
-                    except simpy.Interrupt as interruption:
-                        self._defer_control(interruption.cause)
+                self.engine.ledger.emit("cabin_boarded", robot=self.robot_id, cabin=lift_id, floor=self.floor)
+                yield from elevator.carry(
+                    floor,
+                    travel_seconds=travel_seconds,
+                    door_seconds=door_seconds,
+                    defer=self._defer_control,
+                )
             finally:
                 self._riding = None
+                self._cabin_request = None
+                self._cabin_release_at = None
+                self._cabin_destination = None
         self.x, self.y, self.floor = tx, ty, floor
+        self.engine.ledger.emit("cabin_arrived", robot=self.robot_id, cabin=lift_id, floor=floor)
         self._raise_pending_control()
 
     def _travel_route(self, route: Route, not_before: tuple[float, ...] = ()) -> Generator[Any, Any, None]:
@@ -441,15 +549,25 @@ class Robot:
             yield gate
             raise simpy.Interrupt({"kind": InterruptKind.STATION_DOWN})
         count = len(route.points)
-        if not_before and (len(not_before) != count or not all(math.isfinite(t) for t in not_before) or
-                           any(a > b for a, b in pairwise(not_before))):
+        if not_before and (
+            len(not_before) != count
+            or not all(math.isfinite(t) for t in not_before)
+            or any(a > b for a, b in pairwise(not_before))
+        ):
             raise ValueError("one finite planned start is required per route segment")
         self.route = list(route.points)
         self.route_floors = list(route.floors) if len(route.floors) == count else [self.floor] * count
         self.route_lifts = list(route.lifts) if len(route.lifts) == count else [None] * count
+        self._route_progress_key = self._plan_route_key() if not_before else None
+        self._route_completed_segments = 0
         has_graph = len(route.nodes) == count and len(route.prev_nodes) == count and count > 0
         corridors = self.engine.corridors
         index = 0
+        planned_cabins = iter(())
+        if not_before and self.planned_action is not None:
+            result, action = self.planned_action
+            if action.arc.route is not None:
+                planned_cabins = iter(result.input.routes[action.arc.route].cabins)
         while index < count:
             # A layout change may start while the previous section is occupied.
             # Wait outside it, then let the normal control path re-plan the task.
@@ -462,16 +580,20 @@ class Robot:
             tx, ty = self.route[0]
             lift, floor = self.route_lifts[0], self.route_floors[0]
             if lift is not None and floor != self.floor:
-                yield from self._ride_process(lift, tx, ty, floor)
+                planned = next(planned_cabins, None)
+                yield from self._ride_process(lift, tx, ty, floor, planned.source_floor if planned else None)
                 self._pop_route()
                 index += 1
+                self._route_completed_segments = index
                 continue
             end = corridors.section_end(route, index) if has_graph else index
             yield from self._travel_section(route, index, end, has_graph, not_before)
             index = end + 1
+            self._route_completed_segments = index
 
-    def _travel_section(self, route: Route, start: int, end: int,
-                        has_graph: bool, not_before: tuple[float, ...] = ()) -> Generator[Any, Any, None]:
+    def _travel_section(
+        self, route: Route, start: int, end: int, has_graph: bool, not_before: tuple[float, ...] = ()
+    ) -> Generator[Any, Any, None]:
         """Atomically acquire the whole section and release only after tail clearance."""
         corridors = self.engine.corridors
         reservations = {}
@@ -488,6 +610,8 @@ class Robot:
                 if corridors.is_intersection(node):
                     labels[corridors.intersection_resource(node)] = (f"node:{node}", "교차로 진입 대기")
         request = corridors.arbiter.request(reservations, self.robot_id) if reservations else None
+        self._traffic_request = request
+        self._traffic_release_at = None
         try:
             self._traffic_section_active = True
             if request is not None:
@@ -517,18 +641,21 @@ class Robot:
                         # The stalled robot still owns the physical corridor.
                         self.route, self.route_floors, self.route_lifts = map(list, remaining)
                         yield from self._fault_process(protected=True)
-                        if not self._pending_control or self._pending_control.get("kind") != InterruptKind.RETIRE:
-                            self._pending_control = {"kind": InterruptKind.CHARGE}
+                        self._defer_control({"kind": InterruptKind.CHARGE})
                         self._set_state(RobotState.MOVING)
                 self._pop_route()
                 if has_graph and corridors.is_intersection(route.nodes[index]):
                     duration = self.cfg.length / max(0.05, self.cfg.move_speed) + config.INTERSECTION_MARGIN_SEC
                     yield from self._protected_delay(duration)
             if request is not None:
-                yield from self._protected_delay(tail_clearance_seconds(self.cfg.length, self.cfg.move_speed))
+                tail = tail_clearance_seconds(self.cfg.length, self.cfg.move_speed)
+                self._traffic_release_at = float(self.env.now) + tail
+                yield from self._protected_delay(tail)
         finally:
             if request is not None:
                 request.release()
+            self._traffic_request = None
+            self._traffic_release_at = None
             self._finish_traffic_section()
         self._raise_pending_control()
 
@@ -540,9 +667,20 @@ class Robot:
             except simpy.Interrupt as interruption:
                 self._defer_control(interruption.cause)
 
-    def _defer_control(self, cause: Any) -> None:
-        if self._pending_control is None or self._pending_control.get("kind") != InterruptKind.RETIRE:
-            self._pending_control = cause if isinstance(cause, dict) else {"kind": str(cause)}
+    def _defer_control(self, cause: Any) -> bool:
+        new = cause if isinstance(cause, dict) else {"kind": str(cause)}
+        old = self._pending_control
+        if old is not None and old.get("kind") == InterruptKind.RETIRE:
+            return new.get("task") is None
+        if (
+            old is not None
+            and old.get("task") is not None
+            and old.get("task") is not new.get("task")
+            and old.get("task") is not self.current_task
+        ):
+            self.engine.requeue_task(old["task"])
+        self._pending_control = new
+        return True
 
     def _raise_pending_control(self) -> None:
         if self._pending_control is not None:
@@ -558,29 +696,49 @@ class Robot:
             self.cfg = replace(self.cfg, width=width, length=length)
             self._pending_dimensions = None
 
-    def _task_process(self) -> Generator[Any, Any, None]:
+    def _task_process(
+        self,
+        planned_route: Route | None = None,
+        not_before: tuple[float, ...] = (),
+        work_not_before: float | None = None,
+    ) -> Generator[Any, Any, None]:
         """배정된 작업 1건을 수행한다: 이동 → 대기열 → 작업."""
         task = self.current_task
         assert task is not None
         engine = self.engine
         station = engine.stations.get(task.station_id)
-        if station is None or not station.active:
+        if station is None or not station.active or station.cfg.task_type != task.operation:
             self._requeue_current()
             return
-        route = engine.path_graph.route_to_facility(self.x, self.y, station.id, self.floor, self.cfg.width)
+        route = planned_route or engine.path_graph.route_to_facility(
+            self.x, self.y, station.id, self.floor, self.cfg.width
+        )
         if route is None:
             self.current_task = None
             engine.report_unreachable(task, self)
             yield self.env.timeout(1.0)
             return
         self.target_id = station.id
+        self.engine.task_state(task, TaskState.TRAVELING)
         self._set_state(RobotState.MOVING)
-        yield from self._travel_route(route)
+        yield from self._travel_route(route, not_before)
+        self._mark_planned_route_complete()
+
+        if work_not_before is not None and self.env.now < work_not_before:
+            self._set_state(RobotState.WAITING)
+            yield self.env.timeout(work_not_before - self.env.now)
 
         self._set_state(RobotState.WAITING)
+        self.engine.task_state(task, TaskState.WAITING)
+        station_wait = self.env.now
         with station.resource.request(priority=task.priority) as request:
-            yield request
-            if not station.active or engine.stations.get(station.id) is not station:
+            yield from observe_wait(self, request, "station", "work:" + station.id)
+            engine.metrics.record_station_wait(self.env.now - station_wait)
+            if (
+                not station.active
+                or engine.stations.get(station.id) is not station
+                or station.cfg.task_type != task.operation
+            ):
                 self._requeue_current()
                 return
             self._set_state(RobotState.WORKING)
@@ -590,16 +748,32 @@ class Robot:
             self._work_started = float(started)
             completed = False
             try:
-                duration = (max(0.5, station.cfg.avg_process_time + task.process_noise * station.cfg.process_time_std)
-                            if task.process_noise is not None else station.sample_process_time())
-                yield self.env.timeout(duration)
-                completed = True
+                duration = (
+                    max(0.5, station.cfg.avg_process_time + task.process_noise * station.cfg.process_time_std)
+                    if task.process_noise is not None
+                    else station.sample_process_time()
+                )
+                rate = engine.plant.work_drain_per_sec
+                available_time = self.battery / rate if rate > 0 else math.inf
+                yield self.env.timeout(min(duration, available_time))
+                self._settle_work()
+                if available_time + 1e-9 < duration:
+                    station.end(False)
+                    self._depleted = True
+                    self._fault_holding = True
+                    try:
+                        yield from self._fault_process(protected=True)
+                    finally:
+                        self._fault_holding = False
+                else:
+                    completed = True
             finally:
-                station.end(completed)
-                drain = min(self.battery, config.WORK_DRAIN_PER_SEC * (self.env.now - started))
-                self.work_energy_units += drain
-                self.battery = max(0.0, self.battery - drain)
-                self._work_started = None
+                self._settle_work()
+                if station.current_task is task:
+                    station.end(completed)
+        self._raise_pending_control()
+        if not completed:
+            return
         self.current_task = None
         self.target_id = None
         self.tasks_done += 1
@@ -609,8 +783,11 @@ class Robot:
         """충전소로 이동하여 목표 잔량까지 충전한다."""
         engine = self.engine
         charger = engine.scheduler.choose_charger(self, engine)
-        route = (engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor, self.cfg.width)
-                 if charger else None)
+        route = (
+            engine.path_graph.route_to_facility(self.x, self.y, charger.id, self.floor, self.cfg.width)
+            if charger
+            else None
+        )
         if charger is None or route is None:
             self.forced_charge = False
             self._set_state(RobotState.IDLE)
@@ -627,23 +804,25 @@ class Robot:
         self._set_state(RobotState.CHARGE_WAIT)
         wait_start = self.env.now
         with charger.resource.request() as request:
-            yield request
+            yield from observe_wait(self, request, "charge", "charge:" + charger.id)
             engine.metrics.record_charge_wait(self.env.now - wait_start)
             self._set_state(RobotState.CHARGING)
             self.charge_sessions += 1
             charger.occupants.add(self.robot_id)
             try:
                 while self.alive and charger.active:
-                    target_pct = engine.scheduler.charge_target(self, engine)
+                    if hasattr(engine.scheduler, "target_process"):
+                        target_pct = yield from engine.scheduler.target_process(self)
+                    else:
+                        target_pct = engine.scheduler.charge_target(self, engine)
                     target = target_pct / 100.0 * self.capacity
                     if self.battery_pct >= target_pct - 1e-6:
                         break
-                    rate = max(0.01, float(charger.cfg.charge_rate))
+                    rate = max(1e-9, float(charger.cfg.charge_rate))
                     step = min(config.CHARGE_STEP, (target - self.battery) / rate)
                     self._charge_step = (self.env.now, rate)
                     yield self.env.timeout(step)
-                    self._charge_step = None
-                    self.battery = min(self.capacity, self.battery + rate * step)
+                    self._settle_charge()
             finally:
                 charger.occupants.discard(self.robot_id)
         self.forced_charge = False
@@ -655,9 +834,13 @@ class Robot:
         self._requeue_current()
         self.engine.on_robot_fault(self)
         if protected:
-            yield from self._protected_delay(config.FAULT_RECOVERY_TIME)
+            yield from self._protected_delay(self.engine.plant.fault_recovery_time)
         else:
-            yield self.env.timeout(config.FAULT_RECOVERY_TIME)
-        self.battery = self.capacity * config.RESCUE_BATTERY_LEVEL / 100.0
+            yield self.env.timeout(self.engine.plant.fault_recovery_time)
+        target = self.capacity * self.engine.plant.rescue_battery_pct / 100.0
+        injected = max(0.0, target - self.battery)
+        self.rescue_energy_units += injected
+        self.battery += injected
+        self.engine.ledger.emit("robot_rescued", robot=self.robot_id, injected=injected)
         self._depleted = False
         self.forced_charge = True

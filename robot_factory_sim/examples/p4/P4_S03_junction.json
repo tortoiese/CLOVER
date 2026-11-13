@@ -1,0 +1,428 @@
+{
+  "schema": "clover-scenario-v1",
+  "id": "P4_S03_junction",
+  "units": {
+    "coordinates": "px",
+    "metres_per_pixel": 0.1,
+    "dimensions": "m",
+    "time": "sim-s",
+    "energy": "battery-unit"
+  },
+  "factory": {
+    "profile": {
+      "id": 1,
+      "factory_name": "Default Factory",
+      "floor_width": 400,
+      "floor_height": 400,
+      "grid_cell_size": 50.0,
+      "edge_clearance": 0.4,
+      "side_clearance": 0.3,
+      "floor_travel_sec": 4.0,
+      "door_time_sec": 6.0,
+      "floor_count": 1
+    },
+    "stations": [
+      {
+        "id": "S0",
+        "label": "S0",
+        "x": 50,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      },
+      {
+        "id": "S1",
+        "label": "S1",
+        "x": 75,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      },
+      {
+        "id": "S2",
+        "label": "S2",
+        "x": 100,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      },
+      {
+        "id": "S3",
+        "label": "S3",
+        "x": 300,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      },
+      {
+        "id": "S4",
+        "label": "S4",
+        "x": 325,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      },
+      {
+        "id": "S5",
+        "label": "S5",
+        "x": 350,
+        "y": 200,
+        "width": 80.0,
+        "height": 60.0,
+        "task_type": "inspection",
+        "avg_process_time": 8,
+        "process_time_std": 0,
+        "is_active": true,
+        "floor": 1
+      }
+    ],
+    "chargers": [
+      {
+        "id": "C",
+        "x": 200,
+        "y": 300,
+        "capacity": 4,
+        "charge_rate": 2.0,
+        "is_active": true,
+        "floor": 1
+      }
+    ],
+    "robots": [
+      {
+        "id": "R0",
+        "robot_type": "AGV",
+        "battery_capacity": 100.0,
+        "move_speed": 1,
+        "battery_drain_rate": 0.5,
+        "charge_threshold": 20.0,
+        "is_active": true,
+        "width": 0.6,
+        "length": 0.8
+      },
+      {
+        "id": "R1",
+        "robot_type": "AGV",
+        "battery_capacity": 100.0,
+        "move_speed": 1,
+        "battery_drain_rate": 0.5,
+        "charge_threshold": 20.0,
+        "is_active": true,
+        "width": 0.6,
+        "length": 0.8
+      },
+      {
+        "id": "R2",
+        "robot_type": "AGV",
+        "battery_capacity": 100.0,
+        "move_speed": 1,
+        "battery_drain_rate": 0.5,
+        "charge_threshold": 20.0,
+        "is_active": true,
+        "width": 0.6,
+        "length": 0.8
+      }
+    ],
+    "obstacles": [],
+    "nodes": [
+      {
+        "id": 1,
+        "x": 200,
+        "y": 200,
+        "node_type": "intersection",
+        "linked_station_id": null,
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 2,
+        "x": 200,
+        "y": 300,
+        "node_type": "charger",
+        "linked_station_id": "C",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 10,
+        "x": 50,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S0",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 11,
+        "x": 75,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S1",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 12,
+        "x": 100,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S2",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 13,
+        "x": 300,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S3",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 14,
+        "x": 325,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S4",
+        "floor": 1,
+        "capacity": null
+      },
+      {
+        "id": 15,
+        "x": 350,
+        "y": 200,
+        "node_type": "station",
+        "linked_station_id": "S5",
+        "floor": 1,
+        "capacity": null
+      }
+    ],
+    "edges": [
+      {
+        "id": 1,
+        "from_node": 1,
+        "to_node": 2,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 2,
+        "from_node": 1,
+        "to_node": 12,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 3,
+        "from_node": 12,
+        "to_node": 11,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 4,
+        "from_node": 11,
+        "to_node": 10,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 5,
+        "from_node": 1,
+        "to_node": 13,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 6,
+        "from_node": 13,
+        "to_node": 14,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      },
+      {
+        "id": 7,
+        "from_node": 14,
+        "to_node": 15,
+        "distance": null,
+        "is_bidirectional": true,
+        "width": 5
+      }
+    ],
+    "elevators": []
+  },
+  "duration": 180,
+  "warmup": 0,
+  "check_interval": 1,
+  "initial_robots": {
+    "R0": {
+      "x": 200,
+      "y": 300,
+      "floor": 1,
+      "soc_pct": 100
+    },
+    "R1": {
+      "x": 200,
+      "y": 300,
+      "floor": 1,
+      "soc_pct": 100
+    },
+    "R2": {
+      "x": 200,
+      "y": 300,
+      "floor": 1,
+      "soc_pct": 100
+    }
+  },
+  "initial_cabins": {},
+  "plant": {
+    "work_drain_per_sec": 0.05,
+    "fault_recovery_time": 60.0,
+    "rescue_battery_pct": 15.0
+  },
+  "workload": {
+    "kind": "trace",
+    "jobs": [
+      {
+        "uid": "g0-j0",
+        "at": 0,
+        "station": "S0",
+        "allowed": [
+          "S0"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 90
+      },
+      {
+        "uid": "g0-j1",
+        "at": 0,
+        "station": "S1",
+        "allowed": [
+          "S1"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 90
+      },
+      {
+        "uid": "g0-j2",
+        "at": 0,
+        "station": "S2",
+        "allowed": [
+          "S2"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 90
+      },
+      {
+        "uid": "g1-j0",
+        "at": 60,
+        "station": "S3",
+        "allowed": [
+          "S3"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 150
+      },
+      {
+        "uid": "g1-j1",
+        "at": 60,
+        "station": "S4",
+        "allowed": [
+          "S4"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 150
+      },
+      {
+        "uid": "g1-j2",
+        "at": 60,
+        "station": "S5",
+        "allowed": [
+          "S5"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 150
+      },
+      {
+        "uid": "g2-j0",
+        "at": 120,
+        "station": "S0",
+        "allowed": [
+          "S0"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 210
+      },
+      {
+        "uid": "g2-j1",
+        "at": 120,
+        "station": "S1",
+        "allowed": [
+          "S1"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 210
+      },
+      {
+        "uid": "g2-j2",
+        "at": 120,
+        "station": "S2",
+        "allowed": [
+          "S2"
+        ],
+        "operation": "inspection",
+        "priority": 2,
+        "noise": 0,
+        "deadline": 210
+      }
+    ]
+  },
+  "interventions": []
+}

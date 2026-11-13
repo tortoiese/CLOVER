@@ -1,0 +1,9 @@
+{
+  "scope": "pilot amendment before held-out evaluation; retain original failed timing sample",
+  "source_hash": "d089747ab2debab3735be4b20a0196ba143ba9a8d2b02b41ede69f575410b9b7",
+  "trigger": "duration_8_600/P4_charge_rate08_T600__rh_cpsat_native__1001.json",
+  "observed_publication_seconds": 0.1363467499613762,
+  "previous_reserve": 0.1,
+  "new_reserve": 0.2,
+  "comparison": "all seven policies on same input and seed; no selective native rerun or pooled timing modes"
+}

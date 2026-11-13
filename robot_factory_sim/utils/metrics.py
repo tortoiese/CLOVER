@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 import config
@@ -77,9 +77,24 @@ class MetricsCollector:
         self.intersection_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.ev_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.deadlock_count = 0
+        self.long_wait_count = 0
+        self.sample_totals: dict[str, float] = {}
+        self.sample_counts: dict[str, int] = {}
+        self.sample_sink: Callable[[str, float], None] | None = None
         self.total_completed = 0
         self.orders_finished = 0
         self.orders_on_time = 0
+
+    def _sample(self, channel: str, value: float) -> None:
+        self.sample_totals[channel] = self.sample_totals.get(channel, 0.0) + value
+        self.sample_counts[channel] = self.sample_counts.get(channel, 0) + 1
+        if self.sample_sink is not None:
+            self.sample_sink(channel, value)
+
+    def mean(self, channel: str) -> float:
+        """Return a whole-run mean; the GUI's bounded sample deque is separate."""
+        count = self.sample_counts.get(channel, 0)
+        return self.sample_totals[channel] / count if count else math.nan
 
     def record_task_completed(self, now: float, cycle_time: float) -> None:
         """작업 완료를 기록한다.
@@ -90,6 +105,7 @@ class MetricsCollector:
         """
         self.completions.append(now)
         self.cycle_times.append(cycle_time)
+        self._sample("cycle", cycle_time)
         self.total_completed += 1
 
     def record_wait(self, wait: float) -> None:
@@ -99,6 +115,7 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.wait_times.append(max(0.0, wait))
+        self._sample("arrival_to_start", max(0.0, wait))
 
     def record_charge_wait(self, wait: float) -> None:
         """충전 대기시간을 기록한다.
@@ -107,6 +124,7 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.charge_waits.append(max(0.0, wait))
+        self._sample("charger_queue", max(0.0, wait))
 
     def record_response(self, response: float) -> None:
         """긴급 이벤트 대응시간을 기록한다.
@@ -115,6 +133,7 @@ class MetricsCollector:
             response: 감지~첫 배정까지 시간 (sim-sec)
         """
         self.response_times.append(max(0.0, response))
+        self._sample("response", max(0.0, response))
 
     def record_corridor_wait(self, wait: float) -> None:
         """통로(차선) 대기시간을 기록한다.
@@ -123,6 +142,7 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.corridor_waits.append(max(0.0, wait))
+        self._sample("corridor_queue", max(0.0, wait))
 
     def record_ev_wait(self, wait: float) -> None:
         """엘리베이터 대기시간을 기록한다.
@@ -131,18 +151,24 @@ class MetricsCollector:
             wait: 대기시간 (sim-sec)
         """
         self.ev_waits.append(max(0.0, wait))
+        self._sample("elevator_queue", max(0.0, wait))
+
+    def record_long_wait(self) -> None:
+        """Count a completed long-wait episode without asserting a deadlock."""
+        self.long_wait_count += 1
 
     def record_intersection_wait(self, wait: float) -> None:
-        """교차로 자원 대기시간을 기록한다.
-
-        Args:
-            wait: 대기시간(sim-sec).
-        """
+        """Record a bundle wait attributed to an intersection blocker."""
         self.intersection_waits.append(max(0.0, wait))
+        self._sample("intersection_queue", max(0.0, wait))
+
+    def record_station_wait(self, wait: float) -> None:
+        """Record an actual station queue admission wait."""
+        self._sample("station_queue", max(0.0, wait))
 
     def record_deadlock(self) -> None:
-        """통로 대기가 임계치(config.DEADLOCK_THRESHOLD_SEC)를 넘은 경우를 집계한다."""
-        self.deadlock_count += 1
+        """Legacy long-wait API; does not assert a proven circular deadlock."""
+        self.record_long_wait()
 
     def record_order_finished(self, on_time: bool) -> None:
         """주문 종료를 기록한다.
@@ -160,7 +186,7 @@ class MetricsCollector:
         Returns:
             평균 사이클 타임 (sim-sec)
         """
-        value = _mean(self.cycle_times)
+        value = self.mean("cycle")
         return config.DEFAULT_TASK_CYCLE if math.isnan(value) else value
 
     def throughput(self, now: float) -> float:
@@ -199,17 +225,18 @@ class MetricsCollector:
         order_rate = (self.orders_on_time / self.orders_finished * 100.0) if self.orders_finished else math.nan
         return {
             "throughput": self.throughput(now),
-            "avg_wait": _mean(self.wait_times),
+            "avg_wait": self.mean("arrival_to_start"),
             "utilization": busy / total * 100.0 if total > 0 else 0.0,
-            "charge_wait": _mean(self.charge_waits),
+            "charge_wait": self.mean("charger_queue"),
             "idle_rate": idle / total * 100.0 if total > 0 else 0.0,
             "battery_eff": self.total_completed / sessions if sessions else math.nan,
             "order_fulfillment": order_rate,
-            "response_time": _mean(self.response_times),
-            "corridor_wait": _mean(self.corridor_waits),
-            "intersection_wait": _mean(self.intersection_waits),
-            "ev_wait": _mean(self.ev_waits),
-            "deadlock_count": float(self.deadlock_count),
+            "response_time": self.mean("response"),
+            "corridor_wait": self.mean("corridor_queue"),
+            "intersection_wait": self.mean("intersection_queue"),
+            "ev_wait": self.mean("elevator_queue"),
+            "deadlock_count": float(self.long_wait_count),  # legacy GUI label: long traffic wait
+            "long_wait_count": float(self.long_wait_count),
         }
 
 
