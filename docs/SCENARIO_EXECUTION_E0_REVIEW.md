@@ -87,6 +87,12 @@ S01의 사전 지정 작은 결정적 배치에서는8건 모두 완료했고 op
 
 PR #14 통합 소스의 S08 두 캐빈 조건×7정책×D0/D1 **추가14회**를 실행했고, 전부 SUCCESS·원시 지표·replay·불변식 검수를 통과했다. D1 7회의 coverage/소유 자원 해제와 D0 baseline의 원래 물리 digest 일치도 확인했다. [사전 규약](scenarios/e0_execution_20261113/roam_canary_protocol.json)과 [14회 판정](scenarios/e0_execution_20261113/roam_canary_receipt.json)은 기존 세 소스 결과와 분리했다. 최종 합계는185+42+42+14=**283회 기능 검수**이며 독립 반복 수나 본 실험 수가 아니다. 앞의269회는 해당 세 소스의 보존 기록이다.
 
+### Windows GUI 검사 동기화
+
+`77cbac9`의 [Windows3.11 CI](https://github.com/tortoiese/CLOVER/actions/runs/43439932452/job/131934600625)는501개 통과·기존 GUI1개 실패였다. 이 실패를 성공으로 합치지 않는다. `test_alert_keeps_workspace_size_and_selected_floor`는 고정250ms 후 층을 선택했으며, 늦게 들어온 최초 layout은 다층 개요로 화면을 초기화할 수 있었다. stage의 detail_mode가False라는 기록과 해당 초기화 경로를 확인했다.
+
+검사는 worker 준비·실제 최초 화면 상태를 상한이 있는 조건 대기로 확인한 뒤 층을 선택하고, 실제 애니메이션 완료를 기다리도록 보완했다. 기존 층·패널 크기·도면 배율·알림 검증은 유지한다. 제품 GUI나 시뮬레이션 런타임은 바꾸지 않았으며 변경은 GUI 검사 파일과 문서뿐이다. 따라서283회 자료의 원래 소스 해시를 보존하고 solver 성능 재실행으로 세지 않는다. 최종 교차 플랫폼 성공 여부는 PR checks로 확인한다.
+
 ## 다음 단계와 완료 조건
 
 1. **R1 실제 입력**: 팀의 지도·방향·거리·폭·초기 SOC/캐빈 층·설비·납기를 참조 JSON에 반영한다. 실제 고정 trace의 설계별 대응 import는 별도 구현한다.

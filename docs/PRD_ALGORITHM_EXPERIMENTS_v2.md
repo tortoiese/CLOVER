@@ -769,3 +769,5 @@ S09의 300~420초 사건을 일반 warmup600초 이전에 놓으면 교란을 �
 작업 종료 확인 중 추가 병합된 PR #14의 main `3dfb4ba`도 충돌 없이 통합했다. GUI의 `roam=True`는 유휴 순회·초기 층 분산을 추가하므로, 고정 입력 실험 runner에는 `roam=False`를 명시했다. 무수요 다층 baseline/optimized의 이동·소비 에너지·캐빈 이동0과 replay를 검증하는2개 회귀를 추가했다. GUI의 순회 실행 및 ROI 환산 가정은 공식 headless 실험의 입력/주 지표와 구분한다.
 
 코드 `77cbac9`에서 Python3.11 전체502검사·시나리오 모듈33검사와 다층1조건×7정책×D0/D1의 추가14회 실행·원시 지표·replay·불변식 검수를 통과했다. [순회 경계14회 판정](scenarios/e0_execution_20261113/roam_canary_receipt.json)과 [로컬 검사](scenarios/e0_execution_20261113/local_pr14_integration.json)를 보존하며 교차 플랫폼 최신 판정은 PR #13 checks에서 확인한다. 총283회는 소스별 기능 검수다. E1 후보162개를 성능 실험한 것으로 세거나 R1 실제 지도·λ 확정 및 R2~R7을 완료 처리하지 않는다.
+
+이후 Windows3.11 CI의501통과·GUI1실패도 보존했다. 고정250ms 대기 때문에 첫 layout 도착 전에 층 선택을 하던 검사에 worker/초기 상태/애니메이션 완료의 조건 대기를 적용했다. 화면의 층·크기·배율 assertion과 제한 시간은 유지하며 제품/물리 런타임은 변경하지 않는다. [E0 보고서의 CI 동기화 기록](SCENARIO_EXECUTION_E0_REVIEW.md#windows-gui-검사-동기화)과 최종 PR checks를 함께 확인한다.
