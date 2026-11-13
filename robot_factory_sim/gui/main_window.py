@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self._worker.start()
         self._console.add_system_message(f"DB 연결: {service.db_path}\n[▶ 시작]을 누르면 시뮬레이션과 DB 감시가 시작됩니다.")
         if self._comparison_enabled:
-            self._console.add_system_message("운영안 비교: [운영안 비교]에서 정책·조건 입력 → /최적화 → /추천. "
+            self._console.add_system_message("운영안 비교: [운영안 비교]에서 조건 입력 → /최적화 → /추천. "
                                              "문서 질문은 /검색 ROI 산식. 결과는 자동 적용되지 않습니다.")
 
     # ------------------------------------------------------------------
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
                                          "현재 구성으로 베이스라인·MILP 배정을 비교합니다.")
         comparison_action.setEnabled(self._comparison_enabled)
         if not self._comparison_enabled:
-            comparison_action.setToolTip("비교 계산 실행 함수가 연결되지 않았습니다.")
+            comparison_action.setToolTip("CLOVER_RAG_ENABLED=1로 실행하면 활성화됩니다.")
 
         spacer = QWidget(self)
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)

@@ -54,10 +54,13 @@ headless의 D0나 `d1-staged-budget-v1`과 같은 실험이라고 부르지 않�
 
 ## 검증 결과
 
+기능 검수 commit `63e3057`의 Python source hash는 `dd6f8c51003c66d763af6c9a7baf264b81a10ca517885af2e0069a782dcd89f4`다.
 최초 통합 기능 검수: Python 3.11·3.14 각각 446 passed(기존 P4 430 + live/GUI 16).
 추가 물리 실행 57/57 SUCCESS, 기록 재생·원시 지표 57/57 일치, 기존 D0 물리 digest 36/36 보존.
 기본 config와 핵심 모델·자원·controller·runner 14파일을 P4와 byte 비교해 일치를 확인했다.
 기존 P4 591회 결과는 과거 source의 증거로 유지하며 이번 통합의 새 실행 수로 바꾸지 않는다.
-원격 CI와 main 병합 여부는 PR #10의 현재 상태로 확인한다.
+GUI 화면 검수 후 후보 수·최근 적용 판정·마지막 반환 계획의 표시를 보완했고, Python 3.11/3.14 각각 live/GUI 16개를 다시 통과했다. 이 후속 수정은 표시 getter/문구와 그 assertion이며 물리·수학·적용 로직을 변경하지 않았다.
+원격의 최종 전체 회귀와 main 병합 여부는 PR #10의 현재 checks/merged 상태로 확인한다.
+시간이 지난 native 최적 계획이 STALE_HORIZON으로 거부되어 대체 실행한 실제 GUI 기록도 보존했다. solver의 OPTIMAL 상태와 실제 채택을 혼동하지 않는다.
 
 P5/P6의 실제 팀 지도 본 실험, 통계·최종 선택 규칙은 이번 충돌 해결/GUI 통합과 별도다.

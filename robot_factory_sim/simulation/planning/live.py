@@ -154,7 +154,13 @@ class LiveRollingHorizonScheduler(RollingHorizonScheduler):
 
     def planning_state(self) -> dict[str, Any]:
         """Expose accepted/rejected prefix evidence without old reservation APIs."""
-        return {"scope": "traffic", "timing_protocol": "live-owner-poll-v1",
+        snapshot = (self.last_result.input.snapshot if self.last_result is not None else self.worker.pending)
+        return {"candidates": len(snapshot.jobs) if snapshot else 0,
+                "total_pending": snapshot.pending_count if snapshot else 0,
+                "reason": self.records[-1]["reason"] if self.records else self.last_execution,
+                "stale": sum(r["reason"].startswith("STALE") for r in self.records),
+                "report_token": self.last_result.input.snapshot.token if self.last_result else None,
+                "scope": "traffic", "timing_protocol": "live-owner-poll-v1",
                 "pending": self.worker.pending is not None, "execution_status": self.last_execution,
                 "report": asdict(self.last_result.report) if self.last_result else None,
                 "settings": asdict(self.settings), "accepted": sum(r["accepted"] for r in self.records),

@@ -117,5 +117,9 @@ def test_live_publication_keeps_unrelated_arrival_in_real_queue() -> None:
         assert plant.scheduler.records and plant.scheduler.records[0]['accepted'], plant.scheduler.records
         assert new in plant.pending_tasks and old not in plant.pending_tasks
         assert old.status != 'queued' and new.status == 'queued'
+        view = plant.scheduler.planning_state()
+        assert view['candidates'] == 1 and view['total_pending'] == 1
+        assert view['reason'] == plant.scheduler.records[-1]['reason']
+        assert view['report_token'] == plant.scheduler.last_result.input.snapshot.token
     finally:
         plant.close()

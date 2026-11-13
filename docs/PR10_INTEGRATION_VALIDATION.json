@@ -499,5 +499,17 @@
   "CI_lint": "isolated E4,E7,E9,F,I targeted and runtime hazard planner/decisions/evaluation passed",
   "prior_P4_evidence_is_historical": true,
   "CI_status": "pending on final PR head; see GitHub checks",
-  "main_merge_status": "not yet performed in this receipt"
+  "main_merge_status": "not yet performed in this receipt",
+  "functional_build_commit": "63e30579891f3911c061d7bd5fbac0de872dee7b",
+  "display_followup": {
+    "311": {
+      "passed": 16,
+      "junit_sha256": "5cd98c53008d747f7990ff36440f9eb62d72f5cfe62651922bee8fa5df2a4364"
+    },
+    "314": {
+      "passed": 16,
+      "junit_sha256": "29c0848c185793b28c505a561ce76ff0328c044932e302dceece7a7b9cb9cea4"
+    }
+  },
+  "display_followup_scope": "Only plan-state getters, dashboard labels, main-window text and getter assertions changed after functional build; no math/admission/physical/dispatch change."
 }

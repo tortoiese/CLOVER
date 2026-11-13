@@ -461,10 +461,11 @@ class DashboardPanel(QWidget):
             report = plan.get("report") or {}
             lines += ["", SchedulerModeLabel.LABELS.get(mode, mode) + " · " + plan["execution_status"],
                       f"계획 범위: {plan['scope']} · 후보 {plan.get('candidates', 0)}/{plan.get('total_pending', 0)}",
+                      "아래 해·경계는 마지막 반환 계획이며, 실제 채택은 적용 판정을 따릅니다.",
                       f"1단계 {report.get('phase1_status', '대기')}: 해 {report.get('phase1_cost')} / 경계 {report.get('phase1_bound')}",
                       f"2단계 {report.get('phase2_status', '대기')}: 해 {report.get('phase2_cost')} / 경계 {report.get('phase2_bound')}",
                       f"모델 {report.get('version', '')} · {report.get('backend_version', '')}",
-                      "판정 이유: " + (report.get("message") or str(plan.get("reason", "")) or "정상"),
+                      "최근 적용 판정: " + (str(plan.get("reason", "")) or report.get("message") or "대기"),
                       f"채택 {plan['accepted']} / 대체 {plan['fallbacks']} / 폐기 {plan.get('stale', 0)} / 지연 {plan['overruns']}",
                       "확정한 첫 행동은 실제 통행 자원 승인 뒤 실행합니다."]
             reservations = plan.get("reservations", [])
