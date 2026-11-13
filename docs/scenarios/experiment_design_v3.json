@@ -1,0 +1,1315 @@
+{
+  "schema": "clover-experiment-design-v3",
+  "document_date": "2026-11-13",
+  "status": "DESIGN_NOT_EXECUTED",
+  "execution_ready": false,
+  "warning_ko": "실험 설계 목록이다. clover-scenario-v1 입력이 아니며 --scenario에 전달하지 않는다. 62개 실제 지도/trace/설정과 E0 검사는 아직 미완료다.",
+  "baseline_commit": "b4861d0f0cf8f975243c802e1f597662a26cb948",
+  "source_summary_only": true,
+  "not_supplied_inputs": [
+    "CLOVER_6시나리오_구체화_v2.md",
+    "CLOVER_시나리오_추가6종.md",
+    "lambda_calc.py"
+  ],
+  "units": {
+    "geometry": "px, 0.1m/px",
+    "width": "m",
+    "time": "simulation_s",
+    "arrival_rate": "tasks/s",
+    "energy": "battery-unit",
+    "charge_rate": "battery-unit/s/occupied-slot"
+  },
+  "supported_policy_ids": [
+    "baseline",
+    "optimized",
+    "assignment_milp_legacy",
+    "rh_milp_grid",
+    "rh_cpsat_linear",
+    "rh_cpsat_interval",
+    "rh_cpsat_native"
+  ],
+  "core_policy_ids": [
+    "baseline",
+    "optimized",
+    "rh_milp_grid",
+    "rh_cpsat_linear"
+  ],
+  "native_additional_families": [
+    "S01",
+    "S04",
+    "S08",
+    "S11"
+  ],
+  "supported_intervention_kinds": [
+    "station_active",
+    "charger_active",
+    "robot_retire",
+    "edge_width",
+    "cancel_task"
+  ],
+  "not_supported_scenario_features": [
+    "robot_repair_reactivation",
+    "cabin_failure_injection",
+    "communication_delay_injection",
+    "cabin_capacity_2",
+    "robot_type_skill_enforcement"
+  ],
+  "common_controls": {
+    "initial_state": "identical at t=0 within each policy comparison",
+    "trace": "same UID arrivals eligibility noise priority deadline across policies",
+    "lambda": "fixed per physical treatment reference block, never per policy",
+    "D0_vs_D1": "separate cohorts",
+    "staged_D1": "decision_settings; RH math timing_mode D0",
+    "defaults_changed": false,
+    "stream_candidate_warmup_s": 600,
+    "stream_candidate_measurement_s": 7200,
+    "stream_candidate_duration_s": 7800,
+    "window_status": "must validate in E1, not a steady-state guarantee",
+    "physical_maps": "multiple predeclared layouts per final leaf",
+    "missing_concrete_inputs": [
+      "factory graph",
+      "robot and plant configurations",
+      "absolute lambda calibration",
+      "actual trace generator and output",
+      "decision/RH settings",
+      "deadline slack definition",
+      "resource exposure and audit acceptance thresholds"
+    ]
+  },
+  "lambda_candidates_from_teammate": {
+    "S00": 0.03,
+    "S02": 0.1,
+    "S04": 0.04,
+    "S06_mean": 0.17,
+    "S08": 0.08,
+    "S10": [
+      0.22,
+      0.26
+    ],
+    "status": "uncalibrated; S10 upper-bound claim requires explicit four robots and >=20s robot-work per job"
+  },
+  "burst_rule": {
+    "same_realized_job_count": true,
+    "lambda_mean_candidate": 0.17,
+    "burst_fraction": 0.1,
+    "burst_measurement_start_fraction": 0.45,
+    "burst_measurement_end_fraction": 0.55,
+    "warmup_arrivals": "same smooth trace in each arm",
+    "multipliers": [
+      2,
+      4
+    ],
+    "offpeak_formula": "lambda_mean*(1-burst_multiplier*burst_fraction)/(1-burst_fraction)",
+    "retain": [
+      "UID",
+      "nominal",
+      "allowed",
+      "operation",
+      "noise",
+      "priority"
+    ],
+    "recompute_deadlines": "new_at + identical policy-independent slack rule"
+  },
+  "wait_reporting": {
+    "completed_grants": "P50/P95 with sample count",
+    "unfinished": "count and right-censored age distribution, not pooled with final waits",
+    "withdrawn": "separate elapsed distribution",
+    "carry_in": "separate cohort and exposure",
+    "long_wait": "strictly >120 simulation seconds, separate granted and active episodes",
+    "survival_estimation": "not implemented; do not claim observed-age P95 estimates final-wait P95"
+  },
+  "families": [
+    {
+      "id": "S00",
+      "name_ko": "여유・음성 대조",
+      "importance": "core",
+      "input_mode": "zero_and_stream",
+      "primary_outcome": "offered_count_and_service_cost",
+      "anchor_design": {
+        "robots": 4,
+        "reference_rho": 0.25,
+        "homogeneous_robot_width_m": 0.6
+      },
+      "mechanism_gate": [
+        "zero demand must create zero external jobs",
+        "1.3m and 1.8m have equal admission budget in robot counts"
+      ]
+    },
+    {
+      "id": "S01",
+      "name_ko": "공동배차",
+      "importance": "core",
+      "input_mode": "finite_batch",
+      "primary_outcome": "all_completed_makespan_or_censored",
+      "anchor_design": {
+        "robots": 4,
+        "stations": 4,
+        "jobs": 8,
+        "warmup_s": 0,
+        "nominal_sequence": "cyclic_fixed",
+        "processing_noise_std": 0
+      },
+      "mechanism_gate": [
+        "nominal target and all non-eligibility job attributes identical",
+        "nominal belongs to every allowed set",
+        "rotated allowed sets of same operation"
+      ]
+    },
+    {
+      "id": "S02",
+      "name_ko": "통로 폭",
+      "importance": "core",
+      "input_mode": "finite_batch",
+      "primary_outcome": "makespan_and_corridor_queue_robot_s",
+      "anchor_design": {
+        "robots": 4,
+        "jobs": 8,
+        "destination_stations": 4,
+        "warmup_s": 0,
+        "robot_initial_side": "A",
+        "station_side": "B",
+        "other_corridors": "nonbinding",
+        "robot_width_m": 0.6,
+        "side_clearance_m": 0.3,
+        "edge_clearance_m": 0.4
+      },
+      "mechanism_gate": [
+        "first cohort must cross shared corridor",
+        "inspect real request/grant/release and width budget",
+        "do not assert continuous stationary crossing demand"
+      ]
+    },
+    {
+      "id": "S03",
+      "name_ko": "교차로",
+      "importance": "secondary",
+      "input_mode": "finite_batch",
+      "primary_outcome": "intersection_queue_and_completed",
+      "anchor_design": {
+        "coordinates_and_edges": "identical",
+        "processing_noise_std": 0
+      },
+      "mechanism_gate": [
+        "mutate node_type, never unused kind attribute",
+        "nonempty physical intersection resource exists only in on arm",
+        "confirm actual conflicting requests"
+      ]
+    },
+    {
+      "id": "S04",
+      "name_ko": "충전",
+      "importance": "core",
+      "input_mode": "stream",
+      "primary_outcome": "service_and_charge_queue_with_energy_balance",
+      "anchor_design": {
+        "robots": 4,
+        "battery_capacity_units": 20,
+        "charger_slots": 1,
+        "charge_rate_units_per_s_per_occupied_slot": 0.25,
+        "initial_soc_pct": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "absolute_lambda": "freeze_per_reference_block",
+        "initial_positions": "common_dock",
+        "other_roads": "nonbinding"
+      },
+      "mechanism_gate": [
+        "per-robot charging cycles and low initial SOC transients reported",
+        "charged consumed rescue and final SOC reconcile",
+        "slot change increases nominal total power at fixed slot rate"
+      ]
+    },
+    {
+      "id": "S05",
+      "name_ko": "설비 수요 집중",
+      "importance": "secondary",
+      "input_mode": "stream",
+      "primary_outcome": "station_queue_and_backlog",
+      "anchor_design": {
+        "stations": 4,
+        "avg_process_time_s": 8,
+        "process_time_std_s": 0,
+        "eligible_station_rule": "nominal_only",
+        "remaining_share_rule": "uniform",
+        "absolute_lambda": "freeze_per_reference_block"
+      },
+      "mechanism_gate": [
+        "same physical resources across destination-share levels",
+        "inspect station exposure and robot-work bottleneck jointly"
+      ]
+    },
+    {
+      "id": "S06",
+      "name_ko": "긴급・버스트",
+      "importance": "core",
+      "input_mode": "pregenerated_trace",
+      "primary_outcome": "urgent_response_and_normal_starvation",
+      "anchor_design": {
+        "urgent_fraction": 0.05,
+        "arrival_shape": "smooth",
+        "lambda_candidate_tasks_per_s": 0.17,
+        "lambda_status": "uncalibrated_candidate",
+        "burst_time_fraction": 0.1,
+        "deadline_rule": "arrival_plus_policy_independent_slack",
+        "urgent_priority": 0,
+        "normal_priority": 2,
+        "priority_contrast_deadlines": "unchanged"
+      },
+      "mechanism_gate": [
+        "same realized job count and UID attributes for arrival-shape contrast",
+        "same arrivals for priority-share contrast",
+        "both urgent and nonurgent outcomes reported"
+      ]
+    },
+    {
+      "id": "S07",
+      "name_ko": "이종 로봇 물리 특성",
+      "importance": "secondary",
+      "input_mode": "stream",
+      "primary_outcome": "service_and_feasibility_by_robot_class",
+      "anchor_design": {
+        "robots": 4,
+        "speed_m_per_s": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "robot_width_m": [
+          0.6,
+          0.6,
+          0.6,
+          0.6
+        ],
+        "narrow_shortcut_m": 1.3,
+        "wide_bypass_m": 2.2,
+        "all_other_robot_properties": "fixed"
+      },
+      "mechanism_gate": [
+        "all active robots have feasible required routes",
+        "robot_type labels do not enforce skills",
+        "current K=1 routing is recorded"
+      ]
+    },
+    {
+      "id": "S08",
+      "name_ko": "다층・캐빈",
+      "importance": "core",
+      "input_mode": "finite_batch",
+      "primary_outcome": "makespan_and_cabin_queue",
+      "anchor_design": {
+        "robot_initial_floor": 1,
+        "job_destination_floor": 2,
+        "warmup_s": 0,
+        "shaft_geometry": "both_shafts_in_all_arms",
+        "cabin_capacity_robots": 1,
+        "active_cabins": 1,
+        "initial_active_cabin_floor": 1
+      },
+      "mechanism_gate": [
+        "both shaft geometries and links constant",
+        "two-car arm must actually use both cars under K=1",
+        "do not call nominal floor share observed crossing share"
+      ]
+    },
+    {
+      "id": "S09",
+      "name_ko": "교란・복구",
+      "importance": "secondary",
+      "input_mode": "pregenerated_trace",
+      "primary_outcome": "service_loss_and_recovery_when_defined",
+      "anchor_design": {
+        "event_start_s": 300,
+        "event_end_s": 420,
+        "absolute_lambda": "freeze_per_reference_block",
+        "target_ids": "freeze_before_runs"
+      },
+      "mechanism_gate": [
+        "same exogenous intervention time and ID",
+        "no policy dependent retargeting",
+        "retirement and cancellation are irreversible",
+        "record no-op applied outcome"
+      ]
+    },
+    {
+      "id": "S10",
+      "name_ko": "지속 과부하",
+      "importance": "core",
+      "input_mode": "stream",
+      "primary_outcome": "backlog_slope_and_due_cohort_lateness",
+      "anchor_design": {
+        "robots": 4,
+        "all_job_robot_processing_time_s": 20,
+        "process_time_std_s": 0,
+        "optimistic_robot_work_capacity_tasks_per_s": 0.2,
+        "finite_window": "no_stationarity_assumption"
+      },
+      "mechanism_gate": [
+        "every job occupies one robot for at least 20s",
+        "no task disappearance or post hoc thinning",
+        "initial carry-in and finite-window boundary reported"
+      ]
+    },
+    {
+      "id": "S11",
+      "name_ko": "규모・계산 예산",
+      "importance": "core",
+      "input_mode": "stream",
+      "primary_outcome": "D1_service_fallback_latency_and_memory",
+      "anchor_design": {
+        "nodes": 64,
+        "robots": 4,
+        "common_end_to_end_soft_deadline_s": 2,
+        "absolute_lambda": "freeze_per_reference_block",
+        "startup_mode": "on_demand",
+        "publication_allowance_s": "freeze_after_E1"
+      },
+      "mechanism_gate": [
+        "budget sweep has same map and trace",
+        "256-node map is separate topology cohort unless physical equivalence proven",
+        "8-robot arm retains absolute offered demand",
+        "external watchdog differs from decision budget"
+      ]
+    }
+  ],
+  "base_cells": [
+    {
+      "id": "S00_zero",
+      "family": "S00",
+      "label_ko": "무작업",
+      "reference_block": "S00_empty",
+      "factor_values": {
+        "arrival_rate_tasks_per_s": 0
+      },
+      "changed_axis": "arrival_rate",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S00_low",
+      "family": "S00",
+      "label_ko": "저부하",
+      "reference_block": "S00_load",
+      "factor_values": {
+        "reference_rho": 0.25
+      },
+      "changed_axis": "arrival_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S00_width_1p3",
+      "family": "S00",
+      "label_ko": "같은 입장 용량 대조",
+      "reference_block": "S00_equal_capacity",
+      "factor_values": {
+        "corridor_width_m": 1.3,
+        "reference_rho": 0.25
+      },
+      "changed_axis": "corridor_width",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S00_width_1p8",
+      "family": "S00",
+      "label_ko": "같은 입장 용량 대조",
+      "reference_block": "S00_equal_capacity",
+      "factor_values": {
+        "corridor_width_m": 1.8,
+        "reference_rho": 0.25
+      },
+      "changed_axis": "corridor_width",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S01_eligible_1",
+      "family": "S01",
+      "label_ko": "적합 설비 수",
+      "reference_block": "S01_reference",
+      "factor_values": {
+        "eligible_station_count": 1
+      },
+      "changed_axis": "eligible_station_set",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S01_eligible_2",
+      "family": "S01",
+      "label_ko": "적합 설비 수",
+      "reference_block": "S01_reference",
+      "factor_values": {
+        "eligible_station_count": 2
+      },
+      "changed_axis": "eligible_station_set",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S01_eligible_4",
+      "family": "S01",
+      "label_ko": "적합 설비 수",
+      "reference_block": "S01_reference",
+      "factor_values": {
+        "eligible_station_count": 4
+      },
+      "changed_axis": "eligible_station_set",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S02_width_1p3",
+      "family": "S02",
+      "label_ko": "통로 폭",
+      "reference_block": "S02_reference",
+      "factor_values": {
+        "corridor_width_m": 1.3
+      },
+      "changed_axis": "corridor_width",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S02_width_2p2",
+      "family": "S02",
+      "label_ko": "통로 폭",
+      "reference_block": "S02_reference",
+      "factor_values": {
+        "corridor_width_m": 2.2
+      },
+      "changed_axis": "corridor_width",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S02_width_3p1",
+      "family": "S02",
+      "label_ko": "통로 폭",
+      "reference_block": "S02_reference",
+      "factor_values": {
+        "corridor_width_m": 3.1
+      },
+      "changed_axis": "corridor_width",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S03_off",
+      "family": "S03",
+      "label_ko": "교차로 제어 유무",
+      "reference_block": "S03_reference",
+      "factor_values": {
+        "node_type": "waypoint"
+      },
+      "changed_axis": "node_type",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S03_on",
+      "family": "S03",
+      "label_ko": "교차로 제어 유무",
+      "reference_block": "S03_reference",
+      "factor_values": {
+        "node_type": "intersection"
+      },
+      "changed_axis": "node_type",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_anchor",
+      "family": "S04",
+      "label_ko": "충전 기준",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "charger_slots": 1,
+        "charge_rate_units_per_s_per_occupied_slot": 0.25,
+        "initial_soc_pct": [
+          50,
+          50,
+          50,
+          50
+        ]
+      },
+      "changed_axis": "anchor",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_slots_2",
+      "family": "S04",
+      "label_ko": "충전 슬롯",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "charger_slots": 2
+      },
+      "changed_axis": "charger_slots",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_slots_4",
+      "family": "S04",
+      "label_ko": "충전 슬롯",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "charger_slots": 4
+      },
+      "changed_axis": "charger_slots",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_rate_0p125",
+      "family": "S04",
+      "label_ko": "슬롯당 충전율",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "charge_rate_units_per_s_per_occupied_slot": 0.125
+      },
+      "changed_axis": "charge_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_rate_0p5",
+      "family": "S04",
+      "label_ko": "슬롯당 충전율",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "charge_rate_units_per_s_per_occupied_slot": 0.5
+      },
+      "changed_axis": "charge_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S04_mixed_soc",
+      "family": "S04",
+      "label_ko": "초기 SOC 분산",
+      "reference_block": "S04_reference",
+      "factor_values": {
+        "initial_soc_pct": [
+          20,
+          40,
+          60,
+          80
+        ]
+      },
+      "changed_axis": "initial_soc_distribution",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S05_hotspot_25",
+      "family": "S05",
+      "label_ko": "단일 설비 목적지 비중",
+      "reference_block": "S05_reference",
+      "factor_values": {
+        "hotspot_destination_share": 0.25
+      },
+      "changed_axis": "destination_concentration",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S05_hotspot_70",
+      "family": "S05",
+      "label_ko": "단일 설비 목적지 비중",
+      "reference_block": "S05_reference",
+      "factor_values": {
+        "hotspot_destination_share": 0.7
+      },
+      "changed_axis": "destination_concentration",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S05_hotspot_90",
+      "family": "S05",
+      "label_ko": "단일 설비 목적지 비중",
+      "reference_block": "S05_reference",
+      "factor_values": {
+        "hotspot_destination_share": 0.9
+      },
+      "changed_axis": "destination_concentration",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S06_anchor",
+      "family": "S06",
+      "label_ko": "평탄・긴급5%",
+      "reference_block": "S06_reference",
+      "factor_values": {
+        "urgent_fraction": 0.05,
+        "arrival_shape": "smooth"
+      },
+      "changed_axis": "anchor",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S06_urgent_0",
+      "family": "S06",
+      "label_ko": "긴급 비중",
+      "reference_block": "S06_reference",
+      "factor_values": {
+        "urgent_fraction": 0
+      },
+      "changed_axis": "priority_fraction",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S06_urgent_20",
+      "family": "S06",
+      "label_ko": "긴급 비중",
+      "reference_block": "S06_reference",
+      "factor_values": {
+        "urgent_fraction": 0.2
+      },
+      "changed_axis": "priority_fraction",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S06_burst_2",
+      "family": "S06",
+      "label_ko": "평균 보존 버스트",
+      "reference_block": "S06_reference",
+      "factor_values": {
+        "arrival_shape": "equal_realized_count_burst",
+        "burst_multiplier": 2,
+        "burst_time_fraction": 0.1
+      },
+      "changed_axis": "arrival_shape",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S06_burst_4",
+      "family": "S06",
+      "label_ko": "평균 보존 버스트",
+      "reference_block": "S06_reference",
+      "factor_values": {
+        "arrival_shape": "equal_realized_count_burst",
+        "burst_multiplier": 4,
+        "burst_time_fraction": 0.1
+      },
+      "changed_axis": "arrival_shape",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S07_anchor",
+      "family": "S07",
+      "label_ko": "동질 로봇",
+      "reference_block": "S07_reference",
+      "factor_values": {
+        "speed_m_per_s": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "robot_width_m": [
+          0.6,
+          0.6,
+          0.6,
+          0.6
+        ]
+      },
+      "changed_axis": "anchor",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S07_speed_mix",
+      "family": "S07",
+      "label_ko": "속도 혼합",
+      "reference_block": "S07_reference",
+      "factor_values": {
+        "speed_m_per_s": [
+          0.75,
+          0.75,
+          1.25,
+          1.25
+        ]
+      },
+      "changed_axis": "robot_speed_distribution",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S07_width_mix",
+      "family": "S07",
+      "label_ko": "폭 혼합",
+      "reference_block": "S07_reference",
+      "factor_values": {
+        "robot_width_m": [
+          0.6,
+          0.6,
+          0.9,
+          0.9
+        ]
+      },
+      "changed_axis": "robot_width_distribution",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S08_anchor",
+      "family": "S08",
+      "label_ko": "캐빈1개・초기1층",
+      "reference_block": "S08_reference",
+      "factor_values": {
+        "active_cabins": 1,
+        "initial_active_cabin_floor": 1
+      },
+      "changed_axis": "anchor",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S08_two_cars",
+      "family": "S08",
+      "label_ko": "캐빈2개",
+      "reference_block": "S08_reference",
+      "factor_values": {
+        "active_cabins": 2
+      },
+      "changed_axis": "second_cabin_active",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S08_initial_floor_2",
+      "family": "S08",
+      "label_ko": "캐빈 초기2층",
+      "reference_block": "S08_reference",
+      "factor_values": {
+        "initial_active_cabin_floor": 2
+      },
+      "changed_axis": "initial_cabin_floor",
+      "input_variation": "deterministic",
+      "pilot_trace_repetitions": 1,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_anchor",
+      "family": "S09",
+      "label_ko": "무교란",
+      "reference_block": "S09_reference",
+      "factor_values": {
+        "interventions": []
+      },
+      "changed_axis": "anchor",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_station_active",
+      "family": "S09",
+      "label_ko": "station_active",
+      "reference_block": "S09_station_active_vs_anchor",
+      "factor_values": {
+        "intervention_kind": "station_active",
+        "start_s": 300,
+        "recovery_s": 420,
+        "target": "predeclared_id"
+      },
+      "changed_axis": "intervention_kind",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_charger_active",
+      "family": "S09",
+      "label_ko": "charger_active",
+      "reference_block": "S09_charger_active_vs_anchor",
+      "factor_values": {
+        "intervention_kind": "charger_active",
+        "start_s": 300,
+        "recovery_s": 420,
+        "target": "predeclared_id"
+      },
+      "changed_axis": "intervention_kind",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_robot_retire",
+      "family": "S09",
+      "label_ko": "robot_retire",
+      "reference_block": "S09_robot_retire_vs_anchor",
+      "factor_values": {
+        "intervention_kind": "robot_retire",
+        "start_s": 300,
+        "recovery_s": null,
+        "target": "predeclared_id"
+      },
+      "changed_axis": "intervention_kind",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_cancel_task",
+      "family": "S09",
+      "label_ko": "cancel_task",
+      "reference_block": "S09_cancel_task_vs_anchor",
+      "factor_values": {
+        "intervention_kind": "cancel_task",
+        "start_s": 300,
+        "recovery_s": null,
+        "target": "predeclared_id"
+      },
+      "changed_axis": "intervention_kind",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S09_edge_width",
+      "family": "S09",
+      "label_ko": "edge_width",
+      "reference_block": "S09_edge_width_vs_anchor",
+      "factor_values": {
+        "intervention_kind": "edge_width",
+        "start_s": 300,
+        "recovery_s": 420,
+        "target": "predeclared_id"
+      },
+      "changed_axis": "intervention_kind",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S10_rho_0p7",
+      "family": "S10",
+      "label_ko": "참조 저부하 후보",
+      "reference_block": "S10_reference",
+      "factor_values": {
+        "reference_rho": 0.7,
+        "reference_capacity": "freeze_in_E1"
+      },
+      "changed_axis": "arrival_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S10_lambda_0p22",
+      "family": "S10",
+      "label_ko": "명시 상한 초과 부하",
+      "reference_block": "S10_reference",
+      "factor_values": {
+        "arrival_rate_tasks_per_s": 0.22
+      },
+      "changed_axis": "arrival_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S10_lambda_0p26",
+      "family": "S10",
+      "label_ko": "명시 상한 초과 부하",
+      "reference_block": "S10_reference",
+      "factor_values": {
+        "arrival_rate_tasks_per_s": 0.26
+      },
+      "changed_axis": "arrival_rate",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S11_budget_0p5",
+      "family": "S11",
+      "label_ko": "공통 판단 예산",
+      "reference_block": "S11_budget_64nodes_4robots",
+      "factor_values": {
+        "common_end_to_end_soft_deadline_s": 0.5
+      },
+      "changed_axis": "decision_soft_deadline",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S11_budget_2",
+      "family": "S11",
+      "label_ko": "공통 판단 예산",
+      "reference_block": "S11_budget_64nodes_4robots",
+      "factor_values": {
+        "common_end_to_end_soft_deadline_s": 2
+      },
+      "changed_axis": "decision_soft_deadline",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S11_budget_10",
+      "family": "S11",
+      "label_ko": "공통 판단 예산",
+      "reference_block": "S11_budget_64nodes_4robots",
+      "factor_values": {
+        "common_end_to_end_soft_deadline_s": 10
+      },
+      "changed_axis": "decision_soft_deadline",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S11_graph_256",
+      "family": "S11",
+      "label_ko": "별도256노드 지도 코호트",
+      "reference_block": "S11_topology_256",
+      "factor_values": {
+        "nodes": 256,
+        "robots": 4,
+        "common_end_to_end_soft_deadline_s": 2
+      },
+      "changed_axis": "topology_cohort",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    },
+    {
+      "id": "S11_robots_8",
+      "family": "S11",
+      "label_ko": "로봇 증대",
+      "reference_block": "S11_fleet_same_absolute_demand",
+      "factor_values": {
+        "nodes": 64,
+        "robots": 8,
+        "common_end_to_end_soft_deadline_s": 2
+      },
+      "changed_axis": "fleet_size",
+      "input_variation": "stochastic",
+      "pilot_trace_repetitions": 3,
+      "execution_ready": false
+    }
+  ],
+  "interaction_blocks": [
+    {
+      "id": "X01",
+      "name_ko": "통로×초기 SOC",
+      "design": "full_factorial_2x2",
+      "factor_a": "corridor_width_m",
+      "levels_a": [
+        1.3,
+        3.1
+      ],
+      "factor_b": "uniform_initial_soc_pct",
+      "levels_b": [
+        50,
+        80
+      ],
+      "mechanism_gates": [
+        "initial-energy transient, not steady charge inference"
+      ],
+      "cells": [
+        {
+          "id": "X01_01",
+          "factors": {
+            "corridor_width_m": 1.3,
+            "uniform_initial_soc_pct": 50
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X01_02",
+          "factors": {
+            "corridor_width_m": 1.3,
+            "uniform_initial_soc_pct": 80
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X01_03",
+          "factors": {
+            "corridor_width_m": 3.1,
+            "uniform_initial_soc_pct": 50
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X01_04",
+          "factors": {
+            "corridor_width_m": 3.1,
+            "uniform_initial_soc_pct": 80
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        }
+      ]
+    },
+    {
+      "id": "X02",
+      "name_ko": "충전×긴급",
+      "design": "full_factorial_2x2",
+      "factor_a": "charger_slots",
+      "levels_a": [
+        1,
+        4
+      ],
+      "factor_b": "urgent_fraction",
+      "levels_b": [
+        0,
+        0.2
+      ],
+      "mechanism_gates": [
+        "hold per-slot charge rate fixed",
+        "report ordinary jobs too"
+      ],
+      "cells": [
+        {
+          "id": "X02_01",
+          "factors": {
+            "charger_slots": 1,
+            "urgent_fraction": 0
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X02_02",
+          "factors": {
+            "charger_slots": 1,
+            "urgent_fraction": 0.2
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X02_03",
+          "factors": {
+            "charger_slots": 4,
+            "urgent_fraction": 0
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X02_04",
+          "factors": {
+            "charger_slots": 4,
+            "urgent_fraction": 0.2
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        }
+      ]
+    },
+    {
+      "id": "X03",
+      "name_ko": "캐빈×위층 수요",
+      "design": "full_factorial_2x2",
+      "factor_a": "active_cabins",
+      "levels_a": [
+        1,
+        2
+      ],
+      "factor_b": "upper_floor_destination_fraction",
+      "levels_b": [
+        0.25,
+        0.75
+      ],
+      "mechanism_gates": [
+        "same-floor allowed sets for nominal destination",
+        "verify real crossing and both car usage"
+      ],
+      "cells": [
+        {
+          "id": "X03_01",
+          "factors": {
+            "active_cabins": 1,
+            "upper_floor_destination_fraction": 0.25
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X03_02",
+          "factors": {
+            "active_cabins": 1,
+            "upper_floor_destination_fraction": 0.75
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X03_03",
+          "factors": {
+            "active_cabins": 2,
+            "upper_floor_destination_fraction": 0.25
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X03_04",
+          "factors": {
+            "active_cabins": 2,
+            "upper_floor_destination_fraction": 0.75
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        }
+      ]
+    },
+    {
+      "id": "X04",
+      "name_ko": "변동성×부하",
+      "design": "full_factorial_2x2",
+      "factor_a": "process_time_cv",
+      "levels_a": [
+        0,
+        0.25
+      ],
+      "factor_b": "reference_rho",
+      "levels_b": [
+        0.7,
+        0.95
+      ],
+      "mechanism_gates": [
+        "clamped normal actual moments reported",
+        "same reference load calibration",
+        "future noise hidden from policies"
+      ],
+      "cells": [
+        {
+          "id": "X04_01",
+          "factors": {
+            "process_time_cv": 0,
+            "reference_rho": 0.7
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X04_02",
+          "factors": {
+            "process_time_cv": 0,
+            "reference_rho": 0.95
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X04_03",
+          "factors": {
+            "process_time_cv": 0.25,
+            "reference_rho": 0.7
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        },
+        {
+          "id": "X04_04",
+          "factors": {
+            "process_time_cv": 0.25,
+            "reference_rho": 0.95
+          },
+          "pilot_trace_repetitions": 3,
+          "execution_ready": false
+        }
+      ]
+    }
+  ],
+  "validation_controls": [
+    {
+      "id": "N01",
+      "case": "all routes width 1.0m for 0.6m robot",
+      "expected": "unreachable, retain as mechanism control; not policy performance ranking"
+    },
+    {
+      "id": "N02",
+      "case": "cabin capacity 2",
+      "expected": "schema unsupported rejection"
+    },
+    {
+      "id": "N03",
+      "case": "duplicate job UID",
+      "expected": "trace validation rejection"
+    },
+    {
+      "id": "N04",
+      "case": "second cabin activated but unused by all candidate routes",
+      "expected": "schema may pass; mechanism audit fails"
+    }
+  ],
+  "execution_plan": {
+    "E0": "contract and resource-use checks, not executed",
+    "E1": "pilot counts below are a proposed budget, not results",
+    "E2": "new layouts and demand seeds; preregister configuration before execution",
+    "statistics": "paired differences within layout, preserve layout clustering, predeclare primary outcomes and practical margins; more seeds do not guarantee significance",
+    "deterministic_repeats": "identical trace with renamed seed is not a new independent demand replicate",
+    "failures": "retain all statuses; report failure denominator and valid paired KPI scope"
+  },
+  "counts": {
+    "families": 12,
+    "base_cells": 46,
+    "interaction_blocks": 4,
+    "interaction_cells": 16,
+    "planned_performance_cells": 62,
+    "deterministic_base_cells": 12,
+    "stochastic_base_cells": 34,
+    "base_pilot_paired_blocks": 114,
+    "base_D1_core_runs": 456,
+    "batch_D0_core_runs": 48,
+    "selected_native_additional_D1_runs": 39,
+    "interaction_D1_core_runs": 192,
+    "E1_example_runs": 735,
+    "E0_example_runs": 126
+  }
+}
