@@ -248,6 +248,27 @@ QTabBar QToolButton {
     border: 1px solid #425052;
 }
 
+QTabWidget#WorkspaceTabs > QTabBar::tab {
+    padding: 7px 16px;
+}
+
+QTabWidget#WorkspaceTabs > QTabBar::tab:selected {
+    border-top: 2px solid #73b8a3;
+    font-weight: 600;
+}
+
+QProgressBar#PeriodProgress {
+    background: #181e22;
+    border: 1px solid #343e43;
+    border-radius: 4px;
+    text-align: center;
+}
+
+QProgressBar#PeriodProgress::chunk {
+    background: #326455;
+    border-radius: 3px;
+}
+
 QWidget#RoiScrollContent, QWidget#KpiDetailContent {
     background: #20272b;
 }

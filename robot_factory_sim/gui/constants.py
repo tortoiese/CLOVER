@@ -122,11 +122,12 @@ ANIMATION_INTERVAL_MS: Final[int] = 80
 BLINK_INTERVAL_TICKS: Final[int] = 5
 WINDOW_PREFERRED_SIZE: Final[tuple[int, int]] = (1680, 960)
 WINDOW_FRAME_MARGIN: Final[tuple[int, int]] = (24, 48)
-WORKSPACE_PANE_SIZES: Final[tuple[int, int, int]] = (620, 400, 480)
+WORKSPACE_PANE_SIZES: Final[tuple[int, int]] = (760, 480)
 WORKSPACE_MIN_FACTORY_WIDTH: Final[int] = 300
 WORKSPACE_MIN_DASHBOARD_WIDTH: Final[int] = 360
 WORKSPACE_HANDLE_WIDTH: Final[int] = 8
 WORKSPACE_STATUS_HEIGHT: Final[int] = 48
+CONSOLE_MAX_WIDTH: Final[int] = 900
 BANNER_AUTO_HIDE_MS: Final[int] = 20000
 CONFIG_RELOAD_DEBOUNCE_MS: Final[int] = 300
 ORDER_DIALOG_REFRESH_MS: Final[int] = 2000
@@ -135,10 +136,10 @@ AGENT_STACK_BYTES: Final[int] = 4 * 1024 * 1024
 DEMO_ORDER_QUANTITY: Final[int] = 60       # 엘리베이터 시연 주문 수량
 DEMO_DEADLINE_SEC: Final[float] = 1800.0   # 시연 주문 납기 (sim-sec)
 
-HISTORY_WINDOW: Final[float] = 1800.0     # 그래프 표시 구간 (sim-sec)
-GANTT_WINDOW: Final[float] = 300.0        # 간트 표시 구간 (sim-sec)
+HISTORY_MAX_POINTS: Final[int] = 1200
 HISTORY_SAMPLE_INTERVAL: Final[float] = 2.0  # 히스토리 샘플 간격 (sim-sec)
 THROUGHPUT_START_RANGE: Final[float] = 5.0  # 초기 축의 최소 범위 (분, 건/분)
+HISTORY_START_MINUTES: Final[float] = 5.0
 
 LOW_BATTERY: Final[float] = 30.0
 MID_BATTERY: Final[float] = 60.0
@@ -147,6 +148,7 @@ MID_BATTERY: Final[float] = 60.0
 # 문구
 # ---------------------------------------------------------------------------
 APP_TITLE: Final[str] = "Robot Factory Simulator — CLOVER"
+SIMULATION_TAB_TITLE: Final[str] = "시뮬레이션"
 CONSOLE_TITLE: Final[str] = "관제 콘솔"
 CONSOLE_START_HINT: Final[str] = "상단의 [시작]을 누르면 시뮬레이션과 주문 감시를 시작합니다."
 QUICK_COMMANDS: Final[tuple[tuple[str, str], ...]] = (

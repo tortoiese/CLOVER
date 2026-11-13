@@ -1,4 +1,4 @@
-"""메인 윈도우 — 툴바 + (공장 시각화 | 관제 콘솔 | 대시보드) + 긴급 알림 배너.
+"""메인 윈도우 — 시뮬레이션과 관제 콘솔 탭, 공통 툴바와 긴급 알림 배너.
 
 스레드 구성:
 - 메인 스레드: Qt GUI
@@ -16,7 +16,7 @@ from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
 
-from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QThread, QTimer
 from PySide6.QtGui import QAction, QCloseEvent
 from PySide6.QtWidgets import (
     QComboBox,
@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QSplitter,
     QStackedWidget,
+    QTabWidget,
     QToolBar,
     QToolButton,
     QVBoxLayout,
@@ -44,15 +45,19 @@ from gui.alert_banner import AlertBanner
 from gui.config_editor import ConfigEditorDialog
 from gui.console_panel import ConsolePanel
 from gui.dashboard_panel import DashboardPanel
+from gui.experiment_panel import ExperimentPanel, PeriodWorker
 from gui.factory_panel import FactoryPanel
 from gui.optimization_panel import OptimizationPanel
 from gui.order_dialog import OrderDialog
+from gui.widgets.elided_label import ElidedLabel
 from simulation.factory_service import FactoryService
 from simulation.sim_worker import SimWorker
 from simulation.state import SimState, state_to_context
 from utils.event_types import (
     ActionKind,
     ChangeType,
+    OrderStatus,
+    RobotState,
     SchedulerModeLabel,
     Severity,
     Tables,
@@ -83,6 +88,7 @@ class MainWindow(QMainWindow):
         self._closing = False
         self._comparison_enabled = bool(getattr(agent, "supports_comparison", False))
         self._comparison_pending = False
+        self._period_worker: PeriodWorker | None = None
         self._comparison_request_id: str | None = None
         self._shutdown_timer = QTimer(self)
         self._shutdown_timer.setInterval(SHUTDOWN_POLL_INTERVAL_MS)
@@ -194,18 +200,33 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(6)
 
-        splitter = QSplitter(Qt.Orientation.Horizontal, central)
+        self._workspace = QTabWidget(central)
+        self._workspace.setObjectName("WorkspaceTabs")
+        splitter = QSplitter(Qt.Orientation.Horizontal, self._workspace)
         splitter.setObjectName("WorkspaceSplitter")
         splitter.setHandleWidth(c.WORKSPACE_HANDLE_WIDTH)
         self._factory = FactoryPanel(splitter)
         self._factory.setMinimumWidth(c.WORKSPACE_MIN_FACTORY_WIDTH)
-        self._console = ConsolePanel(splitter, search_enabled=search_enabled,
-                                     comparison_enabled=self._comparison_enabled)
         self._dashboard = DashboardPanel(splitter)
         self._dashboard.setMinimumWidth(c.WORKSPACE_MIN_DASHBOARD_WIDTH)
         splitter.setSizes(list(c.WORKSPACE_PANE_SIZES))
         splitter.setChildrenCollapsible(False)
-        layout.addWidget(splitter, 1)
+        self._workspace.addTab(splitter, c.SIMULATION_TAB_TITLE)
+
+        self._console_page = QWidget(self._workspace)
+        console_layout = QHBoxLayout(self._console_page)
+        self._console = ConsolePanel(self._console_page, search_enabled=search_enabled,
+                                     comparison_enabled=self._comparison_enabled)
+        self._console.setMaximumWidth(c.CONSOLE_MAX_WIDTH)
+        console_layout.addStretch(1)
+        console_layout.addWidget(self._console, 1)
+        console_layout.addStretch(1)
+        self._workspace.addTab(self._console_page, c.CONSOLE_TITLE)
+        self._experiment = ExperimentPanel(self._workspace)
+        self._experiment.run_requested.connect(self._start_period_experiment)
+        self._experiment.cancel_requested.connect(self._cancel_period_experiment)
+        self._workspace.addTab(self._experiment, "기간 실험")
+        layout.addWidget(self._workspace, 1)
 
         self._build_footer(central, layout)
         self._console.message_submitted.connect(self._on_user_message)
@@ -224,20 +245,60 @@ class MainWindow(QMainWindow):
         self._db_status = QLabel("DB 연결 확인 중", status)
         self._db_status.setObjectName("DbStatus")
         row.addWidget(self._sim_status)
-        row.addStretch(1)
+        self._live_summary = ElidedLabel("", status)
+        self._live_summary.setObjectName("Muted")
+        row.addWidget(self._live_summary, 1)
         row.addWidget(self._db_status, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         self._banner = AlertBanner(footer)
-        self._banner.clicked.connect(self._console.focus_console)
+        self._banner.clicked.connect(self._open_console)
         footer.addWidget(status)
         footer.addWidget(self._banner)
         self._banner.active_changed.connect(lambda active: footer.setCurrentWidget(self._banner if active else status))
         layout.addWidget(footer)
 
+    def _open_console(self) -> None:
+        self._workspace.setCurrentWidget(self._console_page)
+        self._console.focus_console()
+
     def _open_comparison(self) -> None:
         self._optimization.show()
         self._optimization.raise_()
         self._optimization.activateWindow()
+
+    def _start_period_experiment(self, days: int) -> None:
+        if self._closing or self._period_worker is not None:
+            return
+        if self._comparison_pending:
+            self._experiment.set_status("운영안 비교가 끝난 뒤 기간 실험을 시작하세요.")
+            return
+        try:
+            factory = self._service.load_factory_config()
+            orders = self._service.list_orders(active_only=True)
+        except (ValueError, OSError) as exc:
+            self._experiment.set_status(f"실험에 사용할 설정을 불러오지 못했습니다. {exc}")
+            return
+        params = self._state.params if self._state else {}
+        task_rate = params.get("task_rate", config.DEFAULT_TASK_RATE)
+        worker = PeriodWorker(factory, orders, self.sim_clock(), task_rate, days, self)
+        self._period_worker = worker
+        worker.progress_changed.connect(self._experiment.set_progress)
+        worker.status_changed.connect(self._experiment.set_status)
+        worker.result_ready.connect(self._experiment.show_result)
+        worker.finished.connect(self._finish_period_experiment)
+        self._experiment.start_progress()
+        worker.start()
+
+    def _cancel_period_experiment(self) -> None:
+        if self._period_worker is not None:
+            self._period_worker.requestInterruption()
+            self._experiment.set_status("실험을 취소하고 있습니다.")
+
+    def _finish_period_experiment(self) -> None:
+        if self._period_worker is not None:
+            self._period_worker.deleteLater()
+            self._period_worker = None
+        self._experiment.finish_progress()
 
     # ------------------------------------------------------------------
     # 시뮬레이션 제어
@@ -289,6 +350,10 @@ class MainWindow(QMainWindow):
         self._act_start.setText("계속" if paused else "시작")
         self._act_stop.setEnabled(state.running or paused)
         self._sim_status.setText(status)
+        orders = sum(order.status in OrderStatus.ACTIVE for order in state.orders)
+        charging = sum(robot.state in (RobotState.CHARGING, RobotState.CHARGE_WAIT) for robot in state.robots)
+        self._live_summary.setText(f"로봇 {len(state.robots)}대 · 충전 중/대기 {charging}대 · "
+                                   f"진행 주문 {orders}건 · 대기 작업 {state.pending_tasks}건")
         self._factory.update_state(state)
         self._dashboard.update_state(state)
         self._sync_combo(self._speed, state.speed)
@@ -370,6 +435,9 @@ class MainWindow(QMainWindow):
             self._console.add_system_message("비교 요청이 진행 중입니다. 완료 후 다시 요청하세요.")
             return
         if self._comparison_enabled and is_comparison_request(text):
+            if self._period_worker is not None:
+                self._console.add_system_message("기간 실험이 끝난 뒤 운영안 비교를 시작하세요.")
+                return
             try:
                 context["comparison_conditions"] = self._optimization.conditions()
                 context["factory_config"] = self._service.load_factory_config().to_dict()
@@ -497,9 +565,13 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # 종료
     # ------------------------------------------------------------------
+    def _threads(self) -> tuple[QThread, ...]:
+        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        return (*threads, self._period_worker) if self._period_worker is not None else threads
+
     def closeEvent(self, event: QCloseEvent) -> None:
         """스레드 종료를 요청하고 모두 종료되기 전에는 창을 유지한다."""
-        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
+        threads = self._threads()
         if not self._closing:
             self._closing = True
             self.setEnabled(False)
@@ -509,6 +581,8 @@ class MainWindow(QMainWindow):
             for thread in (self._worker, self._agent_bridge):
                 thread.requestInterruption()
                 thread.quit()
+            if self._period_worker is not None:
+                self._period_worker.requestInterruption()
             for thread in threads:
                 thread.wait(THREAD_STOP_TIMEOUT_MS)
         if any(thread.isRunning() for thread in threads):
@@ -521,7 +595,6 @@ class MainWindow(QMainWindow):
 
     def _finish_shutdown(self) -> None:
         """진행 중인 요청이 끝난 뒤 메인 스레드에서 창을 닫는다."""
-        threads = (self._config_watcher, self._event_watcher, self._worker, self._agent_bridge)
-        if not any(thread.isRunning() for thread in threads):
+        if not any(thread.isRunning() for thread in self._threads()):
             self._shutdown_timer.stop()
             self.close()

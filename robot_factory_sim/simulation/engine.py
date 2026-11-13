@@ -301,6 +301,10 @@ class SimulationEngine:
         """
         return sum(1 for t in self.pending_tasks if t.order_id is None)
 
+    def skip_background_arrival(self) -> None:
+        """쌍대 실험에서 대기 한도로 수용하지 못한 일반 작업의 난수 순번을 넘긴다."""
+        self._comparison_counts["background"] = self._comparison_counts.get("background", 0) + 1
+
     def _usable_stations(self, task: Task) -> list[str]:
         """작업이 지금 처리될 수 있는 스테이션."""
         return [s for s in (task.allowed_stations or (task.station_id,)) if self.station_available(s)]

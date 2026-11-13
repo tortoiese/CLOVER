@@ -77,9 +77,15 @@ class MetricsCollector:
         self.intersection_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.ev_waits: deque[float] = deque(maxlen=config.METRIC_SAMPLE_LIMIT)
         self.deadlock_count = 0
+        self.background_arrivals = 0
+        self.background_rejected = 0
         self.total_completed = 0
         self.orders_finished = 0
         self.orders_on_time = 0
+        self._wait_sum = 0.0
+        self._wait_count = 0
+        self._charge_wait_sum = 0.0
+        self._charge_wait_count = 0
 
     def record_task_completed(self, now: float, cycle_time: float) -> None:
         """작업 완료를 기록한다.
@@ -98,7 +104,10 @@ class MetricsCollector:
         Args:
             wait: 대기시간 (sim-sec)
         """
-        self.wait_times.append(max(0.0, wait))
+        wait = max(0.0, wait)
+        self.wait_times.append(wait)
+        self._wait_sum += wait
+        self._wait_count += 1
 
     def record_charge_wait(self, wait: float) -> None:
         """충전 대기시간을 기록한다.
@@ -106,7 +115,20 @@ class MetricsCollector:
         Args:
             wait: 대기시간 (sim-sec)
         """
-        self.charge_waits.append(max(0.0, wait))
+        wait = max(0.0, wait)
+        self.charge_waits.append(wait)
+        self._charge_wait_sum += wait
+        self._charge_wait_count += 1
+
+    @property
+    def mean_wait(self) -> float:
+        """실험 시작 이후 완료된 작업 대기의 평균을 반환한다."""
+        return self._wait_sum / self._wait_count if self._wait_count else math.nan
+
+    @property
+    def mean_charge_wait(self) -> float:
+        """실험 시작 이후 완료된 충전 대기의 평균을 반환한다."""
+        return self._charge_wait_sum / self._charge_wait_count if self._charge_wait_count else math.nan
 
     def record_response(self, response: float) -> None:
         """긴급 이벤트 대응시간을 기록한다.

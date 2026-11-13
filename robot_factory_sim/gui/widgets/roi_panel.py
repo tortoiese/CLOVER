@@ -149,6 +149,8 @@ class RoiPanel(QWidget):
             plot.setBackground(c.PANEL)
             plot.showGrid(y=True, alpha=0.15)
             plot.setMenuEnabled(False)
+            plot.setMouseEnabled(x=False, y=False)
+            plot.hideButtons()
             plot.setTitle(title, color=c.TEXT_MUTED, size="10pt")
             plot.setLabel("left", unit)
             plot.getAxis("bottom").setTicks([_TICKS])

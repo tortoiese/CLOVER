@@ -73,7 +73,7 @@ DEFAULT_SCHEDULER_MODE: str = "optimized"   # "baseline" | "optimized"
 SCHEDULER_MODES: tuple[str, ...] = ("baseline", "optimized")
 
 WORKER_LOOP_INTERVAL_MS: int = 25       # SimWorker 루프 주기
-STATE_EMIT_INTERVAL: float = 0.08       # 상태 스냅샷 emit 간격 (wall-sec)
+STATE_EMIT_INTERVAL: float = 0.2        # GUI 상태 스냅샷 emit 간격 (wall-sec)
 MAX_WALL_STEP: float = 0.25             # 한 루프에서 진행할 최대 wall-sec
 ORDER_FLUSH_INTERVAL: float = 1.0       # 주문 진행률 DB 반영 간격 (wall-sec)
 POLL_INTERVAL: float = 1.0              # ConfigWatcher / EventWatcher 폴링 간격

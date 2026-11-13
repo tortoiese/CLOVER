@@ -45,18 +45,28 @@ class TaskGenerator:
         self.engine = engine
         self.rng = rng
 
-    def poisson_process(self) -> Generator[Any, Any, None]:
-        """포아송 도착 과정으로 일반(백그라운드) 작업을 생성한다."""
+    def poisson_process(self, *, shared_input: bool = False) -> Generator[Any, Any, None]:
+        """포아송 작업을 생성한다. 장기 비교에서는 입력 후보를 두 정책에 공통으로 적용한다."""
         env = self.engine.env
+        shared_stations = tuple(sorted(self.engine.background_station_ids())) if shared_input else ()
         while True:
             rate = min(config.TASK_RATE_MAX, max(config.TASK_RATE_MIN, float(self.engine.params["task_rate"])))
             yield env.timeout(float(self.rng.exponential(1.0 / rate)))
             # 두 엔진의 난수 시퀀스를 맞추기 위해 조건과 무관하게 항상 뽑는다.
             pick = float(self.rng.random())
-            stations = self.engine.background_station_ids()
-            if not stations or self.engine.background_task_count() >= config.MAX_BACKGROUND_TASKS:
+            stations = shared_stations if shared_input else self.engine.background_station_ids()
+            if not stations:
                 continue
             station_id = stations[min(len(stations) - 1, int(pick * len(stations)))]
+            full = self.engine.background_task_count() >= config.MAX_BACKGROUND_TASKS
+            if shared_input:
+                self.engine.metrics.background_arrivals += 1
+                if full:
+                    self.engine.metrics.background_rejected += 1
+                    # 미수용 작업도 난수 순번을 소비해 다음 공통 입력과 맞춘다.
+                    self.engine.skip_background_arrival()
+            if full:
+                continue
             self.engine.add_task(
                 product=config.BACKGROUND_PRODUCT,
                 station_id=station_id,
