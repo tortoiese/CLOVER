@@ -264,6 +264,7 @@ def run_case(
             execution_epoch=execution_epoch,
             decision_settings=decision_settings,
             replay_controls=replay_controls,
+            roam=False,
         )
         external_processes = [
             engine.env.process(_inject(engine, trace)),
