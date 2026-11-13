@@ -13,10 +13,10 @@
   "publication_repair_rounds": 0,
   "max_worker_sampled_peak_rss_mib": 248.8125,
   "max_publication_wall_seconds": 0.11870808410458267,
-  "scope": "worker peak RSS excludes parent and unobserved spikes; acceptance counts include auxiliary/empty control actions; RH report counts are separate",
+  "scope": "worker peak RSS excludes parent and unobserved spikes; control acceptance includes auxiliary/empty actions; rh_result records and all returned worker reports are separate",
   "files_sha256": {
     "audit_setup_failure.json": "4212c55f6e1b1ee226bd18559c42cce5a5bbc0aaaa235ea2480a57212e6edeef",
-    "candidate_coverage.json": "72f706bb1b142164ab29dac629790be1190fe5399119736d62f6f21f27ead545",
+    "candidate_coverage.json": "56448ea36e249a990e1932edb5675f525e4c68218c99d34bf3db1e0bc8ba3d71",
     "comparisons/h40_t025/README.md": "3a774e4372ed9fbb76e96c75dc965713aa510f92d285a00513afe4b2c390960b",
     "comparisons/h40_t025/analysis.json": "c33e151d155aa0ad0df6c4755baa453334aa19bee5218ded311ecbc5c6ec6584",
     "comparisons/h40_t025/effects.csv": "7835aa1bc42bd0ee5a688a3e10cbf4dba9c9b183becb16427deb81ce34696a45",
@@ -29,7 +29,7 @@
     "comparisons/h60_t2/analysis.json": "e395240285f548231185d56a21d0a95e18432560985eb2829e8964a2810ab505",
     "comparisons/h60_t2/effects.csv": "2501092d14a5fe36c70b007e7ba7051593469e7a4bb60f39d4f4d5a7b13d2d2e",
     "comparisons/h60_t2/plan.json": "0567bcd3b4eafdbcd75a46ee216bc3e055b491871eeb6933ab82dfb8bb4364ca",
-    "effect_summary.csv": "630ba9a22bbddb1dbf1fcda5e22ee86034d7aebdfd881e4b2b68855047b40519",
+    "effect_summary.csv": "f14278f191ad160cdbf23ebd6c88a93b734284ef8806a067493fbc8dce8360ad",
     "execution.json": "cd5ed25ae8fdb8a2154250ef853bcfc1d0b8d313029e088a627dd9c33c3370e5",
     "preflight.json": "7b4d87ea6f73dbd2b7eba5825f0edb01505b6feea955f2313cd602c4ec710e9b",
     "profiles/b01.json": "3835691741d7560dda3fb11e2ef2ef2e3dfeb85ddd5370c50fdd0cbc5eea1b54",
@@ -46,6 +46,23 @@
     "profiles/b12.json": "ad4b08e19113773ad4a7de7d51106c929812a55151e4adc8b292d6a7513b2938",
     "protocol.json": "9221b2b169ab3f94dcfa8ec3cb17afd540a652e5d45805aba3ed97303ddf6592",
     "receipt.json": "1f8aa5865d5dbf32ad4ad833a6b9fd753f505ba26d1f5089cc0a3a79052b517e",
-    "run_summary.csv": "b53f9af1745c139c359da4da0d38067245e99759b704a641acb4adf2db102629"
-  }
+    "run_summary.csv": "9d68a78cc4f8f2ca976dad370f1d8205968c9ddd9953d8e11e15314dbbaeea5c"
+  },
+  "returned_report_diagnostics": {
+    "worker_rh_reports": 315,
+    "worker_report_statuses": {
+      "OPTIMAL": 254,
+      "FEASIBLE": 51,
+      "BUILD_LIMIT": 4,
+      "NO_INCUMBENT_TIMEOUT": 6
+    },
+    "rh_result_records": 313,
+    "soft_deadline_worker_plans_not_in_rh_result": 2,
+    "build_max_s": 0.4303356248419732,
+    "solve_max_s": 1.9775027909781784,
+    "returned_report_worker_rss_max_mib": 160.265625,
+    "candidate_excluded_observations": 0,
+    "diagnostic_summary_correction": "include two returned but deadline-rejected worker plans; original physical results, raw hashes and audits unchanged"
+  },
+  "csv_line_endings": "LF in published CSV; numeric values unchanged from raw-derived summaries"
 }
