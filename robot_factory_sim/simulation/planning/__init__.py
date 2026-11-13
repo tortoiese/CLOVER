@@ -1,1 +1,1 @@
-"""Solver-neutral rolling horizon scheduling with guarded physical execution."""
+"""Detached planning input for the next rolling-horizon integration gate."""

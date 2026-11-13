@@ -1,211 +1,375 @@
-"""Observe on the simulation thread, build routes only in the solver worker."""
+"""Observe once on the plant thread; prepare detached PR9 routes in a worker."""
 
 from __future__ import annotations
 
 import hashlib
 import json
 import math
-import pickle
-from dataclasses import asdict, dataclass, replace
+import time
+from dataclasses import asdict
+from itertools import product
 from typing import TYPE_CHECKING
+
+import simpy
 
 import config
 from simulation.corridor import CorridorNetwork
-from simulation.path_graph import PathGraph
+from simulation.path_graph import PathGraph, Route
+from simulation.planning.cabin_state import release_state, validate_releases
 from simulation.planning.contracts import (
-    CabinArc,
+    SNAPSHOT_SCHEMA,
     CabinInput,
-    Facility,
+    CabinUse,
+    ExcludedJob,
+    FacilityInput,
     JobInput,
-    Reservation,
+    PhysicalClaim,
+    PlannedHold,
+    PreparedInput,
     ResourceInput,
-    ResourceUse,
     RobotInput,
     RouteInput,
     Settings,
     Snapshot,
-    energy_down,
-    energy_up,
 )
+from simulation.planning.occupancy import cabin_release, capture_holds, owner_key
+from simulation.planning.units import decimal, energy_down, energy_up
+from simulation.resource_pool import TRAFFIC_CONTRACT
+from simulation.task_generator import TaskState
+from simulation.traffic_rules import tail_clearance_seconds
+from utils.config_models import FactoryConfig
 
 if TYPE_CHECKING:
     from simulation.engine import SimulationEngine
 
 
-@dataclass(frozen=True)
-class Request:
-    """Detached factory bytes and scalar observations, safe to send to a process."""
-
-    snapshot: Snapshot
-    factory: bytes
-    positions: tuple[tuple[str, float, float, int, float, float], ...]
+def _canonical(value: object) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
 def topology_hash(engine: SimulationEngine) -> str:
-    """Hash layout, parameters and active entity configuration deterministically."""
-    return hashlib.sha256(json.dumps(asdict(engine.factory), sort_keys=True).encode()).hexdigest()
+    """Hash current configuration and controls without execution samples."""
+    return hashlib.sha256(
+        _canonical(
+            {"factory": engine.factory.to_dict(), "plant": asdict(engine.plant), "params": dict(engine.params)}
+        ).encode()
+    ).hexdigest()
 
 
-def capture(engine: SimulationEngine, settings: Settings, token: str,
-            reservations: tuple[Reservation, ...], charge_intents: set[str]) -> Request:
-    """Capture observed input without paths, process noise or future arrivals."""
+def capture(engine: SimulationEngine, settings: Settings, token: str) -> Snapshot:
+    """Capture only currently observed input, without constructing any route.
+
+    Args:
+        engine: The engine owned by the calling simulation thread.
+        settings: Bounded candidate and route preparation settings.
+        token: Controller-owned request identity, not an executable plan token.
+
+    Returns:
+        Frozen, JSON/pickle-safe observations with no future arrival/noise data.
+    """
     settings.validate()
+    if not isinstance(token, str) or not token:
+        raise ValueError("a nonempty planning request token is required")
     now = engine.now
-    facilities = tuple(
-        [Facility(s.id, s.cfg.x, s.cfg.y, s.cfg.floor, "work", 1,
-                  max(.5, s.cfg.avg_process_time + settings.sigma * s.cfg.process_time_std))
-         for s in engine.stations.values() if s.active]
-        + [Facility(c.id, c.cfg.x, c.cfg.y, c.cfg.floor, "charge", c.cfg.capacity,
-                    rate=energy_down(c.cfg.charge_rate), rate_raw=c.cfg.charge_rate)
-           for c in engine.chargers.values() if c.active])
-    robots = tuple(RobotInput(r.robot_id, "@" + r.robot_id, energy_down(r.live_battery()),
-                              energy_down(r.capacity), energy_up(r.capacity * config.BATTERY_RESERVE / 100),
-                              max(.05, r.cfg.move_speed), r.cfg.battery_drain_rate, r.emergency_order,
-                              r.robot_id in charge_intents,
-                              energy_up(r.capacity * max(75, r.cfg.charge_threshold) / 100)
-                              if r.robot_id in charge_intents else 0)
-                   for r in engine.robot_list() if r.is_available())
-    positions = tuple((r.robot_id, *r.position(), r.floor, r.cfg.width, r.cfg.length)
-                      for r in engine.robot_list() if r.is_available())
-    jobs = [JobInput(t.task_id, () if getattr(t, "planning_blocked", None) else tuple(engine._usable_stations(t)),
-                     t.created_at, t.deadline,
-                     (8, 4, 2, 1)[min(3, max(0, t.priority))] + math.floor(max(0, now - t.created_at) / 30),
-                     t.order_id, t.priority) for t in engine.pending_tasks if not t.cancelled]
-    jobs.sort(key=lambda j: (-j.weight, j.created, j.id))
-    jobs = jobs[:settings.max_tasks]
-    fixed = [r for r in reservations if r.end > now]
-    # Extend an executing prefix when its nominal completion has passed. Actual
-    # resources remain authoritative even when stochastic work overruns the plan.
-    committed = {r.robot for r in reservations}
-    for robot in engine.robot_list():
-        if robot.robot_id in committed and not robot.is_available():
-            for r in reservations:
-                if r.robot == robot.robot_id and r.resource == robot.target_id:
-                    extension = replace(r, start=min(r.start, now), end=max(r.end, now + settings.interval))
-                    fixed = [x for x in fixed if x != r]
-                    fixed.append(extension)
-    if settings.scope == "traffic":
-        observed = {}
-        for edge_id, resource in engine.corridors._corridor_resource.items():
-            observed[engine.corridors.resource_id(edge_id)] = resource
-        for node_id, resource in engine.corridors._intersection_resource.items():
-            observed[engine.corridors.intersection_id(node_id)] = resource
-        for rid, resource in observed.items():
-            for user in resource.users:
-                owner = next((r.robot_id for r in engine.robot_list() if r.process is user.proc), "@external")
-                amount = getattr(user, "amount", 1)
-                covered = [r for r in fixed if r.resource == rid and r.robot == owner and r.start <= now < r.end]
-                end = max([now + settings.interval, *(r.end for r in covered)])
-                fixed = [r for r in fixed if r not in covered]
-                fixed.append(Reservation(rid, owner, min([now, *(r.start for r in covered)]), end, amount))
-    cabins = tuple(CabinInput(e.id, round(e.floor_position()), tuple(range(1, engine.factory.floor_count + 1)),
-                              e.cfg.travel_time, e.door_time,
-                              e.active and not e.moving and e.occupied == 0 and
-                              not getattr(engine.scheduler, "busy_lifts", {}).get(e.id))
-                   for e in engine.elevators.values())
-    snapshot = Snapshot(token, topology_hash(engine), now, settings, robots, tuple(jobs), facilities, (),
-                        tuple(fixed), config.WORK_DRAIN_PER_SEC, settings.scope, cabins=cabins,
-                        positions=positions, geometry=tuple((n.id, n.x, n.y, n.floor, n.node_type)
-                                                           for n in engine.factory.nodes),
-                        edges=tuple((e.id, e.from_node, e.to_node, e.width, e.is_bidirectional)
-                                    for e in engine.factory.edges), clearance=engine.factory.profile.edge_clearance,
-                        obstacles=tuple((o.id, o.obstacle_type, o.x1, o.y1, o.x2, o.y2, o.is_passable, o.label, o.floor)
-                                        for o in engine.factory.obstacles))
-    return Request(snapshot, pickle.dumps(engine.factory, protocol=5), positions)
+    factory_json = _canonical(engine.factory.to_dict())
+    topology = topology_hash(engine)
+    facilities = []
+    for station in sorted(engine.stations.values(), key=lambda item: item.id):
+        point = engine.path_graph.facility_point(station.id) or (station.cfg.x, station.cfg.y)
+        floor = engine.path_graph.facility_floor(station.id) or station.cfg.floor
+        facilities.append(
+            FacilityInput(
+                station.id,
+                "work",
+                *point,
+                floor,
+                station.active,
+                1,
+                station.resource.count,
+                station.waiting,
+                station.cfg.task_type,
+                max(0.5, station.cfg.avg_process_time + settings.sigma * station.cfg.process_time_std),
+                dedicated_order=station.dedicated_order,
+                current_job=station.current_task.external_uid if station.current_task else None,
+            )
+        )
+    for charger in sorted(engine.chargers.values(), key=lambda item: item.id):
+        point = engine.path_graph.facility_point(charger.id) or (charger.cfg.x, charger.cfg.y)
+        floor = engine.path_graph.facility_floor(charger.id) or charger.cfg.floor
+        facilities.append(
+            FacilityInput(
+                charger.id,
+                "charge",
+                *point,
+                floor,
+                charger.active,
+                charger.resource.capacity,
+                charger.resource.count,
+                charger.waiting,
+                charge_rate=charger.cfg.charge_rate,
+            )
+        )
+    robots = tuple(
+        RobotInput(
+            r.robot_id,
+            r.color_index,
+            *r.position(),
+            r.floor,
+            energy_down(r.live_battery()),
+            energy_down(r.capacity),
+            energy_up(decimal(r.capacity) * decimal(config.BATTERY_RESERVE) / 100),
+            max(0.05, r.cfg.move_speed),
+            r.cfg.battery_drain_rate,
+            r.cfg.width,
+            r.cfg.length,
+            r.alive and engine.robots.get(r.robot_id) is r and r.is_available(),
+            r.alive,
+            r.current_task.external_uid if r.current_task else None,
+            r.emergency_order,
+            r.forced_charge,
+        )
+        for r in sorted([*engine.robots.values(), *engine.retired], key=lambda r: r.color_index)
+    )
+    jobs = []
+    for task in engine.pending_tasks:
+        if task.status != TaskState.QUEUED:
+            continue
+        stations = tuple(
+            sorted(
+                sid
+                for sid in task.allowed_stations
+                if sid in engine.stations and engine.stations[sid].cfg.task_type == task.operation
+            )
+        )
+        weight = (8, 4, 2, 1)[min(3, max(0, task.priority))] + math.floor(max(0, now - task.created_at) / 30)
+        jobs.append(
+            JobInput(
+                task.external_uid,
+                task.task_id,
+                stations,
+                task.operation,
+                task.created_at,
+                task.deadline,
+                task.priority,
+                weight,
+                task.order_id,
+            )
+        )
+    jobs.sort(key=lambda job: (-job.weight, job.created, job.uid))
+    excluded = tuple(ExcludedJob(job.uid, now - job.created, "candidate_limit") for job in jobs[settings.max_tasks :])
+    resources, claims = [], []
+    for pool in sorted(engine.corridors._pools.values(), key=lambda item: item.resource_id):
+        resources.append(ResourceInput(pool.resource_id, pool.unit, pool.capacity, pool.count))
+        for claim in sorted(pool.users, key=lambda item: item.request.request_id):
+            claims.append(
+                PhysicalClaim(
+                    claim.request.request_id,
+                    claim.robot_id,
+                    pool.resource_id,
+                    claim.amount,
+                    pool.unit,
+                    claim.usage_since,
+                )
+            )
+    cabins = []
+    for e in sorted(engine.elevators.values(), key=lambda e: e.id):
+        releases = [
+            (r, certificate)
+            for r in [*engine.robots.values(), *engine.retired]
+            if (certificate := cabin_release(r, e)) is not None
+        ]
+        robot, certificate = releases[0] if len(releases) == 1 else (None, None)
+        cabins.append(
+            CabinInput(
+                e.id,
+                e.floor_position(),
+                e.active,
+                e.moving,
+                e.occupied,
+                e.waiting,
+                e.cfg.travel_time,
+                e.door_time,
+                certificate[0] if certificate else None,
+                certificate[1] if certificate else None,
+                owner_key(robot) if robot is not None else None,
+            )
+        )
+    committed = []
+    for r in [*engine.robots.values(), *engine.retired]:
+        action = getattr(r, "planned_action", None)
+        if action is not None:
+            for use in action[1].arc.uses:
+                committed.append(PlannedHold(r.robot_id, use.resource, use.amount, use.unit))
+    return Snapshot(
+        token,
+        engine.execution_epoch,
+        now,
+        engine.layout_version,
+        topology,
+        factory_json,
+        settings,
+        robots,
+        tuple(jobs[: settings.max_tasks]),
+        tuple(facilities),
+        tuple(resources),
+        tuple(claims),
+        tuple(cabins),
+        excluded,
+        len(jobs),
+        engine.plant.work_drain_per_sec,
+        engine.corridors._paused,
+        committed=tuple(committed),
+        holds=capture_holds(engine),
+    )
 
 
-def prepare(request: Request) -> Snapshot:
-    """Compute width-safe multi-floor paths using detached configuration only."""
-    factory = pickle.loads(request.factory)
-    snapshot = request.snapshot
-    if any(e.capacity != 1 for e in factory.elevators):
-        raise ValueError("UNSUPPORTED_CABIN_CAPACITY: RH supports one robot per cabin trip; use capacity=1")
+def _profile(
+    route: Route,
+    robot: RobotInput,
+    origin: tuple[float, float, int],
+    cabins: dict[str, CabinInput],
+    net: CorridorNetwork,
+    source_floors: dict[str, float] | None = None,
+) -> tuple[RouteInput | None, str]:
+    x, y, floor = origin
+    metres = seconds = 0.0
+    starts, ends, rides, sections = [], [], [], []
+    cabin_floors = {
+        cid: cabin.release_floor if cabin.release_at is not None else cabin.floor for cid, cabin in cabins.items()
+    }
+    cabin_floors.update(source_floors or {})
+    index = 0
+    while index < len(route.points):
+        lift = route.lifts[index] if route.lifts else None
+        if lift:
+            cabin = cabins.get(lift)
+            if cabin is None or not cabin.active:
+                return None, "unavailable_cabin"
+            if cabin.waiting or ((cabin.moving or cabin.occupied) and cabin.release_at is None):
+                return None, "unknown_cabin_release"
+            target = route.floors[index]
+            start = seconds
+            starts.append(start)
+            seconds += (abs(cabin_floors[lift] - floor) + abs(target - floor)) * cabin.travel_seconds
+            seconds += cabin.door_seconds
+            ends.append(seconds)
+            rides.append(CabinUse(lift, floor, target, start, seconds, cabin_floors[lift], index))
+            cabin_floors[lift] = target
+            x, y = route.points[index]
+            floor, index = target, index + 1
+            continue
+        end = net.section_end(route, index)
+        for i in range(index, end + 1):
+            starts.append(seconds)
+            tx, ty = route.points[i]
+            distance = math.hypot(tx - x, ty - y) * config.METERS_PER_PIXEL
+            metres += distance
+            seconds += distance / robot.speed
+            x, y = tx, ty
+            if net.is_intersection(route.nodes[i]):
+                seconds += robot.length / robot.speed + config.INTERSECTION_MARGIN_SEC
+            ends.append(seconds)
+        demands = net.section_demands(route, index, end, robot.width)
+        sections.extend((index, end) for _ in demands)
+        if demands:
+            seconds += tail_clearance_seconds(robot.length, robot.speed)
+        index = end + 1
+    holds = net.planned_reservations(route, robot.width, robot.length, robot.speed, tuple(starts), tuple(ends))
+    return RouteInput(
+        robot.id,
+        "",
+        "",
+        metres,
+        seconds,
+        tuple(route.points),
+        tuple(route.floors),
+        tuple(route.lifts),
+        tuple(route.nodes),
+        tuple(route.prev_nodes),
+        tuple(starts),
+        tuple(ends),
+        holds,
+        tuple(rides),
+        tuple(sections),
+    ), ""
+
+
+def prepare(snapshot: Snapshot, *, deadline: float | None = None) -> PreparedInput:
+    """Build K=1 routes from detached input, without reading the live plant.
+
+    Args:
+        snapshot: Detached observation; only certified protected releases have finite ends.
+        deadline: Optional absolute monotonic wall deadline shared with a future solver.
+
+    Returns:
+        Free-flow route alternatives and explicit unavailable-pair reasons. These
+        are resource coefficients, never a validated joint execution schedule.
+    """
+    from dataclasses import replace
+
+    if snapshot.schema != SNAPSHOT_SCHEMA or snapshot.traffic_contract != TRAFFIC_CONTRACT:
+        raise ValueError("planning traffic contract mismatch")
+    snapshot.settings.validate()
+    if deadline is not None and (not math.isfinite(deadline) or time.monotonic() >= deadline):
+        raise TimeoutError("route preparation exhausted decision budget")
+    factory = FactoryConfig.from_json(snapshot.factory_json)
+    validate_releases(snapshot, factory.floor_count)
     graph = PathGraph(factory)
-    if any(e.capacity != 1 for e in graph.implicit_elevators):
-        raise ValueError("UNSUPPORTED_CABIN_CAPACITY: linked elevator nodes require capacity=1")
-    import simpy
     net = CorridorNetwork(simpy.Environment(), factory)
-    resources = {}
-    cabins = {c.id: c for c in snapshot.cabins}
-    for cabin in snapshot.cabins:
-        resources["elevator:" + cabin.id] = ResourceInput("elevator:" + cabin.id, 1, "elevator")
-    step = snapshot.settings.step
-    facilities = tuple(replace(f, x=(graph.facility_point(f.id) or (f.x, f.y))[0],
-                               y=(graph.facility_point(f.id) or (f.x, f.y))[1]) for f in snapshot.facilities)
-    locations = {f.id: (f.x, f.y, f.floor) for f in facilities}
-    robots = {r.id: r for r in snapshot.robots}
-    routes = []
-    for rid, x, y, floor, width, length in request.positions:
-        robot = robots[rid]
-        filtered = graph.for_robot(width)
-        origins = {robot.location: (x, y, floor), **locations}
-        for origin, (sx, sy, sfloor) in origins.items():
-            for destination in locations:
+    cabins = {cabin.id: cabin for cabin in snapshot.cabins}
+    chosen = {sid for job in snapshot.jobs for sid in job.stations}
+    facilities = {f.id: f for f in snapshot.facilities if f.active and (f.kind == "charge" or f.id in chosen)}
+    locations = {fid: (f.x, f.y, f.floor) for fid, f in facilities.items()}
+    routes, unavailable = [], []
+    pairs = 0
+    for robot in snapshot.robots:
+        if not robot.available:
+            continue
+        filtered = graph.for_robot(robot.width)
+        origin_key = "@" + robot.id
+        while origin_key in {f.id for f in snapshot.facilities}:
+            origin_key = "@" + origin_key
+        for origin, position in {origin_key: (robot.x, robot.y, robot.floor), **locations}.items():
+            for destination in facilities:
                 if destination == origin:
                     continue
-                route = filtered.route_to_facility(sx, sy, destination, sfloor)
+                pairs += 1
+                if pairs > snapshot.settings.max_routes:
+                    raise ValueError("ROUTE_LIMIT: input preparation pair limit exceeded")
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeoutError("route preparation exhausted decision budget")
+                reason = "traffic_drain" if snapshot.traffic_paused else ""
+                route = None if reason else filtered.route_to_facility(*position[:2], destination, position[2])
+                data = None
                 if route is None:
-                    continue
-                px, py, pfloor = sx, sy, sfloor
-                distance = seconds = 0.0
-                uses, rides, segment_starts = [], [], []
-                for i, ((tx, ty), tfloor, lift) in enumerate(zip(route.points, route.floors, route.lifts, strict=True)):
-                    start_tick = math.ceil(seconds / step - 1e-9)
-                    segment_starts.append(start_tick)
-                    if lift is None and tfloor == pfloor:
-                        metres = math.hypot(tx - px, ty - py) * config.METERS_PER_PIXEL
-                        distance += metres
-                        duration = metres / robot.speed
-                        if snapshot.scope == "traffic":
-                            seconds += math.ceil(duration / step - 1e-9) * step
-                            edge = net.edge_between(route.prev_nodes[i], route.nodes[i])
-                            if edge is not None and net.edge_kind(edge) == "corridor" and duration > 1e-9:
-                                resource = net.resource_id(edge)
-                                resources[resource] = ResourceInput(resource, net.edge_resource(edge).capacity, "corridor")
-                                uses.append(ResourceUse(resource, start_tick, math.ceil(seconds / step),
-                                                        net.width_units(width)))
+                    reason = reason or "no_width_safe_path"
+                else:
+                    lifts = sorted({cid for cid in route.lifts if cid is not None})
+                    if any(cid not in cabins for cid in lifts):
+                        unavailable.append((robot.id, origin, destination, "unavailable_cabin"))
+                        continue
+                    options = [
+                        sorted({cabins[cid].floor, *range(1, factory.floor_count + 1)})
+                        if snapshot.settings.joint_cabins
+                        else [
+                            release_state(cabins[cid], snapshot.now)[1]
+                            if cabins[cid].release_at is not None
+                            else cabins[cid].floor
+                        ]
+                        for cid in lifts
+                    ]
+                    for values in product(*options):
+                        if deadline is not None and time.monotonic() >= deadline:
+                            raise TimeoutError("cabin route variants exhausted decision budget")
+                        data, reason = _profile(
+                            route, robot, position, cabins, net, dict(zip(lifts, values, strict=True))
+                        )
+                        if data is not None:
+                            if len(routes) >= snapshot.settings.max_routes:
+                                raise ValueError("ROUTE_LIMIT: cabin variants exceed route limit")
+                            routes.append(replace(data, origin=origin, destination=destination))
                         else:
-                            seconds += duration
-                    else:
-                        elevator = next((e for e in [*factory.elevators, *graph.implicit_elevators] if e.id == lift), None)
-                        if elevator is None or not elevator.is_active:
-                            seconds = math.inf
                             break
-                        if snapshot.scope == "traffic":
-                            cabin = cabins.get(lift)
-                            if cabin is None or not cabin.available:
-                                seconds = math.inf
-                                break
-                            duration = math.ceil((abs(tfloor - pfloor) * elevator.travel_time
-                                                  + factory.profile.door_time_sec) / step)
-                            seconds += max(1, duration) * step
-                            rides.append(CabinArc(lift, pfloor, tfloor, start_tick, math.ceil(seconds / step), "ride"))
-                        else:
-                            seconds += abs(tfloor - pfloor) * elevator.travel_time + factory.profile.door_time_sec
-                    node = route.nodes[i]
-                    if next((n.node_type for n in factory.nodes if n.id == node), "") == "intersection":
-                        duration = length / robot.speed + config.INTERSECTION_MARGIN_SEC
-                        start_tick = segment_starts[-1]
-                        if snapshot.scope == "traffic":
-                            seconds += math.ceil(duration / step) * step
-                            resource = net.intersection_id(node)
-                            resources[resource] = ResourceInput(resource, 1, "intersection")
-                            uses.append(ResourceUse(resource, start_tick, math.ceil(seconds / step)))
-                        else:
-                            seconds += duration
-                    px, py, pfloor = tx, ty, tfloor
-                if not math.isfinite(seconds):
-                    continue
-                routes.append(RouteInput(rid, origin, destination, tuple(route.points), tuple(route.floors),
-                                         tuple(route.lifts), tuple(route.nodes), tuple(route.prev_nodes), distance, seconds,
-                                         tuple(uses), tuple(rides), tuple(segment_starts)))
-    # Extend a short horizon to fit long nominal work, up to an explicit hard cap.
-    required = []
-    for job in snapshot.jobs:
-        choices = [f.duration + r.seconds for f in facilities if f.id in job.stations and f.kind == "work"
-                   for r in routes if r.destination == f.id and r.origin.startswith("@")]
-        if choices:
-            required.append(min(choices))
-    horizon = min(300, max(snapshot.settings.horizon, math.ceil(max(required, default=0) + snapshot.settings.step)))
-    return replace(snapshot, facilities=facilities, routes=tuple(routes), resources=tuple(resources.values()),
-                   settings=replace(snapshot.settings, horizon=horizon))
+                if data is None:
+                    unavailable.append((robot.id, origin, destination, reason))
+    return PreparedInput(snapshot, tuple(routes), tuple(unavailable))

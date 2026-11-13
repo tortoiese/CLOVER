@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Any
 
 import simpy
@@ -20,7 +20,15 @@ FLOOR_EPSILON: float = 1e-6
 class Elevator:
     """엘리베이터 1대 (승강로 하나, 캐빈 하나)."""
 
-    def __init__(self, env: simpy.Environment, cfg: ElevatorConfig, door_time: float = config.DOOR_TIME_SEC) -> None:
+    def __init__(
+        self,
+        env: simpy.Environment,
+        cfg: ElevatorConfig,
+        door_time: float = config.DOOR_TIME_SEC,
+        *,
+        observer: Callable[..., None] | None = None,
+        instance: int = 0,
+    ) -> None:
         """엘리베이터를 생성한다. 캐빈은 1층에서 대기한다.
 
         Args:
@@ -29,13 +37,16 @@ class Elevator:
             door_time: 한 번 탑승에 드는 문 개폐 시간 (승차 + 하차 합계, sim-sec)
         """
         self.env = env
+        if isinstance(cfg.capacity, bool) or not isinstance(cfg.capacity, int) or cfg.capacity != 1:
+            raise ValueError("UNSUPPORTED_CABIN_CAPACITY: one rider per cabin is supported")
         self.cfg = cfg
         self.door_time = door_time
-        # A shaft has one cabin motion. Passenger slots never permit independent
-        # simultaneous trips to different floors in the same physical cabin.
-        self.resource = simpy.Resource(env, capacity=1)
+        self.resource = simpy.Resource(env, capacity=max(1, int(cfg.capacity)))
         self.removed = False
         self.rides = 0
+        self.observer = observer
+        self.instance = instance
+        self._phase_counter = 0
         self._floor = 1.0
         self._motion: tuple[float, float, float, float] | None = None  # (출발 층, 도착 층, 시작, 종료)
 
@@ -84,21 +95,87 @@ class Elevator:
         """
         self.cfg = cfg
 
-    def _move(self, target: float) -> Generator[Any, Any, None]:
+    def _phase_start(self, kind: str, origin: float, target: float, duration: float) -> dict[str, Any]:
+        self._phase_counter += 1
+        values = {
+            "operation_id": f"{self.id}:{self.instance}:{self._phase_counter}",
+            "cabin": self.id,
+            "cabin_instance": self.instance,
+            "kind": kind,
+            "origin": origin,
+            "destination": target,
+            "planned_seconds": duration,
+        }
+        if self.observer is not None:
+            self.observer("cabin_phase_start", **values)
+        return values
+
+    def _phase_end(self, values: dict[str, Any], started: float, position: float, completed: bool) -> None:
+        if self.observer is not None:
+            self.observer(
+                "cabin_phase_end",
+                **values,
+                elapsed=float(self.env.now) - started,
+                actual_destination=position,
+                distance_floors=abs(position - values["origin"]),
+                completed=completed,
+            )
+
+    def _delay(self, seconds: float, defer: Callable[[Any], object] | None = None) -> Generator[Any, Any, None]:
+        deadline = self.env.now + seconds
+        while True:
+            try:
+                yield self.env.timeout(max(0.0, deadline - self.env.now))
+                return
+            except simpy.Interrupt as interruption:
+                if defer is None:
+                    raise
+                defer(interruption.cause)
+                if self.env.now >= deadline:
+                    return
+
+    def _move(
+        self,
+        target: float,
+        kind: str = "other_move",
+        *,
+        travel_seconds: float | None = None,
+        defer: Callable[[Any], object] | None = None,
+    ) -> Generator[Any, Any, None]:
         """캐빈을 target 층으로 옮긴다. 중단되면 그때의 보간 위치에 멈춘다."""
         start = self._floor
         distance = abs(target - start)
         if distance < FLOOR_EPSILON:
             return
-        duration = distance * max(0.0, float(self.cfg.travel_time))
+        duration = distance * (max(0.0, float(self.cfg.travel_time)) if travel_seconds is None else travel_seconds)
         self._motion = (start, target, self.env.now, self.env.now + duration)
+        started, completed = float(self.env.now), False
+        values = self._phase_start(kind, start, target, duration)
         try:
-            yield self.env.timeout(duration)
+            yield from self._delay(duration, defer)
             self._floor = target
+            completed = True
         finally:
             if self._floor != target:
                 self._floor = self.floor_position()
             self._motion = None
+            self._phase_end(values, started, self._floor, completed)
+
+    def _door(
+        self,
+        kind: str,
+        *,
+        seconds: float | None = None,
+        defer: Callable[[Any], object] | None = None,
+    ) -> Generator[Any, Any, None]:
+        started, completed = float(self.env.now), False
+        duration = self.door_time / 2.0 if seconds is None else seconds
+        values = self._phase_start(kind, self._floor, self._floor, duration)
+        try:
+            yield from self._delay(duration, defer)
+            completed = True
+        finally:
+            self._phase_end(values, started, self._floor, completed)
 
     def arrive(self, floor: int) -> Generator[Any, Any, None]:
         """캐빈을 승차 층으로 부르고 승차한다 (자원을 점유한 로봇이 호출).
@@ -106,15 +183,25 @@ class Elevator:
         Args:
             floor: 로봇이 기다리는 층
         """
-        yield from self._move(float(floor))
-        yield self.env.timeout(self.door_time / 2.0)
+        yield from self._move(float(floor), "empty_move")
+        yield from self._door("boarding")
 
-    def carry(self, floor: int) -> Generator[Any, Any, None]:
+    def carry(
+        self,
+        floor: int,
+        *,
+        travel_seconds: float | None = None,
+        door_seconds: float | None = None,
+        defer: Callable[[Any], object] | None = None,
+    ) -> Generator[Any, Any, None]:
         """목적 층까지 이동하고 하차한다.
 
         Args:
             floor: 목적 층
+            travel_seconds: 탑승 시 고정한 층당 이동시간. 생략하면 현재 설정.
+            door_seconds: 탑승 시 고정한 하차 문 시간. 생략하면 현재 설정의 절반.
+            defer: 보호된 운행의 제어 명령을 도착 후 처리하는 콜백.
         """
-        yield from self._move(float(floor))
-        yield self.env.timeout(self.door_time / 2.0)
+        yield from self._move(float(floor), "loaded_move", travel_seconds=travel_seconds, defer=defer)
+        yield from self._door("alighting", seconds=door_seconds, defer=defer)
         self.rides += 1

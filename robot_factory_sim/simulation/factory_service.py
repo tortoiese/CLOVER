@@ -19,13 +19,7 @@ from database.config_watcher import ConfigWatcher
 from database.db_manager import DBManager
 from database.order_manager import OrderManager, ProductionEventWatcher
 from database.seed_data import seed_default_factory
-from utils.config_models import (
-    ChargingStationConfig,
-    FactoryConfig,
-    ObstacleConfig,
-    OrderRecord,
-    RobotConfig,
-)
+from utils.config_models import ChargingStationConfig, FactoryConfig, ObstacleConfig, OrderRecord, RobotConfig
 from utils.event_types import Tables
 from utils.layout_tools import link_facilities_to_nodes
 
@@ -51,7 +45,7 @@ class FactoryService:
         return self._db_path
 
     def close(self) -> None:
-        """Release the calling thread's DB handle after its widgets have shut down."""
+        """소유한 DB 연결을 닫는다. 워커 종료 후 호출해야 한다."""
         self._db.close()
 
     # ------------------------------------------------------------------

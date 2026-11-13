@@ -1,0 +1,503 @@
+{
+  "schema": "clover-pr10-integration-validation-v1",
+  "base_main": "a28522d9dd9aee238c27fdc2404cab2b1b10c60d",
+  "old_PR10": "d63276df044eb6eb8ac43737313d1c250a7b571b",
+  "P4_parent": "8770b66e0e11df611a9e9e29a96c9764d2c0b184",
+  "functional_build_source_hash": "dd6f8c51003c66d763af6c9a7baf264b81a10ca517885af2e0069a782dcd89f4",
+  "functional_build_tests": {
+    "311": {
+      "passed": 446,
+      "junit_sha256": "e91d45b36e0bff44846941261dfaced989520ce4b5fca3ad9478120cd2b0a80d"
+    },
+    "314": {
+      "passed": 446,
+      "junit_sha256": "caac5e224a227b6dab99c42a6c7aada7d988317b04afa7763f2d2b98b69891ab"
+    }
+  },
+  "physical_acceptance": {
+    "source_hash": "dd6f8c51003c66d763af6c9a7baf264b81a10ca517885af2e0069a782dcd89f4",
+    "runs": 57,
+    "SUCCESS": 57,
+    "replay_matches": 57,
+    "raw_matches": 57,
+    "previous_D0_physical_digests_preserved": 36,
+    "paired_inputs": true,
+    "rows": [
+      {
+        "group": "d1",
+        "case_id": "joint_batch__rh_cpsat_interval__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__rh_cpsat_interval__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__rh_cpsat_linear__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__rh_cpsat_linear__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__rh_milp_grid__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__rh_milp_grid__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__optimized__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__baseline__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__assignment_milp_legacy__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__assignment_milp_legacy__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "joint_batch__rh_cpsat_native__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/joint_batch__rh_cpsat_native__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__rh_cpsat_interval__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__rh_cpsat_interval__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__rh_cpsat_linear__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__rh_cpsat_linear__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__rh_milp_grid__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__rh_milp_grid__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__assignment_milp_legacy__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__assignment_milp_legacy__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__baseline__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__optimized__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "inflight_cabin_batch__rh_cpsat_native__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/inflight_cabin_batch__rh_cpsat_native__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__rh_milp_grid__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__rh_milp_grid__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__rh_cpsat_linear__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__rh_cpsat_linear__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__assignment_milp_legacy__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__assignment_milp_legacy__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__optimized__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__rh_cpsat_native__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__rh_cpsat_native__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__baseline__1003.json"
+      },
+      {
+        "group": "d1",
+        "case_id": "charging__rh_cpsat_interval__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "d1/charging__rh_cpsat_interval__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "open__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/open__optimized__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "joint_dispatch__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/joint_dispatch__optimized__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__optimized__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "narrow__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/narrow__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__optimized__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "intersection__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/intersection__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__optimized__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "charging__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/charging__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__optimized__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__optimized__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__baseline__1001",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__baseline__1001.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__baseline__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__baseline__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__optimized__1002",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__optimized__1002.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__baseline__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__baseline__1003.json"
+      },
+      {
+        "group": "foundation",
+        "case_id": "multifloor__optimized__1003",
+        "status": "SUCCESS",
+        "replay": true,
+        "raw_metrics_match": true,
+        "result": "foundation/multifloor__optimized__1003.json"
+      }
+    ]
+  },
+  "retired_files": [
+    "robot_factory_sim/simulation/benchmark_planning.py",
+    "robot_factory_sim/simulation/deadlock.py",
+    "robot_factory_sim/simulation/energy.py",
+    "robot_factory_sim/simulation/experiment_replay.py",
+    "robot_factory_sim/simulation/experiments.py",
+    "robot_factory_sim/simulation/planning/warm_start.py",
+    "robot_factory_sim/simulation/scenario_benchmark.py",
+    "robot_factory_sim/simulation/scenario_suite.py",
+    "robot_factory_sim/simulation/test_prd_acceptance.py",
+    "robot_factory_sim/simulation/test_rh_planning.py",
+    "robot_factory_sim/simulation/test_rh_runtime.py",
+    "robot_factory_sim/simulation/wait_metrics.py"
+  ],
+  "core_physics_math_D1_runner_config_14_files_equal_P4": true,
+  "CI_lint": "isolated E4,E7,E9,F,I targeted and runtime hazard planner/decisions/evaluation passed",
+  "prior_P4_evidence_is_historical": true,
+  "CI_status": "pending on final PR head; see GitHub checks",
+  "main_merge_status": "not yet performed in this receipt"
+}

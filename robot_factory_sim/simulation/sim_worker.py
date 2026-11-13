@@ -15,6 +15,7 @@ import threading
 import time
 import traceback
 from collections import deque
+from dataclasses import replace
 from datetime import datetime
 from typing import Any
 
@@ -65,9 +66,9 @@ class _SimController(QObject):
         self._cached_orders: list[OrderRecord] = []
         self._wall_elapsed = 0.0
         self._engines: dict[str, SimulationEngine] = {}
-        self._active_policies = list(config.DEFAULT_ACTIVE_POLICIES)
+        self._active_policies = list(config.SCHEDULER_MODES)
         from simulation.planning.contracts import Settings
-        self._planning_settings = Settings(scope="traffic")
+        self._planning_settings = Settings(horizon=30, step=2, max_tasks=8, native_actions=4, timeout=2, watchdog=3)
         self._command_sequence = 0
         self._command_sent = 0.0
         self._command_latency: deque[float] = deque(maxlen=1000)
@@ -93,7 +94,7 @@ class _SimController(QObject):
         self._timer.stop()
         for engine in self._engines.values():
             if hasattr(engine.scheduler, "close"):
-                engine.scheduler.close()
+                engine.close()
         try:
             self._flush_progress()
         except Exception:
@@ -109,20 +110,22 @@ class _SimController(QObject):
         """DB 구성으로 두 엔진을 새로 만든다 (sim-time 0)."""
         for engine in self._engines.values():
             if hasattr(engine.scheduler, "close"):
-                engine.scheduler.close()
+                engine.close()
         factory = self._db.load_factory_config() if factory is None else copy.deepcopy(factory)
         epoch = datetime.now().replace(microsecond=0)
         self._engines = {
-            mode: SimulationEngine(factory, mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate},
-                                   comparison_seed=config.RANDOM_SEED)
+            mode: SimulationEngine(copy.deepcopy(factory), mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate},
+                                   comparison_seed=config.RANDOM_SEED, demand_source="stochastic")
             for mode in self._active_policies
         }
         from simulation.planning.controller import RollingHorizonScheduler
-        from simulation.planning.process import SolverProcess
+        from simulation.planning.live import LiveRollingHorizonScheduler
         for engine in self._engines.values():
             if isinstance(engine.scheduler, RollingHorizonScheduler):
-                engine.scheduler.settings = self._planning_settings
-                engine.scheduler.process = SolverProcess(engine.scheduler.backend)
+                backend = engine.scheduler.backend
+                engine.scheduler.close()
+                engine.scheduler = LiveRollingHorizonScheduler(backend, self._planning_settings)
+                engine.scheduler.name = engine.mode
         self._progress_cache.clear()
         self._wall_elapsed = 0.0
         self._sync_orders(records)
@@ -190,9 +193,13 @@ class _SimController(QObject):
         for order in self.primary.orders.values():
             if order.status == OrderStatus.CANCELLED:
                 continue
-            key = (order.completed, order.status)
+            observed = cached.get(order.order_id)
+            completed = max(order.completed, observed.completed if observed else 0)
+            status = (observed.status if observed and (observed.completed >= order.quantity
+                      or order.completed < observed.completed) else order.status)
+            key = (completed, status)
             if self._progress_cache.get(order.order_id) != key:
-                self._orders.update_progress(order.order_id, order.completed, order.status)
+                self._orders.update_progress(order.order_id, *key)
                 self._progress_cache[order.order_id] = key
                 # Policy activation reuses this observed DB snapshot. Keep our
                 # own persisted writes in it so finished work cannot reappear.
@@ -244,6 +251,7 @@ class _SimController(QObject):
             params=params,
             events=list(engine.timeline),
             elevators=engine.elevator_snapshots(),
+            traffic=engine.corridors.snapshots(),
             planning={mode: e.scheduler.planning_state() for mode, e in self._engines.items()
                       if hasattr(e.scheduler, "planning_state")},
             active_policies=tuple(self._active_policies),
@@ -297,13 +305,15 @@ class _SimController(QObject):
                 self._speed = min(config.SPEED_OPTIONS, key=lambda s: abs(s - value))
             case ActionKind.SET_MODE:
                 mode = str(params.get("mode", config.DEFAULT_SCHEDULER_MODE))
-                if mode not in config.SCHEDULER_MODES:
+                from simulation.planning.live import LIVE_POLICIES
+                if mode not in LIVE_POLICIES:
                     raise ValueError(f"알 수 없는 모드: {mode}")
                 if mode not in self._engines:
                     # Activation starts a new paired comparison from time zero.
+                    self._flush_progress()
                     factory = None if self._config_dirty else self.primary.factory
                     records = None if self._config_dirty else self._cached_orders
-                    self._active_policies = list(config.DEFAULT_ACTIVE_POLICIES) + [mode]
+                    self._active_policies = list(config.SCHEDULER_MODES) + [mode]
                     self._build_engines(factory, records)
                     self.notice.emit(Severity.INFO, "비교 정책 활성화 — 모든 활성 정책을 0초부터 다시 시작합니다.")
                 self._mode = mode
@@ -317,7 +327,8 @@ class _SimController(QObject):
                 for candidate in self._engines.values():
                     if hasattr(candidate.scheduler, "settings"):
                         candidate.scheduler.notify_event("settings")
-                        candidate.scheduler.settings = settings
+                        candidate.scheduler.settings = replace(settings, formulation=(
+                            "native" if candidate.scheduler.backend == "cpsat_native" else "grid"))
                 self.notice.emit(Severity.INFO, "RH 계획 설정을 적용했습니다.")
             case ActionKind.SET_TASK_RATE | ActionKind.SCALE_TASK_RATE:
                 if kind == ActionKind.SET_TASK_RATE:

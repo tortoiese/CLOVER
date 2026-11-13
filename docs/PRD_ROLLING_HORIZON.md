@@ -1,3 +1,7 @@
+> **과거 구현 기록**: 이 문서는 PR #10의 `d63276d` 기준 명세/검수 기록이다.
+> 현재 실행·모델·지원 범위는 [PR10 통합 검수](PR10_INTEGRATION.md), [P4 검수](P4_REVIEW.md),
+> [headless 안내](../robot_factory_sim/HEADLESS_EVALUATION.md)를 따른다. 아래 구 schema·CLI·성능 수치는 현재 통합본 검증으로 사용하지 않는다.
+
 # PRD — CLOVER Rolling Horizon MILP 통합 및 CP-SAT 확장
 
 문서 버전: 1.0 · 작성일: 2026-10-25 · 상태: 구현 전 검토용 초안

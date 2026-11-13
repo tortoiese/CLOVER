@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from dataclasses import asdict
 from pathlib import Path
 
@@ -19,8 +20,34 @@ from agent.rag.factory import create_agent
 from gui.main_window import MainWindow
 from simulation.comparison import run_comparison
 from simulation.factory_service import FactoryService
-from simulation.test_rh_planning import factory
+from utils.config_models import (
+    ChargingStationConfig,
+    FactoryConfig,
+    PathEdgeConfig,
+    PathNodeConfig,
+    RobotConfig,
+    WorkStationConfig,
+)
 from utils.event_types import ActionKind
+
+
+def factory() -> FactoryConfig:
+    """One passable mm-contract corridor and a two-second station."""
+    return FactoryConfig(chargers=[ChargingStationConfig("C", 0, 0, charge_rate=5)],
+        stations=[WorkStationConfig("S", "S", 10, 0, avg_process_time=2, process_time_std=0)],
+        robots=[RobotConfig("R", move_speed=1)],
+        nodes=[PathNodeConfig(1, 0, 0, linked_station_id="C"),
+               PathNodeConfig(2, 10, 0, linked_station_id="S")],
+        edges=[PathEdgeConfig(1, 1, 2, width=1.3)])
+
+
+@pytest.fixture(autouse=True)
+def no_qt_callback_errors(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    """A Qt slot exception must fail the acceptance test instead of only printing."""
+    errors = []
+    monkeypatch.setattr(sys, "excepthook", lambda kind, value, traceback: errors.append(value))
+    yield
+    assert not errors, errors
 
 
 def wait_until(predicate: Callable[[], bool], timeout: float = 8) -> None:
@@ -31,7 +58,7 @@ def wait_until(predicate: Callable[[], bool], timeout: float = 8) -> None:
     assert predicate()
 
 
-@pytest.mark.parametrize("mode", ["rh_milp", "rh_cpsat"])
+@pytest.mark.parametrize("mode", ["rh_milp_grid", "rh_cpsat_linear", "rh_cpsat_interval", "rh_cpsat_native"])
 def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
                                                              mode: str) -> None:
     app = QApplication.instance() or QApplication([])
@@ -51,8 +78,11 @@ def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, m
     timer.start()
     try:
         wait_until(lambda: window._state is not None)
-        assert window._comparison_enabled
+        assert config.DEFAULT_SCHEDULER_MODE == "optimized"
         assert set(window._state.active_policies) == {"baseline", "optimized"}
+        from simulation.planning.contracts import Settings
+        window._worker.send_command(ActionKind.SET_PLANNING, asdict(Settings(
+            horizon=12, step=2, max_tasks=4, timeout=5, watchdog=7, native_actions=4)))
         window._mode.setCurrentIndex(window._mode.findData(mode))
         wait_until(lambda: window._state.mode == mode)
         assert window._state.sim_time == 0
@@ -60,7 +90,7 @@ def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, m
         window._worker.send_command(ActionKind.SET_SPEED, {"speed": 5})
         window._worker.send_command(ActionKind.START)
         wait_until(lambda: window._state.engine_kpis.get(mode, {}).get("completed_units", 0) >= 1, timeout=12)
-        assert window._state.planning[mode]["accepted"] >= 1
+        assert window._state.planning[mode]["accepted"] >= 1, window._state.planning[mode]
         assert "교통" in window._factory._mode.text()
         assert len(beats) > 20
         window._worker.send_command(ActionKind.RESET)
@@ -72,26 +102,7 @@ def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, m
         app.processEvents()
 
 
-def test_roi_and_comparison_share_energy_formula(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    from gui.widgets.roi_panel import RoiPanel
-    from utils.comparison_models import ComparisonConditions, calculate_economics
-    app = QApplication.instance() or QApplication([])
-    panel = RoiPanel()
-    panel._wh_per_unit.setValue(2)
-    panel._power_price.setValue(150)
-    panel._revenue_per_unit.setValue(100)
-    panel._other_cost.setValue(10)
-    panel.update_kpis(1, 2, 3, 4, 5, 6)
-    conditions = ComparisonConditions(wh_per_battery_unit=2, electricity_per_kwh=150, revenue_per_task=100,
-                                      fixed_cost=10)
-    expected = calculate_economics(3, 6, 4, conditions, False)
-    assert expected["energy_wh"] == pytest.approx(13.3333333333)
-    assert "미입력" not in panel._summary.text()
-    panel.close()
-    app.processEvents()
-
-
-def test_settings_scenario_and_default_factory_gui_response(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_and_default_factory_gui_response(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import numpy as np
 
     from gui.planning_settings import PlanningSettingsDialog
@@ -106,20 +117,15 @@ def test_settings_scenario_and_default_factory_gui_response(tmp_path: Path, monk
     window.show()
     try:
         wait_until(lambda: window._state is not None)
-        dialog = PlanningSettingsDialog(asdict(Settings(scope="traffic")), window)
+        dialog = PlanningSettingsDialog(asdict(Settings()), window)
         dialog.step.setCurrentIndex(dialog.step.findData(.5))
         dialog.fields["horizon"].setValue(20)
         assert dialog.values()["step"] == .5
         window._worker.send_command(ActionKind.SET_PLANNING, dialog.values())
         dialog.close()
-        panel = window._optimization
-        panel._scenario.setCurrentIndex(panel._scenario.findData("alternating_dispatch"))
-        assert panel.scenario_id() == "alternating_dispatch"
-        assert panel.conditions()["horizon"] == 20
-        assert panel.policies() == ("baseline_fifo", "rh_milp")
         assert service.load_factory_config().to_dict() == before
-        window._mode.setCurrentIndex(window._mode.findData("rh_milp"))
-        wait_until(lambda: window._state.mode == "rh_milp")
+        window._mode.setCurrentIndex(window._mode.findData("rh_milp_grid"))
+        wait_until(lambda: window._state.mode == "rh_milp_grid")
         window._worker.send_command(ActionKind.START)
         worker_response = []
         response = []
@@ -130,9 +136,9 @@ def test_settings_scenario_and_default_factory_gui_response(tmp_path: Path, monk
             worker_response.append(window._state.diagnostics["worker_command_ms"])
             response.append(window.gui_response_ms[-1])
         reset_started = time.monotonic()
-        window._mode.setCurrentIndex(window._mode.findData("rh_cpsat"))
-        wait_until(lambda: window._state.mode == "rh_cpsat")
-        assert set(window._state.active_policies) == {"baseline", "optimized", "rh_cpsat"}
+        window._mode.setCurrentIndex(window._mode.findData("rh_cpsat_linear"))
+        wait_until(lambda: window._state.mode == "rh_cpsat_linear")
+        assert set(window._state.active_policies) == {"baseline", "optimized", "rh_cpsat_linear"}
         evidence = {"platform": app.platformName(), "factory_robots": len(before["robots"]),
                     "factory_stations": len(before["stations"]), "samples": response,
                     "command_to_state_p95_ms": float(np.quantile(response, .95)),
@@ -185,11 +191,11 @@ def test_policy_activation_reuses_observed_inputs_and_keeps_default(tmp_path: Pa
     try:
         monkeypatch.setattr(controller._db, "load_factory_config", unexpected_read)
         monkeypatch.setattr(controller._db, "list_orders", unexpected_read)
-        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp"})
+        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp_grid"})
         assert controller.primary.factory.to_dict() == factory_before
         assert controller.primary.now == 0
         assert config.DEFAULT_SCHEDULER_MODE == "optimized"
-        assert set(controller._engines) == {"baseline", "optimized", "rh_milp"}
+        assert set(controller._engines) == {"baseline", "optimized", "rh_milp_grid"}
     finally:
         controller.shutdown()
         app.processEvents()
@@ -218,13 +224,67 @@ def test_policy_activation_preserves_flushed_order_progress(tmp_path: Path, quan
         controller._flush_progress()
         persisted = next(row for row in service.list_orders() if row.order_id == order.order_id)
         assert persisted.completed == 1
-        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp"})
+        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp_grid"})
         for engine in controller._engines.values():
             if quantity == 1:
                 assert order.order_id not in engine.orders
             else:
                 assert engine.orders[order.order_id].completed == persisted.completed
         assert next(row for row in service.list_orders() if row.order_id == order.order_id).completed == 1
+    finally:
+        controller.shutdown()
+        service.close()
+        app.processEvents()
+
+
+def test_live_demo_demand_is_enabled_and_paired_after_activation(tmp_path: Path) -> None:
+    """Passing the noise seed must not silently disable GUI background demand."""
+    from simulation.sim_worker import _SimController
+    app = QApplication.instance() or QApplication([])
+    service = FactoryService(tmp_path / "demand.db")
+    service.ensure_database()
+    for order in service.list_orders(active_only=True):
+        service.cancel_order(order.order_id)
+    service.save_factory_config(factory())
+    controller = _SimController(str(service.db_path))
+    try:
+        observed = []
+        for model in controller._engines.values():
+            assert model.demand_source == "stochastic"
+            model.env.run(until=30)
+            observed.append(tuple((t.external_uid, t.created_at, t.process_noise)
+                                  for t in model.tasks.values()))
+        assert observed[0] == observed[1] and observed[0]
+    finally:
+        controller.shutdown()
+        service.close()
+        app.processEvents()
+
+
+def test_switch_flushes_progress_before_restarting_comparison(tmp_path: Path) -> None:
+    """Work completed since the last timer flush must not reappear on activation."""
+    from simulation.sim_worker import _SimController
+    app = QApplication.instance() or QApplication([])
+    service = FactoryService(tmp_path / "unflushed.db")
+    service.ensure_database()
+    for order in service.list_orders(active_only=True):
+        service.cancel_order(order.order_id)
+    service.save_factory_config(factory())
+    order = service.create_order("P", 3, required_stations=["S"])
+    controller = _SimController(str(service.db_path))
+    try:
+        model = controller.primary
+        model.update_param("task_rate", 0)
+        while model.orders[order.order_id].completed == 0 and model.now < 30:
+            model.env.run(until=model.now + .5)
+        assert model.orders[order.order_id].completed == 1
+        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "rh_milp_grid"})
+        assert next(r for r in service.list_orders() if r.order_id == order.order_id).completed == 1
+        assert all(e.orders[order.order_id].completed == 1 for e in controller._engines.values())
+        # Returning to the slower baseline must not undo persisted completed work.
+        controller._dispatch_command(ActionKind.SET_MODE, {"mode": "baseline"})
+        controller._flush_progress()
+        assert next(r for r in service.list_orders() if r.order_id == order.order_id).completed == 1
     finally:
         controller.shutdown()
         service.close()

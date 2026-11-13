@@ -1,3 +1,7 @@
+> **과거 구현 기록**: 이 문서는 PR #10의 `d63276d` 기준 명세/검수 기록이다.
+> 현재 실행·모델·지원 범위는 [PR10 통합 검수](PR10_INTEGRATION.md), [P4 검수](P4_REVIEW.md),
+> [headless 안내](../robot_factory_sim/HEADLESS_EVALUATION.md)를 따른다. 아래 구 schema·CLI·성능 수치는 현재 통합본 검증으로 사용하지 않는다.
+
 # Rolling Horizon MILP / CP-SAT 사용·검수 가이드
 
 두 RH 정책은 같은 관측 입력, 시간 확장 그래프, 정수 에너지, 목적함수와 독립 검증기를 사용한다. MILP는 OR-Tools의 SCIP, CP-SAT은 OR-Tools CP-SAT으로 같은 정수 선형 모델을 푼다. 기존 `optimized`는 가중치 휴리스틱, `assignment_milp_legacy`는 이전 배정 모델이다. 기본 정책은 `optimized`로 유지한다. [검수 기록](RH_VALIDATION.md)에 적용 조건·불리한 결과·최종 인수의 남은 목표를 명시했다.

@@ -447,10 +447,6 @@ class DashboardPanel(QWidget):
         self._roi_panel.update_kpis(
             int(base_kpis.get("completed_units", 0.0)), base_kpis.get("distance_m", 0.0),
             int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("distance_m", 0.0),
-            base_kpis.get("battery_units", 0.0), opt_kpis.get("battery_units", 0.0),
-            {k.removeprefix("robot_energy:"): v for k, v in base_kpis.items() if k.startswith("robot_energy:")},
-            {k.removeprefix("robot_energy:"): v for k, v in opt_kpis.items() if k.startswith("robot_energy:")},
-            candidate,
         )
 
     def _draw_planning(self) -> None:
@@ -460,17 +456,17 @@ class DashboardPanel(QWidget):
             return
         lines = ["실행 중: " + ", ".join(SchedulerModeLabel.LABELS.get(m, m) for m in state.active_policies),
                  "표시·개입 대상: " + SchedulerModeLabel.LABELS.get(state.mode, state.mode),
-                 f"장기 대기 {state.kpis.get('long_wait_count', 0):.0f} / 교착 순환 {state.kpis.get('deadlock_cycle_count', 0):.0f}"]
+                 "라이브 비동기 실행은 headless staged-D1 실험과 시간 규약이 다릅니다."]
         for mode, plan in state.planning.items():
             report = plan.get("report") or {}
             lines += ["", SchedulerModeLabel.LABELS.get(mode, mode) + " · " + plan["execution_status"],
                       f"계획 범위: {plan['scope']} · 후보 {plan.get('candidates', 0)}/{plan.get('total_pending', 0)}",
                       f"1단계 {report.get('phase1_status', '대기')}: 해 {report.get('phase1_cost')} / 경계 {report.get('phase1_bound')}",
                       f"2단계 {report.get('phase2_status', '대기')}: 해 {report.get('phase2_cost')} / 경계 {report.get('phase2_bound')}",
-                      f"모델 {report.get('model_version', '')} · {report.get('backend_version', '')}",
+                      f"모델 {report.get('version', '')} · {report.get('backend_version', '')}",
                       "판정 이유: " + (report.get("message") or str(plan.get("reason", "")) or "정상"),
-                      f"채택 {plan['accepted']} / 대체 {plan['fallbacks']} / 폐기 {plan['stale']} / 지연 {plan['overruns']}",
-                      "확정 예약 [시작, 종료) · 자원 · 소유 로봇 · 점유 단위"]
+                      f"채택 {plan['accepted']} / 대체 {plan['fallbacks']} / 폐기 {plan.get('stale', 0)} / 지연 {plan['overruns']}",
+                      "확정한 첫 행동은 실제 통행 자원 승인 뒤 실행합니다."]
             reservations = plan.get("reservations", [])
             lines += [f"[{r['start']:.2f}, {r['end']:.2f}) {r['resource']} · {r['robot']} · {r['amount']}"
                       for r in reservations[:100]]

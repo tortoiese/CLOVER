@@ -1,3 +1,7 @@
+> **과거 구현 기록**: 이 문서는 PR #10의 `d63276d` 기준 명세/검수 기록이다.
+> 현재 실행·모델·지원 범위는 [PR10 통합 검수](PR10_INTEGRATION.md), [P4 검수](P4_REVIEW.md),
+> [headless 안내](../robot_factory_sim/HEADLESS_EVALUATION.md)를 따른다. 아래 구 schema·CLI·성능 수치는 현재 통합본 검증으로 사용하지 않는다.
+
 # RH 구현 검수와 적용 범위
 
 검수일: 2026-10-26. 기준 main: `841af64c2ef4684053d0aadeed0b5fee8df36ec7`.

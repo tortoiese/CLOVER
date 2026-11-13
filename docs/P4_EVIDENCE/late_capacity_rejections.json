@@ -1,0 +1,26 @@
+[
+  {
+    "policy": "rh_cpsat_interval",
+    "time": 556.7676489172038,
+    "receipt_reason": "MODEL_INVALID: resource capacity exceeded",
+    "original_plan_validation": [],
+    "applied": false,
+    "interpretation": "Original snapshot valid; latest-state prefix admission rejects changed residual capacity."
+  },
+  {
+    "policy": "rh_milp_grid",
+    "time": 556.7202246673871,
+    "receipt_reason": "MODEL_INVALID: resource capacity exceeded",
+    "original_plan_validation": [],
+    "applied": false,
+    "interpretation": "Original snapshot valid; latest-state prefix admission rejects changed residual capacity."
+  },
+  {
+    "policy": "rh_cpsat_linear",
+    "time": 556.7504788758699,
+    "receipt_reason": "MODEL_INVALID: resource capacity exceeded",
+    "original_plan_validation": [],
+    "applied": false,
+    "interpretation": "Original snapshot valid; latest-state prefix admission rejects changed residual capacity."
+  }
+]

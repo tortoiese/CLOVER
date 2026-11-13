@@ -10,6 +10,7 @@ from scipy.optimize import Bounds, LinearConstraint, milp
 
 import config
 from simulation.scheduler import OptimizedScheduler
+from simulation.travel import estimate_trip
 
 if TYPE_CHECKING:
     from simulation.engine import SimulationEngine
@@ -23,7 +24,7 @@ class RollingMilpScheduler(OptimizedScheduler):
     충전 시점/충전소 선택은 기존 예측 충전 규칙을 사용한다.
     """
 
-    name = "rolling_milp"
+    name = "assignment_milp_legacy"
 
     def __init__(self, horizon: float = 60.0, replan: float = 5.0) -> None:
         """계획 구간과 재계획 주기를 설정한다."""
@@ -48,25 +49,23 @@ class RollingMilpScheduler(OptimizedScheduler):
             for robot in idle:
                 if robot.emergency_order and task.order_id != robot.emergency_order:
                     continue
-                for station_id in task.allowed_stations or (task.station_id,):
-                    if not engine.station_available(station_id):
-                        continue
+                for station_id in engine._usable_stations(task):
                     station = engine.stations[station_id]
-                    if (station.resource.count or station.waiting
-                            or station.dedicated_order not in (None, task.order_id)):
+                    if (
+                        station.resource.count
+                        or station.waiting
+                        or station.dedicated_order not in (None, task.order_id)
+                    ):
                         continue
                     if any(r.target_id == station_id for r in engine.robot_list() if not r.is_available()):
                         continue
-                    distance = engine.path_graph.distance_to_facility(robot.x, robot.y, station_id, robot.floor)
+                    trip = estimate_trip(engine, robot, station_id)
+                    distance = trip.horizontal_m
                     if not math.isfinite(distance):
-                        continue
-                    if not any(math.isfinite(engine.path_graph.distance_to_facility(
-                            station.cfg.x, station.cfg.y, charger.id, station.cfg.floor))
-                               for charger in engine.chargers.values() if charger.active):
                         continue
                     energy = self._energy_needed(robot, engine, station_id, distance)
                     reserve = robot.capacity * config.BATTERY_RESERVE / 100
-                    travel_time = distance * config.METERS_PER_PIXEL / robot.cfg.move_speed
+                    travel_time = trip.seconds
                     if robot.live_battery() - energy < reserve:
                         continue
                     if travel_time + station.cfg.avg_process_time > self.horizon:
@@ -83,16 +82,21 @@ class RollingMilpScheduler(OptimizedScheduler):
                 matrix[len(idle) + tasks.index(task), j] = 1
                 matrix[len(idle) + len(tasks) + stations.index(station_id), j] = 1
                 # 배정 수 증가를 우선하고, 유계인 부목적은 정규화한다.
-                costs.append(task.priority * 10 + distance * config.METERS_PER_PIXEL + energy)
+                costs.append(task.priority * 10 + distance + energy)
             costs = np.asarray(costs, dtype=float)
             costs /= max(1.0, float(costs.max()))
             objective = costs - (min(len(idle), len(tasks), len(stations)) + 1)
-            result = milp(objective, integrality=np.ones(len(entries)), bounds=Bounds(0, 1),
-                          constraints=LinearConstraint(matrix, 0, 1),
-                          options={"time_limit": 0.25, "mip_rel_gap": 0.001})
+            result = milp(
+                objective,
+                integrality=np.ones(len(entries)),
+                bounds=Bounds(0, 1),
+                constraints=LinearConstraint(matrix, 0, 1),
+                options={"time_limit": 0.25, "mip_rel_gap": 0.001},
+            )
             gap = getattr(result, "mip_gap", None)
-            self.solve_records.append({"status": int(result.status),
-                                       "gap": float(gap) if gap is not None and math.isfinite(gap) else None})
+            self.solve_records.append(
+                {"status": int(result.status), "gap": float(gap) if gap is not None and math.isfinite(gap) else None}
+            )
             x = result.x
             # 시간 제한 시에도 정수성·자원 제약을 검증한 유효 해만 사용한다.
             if x is not None and np.all(np.isfinite(x)) and np.all(np.abs(x - np.rint(x)) < 1e-5):
@@ -106,8 +110,9 @@ class RollingMilpScheduler(OptimizedScheduler):
         for robot in idle:
             if not robot.is_available():
                 continue
-            if self.should_charge(robot, engine) or (not engine.pending_tasks
-                                                     and robot.battery_pct < config.OPPORTUNISTIC_CHARGE_LEVEL):
+            if self.should_charge(robot, engine) or (
+                not engine.pending_tasks and robot.battery_pct < config.OPPORTUNISTIC_CHARGE_LEVEL
+            ):
                 engine.send_to_charge(robot)
             elif engine.pending_tasks and robot.battery_pct < config.PRECHARGE_LEVEL:
                 engine.send_to_charge(robot)

@@ -9,6 +9,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any
 
+import config
+from simulation.resource_pool import SLOT_UNIT, TRAFFIC_CONTRACT
 from utils.config_models import FactoryConfig
 
 Point = tuple[float, float]
@@ -35,6 +37,37 @@ class RobotSnapshot:
     floor: int = 1
     floor_pos: float = 1.0  # 엘리베이터 탑승 중이면 소수 층
     route_floors: list[int] = field(default_factory=list)  # route 각 점의 층
+    wait_reason: str = ""
+    wait_resource: str = ""
+    wait_seconds: float = 0.0
+    width: float = config.DEFAULT_ROBOT_WIDTH
+    length: float = config.DEFAULT_ROBOT_LENGTH
+
+
+@dataclass
+class TrafficSnapshot:
+    """통행 자원의 점유·대기 상태. 좌표 px, 폭 m, 대기시간 sim-sec."""
+
+    id: str
+    kind: str
+    floor: int
+    x: float
+    y: float
+    end_x: float
+    end_y: float
+    capacity: int
+    occupied: int
+    waiting: int
+    occupants: list[str] = field(default_factory=list)
+    queue: list[str] = field(default_factory=list)
+    longest_wait: float = 0.0
+    width: float = 0.0
+    bidirectional: bool = True
+    passable: bool = True
+    unit: str = SLOT_UNIT
+    resource_id: str = ""
+    contract: str = TRAFFIC_CONTRACT
+    draining: bool = False
 
 
 @dataclass
@@ -142,6 +175,7 @@ class SimState:
     params: dict[str, float]
     events: list[TimelineEvent] = field(default_factory=list)
     elevators: list[ElevatorSnapshot] = field(default_factory=list)
+    traffic: list[TrafficSnapshot] = field(default_factory=list)
     planning: dict[str, dict[str, Any]] = field(default_factory=dict)
     active_policies: tuple[str, ...] = ()
     diagnostics: dict[str, float] = field(default_factory=dict)
@@ -186,6 +220,7 @@ def state_to_context(state: SimState | None) -> dict[str, Any]:
         "stations": [{**asdict(s), "avg_process_time": process_times.get(s.id, 0.0)} for s in state.stations],
         "chargers": [asdict(c) for c in state.chargers],
         "elevators": [asdict(e) for e in state.elevators],
+        "traffic": [asdict(item) for item in state.traffic],
         "orders": [asdict(o) for o in state.orders],
         "obstacles": [asdict(o) for o in state.layout.obstacles],
     }

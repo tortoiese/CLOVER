@@ -96,7 +96,7 @@ QLabel#DbStatus[connected="false"] {
 }
 
 /* ---------------- 입력 ---------------- */
-QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit, QTextEdit, QTextBrowser {
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit {
     background: #0f1a33;
     border: 1px solid #2a3b63;
     border-radius: 6px;
@@ -198,11 +198,7 @@ QTableWidget, QListWidget, QTreeWidget {
     gridline-color: #22304f;
 }
 
-QHeaderView {
-    background: #0f1a33;
-}
-
-QHeaderView::section, QTableCornerButton::section {
+QHeaderView::section {
     background: #0f3460;
     border: none;
     padding: 4px;

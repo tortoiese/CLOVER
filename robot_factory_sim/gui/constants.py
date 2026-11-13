@@ -6,6 +6,13 @@ from typing import Final
 
 from utils.event_types import RobotState, Severity, TimelineKind
 
+# 통행 상태는 기본 경로망 위에 표시하며, 실시간 오버레이 갱신을 제한한다.
+TRAFFIC_REFRESH_SECONDS: float = 0.2
+TRAFFIC_NODE_RADIUS: float = 9.0
+TRAFFIC_ARROW_SIZE: float = 11.0
+TRAFFIC_BUSY_WIDTH: float = 3.2
+TRAFFIC_IDLE_WIDTH: float = 1.0
+
 # ---------------------------------------------------------------------------
 # 테마 색상
 # ---------------------------------------------------------------------------
@@ -96,8 +103,8 @@ TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
 }
 
 ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7",
-                                     "assignment_milp_legacy": "#f9b572", "rh_milp": "#67d6e8",
-                                     "rh_cpsat": "#d890e8"}
+    "assignment_milp_legacy": "#f9b572", "rh_milp_grid": "#67d6e8",
+    "rh_cpsat_linear": "#d890e8", "rh_cpsat_interval": "#b7a6ed", "rh_cpsat_native": "#f0a5c4"}
 
 # ---------------------------------------------------------------------------
 # 크기

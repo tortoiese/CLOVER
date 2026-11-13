@@ -45,7 +45,13 @@ def test_every_scenario_runs_and_completes_work(layout: str, difficulty: str) ->
     factory, params = build_scenario_config(layout, difficulty)
     engine = SimulationEngine(factory, "optimized", params=params)
     engine.env.run(until=900)
-    assert engine.metrics.total_completed > 0
+    if any(charger.active for charger in engine.chargers.values()):
+        assert engine.metrics.total_completed > 0
+    else:
+        # S3 may disable the only charger. No safe return exists; hold jobs
+        # instead of treating the missing charger as a zero-energy return.
+        assert engine.metrics.total_completed == 0
+        assert engine.pending_tasks and all(robot.battery > 0 for robot in engine.robot_list())
 
 
 def test_loop_layout_reaches_second_floor_through_elevator() -> None:

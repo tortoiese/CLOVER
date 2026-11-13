@@ -1,0 +1,5 @@
+{
+  "horizon": 20, "step": 1, "max_tasks": 4, "sigma": 0,
+  "interval": 5, "timeout": 5, "watchdog": 6,
+  "warm_start": true, "warm_start_seconds": 0.05
+}

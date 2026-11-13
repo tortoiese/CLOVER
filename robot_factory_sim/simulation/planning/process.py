@@ -1,221 +1,289 @@
-"""Spawned solver isolation with a hard watchdog and no Qt objects in children."""
+"""Persistent spawn worker with parent-enforced wall and resident-memory limits."""
 
 from __future__ import annotations
 
-import multiprocessing as mp
-import queue
-import threading
+import multiprocessing
 import time
-from collections.abc import Callable
+import uuid
 from dataclasses import replace
 from multiprocessing.connection import Connection
+from queue import Empty, Queue
+from threading import Thread
 
-from simulation.planning.backend import Backend
-from simulation.planning.contracts import Report, Result
-from simulation.planning.snapshot import Request, prepare
+from simulation.planning.contracts import PreparedInput, Report, Result, Snapshot
 
 
-def solve_request(request: Request, backend: str) -> Result:
-    """Include detached route preparation in the total soft budget."""
-    started = time.monotonic()
+def _worker(connection: Connection) -> None:
+    ready_policy = None
     try:
-        snapshot = prepare(request)
-        return Backend(backend).solve(snapshot, started)
-    except Exception as exc:  # noqa: BLE001 — process boundary must return an explicit failure
-        status = "UNSUPPORTED" if str(exc).startswith("UNSUPPORTED_") else "ERROR"
-        return Result(request.snapshot, Report(backend, status, time.monotonic() - started,
-                                               scope=request.snapshot.scope, message=str(exc)))
-
-
-def _serve(connection: Connection, backend: str) -> None:
-    try:
-        unavailable = ""
-        # Native library initialization belongs to the separate cold-start watchdog.
-        try:
-            if backend == "milp":
-                from ortools.linear_solver import pywraplp
-                pywraplp.Solver.CreateSolver("SCIP")
-            else:
-                from ortools.sat.python import cp_model
-                cp_model.CpModel()
-        except ImportError as exc:
-            unavailable = f"Install requirements (ortools/SCIP): {exc}"
-        connection.send("READY")
         while True:
-            request = connection.recv()
-            if request is None:
-                break
-            if unavailable:
-                connection.send(Result(request.snapshot, Report(backend, "UNAVAILABLE", 0,
-                                                                 scope=request.snapshot.scope, message=unavailable)))
-            else:
-                connection.send(solve_request(request, backend))
+            payload = connection.recv()
+            if payload is None:
+                return
+            if isinstance(payload, dict) and payload.get("rpc_version") == 1:
+                from simulation.decisions.rpc import handle
+
+                reply, ready_policy = handle(payload, ready_policy)
+                connection.send(reply)
+                continue
+            from simulation.planning.backend import Backend
+            from simulation.planning.snapshot import prepare
+
+            snapshot, started, backend = payload
+            received, cpu = time.monotonic(), time.process_time()
+            try:
+                data = prepare(snapshot, deadline=started + snapshot.settings.timeout)
+                prepared = time.monotonic()
+                result = Backend(backend).solve(data, started=started)
+                result = replace(
+                    result,
+                    report=replace(
+                        result.report,
+                        dispatch_to_worker_seconds=received - started,
+                        prepare_seconds=prepared - received,
+                        worker_cpu_seconds=time.process_time() - cpu,
+                        stage_seconds={
+                            "worker_dispatch": received - started,
+                            "route_prepare": prepared - received,
+                            **result.report.stage_seconds,
+                        },
+                    ),
+                )
+            except Exception as exc:
+                if isinstance(exc, TimeoutError):
+                    status = "NO_INCUMBENT_TIMEOUT"
+                elif isinstance(exc, ValueError):
+                    status = (
+                        "BUILD_LIMIT"
+                        if any(code in str(exc) for code in ("BUILD_LIMIT", "ROUTE_LIMIT"))
+                        else "MODEL_INVALID"
+                    )
+                else:
+                    status = "ERROR"
+                result = Result(
+                    PreparedInput(snapshot, (), ()),
+                    Report(
+                        status,
+                        backend=backend,
+                        message=f"{type(exc).__name__}: {exc}",
+                        total_seconds=time.monotonic() - started,
+                        dispatch_to_worker_seconds=received - started,
+                        prepare_seconds=time.monotonic() - received,
+                        worker_cpu_seconds=time.process_time() - cpu,
+                        timing_stage="route_prepare",
+                        timing_complete=False,
+                        stage_seconds={
+                            "worker_dispatch": received - started,
+                            "route_prepare": time.monotonic() - received,
+                        },
+                    ),
+                )
+            connection.send(result)
     except (EOFError, BrokenPipeError):
-        pass
+        return
     finally:
         connection.close()
 
 
 class SolverProcess:
-    """One persistent subprocess; reset and shutdown terminate only owned work."""
+    """Isolate native failures and dispose the entire worker after a hard limit."""
 
-    def __init__(self, backend: str) -> None:
-        self.backend = backend
-        self.process: mp.Process | None = None
+    def __init__(self) -> None:
+        self.process: multiprocessing.Process | None = None
         self.connection: Connection | None = None
-        self.pending: Request | None = None
-        self.started = 0.0
-        self.submitted = 0.0
-        self._cold = True
-        self.peak_rss_mib = 0.0
-        self._send_thread: threading.Thread | None = None
-        self._cancel_send = threading.Event()
-        self._send_error = ""
-        self._messages: queue.Queue = queue.Queue()
-        self._psutil = None
-
-    def submit(self, request: Request) -> None:
-        """Start one request, without building paths or importing a native solver here."""
-        if self.pending is not None:
-            raise RuntimeError("a solve is already in progress")
-        child = None
-        if self.process is None:
-            context = mp.get_context("spawn")
-            self.connection, child = context.Pipe()
-            self.process = context.Process(target=_serve, args=(child, self.backend), daemon=True)
-            self._cold = True
-        self.pending = request
-        self.started = time.monotonic()
-        self.submitted = self.started
-        self.peak_rss_mib = 0
-        self._cancel_send = threading.Event()
-        self._send_error = ""
-        self._messages = queue.Queue()
-        self._send_thread = threading.Thread(target=self._send_request,
-                                            args=(request, self.process, self.connection, child, self._cancel_send,
-                                                  self._messages),
-                                            name="clover-planner-transport", daemon=True)
-        self._send_thread.start()
-
-    def _send_request(self, request: Request, process: mp.Process, connection: Connection,
-                      child: Connection | None, cancelled: threading.Event, messages: queue.Queue) -> None:
-        """Keep spawn and pipe backpressure off both Qt and simulation event loops."""
-        try:
-            import psutil
-            self._psutil = psutil
-            if child is not None and not cancelled.is_set():
-                process.start()
-            if not cancelled.is_set():
-                connection.send(request)
-                while not cancelled.is_set():
-                    message = connection.recv()
-                    messages.put(message)
-                    if message != "READY":
-                        break
-        except ImportError:
-            self._send_error = "UNAVAILABLE: Install requirements: psutil is required for RSS monitoring"
-        except (OSError, EOFError, RuntimeError, ValueError) as exc:
-            if not cancelled.is_set():
-                self._send_error = str(exc)
-        finally:
-            if child is not None:
-                child.close()
-            if cancelled.is_set() and process.pid is not None:
-                if process.is_alive():
-                    process.terminate()
-                process.join(.2)
-                if process.is_alive():
-                    process.kill()
-                    process.join(.2)
-
-    def poll(self) -> Result | None:
-        """Return once, or kill a crashed/overdue solver and return an explicit failure."""
-        if self.pending is None:
-            return None
-        request = self.pending
-        if self._send_error:
-            message = self._send_error
-            self.close()
-            status = "UNAVAILABLE" if message.startswith("UNAVAILABLE:") else "PROCESS_ERROR"
-            return Result(request.snapshot, Report(self.backend, status, 0,
-                                                   scope=request.snapshot.scope, message=message))
-        if self._psutil is None and self._send_thread is not None:
-            if time.monotonic() - self.submitted <= 10:
-                return None
-            self.close()
-            return Result(request.snapshot, Report(self.backend, "HARD_TIMEOUT", 10,
-                                                   scope=request.snapshot.scope, message="monitor initialization timeout"))
-        try:
-            psutil = self._psutil
-            if psutil is None:
-                import psutil
-        except ImportError:
-            self.close()
-            return Result(request.snapshot, Report(self.backend, "UNAVAILABLE", 0, scope=request.snapshot.scope,
-                                                   message="Install requirements: psutil is required for RSS monitoring"))
-        try:
-            if self.process.pid is None:
-                if time.monotonic() - self.submitted <= max(10, request.snapshot.settings.watchdog):
-                    return None
-                self.close()
-                return Result(request.snapshot, Report(self.backend, "HARD_TIMEOUT", 10,
-                                                       scope=request.snapshot.scope, message="startup timeout"))
-            rss = psutil.Process(self.process.pid).memory_info().rss / (1024 * 1024)
-            self.peak_rss_mib = max(self.peak_rss_mib, rss)
-            if rss > request.snapshot.settings.memory_limit_mib:
-                elapsed = time.monotonic() - self.started
-                self.close()
-                return Result(request.snapshot, Report(self.backend, "MEMORY_LIMIT", elapsed,
-                                                       scope=request.snapshot.scope,
-                                                       message=f"RSS {rss:.1f} MiB exceeds configured limit"))
-            try:
-                result = self._messages.get_nowait()
-            except queue.Empty:
-                result = None
-            if self._send_thread is None and self.connection.poll():
-                result = self.connection.recv()
-            if result is not None:
-                if result == "READY":
-                    self._cold = False
-                    self.started = time.monotonic()
-                    return None
-                self.pending = None
-                self._cold = False
-                return replace(result, report=replace(result.report, peak_rss_mib=self.peak_rss_mib,
-                                                       total_wall_seconds=time.monotonic() - self.submitted))
-            limit = max(10.0, request.snapshot.settings.watchdog) if self._cold else request.snapshot.settings.watchdog
-            if self.process.is_alive() and time.monotonic() - self.started <= limit:
-                return None
-            status = "HARD_TIMEOUT" if self.process.is_alive() else "PROCESS_ERROR"
-        except (EOFError, OSError, psutil.Error):
-            status = "PROCESS_ERROR"
-        elapsed = time.monotonic() - self.started
-        self.close()
-        return Result(request.snapshot, Report(self.backend, status, elapsed, scope=request.snapshot.scope,
-                                               message="solver process restarted"))
-
-    def solve(self, request: Request, cancelled: Callable[[], bool] | None = None) -> Result:
-        """Headless paired experiments wait for isolated work at a fixed sim-time."""
-        self.submit(request)
-        while True:
-            if cancelled and cancelled():
-                self.close()
-                raise InterruptedError("solver request cancelled")
-            result = self.poll()
-            if result is not None:
-                return result
-            time.sleep(.005)
+        self.rpc_thread: Thread | None = None
+        self.generation = 0
+        self.session = ""
+        self.ready_for: str | None = None
 
     def close(self) -> None:
-        """Bound cancellation time and release pipes on reset, stop or application exit."""
-        self._cancel_send.set()
-        if self.process is not None and self.process.pid is not None:
-            if self.process.is_alive():
-                self.process.terminate()
-            self.process.join(.2)
-            if self.process.is_alive():
-                self.process.kill()
-                self.process.join(.2)
+        """Stop and reap the owned child; no solver process survives engine disposal."""
+        self.ready_for = None
         if self.connection is not None:
             self.connection.close()
-        self.process = self.connection = self.pending = None
+            self.connection = None
+        if self.process is not None:
+            if self.process.is_alive():
+                self.process.terminate()
+            self.process.join(timeout=0.5)
+            if self.process.is_alive():
+                self.process.kill()
+                self.process.join(timeout=0.5)
+            self.process.close()
+            self.process = None
+        if self.rpc_thread is not None:
+            self.rpc_thread.join(timeout=0.5)
+            self.rpc_thread = None
+
+    def request(self, command: str, policy: str, arguments: dict, *, request_id: str, epoch: str,
+                timeout: float, memory_limit_mib: float) -> dict:
+        """Run an identity-checked D1 RPC with a parent-enforced total bound.
+
+        Readiness and operational calls use the same owned worker and watchdog.
+        A failed generation is fully reaped before another may be created.
+        """
+        started = time.monotonic()
+        startup = command == "ready"
+        peak = 0
+        reused = self.process is not None and self.process.is_alive()
+
+        def failure(code: str, message: str) -> dict:
+            identity = {"session": self.session, "generation": self.generation,
+                        "request_id": request_id, "epoch": epoch, "policy": policy}
+            self.close()
+            return {**identity, "status": ("STARTUP_" if startup else "") + code, "message": message,
+                    "elapsed_seconds": time.monotonic() - started, "worker_reused": reused,
+                    "peak_rss_mib": peak / 1024**2, "value": None}
+
+        try:
+            import psutil
+        except ImportError:
+            return failure("UNAVAILABLE", "psutil is required for memory supervision")
+        try:
+            if command != "ready" and (not reused or self.ready_for != policy):
+                return failure("WORKER_CRASH" if not reused else "NOT_READY", "no matching prepared worker")
+            if not reused:
+                self.close()
+                self.generation += 1
+                self.session = uuid.uuid4().hex
+                context = multiprocessing.get_context("spawn")
+                parent, child = context.Pipe()
+                self.connection = parent
+                self.process = context.Process(target=_worker, args=(child,), daemon=True)
+                self.process.start()
+                child.close()
+            identity = {"session": self.session, "generation": self.generation,
+                        "request_id": request_id, "epoch": epoch, "policy": policy}
+            payload = {"rpc_version": 1, **identity, "command": command, "arguments": arguments,
+                       "started": started}
+            responses: Queue[tuple[bool, object]] = Queue()
+            connection = self.connection
+
+            def exchange() -> None:
+                try:
+                    connection.send(payload)
+                    responses.put((True, connection.recv()))
+                except (EOFError, BrokenPipeError, OSError) as exc:
+                    responses.put((False, str(exc)))
+
+            self.rpc_thread = Thread(target=exchange, daemon=True)
+            self.rpc_thread.start()
+            monitor = psutil.Process(self.process.pid)
+            while True:
+                if time.monotonic() - started > timeout:
+                    return failure("TIMEOUT" if startup else "HARD_TIMEOUT", "parent RPC watchdog")
+                if not self.process.is_alive():
+                    return failure("WORKER_CRASH", "worker exited without matching response")
+                peak = max(peak, monitor.memory_info().rss)
+                if peak > memory_limit_mib * 1024**2:
+                    return failure("MEMORY_LIMIT", "resident memory limit")
+                try:
+                    ok, value = responses.get(timeout=.005)
+                except Empty:
+                    continue
+                if not ok or not isinstance(value, dict):
+                    return failure("TRANSPORT_ERROR", str(value))
+                if any(value.get(key) != expected for key, expected in identity.items()):
+                    return failure("STALE_GENERATION", "response identity differs from owned request")
+                self.rpc_thread.join(timeout=.1)
+                if startup and value["status"] == "READY":
+                    self.ready_for = policy
+                elif value["status"] not in {"READY", "OK"}:
+                    self.close()
+                elapsed=time.monotonic()-started
+                returned=value.get("value")
+                if isinstance(returned,dict) and isinstance(returned.get("plan"),Result):
+                    plan=returned["plan"]
+                    response=max(0,elapsed-plan.report.total_seconds)
+                    returned["plan"]=replace(plan,report=replace(plan.report,
+                        worker_reused=reused,worker_peak_rss_mib=peak/1024**2,
+                        parent_elapsed_seconds=elapsed,response_seconds=response,
+                        stage_seconds={**plan.report.stage_seconds,"worker_response":response}))
+                return {**value, "elapsed_seconds": time.monotonic() - started,
+                        "peak_rss_mib": peak / 1024**2, "worker_reused": reused}
+        except (EOFError, BrokenPipeError, OSError, psutil.Error) as exc:
+            return failure("TRANSPORT_ERROR", str(exc))
+
+    def solve(self, snapshot: Snapshot, started: float, backend: str = "milp") -> Result:
+        """Return a complete result or a retained explicit hard failure."""
+        reused, peak_rss = False, 0
+
+        def failure(status: str, message: str) -> Result:
+            self.close()
+            return Result(
+                PreparedInput(snapshot, (), ()),
+                Report(
+                    status,
+                    backend=backend,
+                    total_seconds=time.monotonic() - started,
+                    parent_elapsed_seconds=time.monotonic() - started,
+                    worker_reused=reused,
+                    worker_peak_rss_mib=peak_rss / 1024**2,
+                    timing_stage="parent_" + status.lower(),
+                    timing_complete=False,
+                    message=message,
+                ),
+            )
+
+        try:
+            import psutil
+        except ImportError:
+            return failure("UNAVAILABLE", "psutil is required for the parent memory watchdog")
+        reused = self.process is not None and self.process.is_alive()
+        if not reused:
+            self.close()
+            context = multiprocessing.get_context("spawn")
+            parent, child = context.Pipe()
+            self.connection = parent
+            self.process = context.Process(target=_worker, args=(child,), daemon=True)
+            self.process.start()
+            child.close()
+        try:
+            responses: Queue[tuple[bool, object]] = Queue()
+            connection = self.connection
+
+            def exchange() -> None:
+                try:
+                    connection.send((snapshot, started, backend))
+                    responses.put((True, connection.recv()))
+                except (EOFError, BrokenPipeError, OSError) as exc:
+                    responses.put((False, str(exc)))
+
+            # Large IPC can block too. The owner must remain able to reap the
+            # worker even if the child never reads or finishes a response.
+            self.rpc_thread = Thread(target=exchange, daemon=True)
+            self.rpc_thread.start()
+            monitor = psutil.Process(self.process.pid)
+            while True:
+                if time.monotonic() - started > snapshot.settings.watchdog:
+                    return failure("HARD_TIMEOUT", "total decision watchdog, including cold start")
+                if not self.process.is_alive():
+                    return failure("ERROR", "native worker exited without a result")
+                rss = monitor.memory_info().rss
+                peak_rss = max(peak_rss, rss)
+                if rss > snapshot.settings.memory_limit_mib * 1024**2:
+                    return failure("MEMORY_LIMIT", "resident memory limit")
+                try:
+                    ok, value = responses.get(timeout=0.005)
+                    if not ok or not isinstance(value, Result):
+                        return failure("ERROR", f"worker transport: {value}")
+                    self.rpc_thread.join(timeout=0.1)
+                    elapsed = time.monotonic() - started
+                    return replace(
+                        value,
+                        report=replace(
+                            value.report,
+                            worker_peak_rss_mib=peak_rss / 1024**2,
+                            worker_reused=reused,
+                            parent_elapsed_seconds=elapsed,
+                            response_seconds=max(0, elapsed - value.report.total_seconds),
+                            stage_seconds={
+                                **value.report.stage_seconds,
+                                "worker_response": max(0, elapsed - value.report.total_seconds),
+                            },
+                        ),
+                    )
+                except Empty:
+                    pass
+        except (EOFError, BrokenPipeError, OSError, psutil.Error) as exc:
+            return failure("ERROR", f"worker transport: {exc}")

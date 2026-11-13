@@ -4,8 +4,9 @@ pyqtgraph>=0.13.7
 numpy>=1.26
 matplotlib>=3.7
 scipy>=1.14,<2
-ortools==9.15.6755
-psutil>=7,<9
 chromadb>=1.5.9,<2
 openai>=2,<3
 pypdf>=5,<7
+
+# Optional RH policies are selectable in the GUI.
+-r requirements-planning.txt

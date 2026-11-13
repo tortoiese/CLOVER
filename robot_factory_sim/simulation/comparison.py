@@ -17,7 +17,6 @@ import numpy as np
 from scipy.stats import t
 
 import config
-from simulation.energy import per_robot
 from simulation.engine import SimulationEngine
 from simulation.milp_scheduler import RollingMilpScheduler
 from utils.comparison_models import ComparisonConditions, calculate_economics
@@ -73,9 +72,18 @@ def validate_factory(factory: FactoryConfig) -> None:
 
 
 def _energy_distance(engine: SimulationEngine) -> tuple[float, float]:
-    from simulation.energy import measure
-    ledger = measure(engine)
-    return ledger["battery_units"], ledger["distance_m"]
+    units = distance = 0.0
+    for robot in engine.robot_list():
+        units += robot.travel_energy_units + robot.work_energy_units
+        distance += robot.distance_m
+        if robot._segment is not None:
+            x0, y0, x1, y1, start, end, drain = robot._segment
+            fraction = robot._segment_fraction(start, end)
+            distance += math.hypot(x1 - x0, y1 - y0) * config.METERS_PER_PIXEL * fraction
+            units += min(robot.battery, drain * fraction)
+        if robot._work_started is not None:
+            units += min(robot.battery, config.WORK_DRAIN_PER_SEC * (engine.now - robot._work_started))
+    return units, distance
 
 
 def _demand_process(engine: SimulationEngine, arrivals: list[tuple[float, str]]) -> Any:
@@ -91,8 +99,6 @@ def _summary(samples: list[dict[str, Any]]) -> dict[str, float | None]:
         values = [sample[key] for sample in samples]
         result[key] = (float(np.mean(values)) if all(value is not None and math.isfinite(value) for value in values)
                        else None)
-    profit, cost = result.get("net_profit"), result.get("total_cost")
-    result["roi"] = profit / cost * 100 if profit is not None and cost is not None and cost > 0 else None
     return result
 
 
@@ -113,9 +119,6 @@ def run_comparison(conditions: ComparisonConditions, context: dict[str, Any],
     로봇은 기본 배치·만충전으로 재시작한다. 진행 중 실행의 이어하기가 아니다.
     """
     conditions.validate()
-    if context.get("comparison_policies"):
-        from simulation.experiments import run_policy_comparison
-        return run_policy_comparison(conditions, context, cancelled)
     if not context.get("factory_config"):
         raise ValueError("공장 설정이 없습니다. GUI가 준비된 뒤 다시 실행하세요.")
     factory = FactoryConfig.from_dict(context["factory_config"])
@@ -161,7 +164,7 @@ def run_comparison(conditions: ComparisonConditions, context: dict[str, Any],
             while when < conditions.duration:
                 arrivals.append((when, str(rng.choice(station_ids))))
                 when += float(rng.exponential(1 / rate))
-        for mode, policy_samples in samples.items():
+        for mode in samples:
             engine = SimulationEngine(copy.deepcopy(factory), "baseline" if mode == "baseline" else "optimized",
                                       seed=seed, epoch=epoch, comparison_seed=seed,
                                       params=dict(parameters))
@@ -181,8 +184,8 @@ def run_comparison(conditions: ComparisonConditions, context: dict[str, Any],
             sample = {**metrics, "completed": engine.metrics.total_completed,
                       "distance_m": distance, "battery_units": units,
                       **calculate_economics(engine.metrics.total_completed, units, distance, conditions,
-                                            mode == "candidate", per_robot(engine))}
-            policy_samples.append(sample)
+                                            mode == "candidate")}
+            samples[mode].append(sample)
             if mode == "candidate":
                 solver_records.extend(engine.scheduler.solve_records)
     baseline, candidate = _summary(samples["baseline"]), _summary(samples["candidate"])

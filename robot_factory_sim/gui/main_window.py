@@ -147,9 +147,10 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         toolbar.addWidget(QLabel(" 스케줄러 ", self))
         self._mode = QComboBox(self)
-        for mode in config.SCHEDULER_MODES:
+        from simulation.planning.live import LIVE_POLICIES
+        for mode in LIVE_POLICIES:
             self._mode.addItem(SchedulerModeLabel.LABELS[mode], mode)
-        self._mode.setCurrentIndex(config.SCHEDULER_MODES.index(config.DEFAULT_SCHEDULER_MODE))
+        self._mode.setCurrentIndex(LIVE_POLICIES.index(config.DEFAULT_SCHEDULER_MODE))
         self._mode.setToolTip("선택은 화면·조치 대상을 바꿉니다. 비활성 정책을 처음 선택하면 비교를 0초부터 다시 시작합니다.")
         self._mode.currentIndexChanged.connect(
             lambda _: self._worker.send_command(ActionKind.SET_MODE, {"mode": self._mode.currentData()}))
@@ -261,7 +262,7 @@ class MainWindow(QMainWindow):
         from gui.planning_settings import PlanningSettingsDialog
         from simulation.planning.contracts import Settings
         values = (self._state.planning.get(self._state.mode, {}).get("settings") if self._state else None)
-        dialog = PlanningSettingsDialog(values or asdict(Settings(scope="traffic")), self)
+        dialog = PlanningSettingsDialog(values or asdict(Settings(horizon=30, step=2, max_tasks=8, native_actions=4, timeout=2, watchdog=3)), self)
         if dialog.exec():
             self._worker.send_command(ActionKind.SET_PLANNING, dialog.values())
 
@@ -340,9 +341,6 @@ class MainWindow(QMainWindow):
         if self._comparison_enabled and is_comparison_request(text):
             try:
                 context["comparison_conditions"] = self._optimization.conditions()
-                context["comparison_policies"] = self._optimization.policies()
-                context["comparison_candidate"] = self._optimization.candidate_policy()
-                context["comparison_scenario"] = self._optimization.scenario_id()
                 context["factory_config"] = self._service.load_factory_config().to_dict()
                 context["sim_datetime"] = self.sim_clock().isoformat()
                 context["comparison_orders"] = []

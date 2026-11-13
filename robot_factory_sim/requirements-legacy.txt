@@ -1,0 +1,3 @@
+-r requirements-headless.txt
+# Optional assignment-only MILP comparator; RH solvers do not import SciPy.
+scipy>=1.17,<1.19

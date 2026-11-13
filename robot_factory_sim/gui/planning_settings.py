@@ -55,11 +55,6 @@ class PlanningSettingsDialog(QDialog):
             self.step.addItem(str(value), value)
         self.step.setCurrentIndex(self.step.findData(values["step"]))
         layout.addRow("시간 격자 (초)", self.step)
-        self.scope = QComboBox(self)
-        self.scope.addItem("작업장·충전기·교통·캐빈", "traffic")
-        self.scope.addItem("작업장·충전기 (교통은 실행 시 제어)", "station_charge")
-        self.scope.setCurrentIndex(self.scope.findData(values["scope"]))
-        layout.addRow("계획 범위", self.scope)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
         buttons.accepted.connect(self._accept)
         buttons.rejected.connect(self.reject)
@@ -68,7 +63,7 @@ class PlanningSettingsDialog(QDialog):
     def values(self) -> dict:
         """Return a complete validated immutable-settings payload."""
         values = {**self._original, **{k: widget.value() for k, widget in self.fields.items()},
-                  "step": self.step.currentData(), "scope": self.scope.currentData()}
+                  "step": self.step.currentData()}
         values["watchdog"] = max(3, values["timeout"] + 1)
         settings = Settings(**values)
         settings.validate()
