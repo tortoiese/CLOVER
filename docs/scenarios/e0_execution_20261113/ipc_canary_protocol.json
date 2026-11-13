@@ -1,0 +1,22 @@
+{
+  "schema": "clover-ipc-release-canary-v1",
+  "source_commit": "ddc94f457732ee3e85b6fa05c31ae35bbbfe6871",
+  "source_hash": "556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e",
+  "scope": "post-IPC-fix functional checks, not statistical policy ranking",
+  "cells": [
+    "S02_width_1p3",
+    "S04_mixed_soc",
+    "S08_two_cars"
+  ],
+  "timings": [
+    "D0",
+    "D1"
+  ],
+  "planned_runs": 42,
+  "seed": 1001,
+  "same_scenario_initial_trace_as_original": true,
+  "input_manifest_sha256": "fa28cf2fba16ed2b275592ff6f12cc6763f9caae1f635835bae52a5631053f62",
+  "driver_sha256": "4c663f341d3519001885a67b25bf985ba11fc062d8d48a9964990c9c636c2e0c",
+  "run_wall_limit_seconds": 120,
+  "group_wall_limit_seconds": 1200
+}

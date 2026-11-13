@@ -1,0 +1,36 @@
+{
+  "schema": "clover-gui-startup-test-synchronization-v1",
+  "frozen_runtime_commit": "77cbac9346e8b32d2093469bee981b025843d2e1",
+  "python_files_changed_since_runtime_audit": [
+    "robot_factory_sim/gui/test_workspace_layout.py"
+  ],
+  "production_python_files_changed": [],
+  "existing_assertions_preserved": true,
+  "original_283_run_receipts_relabelled": false,
+  "prior_CI": {
+    "run_id": 43439932452,
+    "job_id": 131934600625,
+    "platform": "windows-latest",
+    "python": "3.11",
+    "passed": 501,
+    "failed": 1,
+    "test": "gui/test_workspace_layout.py::test_alert_keeps_workspace_size_and_selected_floor",
+    "observed": "stage.detail_mode=False after fixed startup wait"
+  },
+  "local_tests": {
+    "311": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "df3374b25d7b2a952884346b6b0a61ecf7cd12a262121ddfc9527bcded4387b3"
+    },
+    "314": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "7695d01bab881164f81dfb3c1d19725d2cc4b355a66782b865de680ef22971d3"
+    }
+  }
+}

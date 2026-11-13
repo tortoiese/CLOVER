@@ -1,0 +1,20 @@
+{
+  "schema": "clover-roam-integration-canary-v1",
+  "source_commit": "77cbac9346e8b32d2093469bee981b025843d2e1",
+  "source_hash": "e3e1943aa191c7dc17cbc359633f621a121ca1766e7f02332abb9eb8649dc762",
+  "scope": "post-PR14 headless roaming isolation checks, not statistical policy ranking",
+  "cells": [
+    "S08_two_cars"
+  ],
+  "timings": [
+    "D0",
+    "D1"
+  ],
+  "planned_runs": 14,
+  "seed": 1001,
+  "same_scenario_initial_trace_as_original": true,
+  "input_manifest_sha256": "dcefb9927f3342a60076fa91a2e5fb830f18ab1b525fc78cbfe98bdae8c4d866",
+  "driver_sha256": "419aefbf944ecb91501024441de444a10e5d47b28f8b67f05847c950ecff77b3",
+  "run_wall_limit_seconds": 120,
+  "group_wall_limit_seconds": 1200
+}
