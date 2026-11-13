@@ -7,12 +7,14 @@ import json
 import os
 import subprocess
 import sys
+import time
 from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
 
 from simulation.decisions.contracts import DecisionSettings
+from simulation.decisions.rpc import handle
 from simulation.evaluation import snapshot_benchmark as benchmark
 from simulation.evaluation.fixtures import joint_batch
 from simulation.evaluation.frozen_snapshot import freeze_snapshot, load_snapshot
@@ -221,3 +223,25 @@ def test_failure_guards_keep_denominators_and_close_workers(
     else:
         assert result["statuses"] == {"SNAPSHOT_CHANGED": 2} and len(closed) == 1 and not computes
     assert len(closed) == sum(row["result"] is not None for row in result["runs"])
+
+
+def test_worker_times_complete_backend_return_not_only_internal_report(
+    saved: tuple[Path, Path, int], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, model, hint = load_snapshot(saved[1])
+    result = Backend().solve(model.input, model=model, hint=hint, budget_seconds=5)
+    assert result.report.status == "OPTIMAL"
+
+    def delayed(self: Backend, data: object, **kwargs: object) -> object:
+        assert kwargs["started"] <= time.perf_counter()
+        time.sleep(.01)
+        return replace(result, report=replace(result.report, total_seconds=0))
+
+    monkeypatch.setattr(Backend, "solve", delayed)
+    payload = {"session": "test", "generation": 1, "request_id": "complete", "epoch": "test",
+               "policy": "rh_milp_grid", "command": "frozen_grid",
+               "arguments": {"model": model, "hint": hint, "budget_seconds": 1},
+               "started": time.perf_counter()}
+    reply, _ = handle(payload, "rh_milp_grid")
+    assert reply["status"] == "OK"
+    assert reply["value"]["plan"].report.total_seconds >= .01
