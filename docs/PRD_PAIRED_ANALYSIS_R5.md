@@ -26,4 +26,6 @@
 
 R1 실제 지도/trace import, R2/R3 튜닝·장비 비용 보정, R4 관측창·충전 반복·drain, 검열 생존 분석, 교차 군집 추론, 배포 가중치, 검정력/사전 효과 기준, 사전 등록된 E2/E3 및 R7 선택 규칙은 후속 게이트다. 이 분석기의 탐색적 구간·보정 p값만으로 최종 우수성이나 기본 정책 변경을 정당화하지 않는다.
 
+2026-11-14 기초 인수 결과와 실행/코드 해시는 [R5 검수 보고서](R5_ANALYSIS_REVIEW_20261114.md)에 기록했다. 지원 범위 v1은 구현·검수했으며 실제 E1 통계 결과와 전체 R5 연구 단계를 완료한 것은 아니다.
+
 방법 근거: [NIST paired interval](https://itl.nist.gov/div898/handbook/prc/section3/prc312.htm), [SciPy paired test](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_rel.html), [paired bootstrap](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html), [Holm 보정 정의](https://www.statsmodels.org/stable/generated/statsmodels.stats.multitest.multipletests.html). 최소 반복 수·추론 보류 정책은 해당 문서의 정리가 아니라 본 프로젝트의 보수적인 구현 기준이다.
