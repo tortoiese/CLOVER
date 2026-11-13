@@ -1,0 +1,602 @@
+[
+  {
+    "profile": "h60_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 11,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 11,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 11,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 13,
+    "rh_report_accepted_records": 3,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 13,
+    "rh_report_accepted_records": 3,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 15,
+    "rh_report_accepted_records": 6,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S01_eligible_1",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 4,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S01_eligible_1",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S11_budget_2",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S11_budget_2",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 14,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 14,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 16,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S08_two_cars",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S08_two_cars",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 5,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 4,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S01_eligible_1",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 4,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 3,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S01_eligible_1",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S01_eligible_1",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 3,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S08_two_cars",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 4,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S08_two_cars",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 4,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S08_two_cars",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S08_two_cars",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 5,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 3,
+    "rh_report_accepted_records": 1,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S08_two_cars",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S08_two_cars",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 5,
+    "rh_report_accepted_records": 3,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S11_budget_2",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 14,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S11_budget_2",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 15,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t2",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 16,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S01_eligible_1",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 2,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S01_eligible_1",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h60_t2",
+    "cell": "S01_eligible_1",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S11_budget_2",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S11_budget_2",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 15,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S11_budget_2",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 5,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S11_budget_2",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 16,
+    "rh_report_accepted_records": 16,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S04_mixed_soc",
+    "policy": "optimized",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S04_mixed_soc",
+    "policy": "baseline",
+    "rh_report_records": 0,
+    "rh_report_accepted_records": 0,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_linear",
+    "rh_report_records": 12,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_milp_grid",
+    "rh_report_records": 12,
+    "rh_report_accepted_records": 2,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  },
+  {
+    "profile": "h40_t025",
+    "cell": "S04_mixed_soc",
+    "policy": "rh_cpsat_native",
+    "rh_report_records": 15,
+    "rh_report_accepted_records": 6,
+    "excluded_candidate_observations": 0,
+    "excluded_reasons": {},
+    "scope": "exclusions in returned RH reports only; repeated observations are not unique jobs"
+  }
+]

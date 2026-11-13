@@ -786,3 +786,11 @@ manifest/result/raw 무결성과 정책별 같은 입력·시간/설정 확인, 
 ## 25. R2/R3 E1 설정 파일럿 착수 (2026-11-14)
 
 [설정 파일럿 PRD](PRD_E1_SETTINGS_PILOT_20261114.md)에 따라 합성4조건×5정책×3설정의60회 실행 가능성 검사를 사전 동결한다. 실제 팀 지도·수요 입력이 없으므로 E1 본 실험이나 R1 완료로 표시하지 않는다. horizon/solver timeout을 한 축씩 바꾸고 공통 D1 예산·고정 입력을 유지한다. 실행 순서·최대 예산·실패 보존·publication 초과 시의 조건 전체 추가 검수 규칙을 JSON으로 고정한다. 이 절은 실행 전 착수 기록이며 결과·검수는 후속 기록으로 추가한다.
+
+### 25.1 실행·감사 완료 경계
+
+입력 동결 `e827424`에서60회 모두 SUCCESS, 원시 지표·저장 결정 replay·에너지/작업/자원·D1 coverage/해제를 통과했다. [설정 파일럿 검수 보고서](E1_SETTINGS_PILOT_REVIEW_20261114.md)와 [60회 판정](scenarios/e1_settings_pilot_20261114/receipt.json)에 입력·소스·원본 해시를 보존했다. publication 최대0.11871초로 공통0.2초를 충족했고 추가 재실행은0회다. 세 설정별 분석의384비교·768효과 행은 독립 반복 수가 아니며 CI/p값/최종 추천은0개다.
+
+기준 h40_t2에서 S01 전체 batch는 optimized57.84초/MILP57.33초/linear27.24초, S08은106.93/105.30/85.04초였다. 반면 S04는 optimized의 충전 대기가 RH보다 짧았고, S11은 optimized16/16·RH15/16 완료였다. horizon 확대·계산 제한 증가가 항상 개선되지는 않았다. 단일 seed·미보정 합성 입력·계산 지연/fallback 포함 결과를 일반 우열로 승격하지 않는다.
+
+R2/R3는 설정 스크린 한 묶음까지 진행했으며 완료가 아니다. 같은 snapshot의 backend 대조, 실제 장비에서2초 운영 예산의 단계별 배분, native build/timeout·충전 stale/auxiliary 기전, 복수 지도·seed의 training/validation이 남는다. R1 실제 입력·R4 기간/충전 반복 보정·R6/R7 held-out/stress/최종 추천도 미완료다. 기본 optimized·가중치·MILP/CP-SAT 모델·기본 D0는 유지한다.

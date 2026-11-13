@@ -1,0 +1,86 @@
+{
+  "schema": "clover-paired-analysis-plan-v1",
+  "purpose": "training",
+  "control": "optimized",
+  "candidates": [
+    "baseline",
+    "rh_milp_grid",
+    "rh_cpsat_linear",
+    "rh_cpsat_native"
+  ],
+  "metrics": [
+    "throughput_per_min",
+    "late_due_rate",
+    "energy_per_completed",
+    "mean_wip",
+    "charge_queue_robot_seconds",
+    "arrival_to_start_p95",
+    "recorded_run_wall_seconds",
+    "batch_makespan"
+  ],
+  "confidence": 0.95,
+  "bootstrap_resamples": 5000,
+  "bootstrap_seed": 1001,
+  "minimum_seed_pairs": 10,
+  "minimum_layouts": 3,
+  "layout_sampling_independent": false,
+  "hardware_id": "jm-local-mac-arm64-20261114",
+  "blocks": [
+    {
+      "condition": "S04_mixed_soc",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S04",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": true,
+      "demand_kind": "stream",
+      "scenario": "E1_S04_mixed_soc__s1001",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b01_h60_t2_S04_mixed_soc/E1_S04_mixed_soc__s1001/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S11_budget_2",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S11",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": true,
+      "demand_kind": "stream",
+      "scenario": "E1_S11_budget_2__s1001",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b04_h60_t2_S11_budget_2/E1_S11_budget_2__s1001/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S08_two_cars",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S08",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": false,
+      "demand_kind": "finite_batch",
+      "scenario": "E1_S08_two_cars__fixed",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b07_h60_t2_S08_two_cars/E1_S08_two_cars__fixed/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S01_eligible_1",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S01",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": false,
+      "demand_kind": "finite_batch",
+      "scenario": "E1_S01_eligible_1__fixed",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b10_h60_t2_S01_eligible_1/E1_S01_eligible_1__fixed/manifest.json",
+      "unstarted_status": null
+    }
+  ],
+  "draft_from": {
+    "manifest": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b01_h60_t2_S04_mixed_soc/manifest.json",
+    "sha256": "ce596ebb973ce7f90279b825539853c8d36fd9dee23e4673cd59e655d20d8094",
+    "unidentified_parent_arm_slots": 0,
+    "all_prepared_manifests": {
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b01_h60_t2_S04_mixed_soc/manifest.json": "ce596ebb973ce7f90279b825539853c8d36fd9dee23e4673cd59e655d20d8094",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b04_h60_t2_S11_budget_2/manifest.json": "c6ed22be0532a6e0f38c275cb4c5670e6886275a917e7bd1e4004bc082274a97",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b07_h60_t2_S08_two_cars/manifest.json": "990e86523b430f94a6daf5d0601a5e874d289c725e13dbf55a623e36c116b575",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b10_h60_t2_S01_eligible_1/manifest.json": "c2ae62e556ced4ab05bd792a8db0a618c22dfa5c8a58c7480002fe39f7600a29"
+    }
+  },
+  "scope": "preregistered synthetic one-seed settings feasibility screen; no inference or recommendation"
+}
