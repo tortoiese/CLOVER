@@ -22,6 +22,8 @@ python -B -m simulation.evaluation benchmark-snapshot \
 
 계산 예산은 worker 안의 prebuilt solve, 즉 시작해 검사·compile·두 단계 search·결과 decode 비용이다. 공통 route/model/hint 생성·선택 backend 기동·IPC·독립 계획 검사는 별도 비용이다. `summary.csv`의 `backend_seconds`, `compile_seconds`, `search_seconds`, `backend_cpu_seconds`, `startup_wall_seconds`, `request_wall_seconds`, `validation_seconds`를 구분해서 읽는다. 일부 하위 시간은 중첩되므로 전부 합하지 않는다. RSS는 worker 샘플 peak이며 부모/전체 장비 peak나 순간 peak 보장이 아니다.
 
+`backend_seconds`는 평가 worker에서 `Backend.solve` 호출 직전부터 반환 직후까지 직접 측정한다. `request_wall_seconds`는 IPC뿐 아니라 계산·검사·worker/parent 처리도 포함한 전체 요청 시간이며 IPC 단독 측정값이 아니다. 첫 계측 revision의 decode 누락과 수정 후 별도 전체 검수는 저장소의 R2 검수 보고서에 기록한다.
+
 native time limit은 soft limit이다. 구조적으로 유효한 해라도 worker의 solve 시간이 예산을 넘으면 `SOFT_BUDGET_EXCEEDED`, `timed_eligible=false`로 남긴다. parent watchdog은 예산+명시적 요청 여유까지 프로세스를 보호한다. 요청 여유를 solver에 추가로 주는 예산으로 해석하지 않는다. 이 결과는 D1 전체 결정2초 준수를 입증하지 않는다.
 
 반복은 같은 관측의 **기술 반복**이다. 독립 수요 seed나 새 공장으로 세지 않으며 구간·p값·운영 정책 추천을 생성하지 않는다. 목적값은 두 단계의 사전식 쌍으로 읽는다. 두 유효한 OPTIMAL 쌍이 다르면 `PARITY_MISMATCH`다. FEASIBLE·timeout·메모리/기동 실패·source/입력 변경·미실행을 보존하며 누락을0으로 채우지 않는다. 전체 manifest와 arm별 plan/worker/해제 증거를 확인한다. SUCCESS는 모든 예정 arm이 유효한 해를 기한 안에 반환했고 증명된 최적 목적 불일치가 없다는 뜻이다.
