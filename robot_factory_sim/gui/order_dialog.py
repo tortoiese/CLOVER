@@ -58,7 +58,7 @@ class OrderDialog(QDialog):
         """
         super().__init__(parent)
         self.setWindowTitle("📋 주문 관리")
-        self.resize(980, 560)
+        c.fit_to_screen(self, 980, 560)
         self._service = service
         self._sim_clock = sim_clock
         layout = QVBoxLayout(self)

@@ -198,7 +198,7 @@ def test_physical_estimate_matches_deterministic_multifloor_execution() -> None:
     engine.env.run(until=0.01)
     robot = engine.robots[rid]
     estimate = estimate_trip(engine, robot, "WS-05")
-    assert estimate.horizontal_m == pytest.approx(155)
+    assert estimate.horizontal_m == pytest.approx(115)  # 확대된 기본 공장: 가까운 EL-02 경유 (EL-01 경유 시 155)
     assert estimate.routing_cost_px * 0.1 > estimate.horizontal_m
     route = engine.path_graph.for_robot(robot.cfg.width).route_to_facility(100, 150, "WS-05", 1)
     process = engine.env.process(robot._travel_route(route))

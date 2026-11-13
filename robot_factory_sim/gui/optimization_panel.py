@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gui import constants as c
 from agent.orchestration import COMPARISON_METRICS, format_value
 from utils.comparison_models import ComparisonConditions
 
@@ -57,7 +58,7 @@ class OptimizationPanel(QDialog):
         """조건 양식과 비교표를 생성한다."""
         super().__init__(parent)
         self.setWindowTitle("운영안 비교")
-        self.resize(960, 760)
+        c.fit_to_screen(self, 960, 760)
         self._result: dict[str, Any] | None = None
         layout = QVBoxLayout(self)
         self._status = QLabel("현재 GUI 구성·남은 주문을 복사해 기본 배치·만충전으로 재시작하는 독립 실험입니다.", self)

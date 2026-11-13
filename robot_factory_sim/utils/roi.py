@@ -55,6 +55,7 @@ def compute_roi(
     other_cost: float = config.OTHER_COST_KRW,
     revenue_per_unit: float = config.REVENUE_PER_UNIT_KRW,
     energy_wh: float | None = None,
+    elapsed_hours: float | None = None,
 ) -> ROIResult:
     """수익성 지표를 계산한다.
 
@@ -69,6 +70,7 @@ def compute_roi(
         other_cost: 기타 비용 (AI·로봇운영 등, 원)
         revenue_per_unit: 건당 매출/가치 (원, v)
         energy_wh: 전력 소비량(Wh)을 직접 지정 (없으면 거리로 추정)
+        elapsed_hours: 지정하면 other_cost를 원/시간으로 보고 경과 시간만큼만 반영한다
 
     Returns:
         ROIResult
@@ -76,6 +78,8 @@ def compute_roi(
     if energy_wh is None:
         energy_wh = max(0.0, total_distance_m) * wh_per_m
 
+    if elapsed_hours is not None:
+        other_cost = other_cost * max(0.0, elapsed_hours)
     power_cost = energy_wh * power_price_per_wh
     total_cost = power_cost + other_cost
     revenue = max(0, completed_units) * revenue_per_unit
