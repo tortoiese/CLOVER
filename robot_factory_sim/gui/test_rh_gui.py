@@ -58,6 +58,14 @@ def wait_until(predicate: Callable[[], bool], timeout: float = 8) -> None:
     assert predicate()
 
 
+def wait_for_initial_state(window: MainWindow) -> float:
+    """공장 초기화와 준비 후 상태 전달을 별도 watchdog으로 검사한다."""
+    started = time.perf_counter()
+    wait_until(lambda: window._worker._ready, timeout=30)
+    wait_until(lambda: window._state is not None, timeout=2)
+    return time.perf_counter() - started
+
+
 @pytest.mark.parametrize("mode", ["rh_milp_grid", "rh_cpsat_linear", "rh_cpsat_interval", "rh_cpsat_native"])
 def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
                                                              mode: str) -> None:
@@ -77,7 +85,7 @@ def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, m
     timer.timeout.connect(lambda: beats.append(1))
     timer.start()
     try:
-        wait_until(lambda: window._state is not None)
+        wait_for_initial_state(window)
         assert config.DEFAULT_SCHEDULER_MODE == "optimized"
         assert set(window._state.active_policies) == {"baseline", "optimized"}
         from simulation.planning.contracts import Settings
@@ -116,7 +124,7 @@ def test_settings_and_default_factory_gui_response(tmp_path: Path, monkeypatch: 
     window = MainWindow(service, create_agent(run_comparison))
     window.show()
     try:
-        wait_until(lambda: window._state is not None)
+        startup_seconds = wait_for_initial_state(window)
         dialog = PlanningSettingsDialog(asdict(Settings()), window)
         dialog.step.setCurrentIndex(dialog.step.findData(.5))
         dialog.fields["horizon"].setValue(20)
@@ -139,7 +147,8 @@ def test_settings_and_default_factory_gui_response(tmp_path: Path, monkeypatch: 
         window._mode.setCurrentIndex(window._mode.findData("rh_cpsat_linear"))
         wait_until(lambda: window._state.mode == "rh_cpsat_linear")
         assert set(window._state.active_policies) == {"baseline", "optimized", "rh_cpsat_linear"}
-        evidence = {"platform": app.platformName(), "factory_robots": len(before["robots"]),
+        evidence = {"platform": app.platformName(), "initial_state_ready_seconds": startup_seconds,
+                    "factory_robots": len(before["robots"]),
                     "factory_stations": len(before["stations"]), "samples": response,
                     "command_to_state_p95_ms": float(np.quantile(response, .95)),
                     "worker_command_ms": worker_response,
