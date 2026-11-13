@@ -363,3 +363,35 @@ def test_watchdog_interrupts_blocked_large_ipc_send(monkeypatch: pytest.MonkeyPa
     assert result.report.status == "HARD_TIMEOUT" and time.perf_counter() - started < 3
     assert worker.process is None and worker.rpc_thread is None
     engine.close()
+
+
+@pytest.mark.parametrize("stage", ["send", "recv"])
+@pytest.mark.parametrize("closed", [True, False])
+def test_ipc_type_error_is_retained_only_when_pipe_was_closed(stage: str, closed: bool) -> None:
+    from queue import Queue
+
+    from simulation.planning.process import _exchange
+
+    class InterruptedConnection:
+        def __init__(self) -> None:
+            self.closed = False
+
+        def send(self, payload: object) -> None:
+            if stage == "send":
+                self.closed = closed
+                raise TypeError("send handle is None")
+
+        def recv(self) -> object:
+            self.closed = closed
+            raise TypeError("recv handle is None")
+
+    responses: Queue[tuple[bool, object]] = Queue()
+    connection = InterruptedConnection()
+    if closed:
+        _exchange(connection, {"request": 1}, responses)
+        ok, message = responses.get_nowait()
+        assert not ok and "connection closed during exchange" in message
+    else:
+        with pytest.raises(TypeError, match=f"{stage} handle is None"):
+            _exchange(connection, {"request": 1}, responses)
+        assert responses.empty()
