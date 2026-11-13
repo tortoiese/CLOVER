@@ -417,7 +417,7 @@ def test_elevator_reference_and_retire_wait_for_real_arrival() -> None:
     engine.env.process(ride())
     engine.env.run(until=elevator.door_time / 2 + .1)
     assert robot._riding is elevator and elevator.resource.count == 1
-    assert all(r is elevator.resource for r in engine.corridors._elevator_resource.values())
+    assert all(r is engine.elevators[eid].resource for eid, r in engine.corridors._elevator_resource.items())
     assert robot.interrupt(InterruptKind.RETIRE)
     engine.env.run(until=elevator.door_time / 2 + .2)
     assert robot.floor == 1 and elevator.resource.count == 1 and robot.alive
@@ -429,7 +429,7 @@ def test_elevator_reference_and_retire_wait_for_real_arrival() -> None:
         engine.apply_config(resized)
     assert elevator.resource.capacity == 1
     assert engine.factory.elevators[0].capacity == 1
-    assert all(r is elevator.resource for r in engine.corridors._elevator_resource.values())
+    assert all(r is engine.elevators[eid].resource for eid, r in engine.corridors._elevator_resource.items())
 
 
 def test_randomized_bundle_contention_preserves_all_or_none_ownership() -> None:

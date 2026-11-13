@@ -109,7 +109,7 @@ def test_gui_actual_comparison_and_followup(tmp_path: Path) -> None:
     timer = QTimer(window)
     timer.setSingleShot(True)
     timer.timeout.connect(loop.quit)
-    timer.start(15000)
+    timer.start(60000)  # 확대된 기본 공장(12대·3층)의 실제 비교는 약 18초
     QTimer.singleShot(150, lambda: window._on_user_message("/최적화"))
     try:
         loop.exec()

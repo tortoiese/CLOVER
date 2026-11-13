@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from utils.event_types import RobotState, Severity, TimelineKind
 
@@ -12,6 +12,8 @@ TRAFFIC_NODE_RADIUS: float = 9.0
 TRAFFIC_ARROW_SIZE: float = 11.0
 TRAFFIC_BUSY_WIDTH: float = 3.2
 TRAFFIC_IDLE_WIDTH: float = 1.0
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QWidget
 
 # ---------------------------------------------------------------------------
 # 테마 색상
@@ -180,3 +182,24 @@ PALETTE_ITEMS: Final[tuple[tuple[str, str], ...]] = (
     ("node", "• 경로 노드"),
 )
 PALETTE_MIME: Final[str] = "application/x-factory-palette"
+
+
+def fit_to_screen(widget: QWidget, width: int, height: int, margin: int = 60) -> None:
+    """창 크기를 사용 가능한 화면 영역 안으로 제한하고 화면 중앙에 둔다.
+
+    Args:
+        widget: 크기를 정할 최상위 위젯
+        width: 희망 너비
+        height: 희망 높이
+        margin: 화면 가장자리·작업표시줄 여유 (px)
+    """
+    from PySide6.QtGui import QGuiApplication
+
+    screen = widget.screen() or QGuiApplication.primaryScreen()
+    if screen is None:
+        widget.resize(width, height)
+        return
+    area = screen.availableGeometry()
+    w, h = min(width, area.width() - margin), min(height, area.height() - margin)
+    widget.resize(w, h)
+    widget.move(area.x() + (area.width() - w) // 2, area.y() + (area.height() - h) // 2)
