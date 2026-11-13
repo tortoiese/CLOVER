@@ -67,8 +67,37 @@ def main(argv: list[str] | None = None) -> int:
     execute.add_argument("--decision-settings", type=Path)
     execute.add_argument("--run-wall-limit", type=float, default=240)
     execute.add_argument("--suite-wall-limit", type=float)
+    comparison_plan = commands.add_parser("comparison-plan", help="draft an exploratory paired-analysis plan")
+    comparison_plan.add_argument("--manifest", type=Path, required=True)
+    comparison_plan.add_argument("--control", choices=POLICIES, default="optimized")
+    comparison_plan.add_argument("--candidates", choices=POLICIES, nargs="+",
+                                 default=["rh_milp_grid", "rh_cpsat_linear"])
+    comparison_plan.add_argument("--output", type=Path, required=True)
+    comparison = commands.add_parser("compare", help="verify saved arms and compute gated paired statistics")
+    comparison.add_argument("--plan", type=Path, required=True)
+    comparison.add_argument("--output", type=Path, required=True, help="new directory for JSON/CSV/notes")
     args = parser.parse_args(argv)
     try:
+        if args.command in {"comparison-plan", "compare"}:
+            from simulation.evaluation.comparison import compare_plan, validate_plan, write_comparison
+            from simulation.evaluation.comparison_inputs import draft_plan
+
+            if args.output.exists():
+                raise ValueError("output already exists; preserve prior analysis")
+            if args.command == "comparison-plan":
+                result = draft_plan(args.manifest, control=args.control, candidates=tuple(args.candidates))
+                validate_plan(result)
+                status = "DRAFT_DESCRIPTIVE_PLAN"
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                with args.output.open("x", encoding="utf-8", newline="\n") as stream:
+                    json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                    stream.write("\n")
+            else:
+                result = compare_plan(args.plan)
+                write_comparison(result, args.output)
+                status = "EXPLORATORY_ANALYSIS"
+            print(json.dumps({"status": status, "output": str(args.output)}))
+            return 0
         if args.command == "prepare-design":
             from simulation.evaluation.design import prepare_design
             from simulation.evaluation.design_references import synthetic_references
