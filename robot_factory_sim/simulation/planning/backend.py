@@ -10,7 +10,7 @@ from dataclasses import replace
 
 from simulation.planning.calendar import build_calendar
 from simulation.planning.contracts import Action, PreparedInput, Report, Result
-from simulation.planning.incumbent import check, work_hint
+from simulation.planning.incumbent import Hint, check, work_hint
 from simulation.planning.model import Model, Row, build_model
 
 
@@ -211,8 +211,23 @@ class Backend:
             return None, names.get(status, "ERROR"), None
         return tuple(solver.value(v) for v in variables), names[status], float(solver.best_objective_bound)
 
-    def solve(self, data: PreparedInput, *, started: float | None = None) -> Result:
-        """Use one total budget for building, compilation and both objectives."""
+    def solve(
+        self, data: PreparedInput, *, started: float | None = None,
+        model: Model | None = None, hint: Hint | None = None, budget_seconds: float | None = None,
+    ) -> Result:
+        """Solve normally, or benchmark a shared grid model and checked hint.
+
+        Prebuilt inputs are an all-or-none evaluation option. Their budget
+        excludes common preparation; ordinary policy calls retain total timing.
+        """
+        prebuilt = any(value is not None for value in (model, hint, budget_seconds))
+        if prebuilt:
+            if (model is None or hint is None or budget_seconds is None
+                    or self.kind not in {"milp", "cpsat_linear"} or model.input != data
+                    or isinstance(budget_seconds, bool) or not isinstance(budget_seconds, (int, float))
+                    or not math.isfinite(budget_seconds)
+                    or budget_seconds <= 0):
+                raise ValueError("prebuilt evaluation requires matching grid model, hint and positive budget")
         if self.kind == "cpsat_native":
             from simulation.planning.native import solve_native
 
@@ -220,7 +235,7 @@ class Backend:
         started = time.perf_counter() if started is None else started
         self.profile.clear()
         self.version = ""
-        deadline = started + data.snapshot.settings.timeout
+        deadline = started + (budget_seconds if prebuilt else data.snapshot.settings.timeout)
         report = Report(
             "NOT_SOLVED",
             backend=self.kind,
@@ -235,7 +250,7 @@ class Backend:
             if data.snapshot.settings.formulation != "grid":
                 raise ValueError("MODEL_INVALID: grid compiler requires grid time domain")
             before = time.perf_counter()
-            model = build_model(data, deadline)
+            model = model if prebuilt else build_model(data, deadline)
             from simulation.planning.semantic import semantic_spec_hash
 
             self.profile["model_seconds"] = time.perf_counter() - before
@@ -254,7 +269,9 @@ class Backend:
                 build_seconds=time.perf_counter() - started,
             )
             before = time.perf_counter()
-            hint_record = work_hint(model, deadline)
+            hint_record = hint if prebuilt else work_hint(model, deadline)
+            if prebuilt:
+                check_incumbent(model, hint_record.values)
             hint = hint_record.values
             self.profile["hint_seconds"] = time.perf_counter() - before
             report = replace(
@@ -274,7 +291,8 @@ class Backend:
                 native1, proof, source1 = "SKIPPED_ZERO_LOWER_BOUND", "NONNEGATIVE_ZERO_INCUMBENT", hint_record.source
             else:
                 first, status1, bound1 = self.phase(
-                    model, model.objective1, time.perf_counter() + max(0, deadline - time.perf_counter()) * 0.6, hint=hint
+                    model, model.objective1,
+                    time.perf_counter() + max(0, deadline - time.perf_counter()) * 0.6, hint=hint,
                 )
                 native1, proof, source1 = status1, "NATIVE" if status1 == "OPTIMAL" else "NONE", "NATIVE_PHASE1"
                 if first is not None:
@@ -351,5 +369,6 @@ class Backend:
             message = f"{type(exc).__name__}: {exc}"
         return Result(
             data,
-            replace(report, status=status, message=message, total_seconds=time.perf_counter() - started, **self.profile),
+            replace(report, status=status, message=message,
+                    total_seconds=time.perf_counter() - started, **self.profile),
         )

@@ -794,3 +794,7 @@ manifest/result/raw 무결성과 정책별 같은 입력·시간/설정 확인, 
 기준 h40_t2에서 S01 전체 batch는 optimized57.84초/MILP57.33초/linear27.24초, S08은106.93/105.30/85.04초였다. 반면 S04는 optimized의 충전 대기가 RH보다 짧았고, S11은 optimized16/16·RH15/16 완료였다. horizon 확대·계산 제한 증가가 항상 개선되지는 않았다. 단일 seed·미보정 합성 입력·계산 지연/fallback 포함 결과를 일반 우열로 승격하지 않는다.
 
 R2/R3는 설정 스크린 한 묶음까지 진행했으며 완료가 아니다. 같은 snapshot의 backend 대조, 실제 장비에서2초 운영 예산의 단계별 배분, native build/timeout·충전 stale/auxiliary 기전, 복수 지도·seed의 training/validation이 남는다. R1 실제 입력·R4 기간/충전 반복 보정·R6/R7 held-out/stress/최종 추천도 미완료다. 기본 optimized·가중치·MILP/CP-SAT 모델·기본 D0는 유지한다.
+
+## 26. R2 공통 snapshot backend 비교 기반
+
+[R2 상세 계획](PRD_FROZEN_SNAPSHOT_R2.md)에 따라 같은 관측·후보·경로·정수 제약·목적·시작해의 MILP/CP-SAT linear 비교를 추가한다. native/interval 및 closed-loop 운영 비교와 구분한다. [사용법](../robot_factory_sim/FROZEN_SNAPSHOT_BENCHMARK.md)은 공통 준비/기동/IPC/독립 검사 비용과 backend의 compile/search 예산을 구분하고, 늦게 반환된 해·실패·미실행을 보존한다. 이전60회 원본을 변경하지 않으며 동결 소스에서 별도48arm 기능·비용 검수를 수행할 계획이다. 이 절은 착수 기록이며 결과·완료 경계는 검수 후 추가한다.
