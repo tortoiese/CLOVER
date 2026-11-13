@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-14",
+  "main_sha": "b14cbe91474f44ca9e22983881b4f0a1790b5dd0",
+  "review_base_sha": "23bf2463f22ed90e37418bf0a7ef64153a8d9403",
+  "review_base_pr": 17,
+  "parent_prs": {
+    "13": "open, main base",
+    "15": "open, PR13 branch base",
+    "16": "open, PR15 branch base",
+    "17": "open, PR16 branch base"
+  },
+  "virtual_merge_conflicts": 0,
+  "virtual_merge_tree": "003fe34321a0d463813fb1c08ce21c05b80252b2",
+  "actual_merge_performed": false,
+  "scope": "read-only GitHub metadata and git merge-tree at review start; content merge is not functional acceptance"
+}
