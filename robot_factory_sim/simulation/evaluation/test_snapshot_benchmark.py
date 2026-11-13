@@ -171,7 +171,8 @@ def test_invalid_budgets_fail_before_execution(saved: tuple[Path, Path, int], tm
     assert not (tmp_path / "invalid").exists()
 
 
-@pytest.mark.parametrize("fault", ("late", "parity", "cross_budget", "startup", "mutated"))
+@pytest.mark.parametrize("fault", ("late", "parity", "cross_budget", "startup", "mutated",
+                                   "unexpected", "bad_reply", "close_failure"))
 def test_failure_guards_keep_denominators_and_close_workers(
     saved: tuple[Path, Path, int], tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fault: str,
 ) -> None:
@@ -190,12 +191,19 @@ def test_failure_guards_keep_denominators_and_close_workers(
 
         def request(self, command: str, policy: str, args: dict, **kwargs: object) -> dict:
             """Return deterministic test faults without running a second solver."""
+            checkpoint = json.loads((output / "manifest.json").read_text())
+            assert len(checkpoint["runs"]) == checkpoint["planned_runs"]
+            assert any(r["status"] == "RUNNING" for r in checkpoint["runs"])
+            if fault == "unexpected":
+                raise RuntimeError("unexpected worker error")
             base = {"elapsed_seconds": .01, "peak_rss_mib": 50}
             if command == "ready":
                 if fault == "mutated":
                     path.write_bytes(path.read_bytes() + b"\n")
                 return {**base, "status": "STARTUP_UNAVAILABLE" if fault == "startup" else "READY"}
             computes.append(policy)
+            if fault == "bad_reply":
+                return {**base, "status": "OK", "value": {}}
             report = replace(valid.report, backend="milp" if policy == "rh_milp_grid" else "cpsat_linear",
                              total_seconds=args["budget_seconds"] + .1 if fault == "late" else 0)
             if fault == "parity" and policy == "rh_cpsat_linear":
@@ -208,6 +216,8 @@ def test_failure_guards_keep_denominators_and_close_workers(
         def close(self) -> None:
             """Record disposal even for failed startup or changing inputs."""
             closed.append(True)
+            if fault == "close_failure":
+                raise RuntimeError("worker close failed")
 
     monkeypatch.setattr(benchmark, "SolverProcess", Worker)
     output = tmp_path / "runs"
@@ -220,6 +230,15 @@ def test_failure_guards_keep_denominators_and_close_workers(
         assert all(r["valid_plan"] and not r["timed_eligible"] for r in result["runs"])
     elif fault == "startup":
         assert result["statuses"] == {"STARTUP_UNAVAILABLE": 2} and not computes
+    elif fault in {"unexpected", "bad_reply", "close_failure"}:
+        code = "DISPOSAL_FAILED" if fault == "close_failure" else "EVALUATION_ERROR"
+        assert result["status"] == "PARTIAL"
+        assert result["statuses"] == {code: 1, "NOT_RUN_" + code: 1}
+        first = result["runs"][0]
+        artifact = json.loads((output / first["result"]).read_text())
+        assert artifact["error"] if fault != "close_failure" else artifact["disposal_error"]
+        assert first["result_sha256"] and result["runs"][1]["result"] is None
+        assert len(closed) == 1
     else:
         assert result["statuses"] == {"SNAPSHOT_CHANGED": 2} and len(closed) == 1 and not computes
     assert len(closed) == sum(row["result"] is not None for row in result["runs"])

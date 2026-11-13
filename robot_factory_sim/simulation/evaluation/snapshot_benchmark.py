@@ -59,7 +59,9 @@ def benchmark_snapshot(
                      "startup_limit": startup_limit, "request_allowance": request_allowance,
                      "memory_limit_mib": memory_limit_mib, "suite_wall_limit": suite_wall_limit,
                      "solver_seed": 42, "solver_workers": 1},
-        "shared_load_seconds": shared_load_seconds, "planned_runs": len(planned), "runs": [],
+        "shared_load_seconds": shared_load_seconds, "planned_runs": len(planned),
+        "runs": [{**spec, "index": index, "result": None, "status": "NOT_STARTED"}
+                 for index, spec in enumerate(planned)],
         "parity_mismatches": [],
         "timed_scope": "prebuilt grid solve: hint check, compile, two objectives, extraction; soft limit",
         "excluded_scope": "common model/hint preparation, selected-backend bootstrap, IPC, plan validation",
@@ -86,13 +88,16 @@ def benchmark_snapshot(
     checkpoint()
     stopped = None
     optimum: tuple[int | None, int | None] | None = None
-    for index, spec in enumerate(planned):
+    for row in manifest["runs"]:
+        index = row["index"]
+        spec = {key: row[key] for key in ("backend", "budget_seconds", "repeat")}
         stopped = stopped or drift()
-        row = {**spec, "index": index, "result": None, "status": stopped or "NOT_RUN_BUDGET"}
-        manifest["runs"].append(row)
+        row["status"] = stopped or "NOT_RUN_BUDGET"
         if stopped or remaining() <= 0:
             checkpoint()
             continue
+        row["status"] = "RUNNING"
+        checkpoint()
         worker = SolverProcess()
         artifact: dict[str, Any] = {"spec": spec, "source_hash": source["source_hash"],
                                     "input_hash": frozen["input_hash"], "model_hash": frozen["model_hash"],
@@ -152,12 +157,23 @@ def benchmark_snapshot(
                         optimum = objective if optimum is None else optimum
             elif startup["status"] == "READY":
                 row["status"] = "NOT_RUN_BUDGET"
+        except Exception as exc:
+            row["status"] = "EVALUATION_ERROR"
+            row["failure"] = f"{type(exc).__name__}: {exc}"
+            artifact["error"] = row["failure"]
+            stopped = "NOT_RUN_EVALUATION_ERROR"
         finally:
-            worker.close()
+            close_completed = False
+            try:
+                worker.close()
+                close_completed = True
+            except Exception as exc:
+                artifact["disposal_error"] = f"{type(exc).__name__}: {exc}"
             artifact["disposed"] = {"process": worker.process is None, "connection": worker.connection is None,
-                                    "rpc_thread": worker.rpc_thread is None}
+                                    "rpc_thread": worker.rpc_thread is None, "close_completed": close_completed}
             if not all(artifact["disposed"].values()):
                 row["status"] = "DISPOSAL_FAILED"
+                stopped = "NOT_RUN_DISPOSAL_FAILED"
         row["wall_seconds"] = time.perf_counter() - before
         row["status"] = drift() or row["status"]
         artifact["summary"] = dict(row)
