@@ -1,4 +1,4 @@
-"""기본 공장 구성 시드 데이터 (3층, 스테이션 5개, 충전소 3개, 엘리베이터 1대, 로봇 5대) + 물리 제약 시나리오 프리셋."""
+"""기본 공장 구성 시드 데이터 (3층, 스테이션 9개, 충전소 6개, 엘리베이터 2대, 로봇 12대) + 물리 제약 시나리오 프리셋."""
 
 from __future__ import annotations
 
@@ -282,7 +282,8 @@ DEMO_PRESET_NAME: str = "3층 데모 공장"
 def build_default_config() -> FactoryConfig:
     """기본 공장 구성(3층 + 엘리베이터)을 만든다.
 
-    1층 조립·용접, 2층 도장·검사, 3층 포장 라인이며 엘리베이터 EL-01이 세 층을 잇는다.
+    1층 조립·용접, 2층 도장·검사, 3층 포장·출하 검사·라벨링 라인이며 층마다 스테이션 3개·충전소 2곳·로봇 4대가 있고
+    엘리베이터 EL-01·EL-02가 세 층을 잇는다.
 
     Returns:
         FactoryConfig (노드/엣지/장애물 ID는 음수 임시 ID)
@@ -303,16 +304,29 @@ def build_default_config() -> FactoryConfig:
         WorkStationConfig("WS-04", "검사", 300, 500, task_type="inspection", avg_process_time=4.0,
                           process_time_std=0.5, floor=2),
         WorkStationConfig("WS-05", "포장", 700, 100, task_type="packaging", avg_process_time=5.0, floor=3),
+        WorkStationConfig("WS-06", "출하 검사", 300, 500, task_type="inspection", avg_process_time=4.0,
+                          process_time_std=0.5, floor=3),
+        WorkStationConfig("WS-07", "조립 B", 700, 450, task_type="assembly", avg_process_time=6.0, floor=1),
+        WorkStationConfig("WS-08", "표면 처리", 700, 100, task_type="painting", avg_process_time=7.0, floor=2),
+        WorkStationConfig("WS-09", "라벨링", 100, 100, task_type="packaging", avg_process_time=4.5, floor=3),
     ]
+    # 모든 층에 충전소 2곳씩
     chargers = [
         ChargingStationConfig("CS-01", 700, 250, capacity=2, charge_rate=2.0, floor=1),
+        ChargingStationConfig("CS-04", 100, 300, capacity=1, charge_rate=2.0, floor=1),
         ChargingStationConfig("CS-02", 300, 300, capacity=1, charge_rate=2.5, floor=2),
+        ChargingStationConfig("CS-05", 700, 400, capacity=2, charge_rate=2.0, floor=2),
         ChargingStationConfig("CS-03", 200, 300, capacity=1, charge_rate=2.0, floor=3),
+        ChargingStationConfig("CS-06", 700, 400, capacity=2, charge_rate=2.5, floor=3),
     ]
-    elevators = [ElevatorConfig("EL-01", "화물 엘리베이터", 650, 550)]
+    elevators = [
+        ElevatorConfig("EL-01", "화물 엘리베이터", 650, 550),
+        ElevatorConfig("EL-02", "작업자·자재 엘리베이터", 400, 350),
+    ]
+    # 로봇 12대: 층마다 4대씩 배치된다 (층별 충전소 기준 스폰)
     robots = [
         RobotConfig(f"R-{i:02d}", move_speed=2.0, battery_drain_rate=0.35, charge_threshold=20.0)
-        for i in range(1, 6)
+        for i in range(1, 13)
     ]
     obstacles = [
         ObstacleConfig(-1, "wall", 500, 0, 500, 600, False, "구획 벽", 1),

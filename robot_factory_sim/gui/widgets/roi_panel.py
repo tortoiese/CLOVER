@@ -1,8 +1,8 @@
 """RoiPanel — ROI 파라미터 입력, 숫자 요약, 운영안 비교 그래프.
 
 ROI 관련 화면은 전부 이 탭 하나에 모은다:
-- 파라미터(사용자 입력, 조절 가능): 소비효율(Wh/m)·전력 단가·기타 비용·건당 가치. config 기본값으로 시작한다.
-- 완료 건수(Q)·로봇 총 이동거리는 시뮬레이션이 자동 수집해 ``update_kpis()``로 들어온다.
+- 파라미터(사용자 입력, 조절 가능): 배터리 1단위당 Wh·전력 단가·기타 비용(원/시간)·건당 가치. config 기본값으로 시작한다.
+- 완료 건수(Q)·실제 소모 배터리(전력)·경과 시간은 시뮬레이션이 자동 수집해 ``update_kpis()``로 들어온다.
 - 숫자 요약(KpiCard 재사용)과 차트는 모두 같은 compute_roi() 결과로 다시 그려 항상 일치한다.
 """
 
@@ -75,9 +75,10 @@ class RoiPanel(QWidget):
         """
         super().__init__(parent)
         self._base_q = 0
-        self._base_d = 0.0
+        self._base_e = 0.0
+        self._elapsed_hours = 0.0
         self._opt_q = 0
-        self._opt_d = 0.0
+        self._opt_e = 0.0
         self._chart_columns = 0
 
         outer = QVBoxLayout(self)
@@ -106,14 +107,14 @@ class RoiPanel(QWidget):
         """사용자 입력 파라미터(소비효율·전력 단가·기타 비용·건당 가치) 영역."""
         box = QGroupBox("ROI 계산 조건", parent)
         layout = QGridLayout(box)
-        self._wh_per_m = _spin(box, config.WH_PER_M, 0.001, 10.0, 0.001)
+        self._wh_per_unit = _spin(box, config.WH_PER_BATTERY_UNIT, 0.001, 1000.0, 0.5)
         self._power_price = _spin(box, config.POWER_PRICE_PER_WH, 0.001, 100.0, 0.01)
         self._other_cost = _spin(box, config.OTHER_COST_KRW, 0.0, 10_000_000.0, 1000.0, decimals=0)
         self._revenue_per_unit = _spin(box, config.REVENUE_PER_UNIT_KRW, 0.0, 1_000_000.0, 100.0, decimals=0)
         fields = (
-            ("소비효율", self._wh_per_m, "Wh/m"),
+            ("배터리 1단위", self._wh_per_unit, "Wh"),
             ("전력 단가", self._power_price, "원/Wh"),
-            ("기타 비용", self._other_cost, "원"),
+            ("기타 비용", self._other_cost, "원/시간"),
             ("건당 가치", self._revenue_per_unit, "원"),
         )
         for index, (label, spin, unit) in enumerate(fields):
@@ -192,29 +193,35 @@ class RoiPanel(QWidget):
     # ------------------------------------------------------------------
     # 갱신
     # ------------------------------------------------------------------
-    def update_kpis(self, base_completed: int, base_distance: float, opt_completed: int, opt_distance: float) -> None:
-        """시뮬레이션이 자동 수집한 값(완료 건수 Q·로봇 총 이동거리)으로 ROI를 다시 계산한다.
+    def update_kpis(self, base_completed: int, base_energy_units: float, opt_completed: int,
+                    opt_energy_units: float, elapsed_hours: float = 0.0) -> None:
+        """시뮬레이션이 자동 수집한 값(완료 건수 Q·실제 소모 배터리·경과 시간)으로 ROI를 다시 계산한다.
 
         Args:
             base_completed: baseline 완료 생산 건수
-            base_distance: baseline 로봇 총 이동거리 (m)
+            base_energy_units: baseline 로봇이 실제로 소모한 배터리 단위 합 (이동 + 작업)
             opt_completed: optimized 완료 생산 건수
-            opt_distance: optimized 로봇 총 이동거리 (m)
+            opt_energy_units: optimized 로봇이 실제로 소모한 배터리 단위 합
+            elapsed_hours: 시뮬레이션 경과 시간 (시간)
         """
-        self._base_q, self._base_d = base_completed, base_distance
-        self._opt_q, self._opt_d = opt_completed, opt_distance
+        self._base_q, self._base_e = base_completed, base_energy_units
+        self._opt_q, self._opt_e = opt_completed, opt_energy_units
+        self._elapsed_hours = elapsed_hours
         self._recompute()
 
     def _recompute(self) -> None:
         """현재 파라미터 + 최근 수집된 완료 건수·이동거리로 ROI를 계산하고 화면을 갱신한다."""
         params = dict(
-            wh_per_m=self._wh_per_m.value(),
             power_price_per_wh=self._power_price.value(),
             other_cost=self._other_cost.value(),
             revenue_per_unit=self._revenue_per_unit.value(),
+            elapsed_hours=self._elapsed_hours,
         )
-        baseline = compute_roi(completed_units=self._base_q, total_distance_m=self._base_d, **params)
-        optimized = compute_roi(completed_units=self._opt_q, total_distance_m=self._opt_d, **params)
+        wh_per_unit = self._wh_per_unit.value()
+        baseline = compute_roi(completed_units=self._base_q, total_distance_m=0.0,
+                               energy_wh=self._base_e * wh_per_unit, **params)
+        optimized = compute_roi(completed_units=self._opt_q, total_distance_m=0.0,
+                                energy_wh=self._opt_e * wh_per_unit, **params)
         for key, card in self._cards.items():
             card.set_values(getattr(optimized, key), getattr(baseline, key), "베이스라인")
         delta = compare(baseline, optimized)

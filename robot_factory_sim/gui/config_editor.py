@@ -382,7 +382,7 @@ class ConfigEditorDialog(QDialog):
         """
         super().__init__(parent)
         self.setWindowTitle("⚙ 공장 설정 에디터")
-        self.resize(1320, 820)
+        c.fit_to_screen(self, 1320, 820)
         self._service = service
         self._factory = FactoryConfig()
         self._station_items: dict[str, EditableStation] = {}
