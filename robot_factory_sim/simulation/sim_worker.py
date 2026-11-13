@@ -115,7 +115,7 @@ class _SimController(QObject):
         epoch = datetime.now().replace(microsecond=0)
         self._engines = {
             mode: SimulationEngine(copy.deepcopy(factory), mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate},
-                                   comparison_seed=config.RANDOM_SEED, demand_source="stochastic")
+                                   comparison_seed=config.RANDOM_SEED, demand_source="stochastic", roam=True)
             for mode in self._active_policies
         }
         from simulation.planning.controller import RollingHorizonScheduler

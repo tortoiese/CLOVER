@@ -579,8 +579,9 @@ class DashboardPanel(QWidget):
         candidate = state.mode if state.mode != "baseline" else "optimized"
         opt_kpis = state.engine_kpis.get(candidate, {})
         self._roi_panel.update_kpis(
-            int(base_kpis.get("completed_units", 0.0)), base_kpis.get("distance_m", 0.0),
-            int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("distance_m", 0.0),
+            int(base_kpis.get("completed_units", 0.0)), base_kpis.get("energy_units", 0.0),
+            int(opt_kpis.get("completed_units", 0.0)), opt_kpis.get("energy_units", 0.0),
+            state.sim_time / 3600.0,
         )
 
     def _draw_planning(self) -> None:

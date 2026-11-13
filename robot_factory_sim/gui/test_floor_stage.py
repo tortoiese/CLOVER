@@ -69,7 +69,7 @@ def test_plan_shows_only_selected_floor_items() -> None:
     """도면에는 선택한 층의 스테이션/충전소만 보이고 엘리베이터는 모든 층에 보인다."""
     panel = _panel()
     plan = panel.stage.plan
-    for floor, expected in ((1, {"WS-01", "WS-02"}), (2, {"WS-03", "WS-04"}), (3, {"WS-05"})):
+    for floor, expected in ((1, {"WS-01", "WS-02", "WS-07"}), (2, {"WS-03", "WS-04", "WS-08"}), (3, {"WS-05", "WS-06", "WS-09"})):
         plan.set_floor(floor)
         assert {sid for sid, item in plan._stations.items() if item.isVisible()} == expected  # noqa: SLF001
         assert all(item.isVisible() for item in plan._elevators.values())  # noqa: SLF001

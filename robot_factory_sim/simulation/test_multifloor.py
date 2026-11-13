@@ -21,14 +21,15 @@ def test_route_to_other_floor_rides_one_elevator_trip() -> None:
     route = PathGraph(_factory()).route_to_facility(100, 150, "WS-05", 1)
     assert route is not None
     assert route.floors[-1] == 3
-    assert route.lifts.count("EL-01") == 1
+    assert len([lift for lift in route.lifts if lift]) == 1
     assert len(route.points) == len(route.floors) == len(route.lifts)
 
 
 def test_inactive_elevator_cuts_off_other_floors() -> None:
     """엘리베이터가 멈추면 같은 층은 갈 수 있지만 다른 층 설비는 도달 불가다."""
     factory = _factory()
-    factory.elevators[0].is_active = False
+    for elevator in factory.elevators:
+        elevator.is_active = False
     graph = PathGraph(factory)
     assert graph.route_to_facility(100, 150, "WS-05", 1) is None
     assert graph.distance_to_facility(100, 150, "WS-05", 1) == float("inf")
@@ -56,7 +57,7 @@ def test_robots_ride_elevator_and_complete_cross_floor_work() -> None:
         fractional = fractional or any(abs(r.floor_position() - round(r.floor_position())) > 0.05
                                        for r in engine.robots.values())
     assert moved and fractional
-    assert engine.elevators["EL-01"].rides > 0
+    assert sum(e.rides for e in engine.elevators.values()) > 0
     assert engine.metrics.total_completed > 0
     assert {r.floor for r in engine.robots.values()} <= {1, 2, 3}
 
@@ -91,10 +92,10 @@ def test_db_roundtrip_keeps_floors_and_elevators() -> None:
     db.save_factory_config(_factory(), changed_by="test")
     loaded = db.load_factory_config()
     assert loaded.floor_count == 3
-    assert {s.id: s.floor for s in loaded.stations} == {"WS-01": 1, "WS-02": 1, "WS-03": 2, "WS-04": 2, "WS-05": 3}
-    assert [(e.id, e.travel_time, e.capacity) for e in loaded.elevators] == [("EL-01", 4.0, 1)]
+    assert {s.id: s.floor for s in loaded.stations} == {"WS-01": 1, "WS-02": 1, "WS-03": 2, "WS-04": 2, "WS-05": 3, "WS-06": 3, "WS-07": 1, "WS-08": 2, "WS-09": 3}
+    assert [(e.id, e.travel_time, e.capacity) for e in loaded.elevators] == [("EL-01", 4.0, 1), ("EL-02", 4.0, 1)]
     assert {n.floor for n in loaded.nodes} == {1, 2, 3}
-    assert sum(1 for n in loaded.nodes if n.node_type == "elevator") == 3
+    assert sum(1 for n in loaded.nodes if n.node_type == "elevator") == 3 * len(loaded.elevators)
 
 
 def test_v2_database_is_migrated_to_single_floor(tmp_path: Path) -> None:
@@ -152,7 +153,7 @@ def test_demo_orders_force_elevator_use_in_both_schedulers() -> None:
         assert {r.floor for r in engine.robots.values()} == {1}
         engine.sync_orders([order])
         engine.env.run(until=900)
-        assert engine.elevators["EL-01"].rides >= 5, mode
+        assert sum(e.rides for e in engine.elevators.values()) >= 5, mode
         assert engine.orders["ORD-DEMO"].completed > 0, mode
 
 
@@ -169,3 +170,15 @@ def test_milp_comparison_runs_on_multi_floor_factory() -> None:
                "sim_datetime": datetime.now().isoformat(sep=" ", timespec="seconds"), "comparison_orders": [order]}
     result = run_comparison(ComparisonConditions(duration=200, repeats=2), context)
     assert result["factory_config"]["profile"]["floor_count"] == 3
+
+
+def test_roaming_robots_visit_every_floor_and_use_elevator() -> None:
+    """roam=True: 로봇이 모든 층에 배치되고, 작업이 없어도 층을 계속 순회하며 엘리베이터가 움직인다."""
+    engine = SimulationEngine(_factory(), "baseline", params={"task_rate": 0.01}, roam=True)
+    assert {r.floor for r in engine.robots.values()} == {1, 2, 3}
+    visited: set[int] = set()
+    for step in range(1, 600):
+        engine.env.run(until=float(step))
+        visited |= {r.floor for r in engine.robots.values()}
+    assert visited == {1, 2, 3}
+    assert sum(e.rides for e in engine.elevators.values()) >= 5
