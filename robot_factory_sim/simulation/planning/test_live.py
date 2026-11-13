@@ -26,8 +26,8 @@ def engine() -> SimulationEngine:
 
 def result(worker: LiveSolverProcess) -> Result:
     """Poll a bounded real child without changing the captured plant."""
-    deadline = time.monotonic() + 10
-    while time.monotonic() < deadline:
+    deadline = time.perf_counter() + 10
+    while time.perf_counter() < deadline:
         value = worker.poll()
         if value is not None:
             return value
@@ -59,10 +59,10 @@ def test_live_hard_deadline_reaps_only_owned_child() -> None:
     try:
         worker.submit(capture(plant, plant.scheduler.settings, 'timeout'), 'cpsat_linear')
         worker.clock = lambda: worker.started + 100
-        started = time.monotonic()
+        started = time.perf_counter()
         failed = worker.poll()
         assert failed.report.status == 'HARD_TIMEOUT'
-        assert time.monotonic() - started < 3
+        assert time.perf_counter() - started < 3
         assert worker.process is worker.connection is worker.rpc_thread is worker.pending is None
     finally:
         worker.close()
@@ -110,8 +110,8 @@ def test_live_publication_keeps_unrelated_arrival_in_real_queue() -> None:
         plant.scheduler.dispatch(plant)
         new = plant.add_task('P', sid, 2, external_uid='new')
         # Owner dispatch is not allowed to consume the new job as part of the old solve.
-        deadline = time.monotonic() + 10
-        while not plant.scheduler.records and time.monotonic() < deadline:
+        deadline = time.perf_counter() + 10
+        while not plant.scheduler.records and time.perf_counter() < deadline:
             plant.env.run(until=plant.now + .05)
             time.sleep(.01)
         assert plant.scheduler.records and plant.scheduler.records[0]['accepted'], plant.scheduler.records

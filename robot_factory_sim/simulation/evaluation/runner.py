@@ -73,6 +73,10 @@ def environment_manifest() -> dict[str, Any]:
         except importlib.metadata.PackageNotFoundError:
             optional[name] = None
     return {
+        "wall_clock": {"name": "perf_counter",
+                       "implementation": time.get_clock_info("perf_counter").implementation,
+                       "resolution_seconds": time.get_clock_info("perf_counter").resolution,
+                       "monotonic": time.get_clock_info("perf_counter").monotonic},
         "python": platform.python_version(),
         "os": platform.system(),
         "machine": platform.machine(),

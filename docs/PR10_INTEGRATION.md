@@ -57,10 +57,29 @@ headless의 D0나 `d1-staged-budget-v1`과 같은 실험이라고 부르지 않�
 기능 검수 commit `63e3057`의 Python source hash는 `dd6f8c51003c66d763af6c9a7baf264b81a10ca517885af2e0069a782dcd89f4`다.
 최초 통합 기능 검수: Python 3.11·3.14 각각 446 passed(기존 P4 430 + live/GUI 16).
 추가 물리 실행 57/57 SUCCESS, 기록 재생·원시 지표 57/57 일치, 기존 D0 물리 digest 36/36 보존.
-기본 config와 핵심 모델·자원·controller·runner 14파일을 P4와 byte 비교해 일치를 확인했다.
+기본 config와 최초 기능 통합 commit 63e3057에서 핵심 모델·자원·controller·runner 14파일이 P4와 byte 일치했다. 후속 Windows 계측 수정은 아래와 같이 별도로 기록한다.
 기존 P4 591회 결과는 과거 source의 증거로 유지하며 이번 통합의 새 실행 수로 바꾸지 않는다.
 GUI 화면 검수 후 후보 수·최근 적용 판정·마지막 반환 계획의 표시를 보완했고, Python 3.11/3.14 각각 live/GUI 16개를 다시 통과했다. 이 후속 수정은 표시 getter/문구와 그 assertion이며 물리·수학·적용 로직을 변경하지 않았다.
 원격의 최종 전체 회귀와 main 병합 여부는 PR #10의 현재 checks/merged 상태로 확인한다.
 시간이 지난 native 최적 계획이 STALE_HORIZON으로 거부되어 대체 실행한 실제 GUI 기록도 보존했다. solver의 OPTIMAL 상태와 실제 채택을 혼동하지 않는다.
 
 P5/P6의 실제 팀 지도 본 실험, 통계·최종 선택 규칙은 이번 충돌 해결/GUI 통합과 별도다.
+
+
+## Windows Python 3.11 계측 호환성 보완
+
+첫 최종 head 7368a71의 CI에서는 macOS/Linux 및 Windows3.14가 통과했지만 Windows3.11에서 12개 시간 검사 항목이 실패했다.
+짧은 import/prepare/validate 구간이 0초로 기록됐고, 1us 공개 여유 초과도 놓쳤다.
+CPython3.11 Windows의 monotonic/GetTickCount64와 고해상도 perf_counter의 차이에 맞춰
+계획·검증·RPC·deadline·watchdog·D1 phase·Qt 명령 왕복을 perf_counter 기준으로 통일했다.
+서로 다른 시계의 epoch를 빼지 않도록 요청 시작값의 모든 내부 호출자와 테스트도 함께 바꿨다.
+환경 manifest에는 실제 clock implementation/resolution/monotonic 정보를 기록한다.
+
+0초 값에 임의 epsilon을 더하거나 기존 >0/초과 판정을 완화하지 않았다.
+거친 monotonic이 멈춘 상태에서도 미세 phase 비용을 기록하고 20us 공개 비용이 1us 여유를 넘는지 확인하는 회귀 2개를 추가했다.
+수학 제약·목적·자원 단위·기본 정책은 변경하지 않았다. 이 수정의 최종 head는 GitHub checks에서 별도로 검증한다.
+직전 57회 물리 증거는 63e3057의 것이며 현재 clock/source로 재표기하지 않는다.
+
+근거: [Python3.11 perf_counter](https://docs.python.org/3.11/library/time.html#time.perf_counter),
+[CPython clock 구현 차이 기록](https://github.com/python/cpython/issues/126745),
+[첫 CI의 실패 보존](https://github.com/tortoiese/CLOVER/actions/runs/43381140664).

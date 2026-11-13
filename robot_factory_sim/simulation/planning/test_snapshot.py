@@ -164,7 +164,7 @@ def test_route_limit_deadline_and_old_schema_fail_explicitly() -> None:
     with pytest.raises(ValueError, match="ROUTE_LIMIT"):
         prepare(snapshot)
     with pytest.raises(TimeoutError):
-        prepare(snapshot, deadline=time.monotonic() - 1)
+        prepare(snapshot, deadline=time.perf_counter() - 1)
     with pytest.raises(ValueError, match="contract"):
         prepare(replace(snapshot, schema="clover-plan-v2"))
     engine.close()

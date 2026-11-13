@@ -310,7 +310,7 @@ def prepare(snapshot: Snapshot, *, deadline: float | None = None) -> PreparedInp
     if snapshot.schema != SNAPSHOT_SCHEMA or snapshot.traffic_contract != TRAFFIC_CONTRACT:
         raise ValueError("planning traffic contract mismatch")
     snapshot.settings.validate()
-    if deadline is not None and (not math.isfinite(deadline) or time.monotonic() >= deadline):
+    if deadline is not None and (not math.isfinite(deadline) or time.perf_counter() >= deadline):
         raise TimeoutError("route preparation exhausted decision budget")
     factory = FactoryConfig.from_json(snapshot.factory_json)
     validate_releases(snapshot, factory.floor_count)
@@ -336,7 +336,7 @@ def prepare(snapshot: Snapshot, *, deadline: float | None = None) -> PreparedInp
                 pairs += 1
                 if pairs > snapshot.settings.max_routes:
                     raise ValueError("ROUTE_LIMIT: input preparation pair limit exceeded")
-                if deadline is not None and time.monotonic() >= deadline:
+                if deadline is not None and time.perf_counter() >= deadline:
                     raise TimeoutError("route preparation exhausted decision budget")
                 reason = "traffic_drain" if snapshot.traffic_paused else ""
                 route = None if reason else filtered.route_to_facility(*position[:2], destination, position[2])
@@ -359,7 +359,7 @@ def prepare(snapshot: Snapshot, *, deadline: float | None = None) -> PreparedInp
                         for cid in lifts
                     ]
                     for values in product(*options):
-                        if deadline is not None and time.monotonic() >= deadline:
+                        if deadline is not None and time.perf_counter() >= deadline:
                             raise TimeoutError("cabin route variants exhausted decision budget")
                         data, reason = _profile(
                             route, robot, position, cabins, net, dict(zip(lifts, values, strict=True))

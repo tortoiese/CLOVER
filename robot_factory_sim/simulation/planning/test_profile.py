@@ -136,7 +136,7 @@ def test_parent_kill_does_not_invent_worker_phase_measurements() -> None:
     engine = joint()
     worker = SolverProcess()
     try:
-        result = worker.solve(capture(engine, config(memory_limit_mib=1), "rss"), time.monotonic(), "cpsat_native")
+        result = worker.solve(capture(engine, config(memory_limit_mib=1), "rss"), time.perf_counter(), "cpsat_native")
         assert result.report.status == "MEMORY_LIMIT" and worker.process is None
         assert result.report.timing_stage == "parent_memory_limit" and not result.report.timing_complete
         assert not result.report.stage_seconds
@@ -149,7 +149,7 @@ def test_worker_route_preparation_failure_is_distinct_from_native_construction()
     engine = joint()
     worker = SolverProcess()
     try:
-        result = worker.solve(capture(engine, config(max_routes=1), "route-limit"), time.monotonic(), "cpsat_native")
+        result = worker.solve(capture(engine, config(max_routes=1), "route-limit"), time.perf_counter(), "cpsat_native")
         assert result.report.status == "BUILD_LIMIT" and result.report.timing_stage == "route_prepare"
         assert result.report.stage_seconds["route_prepare"] > 0
         assert "native_robot_model" not in result.report.stage_seconds

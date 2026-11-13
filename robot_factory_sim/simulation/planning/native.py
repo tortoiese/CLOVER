@@ -160,12 +160,12 @@ class NativeModel:
     def __init__(self, data: PreparedInput, deadline: float, timer: PhaseTimer | None = None) -> None:
         self.timer = timer or PhaseTimer()
         self.timer.start("native_import")
-        importing = time.monotonic()
+        importing = time.perf_counter()
         import ortools
         from ortools.sat.python import cp_model
 
         self.cp, self.version = cp_model, "CP-SAT " + ortools.__version__
-        self.import_seconds = time.monotonic() - importing
+        self.import_seconds = time.perf_counter() - importing
         self.timer.start("native_setup")
         self.data, self.deadline = data, deadline
         cfg = data.snapshot.settings
@@ -226,7 +226,7 @@ class NativeModel:
         self.size += extra
         if self.size > self.data.snapshot.settings.max_arcs:
             raise ValueError("BUILD_LIMIT: native alternative/circuit edge limit exceeded")
-        if time.monotonic() >= self.deadline:
+        if time.perf_counter() >= self.deadline:
             raise TimeoutError("native construction exhausted decision budget")
 
     def integer(self, name: str, lower: int, upper: int, hint: int = 0) -> Any:
@@ -540,7 +540,7 @@ class NativeModel:
 
 def solve_native(data: PreparedInput, *, started: float | None = None) -> Result:
     """Compile and solve two objectives under the same parent-enforced total budget."""
-    started = time.monotonic() if started is None else started
+    started = time.perf_counter() if started is None else started
     deadline = started + data.snapshot.settings.timeout
     timer = PhaseTimer()
     report = Report(
@@ -552,7 +552,7 @@ def solve_native(data: PreparedInput, *, started: float | None = None) -> Result
     )
     try:
         built = NativeModel(data, deadline, timer)
-        model_time = time.monotonic() - started
+        model_time = time.perf_counter() - started
         timer.start("native_fingerprint")
         target = built.target
         fingerprint = hashlib.sha256(
@@ -592,7 +592,7 @@ def solve_native(data: PreparedInput, *, started: float | None = None) -> Result
             if data.snapshot.settings.warm_start:
                 for variable, value in zip(variables, hint, strict=True):
                     target.add_hint(variable, value)
-            remaining = until - time.monotonic()
+            remaining = until - time.perf_counter()
             if remaining <= 0.002:
                 return None, "NO_INCUMBENT_TIMEOUT", None
             solver = built.cp.CpSolver()
@@ -601,10 +601,10 @@ def solve_native(data: PreparedInput, *, started: float | None = None) -> Result
             solver.parameters.max_time_in_seconds = remaining
             solver.parameters.relative_gap_limit = 0
             solver.parameters.absolute_gap_limit = 0
-            searching = time.monotonic()
+            searching = time.perf_counter()
             timer.start(phase_name + "_search")
             status = solver.solve(target)
-            search_seconds += time.monotonic() - searching
+            search_seconds += time.perf_counter() - searching
             names = {
                 built.cp.OPTIMAL: "OPTIMAL",
                 built.cp.FEASIBLE: "FEASIBLE",
@@ -619,7 +619,7 @@ def solve_native(data: PreparedInput, *, started: float | None = None) -> Result
         def score(values: tuple[int, ...], objective: dict[int, int]) -> int:
             return sum(values[i] * c for i, c in objective.items())
 
-        first, s1, b1 = phase(built.primary, time.monotonic() + max(0, deadline - time.monotonic()) * 0.6, safe)
+        first, s1, b1 = phase(built.primary, time.perf_counter() + max(0, deadline - time.perf_counter()) * 0.6, safe)
         if s1 in {"MODEL_INVALID", "INFEASIBLE", "ERROR"}:
             raise ValueError("MODEL_INVALID: native primary solve: " + s1)
         first_source = "SAFE_HOLD_HINT" if first is None else "NATIVE_PHASE1"
@@ -652,8 +652,8 @@ def solve_native(data: PreparedInput, *, started: float | None = None) -> Result
             native_phase2_status=s2,
             phase2_cost=score(values, built.secondary),
             phase2_bound=b2,
-            total_seconds=time.monotonic() - started,
-            solve_seconds=time.monotonic() - started - model_time,
+            total_seconds=time.perf_counter() - started,
+            solve_seconds=time.perf_counter() - started - model_time,
             solution_source="NATIVE_PHASE2" if values is second else "NATIVE_PHASE1_OR_SAFE_HOLD",
             search_seconds=search_seconds,
         )
@@ -707,5 +707,5 @@ def profile_report(report: Report, timer: PhaseTimer, started: float, complete: 
         ),
         search_seconds=search,
         solution_check_seconds=checks,
-        total_seconds=time.monotonic() - started,
+        total_seconds=time.perf_counter() - started,
     )

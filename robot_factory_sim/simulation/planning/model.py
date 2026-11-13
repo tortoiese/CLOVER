@@ -108,7 +108,7 @@ def build_model(data: PreparedInput, deadline: float | None = None) -> Model:
     states_by_robot = {}
 
     def check_budget() -> None:
-        if deadline is not None and time.monotonic() >= deadline:
+        if deadline is not None and time.perf_counter() >= deadline:
             raise TimeoutError("model building exhausted decision budget")
 
     for robot in snapshot.robots:

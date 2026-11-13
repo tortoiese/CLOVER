@@ -52,8 +52,8 @@ def no_qt_callback_errors(monkeypatch: pytest.MonkeyPatch) -> Generator[None, No
 
 def wait_until(predicate: Callable[[], bool], timeout: float = 8) -> None:
     """Pump real Qt events while waiting; the GUI must remain responsive."""
-    deadline = time.monotonic() + timeout
-    while not predicate() and time.monotonic() < deadline:
+    deadline = time.perf_counter() + timeout
+    while not predicate() and time.perf_counter() < deadline:
         QTest.qWait(20)
     assert predicate()
 
@@ -135,7 +135,7 @@ def test_settings_and_default_factory_gui_response(tmp_path: Path, monkeypatch: 
             wait_until(lambda observed=count: len(window.gui_response_ms) > observed, timeout=2)
             worker_response.append(window._state.diagnostics["worker_command_ms"])
             response.append(window.gui_response_ms[-1])
-        reset_started = time.monotonic()
+        reset_started = time.perf_counter()
         window._mode.setCurrentIndex(window._mode.findData("rh_cpsat_linear"))
         wait_until(lambda: window._state.mode == "rh_cpsat_linear")
         assert set(window._state.active_policies) == {"baseline", "optimized", "rh_cpsat_linear"}
@@ -143,7 +143,7 @@ def test_settings_and_default_factory_gui_response(tmp_path: Path, monkeypatch: 
                     "factory_stations": len(before["stations"]), "samples": response,
                     "command_to_state_p95_ms": float(np.quantile(response, .95)),
                     "worker_command_ms": worker_response,
-                    "policy_activation_reset_ms": (time.monotonic() - reset_started) * 1000,
+                    "policy_activation_reset_ms": (time.perf_counter() - reset_started) * 1000,
                     "target_150ms_met": float(np.quantile(response, .95)) < 150,
                     "scope": "30 live speed commands sent to GUI state application; activation reset reported separately"}
         if os.environ.get("CLOVER_QA_METRICS"):

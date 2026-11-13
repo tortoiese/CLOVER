@@ -11,7 +11,7 @@ class PhaseTimer:
     """Keep completed/current native stages outside the fallible builder object."""
 
     def __init__(self, clock: Callable[[], float] | None = None) -> None:
-        self.clock = clock or time.monotonic
+        self.clock = clock or time.perf_counter
         self.seconds: dict[str, float] = defaultdict(float)
         self.active = ""
         self.last = "not_started"

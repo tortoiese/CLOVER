@@ -36,7 +36,7 @@ def observed(warm: bool = True) -> PreparedInput:
 def test_hint_serves_both_jobs_with_correct_return_energy_and_unchanged_math() -> None:
     data = observed()
     model = build_model(data)
-    hint = work_hint(model, time.monotonic() + 5)
+    hint = work_hint(model, time.perf_counter() + 5)
     assert hint.source == "WORK_WARM_START" and 1 <= hint.trials <= 8
     check_incumbent(model, hint.values)
     assert cost(hint.values, model.objective1) == 0
@@ -53,7 +53,7 @@ def test_hint_serves_both_jobs_with_correct_return_energy_and_unchanged_math() -
         old.objective2,
         old.fingerprint,
     )
-    assert work_hint(old, time.monotonic() + 5).source == "SAFE_HOLD_HINT"
+    assert work_hint(old, time.perf_counter() + 5).source == "SAFE_HOLD_HINT"
 
 
 @pytest.mark.parametrize("backend", tuple(RH_BACKENDS.values()))
@@ -97,7 +97,7 @@ def test_missing_native_dependency_is_explicit_even_if_a_work_hint_exists(monkey
 
 def test_exhausted_hint_budget_keeps_checked_hold() -> None:
     model = build_model(observed())
-    hint = work_hint(model, time.monotonic() - 1)
+    hint = work_hint(model, time.perf_counter() - 1)
     assert hint.expired and hint.source == "SAFE_HOLD_HINT"
     check_incumbent(model, hint.values)
 
@@ -106,12 +106,12 @@ def test_battery_and_resource_constraints_are_not_relaxed_by_hint() -> None:
     data = observed()
     actors = tuple(replace(r, battery=1) for r in data.snapshot.robots)
     model = build_model(replace(data, snapshot=replace(data.snapshot, robots=actors)))
-    hint = work_hint(model, time.monotonic() + 5)
+    hint = work_hint(model, time.perf_counter() + 5)
     assert hint.source == "SAFE_HOLD_HINT"
     check_incumbent(model, hint.values)
     blocked = tuple(replace(f, occupied=f.capacity) if f.kind == "work" else f for f in data.snapshot.facilities)
     model = build_model(replace(data, snapshot=replace(data.snapshot, facilities=blocked)))
-    hint = work_hint(model, time.monotonic() + 5)
+    hint = work_hint(model, time.perf_counter() + 5)
     assert hint.source == "SAFE_HOLD_HINT"
     check_incumbent(model, hint.values)
 
@@ -138,7 +138,7 @@ def test_real_worker_profile_separates_preparation_from_model_and_reuses_process
     try:
         reports = []
         for i in range(2):
-            result = worker.solve(capture(engine, config, str(i)), time.monotonic(), "cpsat_linear")
+            result = worker.solve(capture(engine, config, str(i)), time.perf_counter(), "cpsat_linear")
             assert result.report.status in {"OPTIMAL", "FEASIBLE"}, result.report
             assert not validate(result)
             reports.append(result.report)

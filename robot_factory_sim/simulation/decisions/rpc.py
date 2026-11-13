@@ -47,7 +47,7 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
     """Dispatch one RPC, retaining identity even on an unavailable backend."""
     identity = {key: payload[key] for key in ("session", "generation", "request_id", "epoch", "policy")}
     args, command, policy = payload["arguments"], payload["command"], payload["policy"]
-    started = time.monotonic()
+    started = time.perf_counter()
     cpu_started = time.process_time()
     try:
         if command == "ready":
@@ -61,21 +61,21 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
             result = propose(args["observation"], **args["options"])
             status = "OK"
         elif command == "rh":
-            adapter_started = time.monotonic()
+            adapter_started = time.perf_counter()
             from simulation.planning.backend import Backend
             from simulation.planning.contracts import ALL_RH_BACKENDS
             from simulation.planning.snapshot import prepare
 
-            imported = time.monotonic()
+            imported = time.perf_counter()
             snapshot = args["snapshot"]
             data = prepare(snapshot, deadline=payload["started"] + snapshot.settings.timeout)
-            prepared = time.monotonic()
+            prepared = time.perf_counter()
             plan = Backend(ALL_RH_BACKENDS[policy]).solve(data, started=payload["started"])
             from simulation.decisions.adapters import propose
 
-            auxiliary_started = time.monotonic()
+            auxiliary_started = time.perf_counter()
             auxiliary = propose(args["observation"], **args["options"])
-            completed = time.monotonic()
+            completed = time.perf_counter()
             plan = replace(
                 plan,
                 report=replace(
@@ -105,7 +105,7 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
                 **identity,
                 "status": status,
                 "value": result,
-                "worker_seconds": time.monotonic() - started,
+                "worker_seconds": time.perf_counter() - started,
                 "dispatch_seconds": started - payload["started"],
             },
             ready_policy,
@@ -118,7 +118,7 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
                 "status": ("STARTUP_" if command == "ready" else "") + code,
                 "value": None,
                 "message": f"{type(exc).__name__}: {exc}",
-                "worker_seconds": time.monotonic() - started,
+                "worker_seconds": time.perf_counter() - started,
             },
             None if command == "ready" else ready_policy,
         )

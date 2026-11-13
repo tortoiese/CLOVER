@@ -24,7 +24,7 @@ class DelayLedger:
         self,
         env: Any,
         allowance: float,
-        clock: Callable[[], float] = time.monotonic,
+        clock: Callable[[], float] | None = None,
         replay: list[dict[str, Any]] | None = None,
     ) -> None:
         if not math.isfinite(allowance) or allowance <= 0:
@@ -32,7 +32,7 @@ class DelayLedger:
         self.env, self.allowance, self.clock, self.replay = (
             env,
             allowance,
-            clock,
+            clock or time.perf_counter,
             replay,
         )
         self.records: list[dict[str, Any]] = []

@@ -40,9 +40,9 @@ class Backend:
         self.profile: dict[str, float] = defaultdict(float)
 
     def _compile_expired(self, started: float, deadline: float) -> bool:
-        if time.monotonic() < deadline:
+        if time.perf_counter() < deadline:
             return False
-        self.profile["compile_seconds"] += time.monotonic() - started
+        self.profile["compile_seconds"] += time.perf_counter() - started
         return True
 
     def phase(
@@ -61,13 +61,13 @@ class Backend:
     def _mip(
         self, model: Model, objective: dict[int, int], deadline: float, extra: Row | None, hint: tuple[int, ...] | None
     ) -> tuple[tuple[int, ...] | None, str, float | None]:
-        if time.monotonic() >= deadline - 0.002:
+        if time.perf_counter() >= deadline - 0.002:
             return None, "NO_INCUMBENT_TIMEOUT", None
-        before = time.monotonic()
+        before = time.perf_counter()
         from ortools.linear_solver import pywraplp
 
-        self.profile["import_seconds"] += time.monotonic() - before
-        before = time.monotonic()
+        self.profile["import_seconds"] += time.perf_counter() - before
+        before = time.perf_counter()
         solver = pywraplp.Solver.CreateSolver("SCIP")
         if solver is None:
             raise ImportError("SCIP unavailable")
@@ -95,14 +95,14 @@ class Backend:
         target.SetMinimization()
         if hint is not None:
             solver.SetHint(variables, hint)
-        self.profile["compile_seconds"] += time.monotonic() - before
-        remaining = deadline - time.monotonic()
+        self.profile["compile_seconds"] += time.perf_counter() - before
+        remaining = deadline - time.perf_counter()
         if remaining <= 0.002:
             return None, "NO_INCUMBENT_TIMEOUT", None
         solver.SetTimeLimit(max(1, int(remaining * 1000)))
-        before = time.monotonic()
+        before = time.perf_counter()
         status = solver.Solve()
-        self.profile["search_seconds"] += time.monotonic() - before
+        self.profile["search_seconds"] += time.perf_counter() - before
         names = {
             solver.OPTIMAL: "OPTIMAL",
             solver.FEASIBLE: "FEASIBLE",
@@ -123,14 +123,14 @@ class Backend:
     def _cp(
         self, model: Model, objective: dict[int, int], deadline: float, extra: Row | None, hint: tuple[int, ...] | None
     ) -> tuple[tuple[int, ...] | None, str, float | None]:
-        if time.monotonic() >= deadline - 0.002:
+        if time.perf_counter() >= deadline - 0.002:
             return None, "NO_INCUMBENT_TIMEOUT", None
-        before = time.monotonic()
+        before = time.perf_counter()
         import ortools
         from ortools.sat.python import cp_model
 
-        self.profile["import_seconds"] += time.monotonic() - before
-        before = time.monotonic()
+        self.profile["import_seconds"] += time.perf_counter() - before
+        before = time.perf_counter()
         self.version = "CP-SAT " + ortools.__version__
         target = cp_model.CpModel()
         variables = []
@@ -187,8 +187,8 @@ class Backend:
         if hint is not None:
             for var, value in zip(variables, hint, strict=True):
                 target.add_hint(var, value)
-        self.profile["compile_seconds"] += time.monotonic() - before
-        remaining = deadline - time.monotonic()
+        self.profile["compile_seconds"] += time.perf_counter() - before
+        remaining = deadline - time.perf_counter()
         if remaining <= 0.002:
             return None, "NO_INCUMBENT_TIMEOUT", None
         solver = cp_model.CpSolver()
@@ -197,9 +197,9 @@ class Backend:
         solver.parameters.random_seed = 42
         solver.parameters.relative_gap_limit = 0
         solver.parameters.absolute_gap_limit = 0
-        before = time.monotonic()
+        before = time.perf_counter()
         status = solver.solve(target)
-        self.profile["search_seconds"] += time.monotonic() - before
+        self.profile["search_seconds"] += time.perf_counter() - before
         names = {
             cp_model.OPTIMAL: "OPTIMAL",
             cp_model.FEASIBLE: "FEASIBLE",
@@ -217,7 +217,7 @@ class Backend:
             from simulation.planning.native import solve_native
 
             return solve_native(data, started=started)
-        started = time.monotonic() if started is None else started
+        started = time.perf_counter() if started is None else started
         self.profile.clear()
         self.version = ""
         deadline = started + data.snapshot.settings.timeout
@@ -234,11 +234,11 @@ class Backend:
         try:
             if data.snapshot.settings.formulation != "grid":
                 raise ValueError("MODEL_INVALID: grid compiler requires grid time domain")
-            before = time.monotonic()
+            before = time.perf_counter()
             model = build_model(data, deadline)
             from simulation.planning.semantic import semantic_spec_hash
 
-            self.profile["model_seconds"] = time.monotonic() - before
+            self.profile["model_seconds"] = time.perf_counter() - before
             report = replace(
                 report,
                 model_hash=(
@@ -251,12 +251,12 @@ class Backend:
                 time_unit_seconds=data.snapshot.settings.time_unit,
                 variables=len(model.variables),
                 constraints=len(model.rows),
-                build_seconds=time.monotonic() - started,
+                build_seconds=time.perf_counter() - started,
             )
-            before = time.monotonic()
+            before = time.perf_counter()
             hint_record = work_hint(model, deadline)
             hint = hint_record.values
-            self.profile["hint_seconds"] = time.monotonic() - before
+            self.profile["hint_seconds"] = time.perf_counter() - before
             report = replace(
                 report,
                 hint_source=hint_record.source,
@@ -274,7 +274,7 @@ class Backend:
                 native1, proof, source1 = "SKIPPED_ZERO_LOWER_BOUND", "NONNEGATIVE_ZERO_INCUMBENT", hint_record.source
             else:
                 first, status1, bound1 = self.phase(
-                    model, model.objective1, time.monotonic() + max(0, deadline - time.monotonic()) * 0.6, hint=hint
+                    model, model.objective1, time.perf_counter() + max(0, deadline - time.perf_counter()) * 0.6, hint=hint
                 )
                 native1, proof, source1 = status1, "NATIVE" if status1 == "OPTIMAL" else "NONE", "NATIVE_PHASE1"
                 if first is not None:
@@ -302,9 +302,9 @@ class Backend:
                 second, status2, bound2 = self.phase(model, model.objective2, deadline, lock, first)
                 native2 = status2
                 if second is not None:
-                    before = time.monotonic()
+                    before = time.perf_counter()
                     check_incumbent(model, second, lock)
-                    self.profile["solution_check_seconds"] += time.monotonic() - before
+                    self.profile["solution_check_seconds"] += time.perf_counter() - before
                     if (cost(second, model.objective1), cost(second, model.objective2)) > (
                         cost(first, model.objective1),
                         cost(first, model.objective2),
@@ -330,8 +330,8 @@ class Backend:
                 native_phase2_status=native2,
                 phase2_cost=cost(values, model.objective2),
                 phase2_bound=bound2,
-                solve_seconds=time.monotonic() - started - report.build_seconds,
-                total_seconds=time.monotonic() - started,
+                solve_seconds=time.perf_counter() - started - report.build_seconds,
+                total_seconds=time.perf_counter() - started,
                 backend_version=self.version,
                 solution_source=source,
                 **self.profile,
@@ -351,5 +351,5 @@ class Backend:
             message = f"{type(exc).__name__}: {exc}"
         return Result(
             data,
-            replace(report, status=status, message=message, total_seconds=time.monotonic() - started, **self.profile),
+            replace(report, status=status, message=message, total_seconds=time.perf_counter() - started, **self.profile),
         )

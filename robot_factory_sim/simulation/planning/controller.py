@@ -67,7 +67,7 @@ class RollingHorizonScheduler(BaseScheduler):
         self.signature: Any = None
         self.pending_return = False
         self.apply_processes: list[Any] = []
-        self._clock = time.monotonic
+        self._clock = time.perf_counter
 
     def close(self) -> None:
         """Release the isolated native worker on engine disposal."""

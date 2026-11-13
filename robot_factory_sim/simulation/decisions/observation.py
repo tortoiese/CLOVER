@@ -63,7 +63,7 @@ def capture(
         }
         for origin in sorted(origins):
             for destination in facilities:
-                if time.monotonic() > deadline:
+                if time.perf_counter() > deadline:
                     raise TimeoutError("policy observation exceeded budget")
                 trip = estimate_trip(engine, robot, destination, origin=origin)
                 trips[trip_key(robot.robot_id, origin, destination)] = [

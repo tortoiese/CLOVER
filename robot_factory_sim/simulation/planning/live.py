@@ -46,7 +46,7 @@ class LiveSolverProcess(SolverProcess):
         self.backend = "milp"
         self.reused = False
         self.peak_rss = 0
-        self.clock: Callable[[], float] = time.monotonic
+        self.clock: Callable[[], float] = time.perf_counter
 
     def close(self) -> None:
         """Reap child and IPC thread before invalidating this generation."""

@@ -511,5 +511,18 @@
       "junit_sha256": "29c0848c185793b28c505a561ce76ff0328c044932e302dceece7a7b9cb9cea4"
     }
   },
-  "display_followup_scope": "Only plan-state getters, dashboard labels, main-window text and getter assertions changed after functional build; no math/admission/physical/dispatch change."
+  "display_followup_scope": "Only plan-state getters, dashboard labels, main-window text and getter assertions changed after functional build; no math/admission/physical/dispatch change.",
+  "core_physics_math_D1_runner_config_14_files_equal_P4_scope": "functional build 63e3057 only; later high-resolution clock migration changes timing reads and adds environment clock metadata, not mathematical constraints.",
+  "clock_fix": {
+    "failed_head": "7368a71f9e4080e8564075612dc69e06712a1b54",
+    "failed_ci": 43381140664,
+    "platform": "Windows Python3.11",
+    "cause": "coarse monotonic wall clock loses short durations and publication overruns",
+    "solution": "consistent perf_counter across timing and deadline boundaries, including cross-process started values and Qt command round-trip",
+    "new_regressions": 2,
+    "existing_assertions_weakened": false,
+    "python314_local_passed": 448,
+    "junit_sha256": "bd3bd995350201b5acf055d7609772048a1167cb3236675dcf6f209717e2e344",
+    "final_windows_CI": "pending; see current PR checks"
+  }
 }

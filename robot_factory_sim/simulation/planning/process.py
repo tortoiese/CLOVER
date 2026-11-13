@@ -30,10 +30,10 @@ def _worker(connection: Connection) -> None:
             from simulation.planning.snapshot import prepare
 
             snapshot, started, backend = payload
-            received, cpu = time.monotonic(), time.process_time()
+            received, cpu = time.perf_counter(), time.process_time()
             try:
                 data = prepare(snapshot, deadline=started + snapshot.settings.timeout)
-                prepared = time.monotonic()
+                prepared = time.perf_counter()
                 result = Backend(backend).solve(data, started=started)
                 result = replace(
                     result,
@@ -66,15 +66,15 @@ def _worker(connection: Connection) -> None:
                         status,
                         backend=backend,
                         message=f"{type(exc).__name__}: {exc}",
-                        total_seconds=time.monotonic() - started,
+                        total_seconds=time.perf_counter() - started,
                         dispatch_to_worker_seconds=received - started,
-                        prepare_seconds=time.monotonic() - received,
+                        prepare_seconds=time.perf_counter() - received,
                         worker_cpu_seconds=time.process_time() - cpu,
                         timing_stage="route_prepare",
                         timing_complete=False,
                         stage_seconds={
                             "worker_dispatch": received - started,
-                            "route_prepare": time.monotonic() - received,
+                            "route_prepare": time.perf_counter() - received,
                         },
                     ),
                 )
@@ -122,7 +122,7 @@ class SolverProcess:
         Readiness and operational calls use the same owned worker and watchdog.
         A failed generation is fully reaped before another may be created.
         """
-        started = time.monotonic()
+        started = time.perf_counter()
         startup = command == "ready"
         peak = 0
         reused = self.process is not None and self.process.is_alive()
@@ -132,7 +132,7 @@ class SolverProcess:
                         "request_id": request_id, "epoch": epoch, "policy": policy}
             self.close()
             return {**identity, "status": ("STARTUP_" if startup else "") + code, "message": message,
-                    "elapsed_seconds": time.monotonic() - started, "worker_reused": reused,
+                    "elapsed_seconds": time.perf_counter() - started, "worker_reused": reused,
                     "peak_rss_mib": peak / 1024**2, "value": None}
 
         try:
@@ -170,7 +170,7 @@ class SolverProcess:
             self.rpc_thread.start()
             monitor = psutil.Process(self.process.pid)
             while True:
-                if time.monotonic() - started > timeout:
+                if time.perf_counter() - started > timeout:
                     return failure("TIMEOUT" if startup else "HARD_TIMEOUT", "parent RPC watchdog")
                 if not self.process.is_alive():
                     return failure("WORKER_CRASH", "worker exited without matching response")
@@ -190,7 +190,7 @@ class SolverProcess:
                     self.ready_for = policy
                 elif value["status"] not in {"READY", "OK"}:
                     self.close()
-                elapsed=time.monotonic()-started
+                elapsed=time.perf_counter()-started
                 returned=value.get("value")
                 if isinstance(returned,dict) and isinstance(returned.get("plan"),Result):
                     plan=returned["plan"]
@@ -199,7 +199,7 @@ class SolverProcess:
                         worker_reused=reused,worker_peak_rss_mib=peak/1024**2,
                         parent_elapsed_seconds=elapsed,response_seconds=response,
                         stage_seconds={**plan.report.stage_seconds,"worker_response":response}))
-                return {**value, "elapsed_seconds": time.monotonic() - started,
+                return {**value, "elapsed_seconds": time.perf_counter() - started,
                         "peak_rss_mib": peak / 1024**2, "worker_reused": reused}
         except (EOFError, BrokenPipeError, OSError, psutil.Error) as exc:
             return failure("TRANSPORT_ERROR", str(exc))
@@ -215,8 +215,8 @@ class SolverProcess:
                 Report(
                     status,
                     backend=backend,
-                    total_seconds=time.monotonic() - started,
-                    parent_elapsed_seconds=time.monotonic() - started,
+                    total_seconds=time.perf_counter() - started,
+                    parent_elapsed_seconds=time.perf_counter() - started,
                     worker_reused=reused,
                     worker_peak_rss_mib=peak_rss / 1024**2,
                     timing_stage="parent_" + status.lower(),
@@ -255,7 +255,7 @@ class SolverProcess:
             self.rpc_thread.start()
             monitor = psutil.Process(self.process.pid)
             while True:
-                if time.monotonic() - started > snapshot.settings.watchdog:
+                if time.perf_counter() - started > snapshot.settings.watchdog:
                     return failure("HARD_TIMEOUT", "total decision watchdog, including cold start")
                 if not self.process.is_alive():
                     return failure("ERROR", "native worker exited without a result")
@@ -268,7 +268,7 @@ class SolverProcess:
                     if not ok or not isinstance(value, Result):
                         return failure("ERROR", f"worker transport: {value}")
                     self.rpc_thread.join(timeout=0.1)
-                    elapsed = time.monotonic() - started
+                    elapsed = time.perf_counter() - started
                     return replace(
                         value,
                         report=replace(

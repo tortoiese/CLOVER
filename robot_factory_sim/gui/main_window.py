@@ -255,7 +255,7 @@ class MainWindow(QMainWindow):
         self._sync_combo(self._mode, state.mode)
         sequence = state.diagnostics.get("command_seq", 0)
         if sequence and sequence != self._last_response_seq:
-            self.gui_response_ms.append((time.monotonic() - state.diagnostics["command_sent"]) * 1000)
+            self.gui_response_ms.append((time.perf_counter() - state.diagnostics["command_sent"]) * 1000)
             self._last_response_seq = sequence
 
     def _edit_planning(self) -> None:

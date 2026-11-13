@@ -188,7 +188,7 @@ def test_unowned_certificate_rejected_by_worker_backend_and_independent_validato
     assert errors and "matching actual hold" in errors[0]
     worker = SolverProcess()
     try:
-        rejected = worker.solve(invalid, time.monotonic())
+        rejected = worker.solve(invalid, time.perf_counter())
         assert rejected.report.status == "MODEL_INVALID", rejected.report
     finally:
         worker.close()

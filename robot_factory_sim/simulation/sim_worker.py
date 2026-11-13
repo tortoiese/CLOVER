@@ -76,7 +76,7 @@ class _SimController(QObject):
         self._timer = QTimer(self)
         self._timer.setInterval(config.WORKER_LOOP_INTERVAL_MS)
         self._timer.timeout.connect(self._tick)
-        self._last_wall = time.monotonic()
+        self._last_wall = time.perf_counter()
         self._last_emit = 0.0
         self._last_flush = 0.0
 
@@ -85,7 +85,7 @@ class _SimController(QObject):
     # ------------------------------------------------------------------
     def start_loop(self) -> None:
         """루프 타이머를 시작하고 초기 상태를 내보낸다."""
-        self._last_wall = time.monotonic()
+        self._last_wall = time.perf_counter()
         self._timer.start()
         self._emit_state()
 
@@ -140,7 +140,7 @@ class _SimController(QObject):
     @Slot()
     def _tick(self) -> None:
         """타이머 1회: 설정 반영 → 시간 진행 → 주문 동기화 → 상태 emit."""
-        now = time.monotonic()
+        now = time.perf_counter()
         dt = min(now - self._last_wall, config.MAX_WALL_STEP)
         self._last_wall = now
         try:
@@ -276,7 +276,7 @@ class _SimController(QObject):
         if sent is not None:
             self._command_sent = float(sent)
             self._command_sequence += 1
-            self._command_latency.append((time.monotonic() - self._command_sent) * 1000)
+            self._command_latency.append((time.perf_counter() - self._command_sent) * 1000)
         try:
             self._dispatch_command(kind, params)
         except Exception as exc:  # noqa: BLE001 — 잘못된 명령이 워커를 죽이지 않도록
@@ -289,7 +289,7 @@ class _SimController(QObject):
         engine = self.primary
         match kind:
             case ActionKind.START:
-                self._last_wall = time.monotonic()
+                self._last_wall = time.perf_counter()
                 self._set_running(True)
             case ActionKind.PAUSE:
                 self._set_running(False)
@@ -396,7 +396,7 @@ class SimWorker(QThread):
             params: 파라미터
         """
         payload = dict(params or {})
-        payload["_sent_monotonic"] = time.monotonic()
+        payload["_sent_monotonic"] = time.perf_counter()
         with self._lock:
             if not self._ready:
                 self._backlog.append((kind, payload))

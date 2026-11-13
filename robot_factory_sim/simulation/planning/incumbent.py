@@ -52,7 +52,7 @@ def work_hint(model: Model, deadline: float) -> Hint:
     settings = model.input.snapshot.settings
     if not settings.warm_start:
         return best
-    deadline = min(deadline, time.monotonic() + settings.warm_start_seconds)
+    deadline = min(deadline, time.perf_counter() + settings.warm_start_seconds)
     robots = {r.id: r for r in model.input.snapshot.robots if r.available}
     origins = {rid: initial_location(robot, model.input) for rid, robot in robots.items()}
     actor_sinks: dict[str, list[int]] = defaultdict(list)
@@ -61,7 +61,7 @@ def work_hint(model: Model, deadline: float) -> Hint:
     candidates: dict[str, list[int]] = defaultdict(list)
     actor_arcs: dict[str, list[int]] = defaultdict(list)
     for v, arc in enumerate(model.arcs):
-        if v % 128 == 0 and time.monotonic() >= deadline:
+        if v % 128 == 0 and time.perf_counter() >= deadline:
             return Hint(best.values, best.source, best.trials, True)
         actor_arcs[arc.robot].append(v)
         if arc.kind == "service" and arc.origin == origins[arc.robot]:
@@ -82,7 +82,7 @@ def work_hint(model: Model, deadline: float) -> Hint:
         for rid in order:
             robot = robots[rid]
             for v in candidates[rid]:
-                if time.monotonic() >= deadline:
+                if time.perf_counter() >= deadline:
                     break
                 arc = model.arcs[v]
                 required = model.return_energy.get((rid, arc.destination))
@@ -135,6 +135,6 @@ def work_hint(model: Model, deadline: float) -> Hint:
         if score(candidate) < score(best.values):
             best = Hint(candidate, "WORK_WARM_START", best.trials)
         best = Hint(best.values, best.source, best.trials + 1)
-        if time.monotonic() >= deadline:
+        if time.perf_counter() >= deadline:
             return Hint(best.values, best.source, best.trials, True)
     return best

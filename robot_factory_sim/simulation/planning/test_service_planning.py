@@ -169,10 +169,10 @@ def test_real_worker_wall_and_memory_limits_reap_child() -> None:
     engine = joint()
     worker = SolverProcess()
     tiny = Settings(horizon=20, step=2, timeout=0.001, watchdog=0.01)
-    result = worker.solve(capture(engine, tiny, "timeout"), time.monotonic())
+    result = worker.solve(capture(engine, tiny, "timeout"), time.perf_counter())
     assert result.report.status == "HARD_TIMEOUT" and worker.process is None
     small = Settings(horizon=20, step=2, timeout=2, watchdog=4, memory_limit_mib=1)
-    result = worker.solve(capture(engine, small, "memory"), time.monotonic())
+    result = worker.solve(capture(engine, small, "memory"), time.perf_counter())
     assert result.report.status == "MEMORY_LIMIT" and worker.process is None
     worker.close()
     engine.close()
@@ -358,8 +358,8 @@ def test_watchdog_interrupts_blocked_large_ipc_send(monkeypatch: pytest.MonkeyPa
     snapshot = replace(snapshot, factory_json=" " * (1024 * 1024) + snapshot.factory_json)
     monkeypatch.setattr(process_module, "_worker", stalled_worker)
     worker = SolverProcess()
-    started = time.monotonic()
+    started = time.perf_counter()
     result = worker.solve(snapshot, started)
-    assert result.report.status == "HARD_TIMEOUT" and time.monotonic() - started < 3
+    assert result.report.status == "HARD_TIMEOUT" and time.perf_counter() - started < 3
     assert worker.process is None and worker.rpc_thread is None
     engine.close()

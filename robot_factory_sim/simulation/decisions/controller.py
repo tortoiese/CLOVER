@@ -79,7 +79,7 @@ class DecisionScheduler(BaseScheduler):
         self.fallbacks: Counter[str] = Counter()
         self.next_plan = 0.0
         self.signature: Any = None
-        self.clock = time.monotonic
+        self.clock = time.perf_counter
         if self.settings.startup_mode == "eager":
             self.pending_dispatch = True
             self.queued_at = engine.now
@@ -302,7 +302,7 @@ class DecisionScheduler(BaseScheduler):
                         self.name,
                         row["token"],
                         self.policy_state,
-                        deadline=time.monotonic() + self.settings.end_to_end_soft_deadline_seconds - spent,
+                        deadline=time.perf_counter() + self.settings.end_to_end_soft_deadline_seconds - spent,
                     )
                     snapshot = None
                     if self.name in ALL_RH_BACKENDS and dispatch and engine.pending_tasks:

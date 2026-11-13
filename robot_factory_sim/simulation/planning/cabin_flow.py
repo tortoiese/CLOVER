@@ -75,7 +75,7 @@ def add_cabin_flow(model: Model, deadline: float | None = None) -> None:
             raise ValueError("BUILD_LIMIT: cabin state limit exceeded")
         for floor in sorted(positions):
             for tick in range(terminal):
-                if tick % 128 == 0 and deadline is not None and time.monotonic() >= deadline:
+                if tick % 128 == 0 and deadline is not None and time.perf_counter() >= deadline:
                     raise TimeoutError("cabin flow building exhausted decision budget")
                 v = model.variable(f"cabin_idle:{cid}:{floor}:{tick}", 0, 1)
                 model.cabin_waits[cid, floor, tick] = v

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 import pytest
@@ -113,3 +114,29 @@ def test_recorded_clock_replay_and_trailing_phase_rejection() -> None:
     env.process(controller())
     env.run()
     assert env.now == 0.6 and ledger.records == records
+
+
+def test_short_phase_survives_coarse_monotonic_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Windows 3.11's coarse clock must not turn real short work into zero."""
+    from simulation.planning.profiling import PhaseTimer
+    samples = iter((100.0, 100.00001, 100.00002))
+    monkeypatch.setattr(time, "monotonic", lambda: 0.0)
+    monkeypatch.setattr(time, "perf_counter", lambda: next(samples))
+    timer = PhaseTimer()
+    timer.start("short_stage")
+    timer.stop()
+    assert timer.snapshot()["short_stage"] == pytest.approx(.00001)
+
+
+def test_sub_tick_publication_overrun_is_detected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Twenty microseconds cannot fit a one-microsecond prepaid allowance."""
+    samples = iter((100.0, 100.00002))
+    monkeypatch.setattr(time, "monotonic", lambda: 0.0)
+    monkeypatch.setattr(time, "perf_counter", lambda: next(samples))
+    env = simpy.Environment()
+    ledger = DelayLedger(env, .000001)
+    env.process(ledger.publish_process(lambda: None))
+    env.run()
+    assert not ledger.coverage_ok
+    assert ledger.records[0]["wall_seconds"] == pytest.approx(.00002)
+    assert env.now == pytest.approx(.000001)
