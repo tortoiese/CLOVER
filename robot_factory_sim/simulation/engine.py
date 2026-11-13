@@ -133,6 +133,7 @@ class SimulationEngine:
         replay_decisions: list[dict[str, Any]] | None = None,
         decision_settings: dict[str, Any] | None = None,
         replay_controls: list[dict[str, Any]] | None = None,
+        roam: bool = False,
     ) -> None:
         """엔진을 생성하고 SimPy 프로세스를 등록한다.
 
@@ -142,6 +143,7 @@ class SimulationEngine:
             seed: 난수 시드 (두 엔진이 같은 값을 쓰면 같은 작업 부하가 생성된다)
             epoch: sim-time 0에 해당하는 실제 시각 (주문 납기 환산용)
             params: 초기 파라미터 (task_rate, min_charge_mode)
+            roam: True면 다층 공장에서 로봇을 모든 층에 배치하고 대기 시 층을 순회시킨다 (GUI 시각화용)
         """
         validate_cabins(factory)
         self.plant = plant or PlantSettings(config.WORK_DRAIN_PER_SEC, config.FAULT_RECOVERY_TIME,
@@ -161,6 +163,7 @@ class SimulationEngine:
         self.execution_epoch = execution_epoch or uuid.uuid4().hex
         self.ledger = EventLedger(lambda: self.now, event_sink)
         self.comparison_seed = comparison_seed
+        self.roam = roam
         self._comparison_counts: dict[str, int] = {}
         self.mode = mode
         self.scheduler: BaseScheduler = create_scheduler(mode) if decision_settings is None else None
@@ -296,7 +299,9 @@ class SimulationEngine:
     def _spawn_point(self, index: int) -> tuple[Point, int]:
         """신규 로봇 배치 위치와 층 (가장 낮은 층의 충전소를 번갈아 가며 그 근처 = 1층 입고 도크)."""
         chargers = [c for c in self.chargers.values() if c.active]
-        if chargers:
+        if chargers and self.roam and self.factory.floor_count > 1:
+            chargers.sort(key=lambda c: (c.cfg.floor, c.id))  # 다층: 모든 층의 충전소에 나눠 배치
+        elif chargers:
             dock = min(c.cfg.floor for c in chargers)
             chargers = [c for c in chargers if c.cfg.floor == dock]
         floor = 1
@@ -375,6 +380,27 @@ class SimulationEngine:
             ID 리스트
         """
         return [sid for sid, s in self.stations.items() if self.station_available(sid) and s.dedicated_order is None]
+
+    def roam_target(self, robot: Robot) -> str | None:
+        """대기 로봇의 순회 목적지: 현재 층의 다음 층에 있는 설비(스테이션·충전소) 하나.
+
+        Args:
+            robot: 순회할 로봇
+
+        Returns:
+            설비 ID 또는 None
+        """
+        facilities = [(fid, self.path_graph.facility_floor(fid)) for fid in
+                      [*(sid for sid, s in self.stations.items() if s.active),
+                       *(cid for cid, c in self.chargers.items() if c.active)]]
+        floors = sorted({floor for _, floor in facilities if floor is not None})
+        if len(floors) < 2:
+            return None
+        later = [f for f in floors if f > robot.floor]
+        floor = later[0] if later else floors[0]
+        candidates = [fid for fid, f in facilities if f == floor]
+        robot.roam_count += 1
+        return candidates[(robot.color_index + robot.roam_count) % len(candidates)]
 
     def background_task_count(self) -> int:
         """대기 중인 일반 작업 수.
@@ -1352,6 +1378,7 @@ class SimulationEngine:
         kpis = self.metrics.compute(self.now, usages)
         kpis["completed_units"] = float(self.metrics.total_completed)
         kpis["distance_m"] = sum(r.distance_m for r in robots)
+        kpis["energy_units"] = sum(r.travel_energy_units + r.work_energy_units for r in robots)
         return kpis
 
     def robot_snapshots(self) -> list[RobotSnapshot]:

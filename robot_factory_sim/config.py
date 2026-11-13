@@ -86,6 +86,7 @@ DEFAULT_TASK_RATE: float = 0.12         # 포아송 λ (tasks / sim-sec)
 TASK_RATE_MIN: float = 0.01
 TASK_RATE_MAX: float = 2.0
 MAX_BACKGROUND_TASKS: int = 40
+ROAM_IDLE_SEC: float = 3.0               # 다층 공장에서 대기 로봇이 이 시간 동안 일이 없으면 다른 층으로 순회 이동 (sim-sec)
 ORDER_PIPELINE_PER_ROBOT: int = 2       # 주문당 동시 진행 작업 수 (로봇 1대당)
 
 CHARGE_STEP: float = 1.0                # 충전 루프 단위 (sim-sec)
@@ -131,7 +132,8 @@ WATCHER_IGNORED_TABLES: frozenset[str] = frozenset({"production_events", "config
 # ---------------------------------------------------------------------------
 WH_PER_M: float = 0.133            # 소비효율 e (Wh/m) = 배터리용량 ÷ 완충 주행거리
 POWER_PRICE_PER_WH: float = 0.13   # 전력 단가 (원/Wh = 130원/kWh)
-OTHER_COST_KRW: float = 60000.0    # 기타 비용 (AI(API) + 로봇 운영 등, 원)
+OTHER_COST_KRW: float = 6000.0     # 기타 비용 (AI(API) + 로봇 운영 등, 원/시간 — 경과 시간에 비례해 누적)
+WH_PER_BATTERY_UNIT: float = 5.0   # 로봇 배터리 1단위(=1%) 소모당 전력량 (Wh). 실제 소모 배터리로 전력 비용을 계산한다
 REVENUE_PER_UNIT_KRW: float = 2000.0  # 완료 생산 1건당 매출/가치 (원)
 # RAG: 기본 로컬 모드. OpenAI 모드는 명시적인 외부 요청 허용이 필요하다.
 RAG_ENABLED: bool = os.environ.get("CLOVER_RAG_ENABLED", "0") == "1"

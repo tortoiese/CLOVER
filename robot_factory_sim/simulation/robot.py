@@ -94,6 +94,7 @@ class Robot:
         self.retired_at: float | None = None
         self.charge_sessions = 0
         self.tasks_done = 0
+        self.roam_count = 0
         self.distance_m = 0.0
         self.travel_energy_units = 0.0
         self.work_energy_units = 0.0
@@ -411,6 +412,13 @@ class Robot:
                 if self.current_task is None:
                     self._set_state(RobotState.IDLE)
                     self._wake = self.env.event()
+                    if self.engine.roam and self.engine.factory.floor_count > 1:
+                        wake = self._wake
+                        yield wake | self.env.timeout(config.ROAM_IDLE_SEC)
+                        self._wake = None
+                        if not wake.triggered:
+                            yield from self._roam_process()
+                        continue
                     yield self._wake
                     self._wake = None
                     continue
@@ -778,6 +786,17 @@ class Robot:
         self.target_id = None
         self.tasks_done += 1
         engine.complete_task(task, self)
+
+    def _roam_process(self) -> Generator[Any, Any, None]:
+        """일이 없는 로봇이 다음 층의 설비로 순회 이동한다 (엘리베이터 포함)."""
+        engine = self.engine
+        facility_id = engine.roam_target(self)
+        route = engine.path_graph.route_to_facility(self.x, self.y, facility_id, self.floor) if facility_id else None
+        if route is None:
+            return
+        self._set_state(RobotState.MOVING)
+        yield from self._travel_route(route)
+        self._clear_route()
 
     def _charge_process(self) -> Generator[Any, Any, None]:
         """충전소로 이동하여 목표 잔량까지 충전한다."""
