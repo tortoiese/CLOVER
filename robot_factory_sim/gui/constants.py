@@ -16,17 +16,17 @@ TRAFFIC_IDLE_WIDTH: float = 1.0
 # ---------------------------------------------------------------------------
 # 테마 색상
 # ---------------------------------------------------------------------------
-BG: Final[str] = "#1a1a2e"
-PANEL: Final[str] = "#16213e"
-ACCENT: Final[str] = "#0f3460"
-HIGHLIGHT: Final[str] = "#4f8cff"
-TEXT: Final[str] = "#e6e9f5"
-TEXT_MUTED: Final[str] = "#8b93b5"
-GRID: Final[str] = "#22304f"
-FLOOR: Final[str] = "#121a33"
+BG: Final[str] = "#151a1e"
+PANEL: Final[str] = "#20272b"
+ACCENT: Final[str] = "#293632"
+HIGHLIGHT: Final[str] = "#73b8a3"
+TEXT: Final[str] = "#eef2f1"
+TEXT_MUTED: Final[str] = "#acb9b8"
+GRID: Final[str] = "#343e43"
+FLOOR: Final[str] = "#171d20"
 CRITICAL: Final[str] = "#e74c3c"
 WARNING: Final[str] = "#f39c12"
-SUCCESS: Final[str] = "#2ecc71"
+SUCCESS: Final[str] = "#8bcda3"
 INFO: Final[str] = "#3498db"
 ELEVATOR: Final[str] = "#5dade2"
 
@@ -38,7 +38,7 @@ SEVERITY_COLORS: Final[dict[str, str]] = {
 
 ROBOT_STATE_COLORS: Final[dict[str, str]] = {
     RobotState.MOVING: "#3498db",
-    RobotState.WORKING: "#2ecc71",
+    RobotState.WORKING: "#8bcda3",
     RobotState.WAITING: "#27ae60",
     RobotState.CHARGING: "#f1c40f",
     RobotState.CHARGE_WAIT: "#d4ac0d",
@@ -71,11 +71,11 @@ OBSTACLE_COLORS: Final[dict[str, str]] = {
 # ---------------------------------------------------------------------------
 # 3D 건물 뷰 (BuildingView)
 # ---------------------------------------------------------------------------
-BUILDING_SLAB: Final[str] = "#24365f"          # 층 바닥판
-BUILDING_SLAB_EDGE: Final[str] = "#3d5a99"
-BUILDING_SLAB_SIDE: Final[str] = "#0f1a38"
-BUILDING_BG_TOP: Final[str] = "#1b2646"
-BUILDING_BG_BOTTOM: Final[str] = "#10172e"
+BUILDING_SLAB: Final[str] = "#2e4144"          # 층 바닥판
+BUILDING_SLAB_EDGE: Final[str] = "#527075"
+BUILDING_SLAB_SIDE: Final[str] = "#18282c"
+BUILDING_BG_TOP: Final[str] = "#263035"
+BUILDING_BG_BOTTOM: Final[str] = "#192126"
 BUILDING_WALL_HEIGHT: Final[float] = 26.0
 BUILDING_STATION_HEIGHT: Final[float] = 24.0
 BUILDING_FLOOR_GAP: Final[float] = 340.0       # 층 간격 (월드 단위)
@@ -102,9 +102,15 @@ TIMELINE_STYLE: Final[dict[str, tuple[int, str, str, str]]] = {
     TimelineKind.INFO: (0, TEXT_MUTED, "d", "ℹ 정보"),
 }
 
-ENGINE_COLORS: Final[dict[str, str]] = {"optimized": HIGHLIGHT, "baseline": "#9aa3c7",
-    "assignment_milp_legacy": "#f9b572", "rh_milp_grid": "#67d6e8",
-    "rh_cpsat_linear": "#d890e8", "rh_cpsat_interval": "#b7a6ed", "rh_cpsat_native": "#f0a5c4"}
+ENGINE_COLORS: Final[dict[str, str]] = {
+    "optimized": HIGHLIGHT,
+    "baseline": "#9baab5",
+    "assignment_milp_legacy": "#f9b572",
+    "rh_milp_grid": "#67d6e8",
+    "rh_cpsat_linear": "#d890e8",
+    "rh_cpsat_interval": "#b7a6ed",
+    "rh_cpsat_native": "#f0a5c4",
+}
 
 # ---------------------------------------------------------------------------
 # 크기
@@ -117,22 +123,31 @@ PATH_NODE_RADIUS: Final[float] = 3.0
 EDITOR_NODE_RADIUS: Final[float] = 6.0
 ROUTE_DASH: Final[tuple[float, float]] = (4.0, 4.0)
 
-KPI_COLUMNS: Final[int] = 4
+KPI_COLUMNS: Final[int] = 3
+KPI_DETAILS_HEIGHT: Final[int] = 176
 CHART_REFRESH_MS: Final[int] = 500
 ANIMATION_INTERVAL_MS: Final[int] = 80
 BLINK_INTERVAL_TICKS: Final[int] = 5
-BANNER_HEIGHT: Final[int] = 58
-BANNER_ANIMATION_MS: Final[int] = 280
+WINDOW_PREFERRED_SIZE: Final[tuple[int, int]] = (1680, 960)
+WINDOW_FRAME_MARGIN: Final[tuple[int, int]] = (24, 48)
+WORKSPACE_PANE_SIZES: Final[tuple[int, int]] = (760, 480)
+WORKSPACE_MIN_FACTORY_WIDTH: Final[int] = 300
+WORKSPACE_MIN_DASHBOARD_WIDTH: Final[int] = 360
+WORKSPACE_HANDLE_WIDTH: Final[int] = 8
+WORKSPACE_STATUS_HEIGHT: Final[int] = 48
+CONSOLE_MAX_WIDTH: Final[int] = 900
 BANNER_AUTO_HIDE_MS: Final[int] = 20000
 CONFIG_RELOAD_DEBOUNCE_MS: Final[int] = 300
 ORDER_DIALOG_REFRESH_MS: Final[int] = 2000
 CHAT_MAX_MESSAGES: Final[int] = 300
+AGENT_STACK_BYTES: Final[int] = 4 * 1024 * 1024
 DEMO_ORDER_QUANTITY: Final[int] = 60       # 엘리베이터 시연 주문 수량
 DEMO_DEADLINE_SEC: Final[float] = 1800.0   # 시연 주문 납기 (sim-sec)
 
-HISTORY_WINDOW: Final[float] = 1800.0     # 그래프 표시 구간 (sim-sec)
-GANTT_WINDOW: Final[float] = 300.0        # 간트 표시 구간 (sim-sec)
+HISTORY_MAX_POINTS: Final[int] = 1200
 HISTORY_SAMPLE_INTERVAL: Final[float] = 2.0  # 히스토리 샘플 간격 (sim-sec)
+THROUGHPUT_START_RANGE: Final[float] = 5.0  # 초기 축의 최소 범위 (분, 건/분)
+HISTORY_START_MINUTES: Final[float] = 5.0
 
 LOW_BATTERY: Final[float] = 30.0
 MID_BATTERY: Final[float] = 60.0
@@ -141,7 +156,9 @@ MID_BATTERY: Final[float] = 60.0
 # 문구
 # ---------------------------------------------------------------------------
 APP_TITLE: Final[str] = "Robot Factory Simulator — CLOVER"
-CONSOLE_TITLE: Final[str] = "🤖 AI 관제 콘솔"
+SIMULATION_TAB_TITLE: Final[str] = "시뮬레이션"
+CONSOLE_TITLE: Final[str] = "관제 콘솔"
+CONSOLE_START_HINT: Final[str] = "상단의 [시작]을 누르면 시뮬레이션과 주문 감시를 시작합니다."
 QUICK_COMMANDS: Final[tuple[tuple[str, str], ...]] = (
     ("현재 상태", "현재 상태 알려줘"),
     ("효율 분석", "현재 효율 분석해줘"),
@@ -151,7 +168,7 @@ QUICK_COMMANDS: Final[tuple[tuple[str, str], ...]] = (
     ("긴급 주문", "긴급 주문 넣어줘: 제품B 150개, 1시간 내"),
 )
 CHART_TABS: Final[tuple[str, ...]] = (
-    "Throughput", "로봇 타임라인", "대기열", "배터리", "KPI 레이더", "주문 진행", "이벤트",
+    "처리량", "로봇 타임라인", "대기열", "배터리", "KPI 레이더", "주문 진행", "이벤트",
 )
 PALETTE_ITEMS: Final[tuple[tuple[str, str], ...]] = (
     ("station", "🏭 작업 스테이션"),

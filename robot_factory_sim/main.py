@@ -52,12 +52,10 @@ def main() -> int:
     pg.setConfigOptions(antialias=True, background=c.PANEL, foreground=c.TEXT)
 
     service = FactoryService(config.DB_PATH)
-    seeded = service.ensure_database()
+    service.ensure_database()
     window = MainWindow(service, create_agent(
         lambda conditions, context: run_comparison(
             conditions, context, lambda: QThread.currentThread().isInterruptionRequested())))
-    if seeded:
-        window.statusBar().showMessage("factory_config.db 생성 — 기본 공장 구성(스테이션 5, 충전소 2, 로봇 5)을 넣었습니다.", 8000)
     window.show()
     return app.exec()
 

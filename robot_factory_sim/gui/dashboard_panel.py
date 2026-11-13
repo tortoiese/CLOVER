@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import math
-from collections import deque
 from dataclasses import dataclass
 
 import numpy as np
@@ -16,26 +15,32 @@ from PySide6.QtGui import QColor, QFont, QPen, QPolygonF
 from PySide6.QtWidgets import (
     QGraphicsPolygonItem,
     QGridLayout,
+    QHeaderView,
     QLabel,
     QPlainTextEdit,
+    QScrollArea,
     QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
 from gui import constants as c
+from gui.widgets.elided_label import ElidedLabel
 from gui.widgets.kpi_card import KpiCard
 from gui.widgets.roi_panel import RoiPanel
-from simulation.state import SimState
+from simulation.state import SimState, TimelineEvent
 from utils.event_types import OrderStatus, RobotState, SchedulerModeLabel
 from utils.metrics import KPI_DEFINITIONS, KpiDefinition
 
-MAX_SAMPLES: int = int(c.HISTORY_WINDOW / c.HISTORY_SAMPLE_INTERVAL)
 GANTT_BAR_HEIGHT: float = 0.7
 ORDER_BAR_HEIGHT: float = 0.55
 RADAR_RINGS: tuple[float, ...] = (0.25, 0.5, 0.75, 1.0)
 RADAR_LABEL_RADIUS: float = 1.22
+FEATURED_METRICS: tuple[str, ...] = ("throughput", "avg_wait")
 PRIORITY_COLORS: dict[str, str] = {"critical": c.CRITICAL, "high": c.WARNING, "normal": c.INFO, "low": c.TEXT_MUTED}
 
 
@@ -47,6 +52,20 @@ class GanttSegment:
     end: float
     state: str
     emergency: bool
+
+
+@dataclass
+class HistorySample:
+    """같은 시각에 수집한 그래프 원천 데이터."""
+
+    minute: float
+    throughput: dict[str, float]
+    queues: dict[str, int]
+    batteries: dict[str, float]
+
+
+LIVE_METRICS = (*KPI_DEFINITIONS, KpiDefinition("completed_units", "완료 작업", "건", True, 0),
+                KpiDefinition("distance_m", "로봇 이동거리", "m", False))
 
 
 def radar_score(definition: KpiDefinition, value: float, other: float) -> float:
@@ -71,7 +90,7 @@ def radar_score(definition: KpiDefinition, value: float, other: float) -> float:
     return best / value if value > 1e-9 else 1.0
 
 
-def make_plot(parent: QWidget, x_label: str = "sim-time (분)", y_label: str = "") -> pg.PlotWidget:
+def make_plot(parent: QWidget, x_label: str = "시뮬레이션 시간 (분)", y_label: str = "") -> pg.PlotWidget:
     """테마를 적용한 PlotWidget.
 
     Args:
@@ -86,13 +105,17 @@ def make_plot(parent: QWidget, x_label: str = "sim-time (분)", y_label: str = "
     plot.setBackground(c.PANEL)
     plot.showGrid(x=True, y=True, alpha=0.15)
     plot.setMenuEnabled(False)
+    plot.setMouseEnabled(x=False, y=False)
+    plot.hideButtons()
     if x_label:
         plot.setLabel("bottom", x_label)
     if y_label:
         plot.setLabel("left", y_label)
     for axis in ("left", "bottom"):
-        plot.getAxis(axis).setPen(pg.mkPen(c.GRID))
-        plot.getAxis(axis).setTextPen(pg.mkPen(c.TEXT_MUTED))
+        scale = plot.getAxis(axis)
+        scale.setPen(pg.mkPen(c.GRID))
+        scale.setTextPen(pg.mkPen(c.TEXT_MUTED))
+        scale.enableAutoSIPrefix(False)
     return plot
 
 
@@ -119,28 +142,56 @@ class DashboardPanel(QWidget):
         kpi_box = QWidget(splitter)
         kpi_layout = QVBoxLayout(kpi_box)
         kpi_layout.setContentsMargins(0, 0, 0, 0)
-        self._kpi_title = QLabel("📊 성능 KPI", kpi_box)
-        self._kpi_title.setObjectName("PanelTitle")
-        kpi_layout.addWidget(self._kpi_title)
-        grid = QGridLayout()
-        grid.setSpacing(6)
+        title = QLabel("운영 성과", kpi_box)
+        title.setObjectName("PanelTitle")
+        kpi_layout.addWidget(title)
+        self._comparison_caption = ElidedLabel("표시 정책 확인 중", kpi_box)
+        self._comparison_caption.setObjectName("Muted")
+        kpi_layout.addWidget(self._comparison_caption)
+
+        featured = tuple(definition for definition in KPI_DEFINITIONS if definition.key in FEATURED_METRICS)
+        details = tuple(definition for definition in KPI_DEFINITIONS if definition.key not in FEATURED_METRICS)
         self._cards: dict[str, KpiCard] = {}
-        for index, definition in enumerate(KPI_DEFINITIONS):
-            card = KpiCard(definition, kpi_box)
-            grid.addWidget(card, index // c.KPI_COLUMNS, index % c.KPI_COLUMNS)
-            self._cards[definition.key] = card
-        kpi_layout.addLayout(grid)
+        kpi_layout.addWidget(self._build_metrics(kpi_box, featured, len(FEATURED_METRICS), featured=True))
+        toggle = QToolButton(kpi_box)
+        toggle.setObjectName("KpiDetailsToggle")
+        toggle.setText("세부 지표")
+        toggle.setCheckable(True)
+        toggle.setArrowType(Qt.ArrowType.RightArrow)
+        toggle.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        kpi_layout.addWidget(toggle, alignment=Qt.AlignmentFlag.AlignLeft)
+        detail_scroll = QScrollArea(kpi_box)
+        detail_scroll.setObjectName("KpiDetails")
+        detail_scroll.setFixedHeight(c.KPI_DETAILS_HEIGHT)
+        detail_scroll.setWidgetResizable(True)
+        detail_panel = self._build_metrics(detail_scroll, details, c.KPI_COLUMNS)
+        detail_panel.setObjectName("KpiDetailContent")
+        detail_scroll.setWidget(detail_panel)
+        detail_scroll.hide()
+        toggle.toggled.connect(detail_scroll.setVisible)
+        toggle.toggled.connect(lambda shown: toggle.setArrowType(Qt.ArrowType.DownArrow if shown
+                                                                 else Qt.ArrowType.RightArrow))
+        kpi_layout.addWidget(detail_scroll)
         kpi_layout.addStretch(1)
 
         self._tabs = QTabWidget(splitter)
+        self._tabs.setUsesScrollButtons(True)
         self._plots = [make_plot(self._tabs) for _ in c.CHART_TABS]
         for plot, title in zip(self._plots, c.CHART_TABS, strict=True):
             self._tabs.addTab(plot, title)
         self._roi_panel = RoiPanel(self._tabs)
-        self._tabs.addTab(self._roi_panel, "💰 ROI 비교")
+        self._tabs.addTab(self._roi_panel, "ROI 비교")
         self._planning_view = QPlainTextEdit(self._tabs)
         self._planning_view.setReadOnly(True)
         self._tabs.addTab(self._planning_view, "계획·예약")
+        self._metrics = QTableWidget(len(LIVE_METRICS), 4, self._tabs)
+        self._metrics.setHorizontalHeaderLabels(("지표", "라운드로빈", "가중합", "차이"))
+        self._metrics.verticalHeader().hide()
+        self._metrics.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self._metrics.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self._metrics.setAlternatingRowColors(True)
+        self._tabs.insertTab(0, self._metrics, "지표")
+        self._tabs.setCurrentWidget(self._plots[0])
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         self._setup_plots()
@@ -151,17 +202,35 @@ class DashboardPanel(QWidget):
         self._timer.timeout.connect(self._refresh_charts)
         self._timer.start()
 
+    def _build_metrics(self, parent: QWidget, definitions: tuple[KpiDefinition, ...], columns: int,
+                       *, featured: bool = False) -> QWidget:
+        panel = QWidget(parent)
+        grid = QGridLayout(panel)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(6)
+        for column in range(columns):
+            grid.setColumnStretch(column, 1)
+        for index, definition in enumerate(definitions):
+            card = KpiCard(definition, panel, featured=featured)
+            row, column = divmod(index, columns)
+            grid.addWidget(card, row, column)
+            self._cards[definition.key] = card
+        return panel
+
     # ------------------------------------------------------------------
     # 히스토리
     # ------------------------------------------------------------------
     def _reset_history(self) -> None:
         """누적 히스토리를 비운다 (리셋 시)."""
-        self._times: deque[float] = deque(maxlen=MAX_SAMPLES)
-        self._throughput: dict[str, deque[float]] = {m: deque(maxlen=MAX_SAMPLES) for m in c.ENGINE_COLORS}
-        self._queues: deque[dict[str, int]] = deque(maxlen=MAX_SAMPLES)
-        self._battery: dict[str, deque[tuple[float, float]]] = {}
+        self._history: list[HistorySample] = []
+        self._sample_interval = c.HISTORY_SAMPLE_INTERVAL
         self._robot_colors: dict[str, int] = {}
         self._gantt: dict[str, list[GanttSegment]] = {}
+        self._active_robot_ids: set[str] = set()
+        self._events: dict[str, list[TimelineEvent]] = {}
+        self._last_events: dict[str, TimelineEvent] = {}
+        self._throughput_top = c.THROUGHPUT_START_RANGE
+        self._queue_top = 5.0
         self._last_sample = -math.inf
         self._last_time = 0.0
 
@@ -176,45 +245,62 @@ class DashboardPanel(QWidget):
         self._last_time = state.sim_time
         self._state = state
         self._update_gantt(state)
-        if state.sim_time - self._last_sample >= c.HISTORY_SAMPLE_INTERVAL:
+        self._update_events(state)
+        if state.sim_time - self._last_sample >= self._sample_interval:
             self._last_sample = state.sim_time
-            minutes = state.sim_time / 60.0
-            self._times.append(minutes)
-            for mode, values in self._throughput.items():
-                values.append(state.engine_kpis.get(mode, {}).get("throughput", math.nan))
-            self._queues.append({s.id: s.queue_length + s.pending_tasks for s in state.stations})
+            if len(self._history) >= c.HISTORY_MAX_POINTS:
+                self._history = self._history[::2]
+                self._sample_interval *= 2
+            self._history.append(HistorySample(
+                state.sim_time / 60.0,
+                {mode: state.engine_kpis.get(mode, {}).get("throughput", math.nan) for mode in c.ENGINE_COLORS},
+                {s.id: s.queue_length + s.pending_tasks for s in state.stations},
+                {robot.id: robot.battery_pct for robot in state.robots},
+            ))
             for robot in state.robots:
                 self._robot_colors[robot.id] = robot.color_index
-                series = self._battery.setdefault(robot.id, deque(maxlen=MAX_SAMPLES))
-                series.append((minutes, robot.battery_pct))
         self._update_cards(state)
 
     def _update_gantt(self, state: SimState) -> None:
         """로봇별 상태 구간을 갱신한다."""
         now = state.sim_time
-        alive = set()
+        active = {robot.id for robot in state.robots}
+        for robot_id in self._active_robot_ids - active:
+            self._gantt[robot_id][-1].end = now
         for robot in state.robots:
-            alive.add(robot.id)
             segments = self._gantt.setdefault(robot.id, [])
             emergency = bool(robot.emergency_order)
-            if segments and segments[-1].state == robot.state and segments[-1].emergency == emergency:
+            present = robot.id in self._active_robot_ids
+            if present and segments[-1].state == robot.state and segments[-1].emergency == emergency:
                 segments[-1].end = now
             else:
-                if segments:
+                if present:
                     segments[-1].end = now
                 segments.append(GanttSegment(now, now, robot.state, emergency))
-            cutoff = now - c.GANTT_WINDOW
-            while segments and segments[0].end < cutoff:
-                segments.pop(0)
-        for robot_id in [rid for rid in self._gantt if rid not in alive]:
-            del self._gantt[robot_id]
+        self._active_robot_ids = active
+
+    def _update_events(self, state: SimState) -> None:
+        """새 이벤트를 보존한다. 엔진은 기존 이벤트 객체를 스냅샷에 재사용한다."""
+        if not state.events or state.events[-1] is self._last_events.get(state.mode):
+            return
+        previous = self._last_events.get(state.mode)
+        start = next((i + 1 for i in range(len(state.events) - 1, -1, -1) if state.events[i] is previous), 0)
+        archive = self._events.setdefault(state.mode, [])
+        archive.extend(state.events[start:])
+        if len(archive) > c.HISTORY_MAX_POINTS:
+            archive[:] = archive[:-1:2] + archive[-1:]
+        self._last_events[state.mode] = state.events[-1]
 
     def _update_cards(self, state: SimState) -> None:
         """KPI 카드 갱신 (표시 엔진 vs 비교 엔진)."""
         other_mode = next((m for m in state.engine_kpis if m != state.mode), None)
         other = state.engine_kpis.get(other_mode, {}) if other_mode else {}
         label = SchedulerModeLabel.LABELS.get(other_mode or "", "비교")
-        self._kpi_title.setText(f"📊 성능 KPI — {SchedulerModeLabel.LABELS.get(state.mode, state.mode)} 모드")
+        mode = SchedulerModeLabel.LABELS.get(state.mode, state.mode)
+        caption = f"표시 {mode}"
+        if other_mode:
+            caption += f"  /  비교 {label}"
+        self._comparison_caption.setText(caption)
         for key, card in self._cards.items():
             card.set_values(state.kpis.get(key, math.nan), other.get(key, math.nan), label)
 
@@ -230,12 +316,12 @@ class DashboardPanel(QWidget):
             mode: throughput.plot([], [], pen=pg.mkPen(color, width=2), name=SchedulerModeLabel.LABELS[mode])
             for mode, color in c.ENGINE_COLORS.items()
         }
-        self._plots[1].setLabel("bottom", "sim-time (초)")
+        self._plots[1].setLabel("bottom", "시뮬레이션 시간 (초)")
         self._plots[2].setLabel("left", "대기 작업 (건)")
         self._plots[2].addLegend(offset=(10, 10))
         self._plots[3].setLabel("left", "배터리 (%)")
         self._plots[3].addLegend(offset=(10, 10))
-        self._plots[3].setYRange(0, 100)
+        self._plots[3].setYRange(0, 100, padding=0)
         radar = self._plots[4]
         radar.setAspectLocked(True)
         radar.hideAxis("left")
@@ -243,23 +329,62 @@ class DashboardPanel(QWidget):
         radar.showGrid(x=False, y=False)
         radar.addLegend(offset=(10, 10))
         self._plots[5].setLabel("bottom", "주문 경과 + 예상 소요 (분)")
-        self._plots[6].setLabel("bottom", "sim-time (분)")
+        self._plots[6].setLabel("bottom", "시뮬레이션 시간 (분)")
         self._plots[6].getAxis("left").setTicks(
             [[(row, label) for row, _, _, label in c.TIMELINE_STYLE.values()]])
-        self._plots[6].setYRange(-0.5, len(c.TIMELINE_STYLE) - 0.5)
+        self._plots[6].setYRange(-0.5, len(c.TIMELINE_STYLE) - 0.5, padding=0)
+        for index in (0, 2, 3, 6):
+            self._plots[index].setXRange(0, c.HISTORY_START_MINUTES, padding=0)
+        throughput.setYRange(0, self._throughput_top, padding=0)
+        self._plots[2].setYRange(0, self._queue_top, padding=0)
 
     def _refresh_charts(self) -> None:
         """현재 탭 차트를 다시 그린다."""
         if self._state is None or not self.isVisible():
             return
-        index = self._tabs.currentIndex()
+        if self._tabs.currentWidget() is self._metrics:
+            self._draw_metrics()
+            return
+        index = self._tabs.currentIndex() - 1
         drawers = (self._draw_throughput, self._draw_gantt, self._draw_queue, self._draw_battery, self._draw_radar,
                    self._draw_orders, self._draw_events, self._draw_roi, self._draw_planning)
         drawers[index]()
 
+    def _draw_metrics(self) -> None:
+        """라운드로빈과 현재 비교 정책의 지표를 같은 표에 표시한다."""
+        assert self._state is not None
+        baseline = self._state.engine_kpis.get("baseline", {})
+        candidate = self._state.mode if self._state.mode != "baseline" else "optimized"
+        optimized = self._state.engine_kpis.get(candidate, {})
+        self._metrics.horizontalHeaderItem(2).setText(SchedulerModeLabel.LABELS.get(candidate, candidate))
+        for row, metric in enumerate(LIVE_METRICS):
+            base = baseline.get(metric.key, math.nan)
+            opt = optimized.get(metric.key, math.nan)
+            unit = "초" if metric.unit == "s" else metric.unit
+            label = f"{metric.label} ({unit})"
+            numbers = (base, opt, opt - base)
+            values = (label, *(f"{value:,.{metric.decimals}f}" if math.isfinite(value) else "—"
+                               for value in numbers))
+            for column, value in enumerate(values):
+                item = self._metrics.item(row, column)
+                if item is None:
+                    item = QTableWidgetItem()
+                    if column:
+                        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    self._metrics.setItem(row, column, item)
+                if item.text() != value:
+                    item.setText(value)
+
+    def _set_time_axis(self, plot: pg.PlotWidget, *, seconds: bool = False) -> None:
+        """실행 시작을 고정하고 오른쪽 축을 5분 단위로 늘린다."""
+        minutes = self._last_time / 60.0
+        step = c.HISTORY_START_MINUTES
+        right = max(step, math.ceil(minutes / step) * step)
+        plot.setXRange(0, right * 60.0 if seconds else right, padding=0)
+
     def _draw_throughput(self) -> None:
         """Tab 1 — Baseline vs 최적화 처리량."""
-        x = np.fromiter(self._times, float)
+        x = np.fromiter((sample.minute for sample in self._history), float)
         for mode, curve in self._throughput_curves.items():
             active = self._state is not None and mode in self._state.engine_kpis
             curve.setVisible(active)
@@ -267,8 +392,14 @@ class DashboardPanel(QWidget):
             label = legend.getLabel(curve) if legend is not None else None
             if label is not None:
                 label.setText(SchedulerModeLabel.LABELS[mode] + ("" if active else " (미실행)"))
-            y = np.fromiter(self._throughput[mode], float)
-            curve.setData(x, np.nan_to_num(y), connect="finite")
+            y = np.fromiter((sample.throughput[mode] for sample in self._history), float)
+            curve.setData(x, y, connect="finite")
+            finite = y[np.isfinite(y)]
+            if finite.size:
+                self._throughput_top = max(self._throughput_top, math.ceil(finite.max() / 5) * 5)
+        plot = self._plots[0]
+        self._set_time_axis(plot)
+        plot.setYRange(0, self._throughput_top, padding=0)
 
     def _draw_gantt(self) -> None:
         """Tab 2 — 로봇별 상태 타임라인 (긴급배정 주황 테두리)."""
@@ -296,9 +427,7 @@ class DashboardPanel(QWidget):
                                          height=GANTT_BAR_HEIGHT + 0.15, brush=None,
                                          pen=pg.mkPen(c.EMERGENCY_COLOR, width=2)))
         plot.getAxis("left").setTicks([[(i, rid) for i, rid in enumerate(robots)]])
-        if self._state is not None:
-            plot.setXRange(max(0.0, self._state.sim_time - c.GANTT_WINDOW), max(c.GANTT_WINDOW, self._state.sim_time),
-                           padding=0.01)
+        self._set_time_axis(plot, seconds=True)
         plot.setYRange(-0.6, max(1, len(robots)) - 0.4)
         legend = "  ".join(f"<span style='color:{c.ROBOT_STATE_COLORS[s]}'>■</span> {RobotState.LABELS[s]}"
                            for s in (RobotState.MOVING, RobotState.WORKING, RobotState.CHARGING, RobotState.IDLE,
@@ -309,32 +438,35 @@ class DashboardPanel(QWidget):
         """Tab 3 — 스테이션별 대기 작업 누적 영역."""
         plot = self._plots[2]
         plot.clear()
-        if not self._queues:
+        self._set_time_axis(plot)
+        if not self._history:
+            plot.setYRange(0, self._queue_top, padding=0)
             return
-        stations = sorted({sid for sample in self._queues for sid in sample})
-        x = np.fromiter(self._times, float)
+        stations = sorted({sid for sample in self._history for sid in sample.queues})
+        x = np.fromiter((sample.minute for sample in self._history), float)
         cumulative = np.zeros(len(x))
         layers = []
         for station_id in stations:
-            cumulative = cumulative + np.array([sample.get(station_id, 0) for sample in self._queues], float)
+            cumulative = cumulative + np.array([sample.queues.get(station_id, 0) for sample in self._history], float)
             layers.append((station_id, cumulative.copy()))
         for index, (station_id, values) in reversed(list(enumerate(layers))):
             color = QColor(c.ROBOT_PALETTE[index % len(c.ROBOT_PALETTE)])
             fill = QColor(color)
             fill.setAlpha(150)
             plot.plot(x, values, pen=pg.mkPen(color, width=1), fillLevel=0, brush=fill, name=station_id)
+        self._queue_top = max(self._queue_top, math.ceil(cumulative.max() / 5) * 5)
+        plot.setYRange(0, self._queue_top, padding=0)
 
     def _draw_battery(self) -> None:
         """Tab 4 — 로봇별 배터리 추이."""
         plot = self._plots[3]
         plot.clear()
-        for robot_id in sorted(self._battery):
-            series = self._battery[robot_id]
-            if not series:
-                continue
-            x, y = zip(*series, strict=True)
+        x = np.fromiter((sample.minute for sample in self._history), float)
+        for robot_id in sorted(self._robot_colors):
+            y = np.fromiter((sample.batteries.get(robot_id, math.nan) for sample in self._history), float)
             color = c.ROBOT_PALETTE[self._robot_colors.get(robot_id, 0) % len(c.ROBOT_PALETTE)]
-            plot.plot(list(x), list(y), pen=pg.mkPen(color, width=1.5), name=robot_id)
+            plot.plot(x, y, pen=pg.mkPen(color, width=1.5), name=robot_id, connect="finite")
+        self._set_time_axis(plot)
 
     def _draw_radar(self) -> None:
         """Tab 5 — KPI 종합 비교 레이더."""
@@ -386,6 +518,9 @@ class DashboardPanel(QWidget):
         assert state is not None
         orders = state.orders
         if not orders:
+            plot.getAxis("left").setTicks([[]])
+            plot.setXRange(0, 1, padding=0)
+            plot.setYRange(0, 1, padding=0)
             text = pg.TextItem("등록된 주문 없음", color=c.TEXT_MUTED, anchor=(0.5, 0.5))
             plot.addItem(text)
             text.setPos(0.5, 0.5)
@@ -426,7 +561,7 @@ class DashboardPanel(QWidget):
         state = self._state
         assert state is not None
         spots = []
-        for event in state.events:
+        for event in self._events.get(state.mode, []):
             row, color, symbol, _ = c.TIMELINE_STYLE.get(event.kind, c.TIMELINE_STYLE["info"])
             spots.append({"pos": (event.sim_time / 60.0, row), "brush": pg.mkBrush(color), "symbol": symbol,
                           "size": 11, "pen": pg.mkPen(color), "data": event.message})
@@ -434,8 +569,7 @@ class DashboardPanel(QWidget):
                                      tip=lambda x, y, data: f"T+{x:.1f}분\n{data}")
         scatter.addPoints(spots)
         plot.addItem(scatter)
-        end = max(1.0, state.sim_time / 60.0)
-        plot.setXRange(max(0.0, end - c.HISTORY_WINDOW / 60.0), end * 1.02)
+        self._set_time_axis(plot)
 
     def _draw_roi(self) -> None:
         """Tab 8 — ROI 파라미터/숫자 요약/비교 차트. 완료 건수·이동거리만 넘기고 계산은 RoiPanel이 한다."""

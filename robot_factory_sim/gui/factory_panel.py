@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
 from gui import constants as c
 from gui.floor_stage import FloorStage
+from gui.widgets.elided_label import ElidedLabel
 from simulation.state import SimState
 from utils.event_types import OrderStatus, SchedulerModeLabel
 
@@ -27,20 +28,23 @@ class FactoryPanel(QWidget):
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(6)
 
-        self._title = QLabel("🏭 공장 시각화", self)
+        self._title = ElidedLabel("공장 보기", self)
         self._title.setObjectName("PanelTitle")
         layout.addWidget(self._title)
 
-        chips = QHBoxLayout()
-        chips.setSpacing(6)
-        self._sim_time = self._chip("Sim T+00:00:00")
+        chips = QGridLayout()
+        chips.setHorizontalSpacing(6)
+        chips.setVerticalSpacing(4)
+        self._sim_time = self._chip("가상 00:00:00")
         self._wall = self._chip("경과 00:00")
         self._orders = self._chip("활성 주문 0")
         self._mode = self._chip("모드 -")
         self._pending = self._chip("대기 작업 0")
-        for chip in (self._sim_time, self._wall, self._orders, self._pending, self._mode):
-            chips.addWidget(chip)
-        chips.addStretch(1)
+        for column, chip in enumerate((self._sim_time, self._wall, self._mode)):
+            chips.addWidget(chip, 0, column)
+            chips.setColumnStretch(column, 1)
+        chips.addWidget(self._orders, 1, 0)
+        chips.addWidget(self._pending, 1, 1)
         layout.addLayout(chips)
         self._traffic = QLabel("통행 대기 0대 · 병목 0곳", self)
         self._traffic.setObjectName("Muted")
@@ -55,9 +59,9 @@ class FactoryPanel(QWidget):
         legend.setWordWrap(True)
         layout.addWidget(legend)
 
-    def _chip(self, text: str) -> QLabel:
+    def _chip(self, text: str) -> ElidedLabel:
         """정보 칩 라벨."""
-        label = QLabel(text, self)
+        label = ElidedLabel(text, self)
         label.setObjectName("InfoChip")
         return label
 
@@ -77,16 +81,16 @@ class FactoryPanel(QWidget):
             state: 시뮬레이션 상태
         """
         floors = state.layout.floor_count
-        self._title.setText(f"🏭 공장 시각화 — {state.layout.profile.factory_name}"
+        self._title.setText(f"공장 보기 · {state.layout.profile.factory_name}"
                             + (f" ({floors}층)" if floors > 1 else ""))
         seconds = int(state.sim_time)
-        self._sim_time.setText(f"Sim T+{seconds // 3600:02d}:{seconds % 3600 // 60:02d}:{seconds % 60:02d}")
+        self._sim_time.setText(f"가상 {seconds // 3600:02d}:{seconds % 3600 // 60:02d}:{seconds % 60:02d}")
         wall = int(state.wall_elapsed)
         self._wall.setText(f"경과 {wall // 60:02d}:{wall % 60:02d} · {state.speed}x")
         active = sum(1 for o in state.orders if o.status in OrderStatus.ACTIVE)
         self._orders.setText(f"활성 주문 {active}")
         self._pending.setText(f"대기 작업 {state.pending_tasks}")
-        self._mode.setText(f"모드 {SchedulerModeLabel.LABELS.get(state.mode, state.mode)}")
+        mode = SchedulerModeLabel.LABELS.get(state.mode, state.mode)
         traffic_waiting = sum(bool(robot.wait_reason) for robot in state.robots)
         bottlenecks = sum(item.waiting > 0 for item in state.traffic)
         oldest = max((robot.wait_seconds for robot in state.robots if robot.wait_reason), default=0.0)
@@ -97,11 +101,15 @@ class FactoryPanel(QWidget):
             planning = state.planning[state.mode]
             report = planning.get("report") or {}
             scope = "교통·캐빈 포함" if planning["scope"] == "traffic" else "작업장·충전기"
-            self._mode.setText(f"{SchedulerModeLabel.LABELS[state.mode]} · {scope} · {planning['execution_status']}")
-            self._mode.setToolTip(
-                ("작업장·충전기·통로·교차점·단일 캐빈 계획\n" if planning["scope"] == "traffic" else
-                 "작업장·충전기 계획 / 교통 자원은 실행 시 제어\n") +
+            display = f"{scope} · {mode} · {planning['execution_status']}"
+            description = ("작업장·충전기·통로·교차점·단일 캐빈 계획" if planning["scope"] == "traffic" else
+                           "작업장·충전기 계획 / 교통 자원은 실행 시 제어")
+            self._mode.set_content(
+                display,
+                f"{display}\n{description}\n"
                 f"1단계 {report.get('phase1_status', '대기')} · 2단계 {report.get('phase2_status', '대기')}\n"
                 f"계산 {report.get('total_seconds', 0):.3f}초 · 모델 {report.get('model_hash', '')[:12]}\n"
                 f"채택 {planning['accepted']} · 대체 {planning['fallbacks']} · 지연 {planning['overruns']}")
+        else:
+            self._mode.setText(f"모드 {mode}")
         self.stage.update_state(state)

@@ -138,7 +138,8 @@ class MockAgent(BaseAgent):
             (lambda m: "배속" in m or bool(SPEED_RE.search(m)) and "배" in m, self._cmd_speed),
             (lambda m: _has(m, "빈도", "생성률", "작업량") and _has(m, "높", "늘", "증가", "올려", "낮", "줄", "감소",
                                                                "내려"), self._cmd_task_rate),
-            (lambda m: _has(m, "최적화", "baseline", "베이스라인", "기존 방식", "라운드로빈") and _has(m, "모드", "전환", "바꿔"),
+            (lambda m: _has(m, "최적화", "가중합", "baseline", "베이스라인", "기존 방식", "라운드로빈")
+             and _has(m, "모드", "전환", "바꿔"),
              self._cmd_mode),
             (lambda m: "최소충전" in m or "최소 충전" in m, self._cmd_min_charge),
             (lambda m: _has(m, "효율", "kpi", "KPI", "성능", "분석"), self._cmd_efficiency),

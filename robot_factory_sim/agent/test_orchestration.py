@@ -120,6 +120,7 @@ def test_gui_actual_comparison_and_followup(tmp_path: Path) -> None:
         assert calls[0]["factory_config"] == factory.load_factory_config().to_dict()
         assert len(calls[0]["comparison_orders"]) == len(factory.list_orders(active_only=True))
         assert window._optimization._table.item(0, 1).text()
+        assert not window._optimization.isVisible()
         assert "operating_policy.md" in window._optimization._evidence.toPlainText()
         assert not window._comparison_pending
         # 저장된 결과를 재표시할 때는 재계산하지 않는다.

@@ -134,10 +134,15 @@ class ActionKind:
 class SchedulerModeLabel:
     """스케줄러 모드 표시 이름."""
 
-    LABELS: Final[dict[str, str]] = {"baseline": "Baseline", "optimized": "최적화",
-        "assignment_milp_legacy": "배정 MILP", "rh_milp_grid": "RH MILP",
-        "rh_cpsat_linear": "RH CP-SAT 선형", "rh_cpsat_interval": "RH CP-SAT 격자 interval",
-        "rh_cpsat_native": "RH CP-SAT native"}
+    LABELS: Final[dict[str, str]] = {
+        "baseline": "라운드로빈",
+        "optimized": "가중합",
+        "assignment_milp_legacy": "배정 MILP",
+        "rh_milp_grid": "RH MILP",
+        "rh_cpsat_linear": "RH CP-SAT 선형",
+        "rh_cpsat_interval": "RH CP-SAT 격자 interval",
+        "rh_cpsat_native": "RH CP-SAT native",
+    }
 
 
 class Tables:
