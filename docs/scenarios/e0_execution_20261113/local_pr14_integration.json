@@ -1,0 +1,14 @@
+{
+  "schema": "clover-pr14-integration-local-tests-v1",
+  "source_commit": "77cbac9346e8b32d2093469bee981b025843d2e1",
+  "main_commit": "3dfb4ba3100e81599a6d9720efa8f5768ea96c39",
+  "python": "3.11",
+  "tests": 502,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "junit_sha256": "c44c29142a5a95eccfc39ac3471f12d9403fee8d89703fc4143e5a8c1859b486",
+  "unhandled_thread_warning_policy": "error",
+  "headless_roam": false,
+  "scope": "post-PR14 headless isolation, separate from earlier source audits"
+}

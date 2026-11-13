@@ -763,3 +763,9 @@ S09의 300~420초 사건을 일반 warmup600초 이전에 놓으면 교란을 �
 원격 PR #11·#12 병합 후 main `69bb83c`를 충돌 없이 기능 브랜치에 통합했고 PR #13의 base를 main으로 바꿨다. PR #13의 main 병합은 수행하지 않았다. 통합 코드 `aec9b53`는 Python3.11/3.14 전체 각각499검사, GitHub Ubuntu/macOS/Windows×두 버전의6개 조합 각각499검사를 통과했다. 최초 localhost 차단으로 실패한3검사도 보존하고 로컬 HTTP 모의 서버를 허용한 환경에서 전체 검사를 통과했다.
 
 통합 소스로 다시 준비한3조건×7정책×D0/D1의 추가42회도 모두 SUCCESS·원시 지표 재구성·replay·수요/에너지/자원 불변식·D1 coverage/해제를 통과했다. [통합42회 판정](scenarios/e0_execution_20261113/main_canary_receipt.json)과 [통합 CI](scenarios/e0_execution_20261113/ci_main_integration.json)를 분리해 보존했다. 총185+42+42=269회는 소스별 기능 검수 횟수이며 독립 반복 수가 아니다. R1의 실제 팀 입력 확정과 R2~R7의 보정·튜닝·통계·held-out 결론은 여전히 남는다.
+
+### 23.2 추가 main 3dfb4ba 통합·GUI 순회 분리
+
+작업 종료 확인 중 추가 병합된 PR #14의 main `3dfb4ba`도 충돌 없이 통합했다. GUI의 `roam=True`는 유휴 순회·초기 층 분산을 추가하므로, 고정 입력 실험 runner에는 `roam=False`를 명시했다. 무수요 다층 baseline/optimized의 이동·소비 에너지·캐빈 이동0과 replay를 검증하는2개 회귀를 추가했다. GUI의 순회 실행 및 ROI 환산 가정은 공식 headless 실험의 입력/주 지표와 구분한다.
+
+코드 `77cbac9`에서 Python3.11 전체502검사·시나리오 모듈33검사와 다층1조건×7정책×D0/D1의 추가14회 실행·원시 지표·replay·불변식 검수를 통과했다. [순회 경계14회 판정](scenarios/e0_execution_20261113/roam_canary_receipt.json)과 [로컬 검사](scenarios/e0_execution_20261113/local_pr14_integration.json)를 보존하며 교차 플랫폼 최신 판정은 PR #13 checks에서 확인한다. 총283회는 소스별 기능 검수다. E1 후보162개를 성능 실험한 것으로 세거나 R1 실제 지도·λ 확정 및 R2~R7을 완료 처리하지 않는다.

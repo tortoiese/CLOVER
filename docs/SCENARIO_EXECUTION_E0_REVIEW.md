@@ -33,7 +33,7 @@ E0 물리 실행185회는 모두 `SUCCESS`이고, 원시 로그에서 재구성�
 - D1 49회는 결정 coverage 및 process/connection/RPC thread/application process 해제를 확인했다.
 - [전체 판정·파일 해시](scenarios/e0_execution_20261113/receipt.json), [185회 관측 CSV](scenarios/e0_execution_20261113/summary.csv), [자원 노출 감사](scenarios/e0_execution_20261113/reference_exposure.json), [준비한226개 입력의 메타데이터](scenarios/e0_execution_20261113/prepared_index.json)를 보존한다. 입력 메타데이터는 E0 62+E1 후보162+충전 연장2이며 실행185회와 다른 분모다. CSV는 원시 관측 요약이며 신뢰구간·추천 표가 아니다.
 
-원시 결과·준비 입력은 로컬 `outputs/CLOVER_v3_experiments_20261113/`에 후속 검수까지 약644MB로 보존했다. Git에는 작은 판정·해시·요약만 넣었다. 원시 파일이 없는 환경에서 receipt만으로 replay가 된다고 표시하지 않는다.
+원시 결과·준비 입력은 로컬 `outputs/CLOVER_v3_experiments_20261113/`에 후속 검수까지 약0.7GB로 보존했다. Git에는 작은 판정·해시·요약만 넣었다. 원시 파일이 없는 환경에서 receipt만으로 replay가 된다고 표시하지 않는다.
 
 185회와 입력 묶음의 정확한 코드 commit은 `4f6dc5e748735318cdb4fa068b86f4e8db9b894c`, 소스 해시는 `ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30`이다. manifest의 기존 `base_commit`은 모델 계보 필드이며 이 작업의 실행 commit을 뜻하지 않는다. receipt의 commit과157개 소스 파일의 Git object 해시를 별도 대조했고 불일치는0개였다. 이후 수정 코드의 결과와 이 동결 결과를 같은 소스 실행으로 합치지 않는다.
 
@@ -63,7 +63,7 @@ S01의 사전 지정 작은 결정적 배치에서는8건 모두 완료했고 op
 
 수정 후 새 입력 묶음으로 S02 좁은 통로·S04 혼합SOC·S08 두 캐빈의3조건 ×7정책 ×D0/D1, **별도42회**를 실행했다. 입력 scenario/trace/initial 해시는 원래 조건과 같고 소스 해시만 새 코드에 연결했다. 전42회 SUCCESS·원시 지표·replay·불변식 검수를 통과했으며 D1 21회는 coverage/소유 자원 해제도 통과했다. D0 baseline3개의 물리 사건 digest도 수정 전과 같다. [사전 규약](scenarios/e0_execution_20261113/ipc_canary_protocol.json)과 [42회 판정](scenarios/e0_execution_20261113/ipc_canary_receipt.json)을 구분해 보존했다. 앞의185회 판정을 새 소스로 다시 이름 붙이지 않았다.
 
-## 최신 main 통합 검수
+## main 69bb83c 통합 검수
 
 작업 중 원격의 PR #11·#12가 병합되어 main이 `69bb83ccae87cc6fa95f89125b129d990188360c`로 바뀌었다. 해당 main을 기능 브랜치에 충돌 없이 merge했고 PR #13의 base도 main으로 변경했다. 이 작업에서 PR #13을 main에 병합한 것은 아니다.
 
@@ -78,6 +78,14 @@ S01의 사전 지정 작은 결정적 배치에서는8건 모두 완료했고 op
 | 최신 main 통합 | `aec9b53` | 42 | 원시/재생42회 일치 |
 
 총269회는 소스별 기능 검수 실행 수다. 269개의 독립 seed나 E1 본 실험으로 합치지 않는다. 마지막 통합 뒤의 판정·PRD 편집은 Python 소스를 바꾸지 않았다. 기본 optimized·휴리스틱 가중치·기본 D0는 유지한다.
+
+## 추가 PR #14 통합·headless 순회 경계
+
+최종 검사 도중 PR #14가 main `3dfb4ba3100e81599a6d9720efa8f5768ea96c39`에 병합됐다. 이 main도 충돌 없이 기능 브랜치에 통합했다. PR #14의 `roam=True`는 GUI의 유휴 로봇 순회·초기 층 분산을 위한 옵션이고 engine 기본값은False다. 고정 입력 실험은 runner에서 `roam=False`를 명시해 이 기본값에 의존하지 않도록 했다. GUI 순회를 포함한 실행은 다른 운용 조건이므로 공식 headless 결과와 구분한다. ROI의 새 환산 가정도 headless의 battery-unit 지표를 대체하지 않는다.
+
+무수요 다층 입력을 baseline/optimized로 각각 실행해 이동거리·소비 에너지·캐빈 층 이동이0이고 replay가 일치하는 회귀2개를 추가했다. 이 코드는 `77cbac9346e8b32d2093469bee981b025843d2e1`에 동결했고, Python3.11 전체 **502개**와 새 시나리오 모듈33개를 통과했다. [로컬 판정](scenarios/e0_execution_20261113/local_pr14_integration.json)에 JUnit 해시를 보존한다. Python3.14와 운영체제별 최신 자동 판정은 [PR #13 checks](https://github.com/tortoiese/CLOVER/pull/13/checks)를 참조한다.
+
+PR #14 통합 소스의 S08 두 캐빈 조건×7정책×D0/D1 **추가14회**를 실행했고, 전부 SUCCESS·원시 지표·replay·불변식 검수를 통과했다. D1 7회의 coverage/소유 자원 해제와 D0 baseline의 원래 물리 digest 일치도 확인했다. [사전 규약](scenarios/e0_execution_20261113/roam_canary_protocol.json)과 [14회 판정](scenarios/e0_execution_20261113/roam_canary_receipt.json)은 기존 세 소스 결과와 분리했다. 최종 합계는185+42+42+14=**283회 기능 검수**이며 독립 반복 수나 본 실험 수가 아니다. 앞의269회는 해당 세 소스의 보존 기록이다.
 
 ## 다음 단계와 완료 조건
 
