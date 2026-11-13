@@ -1,16 +1,17 @@
 """알림 상태가 바뀌어도 메인 작업 영역과 도면 배율이 유지되는지 검증한다."""
 
+import time
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QEventLoop, QTimer
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QPushButton, QSplitter
 
 import config
 from agent.mock_agent import MockAgent
-from gui import constants as c
 from gui import experiment_panel
 from gui.main_window import MainWindow
 from simulation.factory_service import FactoryService
@@ -25,6 +26,14 @@ def _wait(ms: int) -> None:
     loop.exec()
 
 
+def _wait_until(predicate: Callable[[], bool], timeout: float = 5) -> None:
+    """Process Qt events until the actual state is ready, with a bounded deadline."""
+    deadline = time.perf_counter() + timeout
+    while not predicate() and time.perf_counter() < deadline:
+        QTest.qWait(20)
+    assert predicate(), "GUI state did not become ready before the deadline"
+
+
 def test_alert_keeps_workspace_size_and_selected_floor(tmp_path: Path) -> None:
     """좁은 화면에서 긴 알림을 열고 닫아도 패널 배치와 도면이 움직이지 않는다."""
     app = QApplication.instance() or QApplication([])
@@ -35,7 +44,8 @@ def test_alert_keeps_workspace_size_and_selected_floor(tmp_path: Path) -> None:
     window.resize(1024, 700)
     window.show()
     try:
-        _wait(250)
+        _wait_until(lambda: window._worker._ready, timeout=30)
+        _wait_until(lambda: window._state is not None and window._factory.stage._state is not None)
         assert window.width() == 1024
         splitter = window.findChild(QSplitter, "WorkspaceSplitter")
         assert window._workspace.currentWidget() is splitter
@@ -43,7 +53,7 @@ def test_alert_keeps_workspace_size_and_selected_floor(tmp_path: Path) -> None:
         assert window._workspace.tabText(2) == "기간 실험"
         stage = window._factory.stage
         stage.select_floor(2)
-        _wait(c.BUILDING_ANIMATION_MS + 100)
+        _wait_until(lambda: stage.detail_mode and stage.current_floor == 2 and stage._progress == 1.0)
         assert stage.detail_mode and stage.current_floor == 2
         sizes = splitter.sizes()
         plan_geometry = stage.plan.geometry()
