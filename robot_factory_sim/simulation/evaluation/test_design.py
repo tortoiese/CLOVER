@@ -18,7 +18,7 @@ from simulation.evaluation import prepared as execution
 from simulation.evaluation.__main__ import main
 from simulation.evaluation.design import materialize, prepare_design, write_json
 from simulation.evaluation.design_references import synthetic_references
-from simulation.evaluation.runner import replay
+from simulation.evaluation.runner import replay, run_case
 from simulation.path_graph import PathGraph
 
 
@@ -48,6 +48,18 @@ def test_full_design_is_executable_and_fixed_batches_are_not_seed_replicates(des
     assert len(by_cell["S11_graph_256"].factory.nodes) == 256
     assert len(by_cell["S11_robots_8"].factory.nodes) == 64
     assert len(by_cell["S11_robots_8"].initial_robots) == 8
+
+
+@pytest.mark.parametrize("policy", ["baseline", "optimized"])
+def test_empty_multifloor_experiment_has_no_visual_roaming(design: dict[str, Any], policy: str) -> None:
+    case = cases(design, ("S08_two_cars",))["S08_two_cars"]
+    case.workload = {"kind": "trace", "jobs": []}
+    result = run_case(case, policy, 1001)
+    assert result["status"] == "SUCCESS" and result["final_audit"]["ok"]
+    assert result["offered"] == result["completed_total"] == 0
+    assert result["energy"]["distance_m"] == result["energy"]["consumed"] == 0
+    assert not any(p["distance_floors"] for p in result["cabin_phases"]["by_cabin_phase"])
+    assert replay(result)["matches"]
 
 
 @pytest.mark.parametrize("ids", [
