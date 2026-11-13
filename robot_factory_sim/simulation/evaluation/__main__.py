@@ -76,8 +76,42 @@ def main(argv: list[str] | None = None) -> int:
     comparison = commands.add_parser("compare", help="verify saved arms and compute gated paired statistics")
     comparison.add_argument("--plan", type=Path, required=True)
     comparison.add_argument("--output", type=Path, required=True, help="new directory for JSON/CSV/notes")
+    freeze = commands.add_parser("freeze-snapshot", help="freeze one returned grid input and common hint")
+    freeze.add_argument("--run", type=Path, required=True)
+    freeze.add_argument("--decision", type=int, required=True)
+    freeze.add_argument("--output", type=Path, required=True)
+    freeze.add_argument("--preparation-limit", type=float, default=30)
+    benchmark = commands.add_parser("benchmark-snapshot", help="compare compilers of one frozen grid model")
+    benchmark.add_argument("--snapshot", type=Path, required=True)
+    benchmark.add_argument("--output", type=Path, required=True)
+    benchmark.add_argument("--budgets", type=float, nargs="+", default=[.25, 2])
+    benchmark.add_argument("--repeats", type=int, default=3)
+    benchmark.add_argument("--order-seed", type=int, default=20261114)
+    benchmark.add_argument("--startup-limit", type=float, default=10)
+    benchmark.add_argument("--request-allowance", type=float, default=3)
+    benchmark.add_argument("--memory-limit-mib", type=float, default=1024)
+    benchmark.add_argument("--suite-wall-limit", type=float, default=300)
     args = parser.parse_args(argv)
     try:
+        if args.command == "freeze-snapshot":
+            from simulation.evaluation.frozen_snapshot import freeze_snapshot
+
+            result = freeze_snapshot(args.run, args.decision, args.output, preparation_limit=args.preparation_limit)
+            print(json.dumps({"status": "FROZEN", "model_hash": result["model_hash"],
+                              "variables": result["variables"]}))
+            return 0
+        if args.command == "benchmark-snapshot":
+            from simulation.evaluation.snapshot_benchmark import benchmark_snapshot
+
+            result = benchmark_snapshot(
+                args.snapshot, args.output, budgets=tuple(args.budgets), repeats=args.repeats,
+                order_seed=args.order_seed, startup_limit=args.startup_limit,
+                request_allowance=args.request_allowance, memory_limit_mib=args.memory_limit_mib,
+                suite_wall_limit=args.suite_wall_limit,
+            )
+            print(json.dumps({"status": result["status"], "runs": len(result["runs"]),
+                              "statuses": result["statuses"]}))
+            return 0 if result["status"] == "SUCCESS" else 1
         if args.command in {"comparison-plan", "compare"}:
             from simulation.evaluation.comparison import compare_plan, validate_plan, write_comparison
             from simulation.evaluation.comparison_inputs import draft_plan

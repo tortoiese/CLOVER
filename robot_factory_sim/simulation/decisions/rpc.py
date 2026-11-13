@@ -60,6 +60,25 @@ def handle(payload: dict[str, Any], ready_policy: str | None) -> tuple[dict[str,
 
             result = propose(args["observation"], **args["options"])
             status = "OK"
+        elif command == "frozen_grid":
+            from simulation.planning.backend import Backend
+            from simulation.planning.validation import validate
+
+            kinds = {"rh_milp_grid": "milp", "rh_cpsat_linear": "cpsat_linear"}
+            if policy not in kinds:
+                raise ValueError("frozen grid comparison supports MILP and CP-SAT linear only")
+            backend_cpu_started = time.process_time()
+            plan = Backend(kinds[policy]).solve(
+                args["model"].input, model=args["model"], hint=args["hint"],
+                budget_seconds=args["budget_seconds"],
+            )
+            plan = replace(plan, report=replace(plan.report,
+                                               worker_cpu_seconds=time.process_time() - backend_cpu_started))
+            validation_started = time.perf_counter()
+            errors = validate(plan, reconstruct_routes=False) if plan.report.status in {"OPTIMAL", "FEASIBLE"} else ()
+            result = {"plan": plan, "validation_errors": errors,
+                      "validation_seconds": time.perf_counter() - validation_started}
+            status = "OK"
         elif command == "rh":
             adapter_started = time.perf_counter()
             from simulation.planning.backend import Backend
