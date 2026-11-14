@@ -2,6 +2,8 @@
 
 작성일: 2026-11-10 · 상태: 실행 명세 + 2026-11-13 구현 진척·잔여 작업 반영 · 초점: GUI 없는 기능 구현, 모델 정확성, 최적화, 재현 실험.
 
+> 최신 상태(2026-11-14): 합성 연구환경 승인과 사전 보완은 §28 및 [검수 결과](EXPERIMENT_HARDENING_REVIEW_20261114.md)를 따른다. 시간/입력/관측/phase 동결 기반과 최종45회 기능 검수는 완료했고, reference μ 검토·독립 반복 본 실험·자동 선택/R7은 남는다.
+
 ## 0. 이 작업의 최종 목적
 
 최종 산출물은 “MILP를 붙였다”가 아니라 다음 질문에 근거를 갖고 답하는 것이다.
@@ -794,3 +796,31 @@ manifest/result/raw 무결성과 정책별 같은 입력·시간/설정 확인, 
 기준 h40_t2에서 S01 전체 batch는 optimized57.84초/MILP57.33초/linear27.24초, S08은106.93/105.30/85.04초였다. 반면 S04는 optimized의 충전 대기가 RH보다 짧았고, S11은 optimized16/16·RH15/16 완료였다. horizon 확대·계산 제한 증가가 항상 개선되지는 않았다. 단일 seed·미보정 합성 입력·계산 지연/fallback 포함 결과를 일반 우열로 승격하지 않는다.
 
 R2/R3는 설정 스크린 한 묶음까지 진행했으며 완료가 아니다. 같은 snapshot의 backend 대조, 실제 장비에서2초 운영 예산의 단계별 배분, native build/timeout·충전 stale/auxiliary 기전, 복수 지도·seed의 training/validation이 남는다. R1 실제 입력·R4 기간/충전 반복 보정·R6/R7 held-out/stress/최종 추천도 미완료다. 기본 optimized·가중치·MILP/CP-SAT 모델·기본 D0는 유지한다.
+
+## 26. R2 공통 snapshot backend 비교 기반
+
+[R2 상세 계획](PRD_FROZEN_SNAPSHOT_R2.md)에 따라 같은 관측·후보·경로·정수 제약·목적·시작해의 MILP/CP-SAT linear 비교를 추가한다. native/interval 및 closed-loop 운영 비교와 구분한다. [사용법](../robot_factory_sim/FROZEN_SNAPSHOT_BENCHMARK.md)은 공통 준비/기동/IPC/독립 검사 비용과 backend의 compile/search 예산을 구분하고, 늦게 반환된 해·실패·미실행을 보존한다. 이전60회 원본을 변경하지 않으며 동결 소스에서 별도48arm 기능·비용 검수를 수행할 계획이다. 이 절은 착수 기록이며 결과·완료 경계는 검수 후 추가한다.
+
+### 26.1 공통 관측 비교 기반·첫 검수 완료
+
+최종 코드 `f43908a`에서 Python3.11 전체574검사·Python3.14 관련44검사를 통과했다. source freeze 이후4관측×2backend×2예산×기술 반복3회=48arm을 실행했다. 기한 내 OPTIMAL36·FEASIBLE9, 늦은 유효 해3을 보존해 실행 상태는 PARTIAL이다. 입력·모델·시작해 일치, 독립 계획 유효성, 모든 보고된 OPTIMAL 목적 일치, 해제·source·분모 감사는 PASS다. 최초48arm은 마지막 decode 비용이 빠지는 계측 문제를 확인해 별도 보존했고, 완전한 호출 계측으로 전체48arm을 다시 검수했다. 누적96arm의 두 소스를 합치지 않는다. 새 closed-loop/독립 수요 반복은0회다. [R2 검수 보고서](R2_SNAPSHOT_REVIEW_20261114.md)와 [수정본48arm 판정](scenarios/r2_snapshot_20261114/receipt.json)에 정확한 상태·원본 해시·제한을 남겼다.
+
+고정 S04/S11에서 MILP가 같은 최적 목적을 더 빨리 증명했고, S01/S08 일부 예산에서 CP가 더 좋은 목적/증명 비용을 보였다. 반환 기록에 조건부인4개 관측과 기술 반복을 일반적 운영 우열로 해석하지 않는다. R2 전체·R3 운영2초 예산의 검증/공개 여유, 미반환 timeout 관측의 보존 확대, 실제 입력 보정·training/validation·E2/E3·선택 규칙은 미완료다. 기본 optimized·가중치·기본 D0·운영 모델/목적은 유지한다.
+
+## 27. 본 실험 사전 검수 (2026-11-14)
+
+[사전 검수·보완 계획](PRE_EXPERIMENT_REVIEW_20261114.md)의 판정은 **본 실험 시작 보류**다. 실제 입력/λ·기간/충전 순환, 운영2초 규약·admission/공개 여유, 미반환 관측 보존, E1 설정 확정과 E2/E3 분리·동결, 실제 코드 통합이 남는다. 기능 테스트와 짧은 파일럿의 완료를 이 조건들의 완료로 표시하지 않는다.
+
+기존 E1 control5119기록에서 finalized5118·pending1, soft deadline 초과19·초과 accepted3을 확인했다. 현재2초는 soft 규약이며 strict 완료 보장이 아니다. controller가 남은 시간으로 timeout을 줄이는 기존 동작은 유지하고, 추가 reserve/공개 전 확인은 R3 보완 항목으로 명시한다.
+
+이번 검수에서는 동결 benchmark의 예상 밖 worker/응답 예외가 RUNNING manifest·0/12 row를 남기는 문제를 재현했다. 전체 계획·실행 전 상태를 먼저 checkpoint하고, evaluator/해제 오류와 원인을 보존한 뒤 나머지 arm을 미실행으로 남기도록 보완한다. 운영 정책·모델·가중치는 변경하지 않는다. 실제 회귀·수정 후 fault 검수와 정확한 source는 [사전 판정](scenarios/pre_experiment_review_20261114/receipt.json)을 따른다. 새 알고리즘 성능 실험은 수행하지 않으며 과거 원본·source는 그대로 보존한다.
+
+## 28. 사전 문제 보완과 합성 연구 범위 확정 (2026-11-14)
+
+사용자가 실제 입력 대신 **합성 연구환경으로 검증**을 승인했다. 따라서 R1은 합성 입력·단위·초기 상태·수요·납기·부하 산정과 한계를 고정하는 경로로 진행하며, 실제 공장 자료가 없다는 이유만으로 합성 검증을 막지 않는다. 실제 공장 효과의 검증 완료로 승격하지 않는다. §27은 보완 전 판정 기록으로 유지한다.
+
+[보완 PRD](PRD_EXPERIMENT_HARDENING.md)와 [실행 설명](../robot_factory_sim/STUDY_PROTOCOL.md)에 따라 D1 v2의 정상 계획 기한 확인·admission/publication reserve, 기한 내 유효 계획률/dispatch·auxiliary·pending 구분, worker 전 RH 입력 CAS, 완료 충전 세션 관측/기간 감사, training/validation/heldout/stress 동결·실행·등록 분석 경로를 추가한다. 기본 정책·가중치·D0·v1 soft 동작·수학 목적은 유지한다.
+
+완료 근거·정확한 코드/입력 hash·실험별 결과와 후속 경계는 [보완 검수 보고서](EXPERIMENT_HARDENING_REVIEW_20261114.md)에 기록한다. 이 절 자체로 본 실험·통계적 우세·추천을 완료 처리하지 않는다. 자동 profile 선택과 환경별 추천은 기존 R2/R7 후속 범위다. confirmatory에서는 검수된 a-priori 설정만 허용하고, 보정 미완료·dirty Python·등록 변경을 거부한다.
+
+최종 보완 코드 `89afcdc`에서 합성45회(정책20·개발/검증 관측창24·긴 충전1)와 native 없는 replay20회를 검수했다. RH 입력37개·기한 뒤 정상 채택0·완료 충전36~37회/로봇,25개 calibration의 원시 재구성을 확인했다. 이전 코드의45회는 별도 보존해 독립 반복으로 합치지 않는다. 판정은 합성 파일럿 기반 검증 완료이며 confirmatory 본 실험 완료가 아니다.

@@ -104,6 +104,17 @@ def load_arm(suite_path: Path, scenario_id: str, seed: int, policy: str) -> dict
     if control and (fingerprint(control["decisions"]) != control["decisions_hash"]
                     or fingerprint(control["lifecycle"]) != control["lifecycle_hash"]):
         raise ValueError("control decision/lifecycle hash mismatch")
+    if control and "planning_inputs" in control:
+        from simulation.decisions.contracts import digest
+        from simulation.decisions.input_store import load_planning_input
+
+        if digest(control["planning_inputs"]) != control["planning_inputs_hash"]:
+            raise ValueError("planning input index hash mismatch")
+        for decision in control["decisions"]:
+            if decision.get("planning_input_ref"):
+                snap = load_planning_input(control, decision["planning_input_ref"], path.parent)
+                if snap.token != decision["token"] or snap.epoch != run["execution_epoch"]:
+                    raise ValueError("planning input observation identity mismatch")
     if planning and fingerprint(planning["decisions"]) != planning["decisions_hash"]:
         raise ValueError("planning decision hash mismatch")
     if control:
@@ -126,6 +137,11 @@ def load_arm(suite_path: Path, scenario_id: str, seed: int, policy: str) -> dict
                                   "late_due_rate", "energy_per_completed", "measurement_energy", "mean_wip",
                                   "resource_waits", "wall_seconds", "faults")}
     compact["start_cohort_jobs"] = sum(case.warmup <= job["at"] < run["observed_seconds"] for job in run["trace"])
+    from simulation.decisions.metrics import control_summary
+
+    compact["control_summary"] = control_summary(control, case.warmup, run["observed_seconds"])
+    if control and "summary" in control and control["summary"] != compact["control_summary"]:
+        raise ValueError("saved decision cohort metrics differ")
     if run["arrival_to_start"]["count"] > compact["start_cohort_jobs"]:
         raise ValueError("observed starts exceed arrival cohort")
     tasks = run["tasks"]

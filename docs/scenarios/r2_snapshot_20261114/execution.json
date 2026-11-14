@@ -1,0 +1,125 @@
+{
+  "schema": "clover-r2-snapshot-review-runs-v1",
+  "status": "PARTIAL",
+  "planned_arms": 48,
+  "cells": [
+    {
+      "cell": "S08_two_cars",
+      "status": "SUCCESS",
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b05_h40_t2_S08_two_cars/E1_S08_two_cars__fixed/E1_S08_two_cars__fixed__rh_milp_grid__1001.json",
+      "run_sha256": "e7220939b3abf887980d7661b513bcac7bb8efd186d2fdad5ed4803b8d59aa48",
+      "decision": 4,
+      "observation_time": 43.64694872269694,
+      "jobs": 4,
+      "available_robots": 1,
+      "original_reason": "STALE_AVAILABILITY",
+      "original_backend_status": "OPTIMAL",
+      "planned_arms": 12,
+      "snapshot": "snapshots/S08_two_cars.json",
+      "model_hash": "eabde387af61006a4fa871ea25a03fd3dd2f36c8194b710d2a17047d9c5c535f",
+      "hint_hash": "bc70148d093278a6fb974e1237cb55836ebe207b1fd14d29b5fac635e0b2b50a",
+      "variables": 315,
+      "constraints": 618,
+      "previous_cohort_identity": {
+        "input_hash": true,
+        "model_hash": true,
+        "hint_hash": true
+      },
+      "manifest": "runs/S08_two_cars/manifest.json",
+      "statuses": {
+        "OPTIMAL": 9,
+        "FEASIBLE": 3
+      },
+      "wall_seconds": 9.087225208990276
+    },
+    {
+      "cell": "S04_mixed_soc",
+      "status": "SUCCESS",
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b02_h40_t2_S04_mixed_soc/E1_S04_mixed_soc__s1001/E1_S04_mixed_soc__s1001__rh_milp_grid__1001.json",
+      "run_sha256": "dcbfc9447ab97b5f17cae54be9dd33a01eff3c02aeeb00ca561b382a583a2184",
+      "decision": 1,
+      "observation_time": 17.0,
+      "jobs": 1,
+      "available_robots": 4,
+      "original_reason": "COMMITTED",
+      "original_backend_status": "OPTIMAL",
+      "planned_arms": 12,
+      "snapshot": "snapshots/S04_mixed_soc.json",
+      "model_hash": "dbe0f64cc08a867be848ff5683b88c45dd7ac62bf2945efddf1297dfff97a4ae",
+      "hint_hash": "888a258c69603ea10de81657ac88fef6c5168fbb8f439dbf0c5f1ddee4c32917",
+      "variables": 977,
+      "constraints": 927,
+      "previous_cohort_identity": {
+        "input_hash": true,
+        "model_hash": true,
+        "hint_hash": true
+      },
+      "manifest": "runs/S04_mixed_soc/manifest.json",
+      "statuses": {
+        "OPTIMAL": 12
+      },
+      "wall_seconds": 7.9741454580798745
+    },
+    {
+      "cell": "S11_budget_2",
+      "status": "SUCCESS",
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b09_h40_t2_S11_budget_2/E1_S11_budget_2__s1001/E1_S11_budget_2__s1001__rh_milp_grid__1001.json",
+      "run_sha256": "ac3ff59f680fb6b8d2e6eb7c4503918ba4c05b64d34617973271a13899ffdb3d",
+      "decision": 1,
+      "observation_time": 14.5,
+      "jobs": 1,
+      "available_robots": 4,
+      "original_reason": "COMMITTED",
+      "original_backend_status": "OPTIMAL",
+      "planned_arms": 12,
+      "snapshot": "snapshots/S11_budget_2.json",
+      "model_hash": "14e958917f7651f54ddebfb4d9669015bd788e053fd6e8db20bfc49cd60cebc0",
+      "hint_hash": "ad826d3a0a2122a84469f06cd2d4a6970255584d48f7c84ddef08e3390e5fe01",
+      "variables": 1705,
+      "constraints": 2604,
+      "previous_cohort_identity": {
+        "input_hash": true,
+        "model_hash": true,
+        "hint_hash": true
+      },
+      "manifest": "runs/S11_budget_2/manifest.json",
+      "statuses": {
+        "OPTIMAL": 12
+      },
+      "wall_seconds": 11.004833709215745
+    },
+    {
+      "cell": "S01_eligible_1",
+      "status": "PARTIAL",
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b03_h40_t2_S01_eligible_1/E1_S01_eligible_1__fixed/E1_S01_eligible_1__fixed__rh_milp_grid__1001.json",
+      "run_sha256": "76c3a781c35c9102d4aeeb59c3e5ac1c8d4c58f06a4184c407a6f906d4e7bc7d",
+      "decision": 4,
+      "observation_time": 13.199508915841578,
+      "jobs": 4,
+      "available_robots": 1,
+      "original_reason": "STALE_AVAILABILITY",
+      "original_backend_status": "FEASIBLE",
+      "planned_arms": 12,
+      "snapshot": "snapshots/S01_eligible_1.json",
+      "model_hash": "6b29d07b4b2e89b663e5ae7149e370b0e9088edff51f6a91e662b0650ed308a6",
+      "hint_hash": "e1bb99b30cb3b1efc0ce414739dfdb55c4ea038c0d9091aca3ec8ba6bab827c2",
+      "variables": 1044,
+      "constraints": 1288,
+      "previous_cohort_identity": {
+        "input_hash": true,
+        "model_hash": true,
+        "hint_hash": true
+      },
+      "manifest": "runs/S01_eligible_1/manifest.json",
+      "statuses": {
+        "OPTIMAL": 3,
+        "SOFT_BUDGET_EXCEEDED": 3,
+        "FEASIBLE": 6
+      },
+      "wall_seconds": 17.566134415799752
+    }
+  ],
+  "new_closed_loop_simulations": 0,
+  "wall_seconds": 46.97092704195529,
+  "source_at_end": "04272705152b02292f170d76974ebb6ba365a625edf5dd4065f16b269449252a"
+}

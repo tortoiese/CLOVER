@@ -36,12 +36,11 @@ def encode(result: Result) -> dict[str, Any]:
     return {"schema": PLAN_SCHEMA, **asdict(result)}
 
 
-def decode(raw: dict[str, Any]) -> Result:
-    """Restore only the explicit current schema, normalizing immutable tuples."""
-    if raw.get("schema") != PLAN_SCHEMA or raw["input"]["snapshot"].get("schema") != SNAPSHOT_SCHEMA:
-        raise ValueError("unsupported recorded planning schema")
-    data = raw["input"]
-    row = dict(data["snapshot"])
+def decode_snapshot(raw: dict[str, Any]) -> Snapshot:
+    """Restore a detached observation even when a worker returned no plan."""
+    if raw.get("schema") != SNAPSHOT_SCHEMA:
+        raise ValueError("unsupported recorded snapshot schema")
+    row = dict(raw)
     row["settings"] = Settings(**row["settings"])
     for key, cls in (
         ("robots", RobotInput),
@@ -55,6 +54,15 @@ def decode(raw: dict[str, Any]) -> Result:
     ):
         row[key] = tuple(cls(**value) for value in row[key])
     row["jobs"] = tuple(JobInput(**{**j, "stations": tuple(j["stations"])}) for j in row["jobs"])
+    return Snapshot(**row)
+
+
+def decode(raw: dict[str, Any]) -> Result:
+    """Restore only the explicit current schema, normalizing immutable tuples."""
+    if raw.get("schema") != PLAN_SCHEMA:
+        raise ValueError("unsupported recorded planning schema")
+    data = raw["input"]
+    snapshot = decode_snapshot(data["snapshot"])
     routes = []
     for route in data["routes"]:
         item = dict(route)
@@ -65,7 +73,7 @@ def decode(raw: dict[str, Any]) -> Result:
         item["uses"] = tuple(TrafficReservation(**u) for u in item["uses"])
         item["cabins"] = tuple(CabinUse(**c) for c in item["cabins"])
         routes.append(RouteInput(**item))
-    prepared = PreparedInput(Snapshot(**row), tuple(routes), tuple(tuple(v) for v in data["unavailable_routes"]))
+    prepared = PreparedInput(snapshot, tuple(routes), tuple(tuple(v) for v in data["unavailable_routes"]))
     actions = []
     for item in raw["actions"]:
         arc = dict(item["arc"])

@@ -12,12 +12,14 @@ from typing import TYPE_CHECKING, Any
 from simulation.decisions import admission
 from simulation.decisions.adapters import propose
 from simulation.decisions.contracts import (
+    DEADLINE_EPSILON,
     DecisionSettings,
     Proposal,
     decode,
     digest,
     encode,
 )
+from simulation.decisions.input_store import PlanningInputStore
 from simulation.decisions.observation import capture
 from simulation.decisions.timing import DelayLedger
 from simulation.planning.contracts import ALL_RH_BACKENDS, Settings
@@ -62,6 +64,7 @@ class DecisionScheduler(BaseScheduler):
         )
         self.math.validate()
         self.worker = SolverProcess()
+        self.input_store = PlanningInputStore()
         self.records: list[dict[str, Any]] = []
         self.lifecycle: list[dict[str, Any]] = []
         self.replay_records = replay_records
@@ -227,6 +230,12 @@ class DecisionScheduler(BaseScheduler):
         )
         return self.ready
 
+    def _primary_remaining(self, row: dict[str, Any], *, reserve: bool = True) -> float:
+        remaining = self.settings.end_to_end_soft_deadline_seconds - (self.engine.now - row["triggered_at"])
+        if reserve and self.settings.primary_deadline_policy == "reject_late_primary":
+            remaining -= self.settings.admission_reserve_seconds + self.settings.publication_allowance_seconds
+        return remaining
+
     def _admit_process(
         self,
         ledger: DelayLedger,
@@ -235,12 +244,26 @@ class DecisionScheduler(BaseScheduler):
         publish: Callable[[], dict[str, Any]],
     ) -> Generator[Any, Any, dict[str, Any]]:
         """Bound fresh admission attempts; partial application is never repeated."""
+        strict = self.settings.primary_deadline_policy == "reject_late_primary"
+
+        def publish_before_deadline() -> dict[str, Any]:
+            row["primary_publication_checked_at"] = self.engine.now
+            if strict and self._primary_remaining(row, reserve=False) < -DEADLINE_EPSILON:
+                return {"accepted": False, "reason": "PRIMARY_PUBLICATION_DEADLINE", "applied": []}
+            return publish()
+
         for attempt in range(self.settings.max_admission_attempts):
             row["admission_attempts"] = attempt + 1
+            if (strict and self._primary_remaining(row, reserve=False) + DEADLINE_EPSILON
+                    < self.settings.publication_allowance_seconds):
+                return {"accepted": False, "reason": "DEADLINE_BEFORE_ADMISSION", "applied": []}
             valid, reason = yield from ledger.call_process("admission_prepare", prepare)
             if not valid:
                 return {"accepted": False, "reason": reason, "applied": []}
-            receipt = yield from ledger.publish_process(publish)
+            if (strict and self._primary_remaining(row, reserve=False) + DEADLINE_EPSILON
+                    < self.settings.publication_allowance_seconds):
+                return {"accepted": False, "reason": "DEADLINE_AFTER_ADMISSION", "applied": []}
+            receipt = yield from ledger.publish_process(publish_before_deadline)
             if receipt["accepted"] or not ledger.coverage_ok or not receipt["reason"].startswith("STALE"):
                 return receipt
         return receipt
@@ -287,12 +310,13 @@ class DecisionScheduler(BaseScheduler):
         row["pending_phase"] = ledger.pending
         charges, targets = self.pending_charge, self.pending_target
         dispatch = self.pending_dispatch
+        row["request_kind"] = "dispatch" if dispatch else "auxiliary"
+        row["primary_kind"] = None
         self.pending_charge, self.pending_target, self.pending_dispatch = {}, {}, False
         finished = False
         try:
             ready = yield from self._startup_process(ledger, row, original)
-            spent = engine.now - row["triggered_at"]
-            if not ready or spent >= self.settings.end_to_end_soft_deadline_seconds:
+            if not ready or self._primary_remaining(row) <= 0:
                 row["reason"] = "BACKEND_NOT_READY" if not ready else "DEADLINE_BEFORE_OBSERVATION"
             else:
 
@@ -302,7 +326,7 @@ class DecisionScheduler(BaseScheduler):
                         self.name,
                         row["token"],
                         self.policy_state,
-                        deadline=time.perf_counter() + self.settings.end_to_end_soft_deadline_seconds - spent,
+                        deadline=time.perf_counter() + max(0, self._primary_remaining(row)),
                     )
                     snapshot = None
                     if self.name in ALL_RH_BACKENDS and dispatch and engine.pending_tasks:
@@ -316,11 +340,21 @@ class DecisionScheduler(BaseScheduler):
                 if original is not None and original["observation_hash"] != observation.hash:
                     raise ValueError("decision replay observation differs from current plant")
                 row["observation_hash"] = observation.hash
-                remaining = self.settings.end_to_end_soft_deadline_seconds - (engine.now - row["triggered_at"])
+                if snapshot is not None and self.settings.record_planning_inputs:
+                    def retain_input() -> str:
+                        ref = self.input_store.put(snapshot)
+                        row["planning_input_ref"] = ref
+                        if original is not None and original.get("planning_input_ref") != ref:
+                            raise ValueError("replayed planning input differs")
+                        return ref
+
+                    yield from ledger.call_process("planning_input_record", retain_input)
+                remaining = self._primary_remaining(row)
                 if remaining <= 0:
                     row["reason"] = "DEADLINE_AFTER_CAPTURE"
                 else:
                     is_rh = snapshot is not None
+                    row["primary_kind"] = "rh_plan" if is_rh else "selector"
                     options = {
                         "dispatch": dispatch and self.name not in ALL_RH_BACKENDS,
                         "charge_robots": tuple(charges),
@@ -343,6 +377,13 @@ class DecisionScheduler(BaseScheduler):
                         payload["observation"] = replace(observation, policy="safe_fallback")
 
                     def compute() -> dict[str, Any]:
+                        remaining_now = self._primary_remaining(row)
+                        row["compute_budget_seconds"] = max(0, remaining_now)
+                        if is_rh:
+                            snap = payload["snapshot"]
+                            timeout = min(snap.settings.timeout, max(0.000001, remaining_now))
+                            row["effective_solver_timeout_seconds"] = timeout
+                            payload["snapshot"] = replace(snap, settings=replace(snap.settings, timeout=timeout))
                         if original is not None:
                             saved = dict(original["compute"])
                             if saved["status"] == "OK":
@@ -367,17 +408,6 @@ class DecisionScheduler(BaseScheduler):
                                 elif saved["value"].observation != payload["observation"]:
                                     raise ValueError("recorded selector computation input differs")
                             return saved
-                        remaining_now = self.settings.end_to_end_soft_deadline_seconds - (
-                            engine.now - row["triggered_at"]
-                        )
-                        if is_rh:
-                            snap = payload["snapshot"]
-                            payload["snapshot"] = replace(
-                                snap,
-                                settings=replace(
-                                    snap.settings, timeout=min(snap.settings.timeout, max(0.000001, remaining_now))
-                                ),
-                            )
                         saved = self.worker.request(
                             "rh" if is_rh else "propose",
                             self.name,
@@ -509,6 +539,12 @@ class DecisionScheduler(BaseScheduler):
             row["coverage_ok"] = ledger.coverage_ok
             row["time"] = engine.now
         finally:
+            if row["time"] is not None:
+                latency = row["time"] - row["triggered_at"]
+                row["decision_latency_seconds"] = latency
+                row["soft_deadline_exceeded"] = latency > self.settings.end_to_end_soft_deadline_seconds
+                row["timely_accepted"] = bool(row["accepted"] and row["coverage_ok"]
+                    and latency <= self.settings.end_to_end_soft_deadline_seconds + DEADLINE_EPSILON)
             self.busy = False
             self._kick()
 
