@@ -2,6 +2,8 @@
 
 작성일: 2026-11-10 · 상태: 실행 명세 + 2026-11-13 구현 진척·잔여 작업 반영 · 초점: GUI 없는 기능 구현, 모델 정확성, 최적화, 재현 실험.
 
+> 최신 상태(2026-11-14): 합성 연구환경 승인과 사전 보완은 §28 및 [검수 결과](EXPERIMENT_HARDENING_REVIEW_20261114.md)를 따른다. 시간/입력/관측/phase 동결 기반과 최종45회 기능 검수는 완료했고, reference μ 검토·독립 반복 본 실험·자동 선택/R7은 남는다.
+
 ## 0. 이 작업의 최종 목적
 
 최종 산출물은 “MILP를 붙였다”가 아니라 다음 질문에 근거를 갖고 답하는 것이다.
@@ -812,3 +814,13 @@ R2/R3는 설정 스크린 한 묶음까지 진행했으며 완료가 아니다. 
 기존 E1 control5119기록에서 finalized5118·pending1, soft deadline 초과19·초과 accepted3을 확인했다. 현재2초는 soft 규약이며 strict 완료 보장이 아니다. controller가 남은 시간으로 timeout을 줄이는 기존 동작은 유지하고, 추가 reserve/공개 전 확인은 R3 보완 항목으로 명시한다.
 
 이번 검수에서는 동결 benchmark의 예상 밖 worker/응답 예외가 RUNNING manifest·0/12 row를 남기는 문제를 재현했다. 전체 계획·실행 전 상태를 먼저 checkpoint하고, evaluator/해제 오류와 원인을 보존한 뒤 나머지 arm을 미실행으로 남기도록 보완한다. 운영 정책·모델·가중치는 변경하지 않는다. 실제 회귀·수정 후 fault 검수와 정확한 source는 [사전 판정](scenarios/pre_experiment_review_20261114/receipt.json)을 따른다. 새 알고리즘 성능 실험은 수행하지 않으며 과거 원본·source는 그대로 보존한다.
+
+## 28. 사전 문제 보완과 합성 연구 범위 확정 (2026-11-14)
+
+사용자가 실제 입력 대신 **합성 연구환경으로 검증**을 승인했다. 따라서 R1은 합성 입력·단위·초기 상태·수요·납기·부하 산정과 한계를 고정하는 경로로 진행하며, 실제 공장 자료가 없다는 이유만으로 합성 검증을 막지 않는다. 실제 공장 효과의 검증 완료로 승격하지 않는다. §27은 보완 전 판정 기록으로 유지한다.
+
+[보완 PRD](PRD_EXPERIMENT_HARDENING.md)와 [실행 설명](../robot_factory_sim/STUDY_PROTOCOL.md)에 따라 D1 v2의 정상 계획 기한 확인·admission/publication reserve, 기한 내 유효 계획률/dispatch·auxiliary·pending 구분, worker 전 RH 입력 CAS, 완료 충전 세션 관측/기간 감사, training/validation/heldout/stress 동결·실행·등록 분석 경로를 추가한다. 기본 정책·가중치·D0·v1 soft 동작·수학 목적은 유지한다.
+
+완료 근거·정확한 코드/입력 hash·실험별 결과와 후속 경계는 [보완 검수 보고서](EXPERIMENT_HARDENING_REVIEW_20261114.md)에 기록한다. 이 절 자체로 본 실험·통계적 우세·추천을 완료 처리하지 않는다. 자동 profile 선택과 환경별 추천은 기존 R2/R7 후속 범위다. confirmatory에서는 검수된 a-priori 설정만 허용하고, 보정 미완료·dirty Python·등록 변경을 거부한다.
+
+최종 보완 코드 `89afcdc`에서 합성45회(정책20·개발/검증 관측창24·긴 충전1)와 native 없는 replay20회를 검수했다. RH 입력37개·기한 뒤 정상 채택0·완료 충전36~37회/로봇,25개 calibration의 원시 재구성을 확인했다. 이전 코드의45회는 별도 보존해 독립 반복으로 합치지 않는다. 판정은 합성 파일럿 기반 검증 완료이며 confirmatory 본 실험 완료가 아니다.

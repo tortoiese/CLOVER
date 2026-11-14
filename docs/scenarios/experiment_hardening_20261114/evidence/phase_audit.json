@@ -1,0 +1,216 @@
+{
+  "phases": [
+    {
+      "phase": "training",
+      "parent": {
+        "schema": "clover-study-runs-v1",
+        "status": "SUCCESS",
+        "phase": "training",
+        "stage": "pilot",
+        "frozen": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/frozen_smoke.json",
+        "frozen_sha256": "1c6601fbd945991640f3350849be0553e8c8cf27419f2589aad043c49dd78bbb",
+        "study_hash": "a6d102ddc2bb535e49964e78ed68a9136d914b5e1066c9ca84ef6bef82db429e",
+        "planned_runs": 5,
+        "entries": [
+          {
+            "id": "training_S01_eligible_1",
+            "status": "SUCCESS",
+            "suite": "training_S01_eligible_1/manifest.json",
+            "arms": [
+              {
+                "policy": "rh_milp_grid",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_native",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "optimized",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "baseline",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_linear",
+                "status": "SUCCESS",
+                "failure": null
+              }
+            ]
+          }
+        ],
+        "run_wall_limit": 120,
+        "suite_wall_limit": 420,
+        "source_and_registration_unchanged": true,
+        "wall_seconds": 17.6498680410441
+      },
+      "parent_sha256": "16cd0a22681698e412131f217e235e37a5e4273ca46fa8b7c6e1b2be1e81c165",
+      "analysis_sha256": "52248073fbc82c5bf1ed0fe5b7128e92e5ac16d0dbc9eccdb4f13bab4f699736"
+    },
+    {
+      "phase": "validation",
+      "parent": {
+        "schema": "clover-study-runs-v1",
+        "status": "SUCCESS",
+        "phase": "validation",
+        "stage": "pilot",
+        "frozen": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/frozen_smoke.json",
+        "frozen_sha256": "1c6601fbd945991640f3350849be0553e8c8cf27419f2589aad043c49dd78bbb",
+        "study_hash": "a6d102ddc2bb535e49964e78ed68a9136d914b5e1066c9ca84ef6bef82db429e",
+        "planned_runs": 5,
+        "entries": [
+          {
+            "id": "validation_S04_mixed_soc",
+            "status": "SUCCESS",
+            "suite": "validation_S04_mixed_soc/manifest.json",
+            "arms": [
+              {
+                "policy": "optimized",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_milp_grid",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_native",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_linear",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "baseline",
+                "status": "SUCCESS",
+                "failure": null
+              }
+            ]
+          }
+        ],
+        "run_wall_limit": 120,
+        "suite_wall_limit": 420,
+        "source_and_registration_unchanged": true,
+        "wall_seconds": 3.6812299170996994
+      },
+      "parent_sha256": "bd073091de0bb7606e51a44a2f20a6f6b96de15214d6cb3e15f517717e6e08a7",
+      "analysis_sha256": "b91310e9c207799af3a9175b2cc5397df251c8e274185eeacfab5871c45aadb8"
+    },
+    {
+      "phase": "heldout",
+      "parent": {
+        "schema": "clover-study-runs-v1",
+        "status": "SUCCESS",
+        "phase": "heldout",
+        "stage": "pilot",
+        "frozen": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/frozen_smoke.json",
+        "frozen_sha256": "1c6601fbd945991640f3350849be0553e8c8cf27419f2589aad043c49dd78bbb",
+        "study_hash": "a6d102ddc2bb535e49964e78ed68a9136d914b5e1066c9ca84ef6bef82db429e",
+        "planned_runs": 5,
+        "entries": [
+          {
+            "id": "heldout_S08_two_cars",
+            "status": "SUCCESS",
+            "suite": "heldout_S08_two_cars/manifest.json",
+            "arms": [
+              {
+                "policy": "rh_cpsat_native",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_linear",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "baseline",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_milp_grid",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "optimized",
+                "status": "SUCCESS",
+                "failure": null
+              }
+            ]
+          }
+        ],
+        "run_wall_limit": 120,
+        "suite_wall_limit": 420,
+        "source_and_registration_unchanged": true,
+        "wall_seconds": 12.318698542192578
+      },
+      "parent_sha256": "565d2aaf386d33d9a230bce1a5cfb02ace3a5560dbf86a3bc1ef29816fa4e6ca",
+      "analysis_sha256": "2802e9aae4611dace6ca819d44e576e4bbbfc969480a014f6fcaae9dfd910e2b"
+    },
+    {
+      "phase": "stress",
+      "parent": {
+        "schema": "clover-study-runs-v1",
+        "status": "SUCCESS",
+        "phase": "stress",
+        "stage": "pilot",
+        "frozen": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/frozen_smoke.json",
+        "frozen_sha256": "1c6601fbd945991640f3350849be0553e8c8cf27419f2589aad043c49dd78bbb",
+        "study_hash": "a6d102ddc2bb535e49964e78ed68a9136d914b5e1066c9ca84ef6bef82db429e",
+        "planned_runs": 5,
+        "entries": [
+          {
+            "id": "stress_S11_budget_2",
+            "status": "SUCCESS",
+            "suite": "stress_S11_budget_2/manifest.json",
+            "arms": [
+              {
+                "policy": "baseline",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_linear",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_milp_grid",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "optimized",
+                "status": "SUCCESS",
+                "failure": null
+              },
+              {
+                "policy": "rh_cpsat_native",
+                "status": "SUCCESS",
+                "failure": null
+              }
+            ]
+          }
+        ],
+        "run_wall_limit": 120,
+        "suite_wall_limit": 420,
+        "source_and_registration_unchanged": true,
+        "wall_seconds": 7.251988417003304
+      },
+      "parent_sha256": "c803763c516e86f78810eba40dcb52aff608b3579e98d7e3c1162eee04dd2c57",
+      "analysis_sha256": "bfac08de1b1be4ffae3a4311a248e440db85e655ea57dd550f6eeb059f9d3fe5"
+    }
+  ]
+}

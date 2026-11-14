@@ -25,7 +25,7 @@
 
 시간 경계/재시도/공개 거절·fallback·v1 호환, 실패 입력·CAS 변조·경로 탈출·replay, 관측창·충전/에너지·구간 통계, phase 누수·source/설정 변경·동결 덮어쓰기·미실행 보존과 실제 CLI를 검사한다. 전체 회귀와 직렬 smoke 실험에서 소유 자원·에너지·작업 장부를 감사한다. 이전 결과와 source는 보존한다.
 
-코드/검증 경로의 완료와 실제 데이터/본 실험 결과의 완료는 구분한다. 실제 입력·보정 결과·training/validation·새 지도/seed가 없으면 confirmatory 준비 상태는 계속 미완료다.
+코드/검증 경로의 완료와 실제 데이터/본 실험 결과의 완료는 구분한다. 확정한 실제/합성 입력·보정 결과·training/validation·새 지도/seed가 없으면 confirmatory 준비 상태는 계속 미완료다. 합성 연구 자체에 실제 공장 자료를 필수로 요구하지 않는다.
 
 ## 범위 확정·구현 현황
 
@@ -34,3 +34,5 @@
 구현 경로는 `d1-primary-deadline-v2`, worker 전 CAS, dispatch/auxiliary 기한 요약, `calibrate-window`, `freeze-study`, `run-study`, `study-analysis-plan`이다. 확인할 입력 예제는 `docs/scenarios/experiment_hardening_20261114/`와 해당 폴더의 생성기다. 12가족×4phase의 전체 입력은 생성기로 만들며, 작은 smoke 입력은 Git에 포함한다. 큰 원시 trace·run은 별도 출력에 보존하고 digest/검수 요약을 공개한다.
 
 confirmatory는 committed Python, 개발 입력별 보정 PASS와 검토된 reference μ·근거를 요구한다. 현재 구현한 선택 경로는 근거를 명시하는 a-priori 설정이다. training/validation 결과에서 최적 profile을 자동 선택하는 receipt, 자동 환경별 추천은 후속 작업이며 구현된 것으로 표시하지 않는다. 주 지표/실용 차이/guardrail/선택 규칙의 등록과 실제 우세 판정은 구분한다.
+
+최종 구현·검수는 [검수 보고서](EXPERIMENT_HARDENING_REVIEW_20261114.md)와 [판정 JSON](scenarios/experiment_hardening_20261114/evidence/receipt.json)을 따른다. 핵심 경로 구현과 합성45회 검수는 완료했으며 reference μ 검토·독립 반복 본 실험·자동 선택/추천은 남는다.
