@@ -24,7 +24,7 @@ from simulation.evaluation.main_inputs import (
     window,
 )
 from simulation.evaluation.reference_capacity import predict_reference, verify_reference
-from simulation.evaluation.runner import run_case, source_manifest
+from simulation.evaluation.runner import replay, run_case, source_manifest
 from simulation.evaluation.scenario import Scenario, fingerprint
 from simulation.evaluation.study import code_identity, freeze_study, load_frozen, save, validate_spec
 from simulation.planning.contracts import Settings
@@ -155,6 +155,9 @@ def build_main_spec(capacity: dict[str, Any], capacity_path: Path, *,
                         "scenario": case.to_dict(), "policies": policies, "load": load,
                         "window": window(case, family, stress=phase == "stress"),
                         "inferential": phase == "heldout" and family in CORE})
+    phase_order = {p: i for i, p in enumerate(("training", "validation", "heldout", "stress"))}
+    spec["cases"].sort(key=lambda row: (phase_order[row["phase"]],
+        fingerprint(["main-block-order-v1", 20261114, row["id"]])))
     return spec
 
 
@@ -343,6 +346,9 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
         if arm["result"] is None:
             continue
         run, _ = read_json(Path(arm["result"]))
+        replay_matches = replay(run, input_root=Path(arm["result"]).parent)["matches"]
+        if not replay_matches:
+            reasons.append("CANARY_REPLAY_MISMATCH")
         if any(r.get("primary_kind") == "rh_plan" and r["accepted"] for r in run["control"]["decisions"]):
             accepted_backends.add(run["policy"])
         if any(r["accepted"] and r["time"] is not None and r["time"] - r["triggered_at"] > 2 + 1e-9
@@ -355,6 +361,7 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
         wall.append(run["wall_seconds"] * 2100 / run["scenario"]["duration"])
         storage.append(size * 2100 / run["scenario"]["duration"])
         arms.append({"case_id": run["case_id"], "policy": run["policy"], "status": run["status"],
+                     "replay_matches": replay_matches,
                      "wall_seconds": run["wall_seconds"] + archive_cost.get(run["case_id"], 0),
                      "duration": run["scenario"]["duration"], "bytes": size, "offered": run["offered"],
                      "family": canary_rows[run["scenario"]["id"]]["family"],

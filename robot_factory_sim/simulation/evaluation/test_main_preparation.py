@@ -48,6 +48,9 @@ def test_full_main_matrix_and_nested_seeds(main_spec: dict) -> None:
     batches = [r for r in cases if r["family"] == "S01"]
     assert all(r["load"]["reference_rho"] is None and r["load"]["lambda_tasks_per_second"] is None for r in batches)
     assert all(len(r["scenario"]["workload"]["jobs"]) == 8 for r in batches)
+    assert len({r["family"] for r in main_spec["cases"] if r["phase"] == "heldout"} ) == 12
+    first_twenty = [r for r in main_spec["cases"] if r["phase"] == "heldout"][:20]
+    assert len({r["family"] for r in first_twenty}) >= 3
 
 
 def test_single_axis_shared_input(main_spec: dict) -> None:
