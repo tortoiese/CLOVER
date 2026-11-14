@@ -1,0 +1,85 @@
+{
+  "schema": "clover-pre-experiment-readiness-review-v1",
+  "date": "2026-11-14",
+  "status": "NOT_READY",
+  "assessment_method": "manual code/protocol review, read-only historical artifacts, fault injection and regression tests; not an automated execution gate",
+  "review_base_commit": "23bf2463f22ed90e37418bf0a7ef64153a8d9403",
+  "fix_commit": "508419fdac525c3e73c6c2fe5436efb6c0cd4430",
+  "fix_source_hash": "7ff238682066d29f66432b7a011a0107914f09982741d74d696b296fc4a6e7fb",
+  "implementation_validation": "PASS",
+  "python_files_match_git": 173,
+  "tests": {
+    "py311_full": {
+      "counts": {
+        "tests": 577,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "b91a9158d36f17c5758debbd9c46c85eb986bea33c24679185aea420ada6e9db"
+    },
+    "py314_targeted": {
+      "counts": {
+        "tests": 47,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "33089068b8a38f72c558c71e24077948a07cbefe29515f843f09b33b274aaf42"
+    }
+  },
+  "fault_guard_after": {
+    "planned": 12,
+    "retained_rows": 12,
+    "statuses": {
+      "EVALUATION_ERROR": 1,
+      "NOT_RUN_EVALUATION_ERROR": 11
+    },
+    "worker_closed": true
+  },
+  "readiness_gates": [
+    {
+      "id": "R1",
+      "status": "OPEN",
+      "missing": "reviewed actual maps/trace/deadlines/initial state and calibrated load"
+    },
+    {
+      "id": "R3",
+      "status": "OPEN",
+      "missing": "explicit soft/strict deadline contract, admission/publication reserve and timely acceptance metrics"
+    },
+    {
+      "id": "R4",
+      "status": "OPEN",
+      "missing": "warmup/measurement/drain and repeated charging calibration"
+    },
+    {
+      "id": "R2-observation",
+      "status": "OPEN",
+      "missing": "include non-returned/timeout observations under predeclared sampling"
+    },
+    {
+      "id": "R5-R7",
+      "status": "OPEN",
+      "missing": "training/validation, E2/E3 freeze and statistical/selection protocol"
+    },
+    {
+      "id": "code-freeze",
+      "status": "OPEN",
+      "missing": "choose final tested feature/main commit after remaining tuning; main merge itself is not mandatory"
+    },
+    {
+      "id": "snapshot-fatal-errors",
+      "status": "FIXED_VERIFIED",
+      "scope": "preallocated plan and error/cleanup failure stop records"
+    }
+  ],
+  "new_performance_simulations": 0,
+  "historical_results_changed": false,
+  "files_sha256": {
+    "d1_budget_review.json": "d3b36a89ff3fba82d6c38beea172a5fc58b01b1aa0a73fdd6471434aa9e4dac0",
+    "exception_after_fix.json": "89804b532696fa55074ea1eb74d07fe5ff9e67201a059e42d2b6a578ec9ddfd0",
+    "exception_reproduction.json": "7ac8f98605eb41243de522d0bb964ec596f2d57561c96f762b59cec58bdf1b60",
+    "integration_review.json": "527bdbb62c3bd8432229ee24a8c18f0896ca55fc1adc98b72c004e52b973d1a9"
+  }
+}

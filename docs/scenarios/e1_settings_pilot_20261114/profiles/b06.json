@@ -1,0 +1,947 @@
+{
+  "schema": "clover-timing-analysis-v1",
+  "suite_status": "SUCCESS",
+  "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+  "planned_runs": 5,
+  "recorded_rows": 5,
+  "loaded_runs": 5,
+  "not_started_budget": [],
+  "not_yet_recorded": 0,
+  "groups": [
+    {
+      "group_hash": "b8b73ae6f2723147a79c67da5e9d8d5cc0b015bdb87399628d767a5d929f5645",
+      "policy": "optimized",
+      "scenario_hash": "f58731fb216f1edb2aec43cc2b96dd0ade9acaac915cd0ae1d4a7281fb6898cf",
+      "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+      "settings": {
+        "decision": {
+          "timing_protocol": "d1-staged-budget-v1",
+          "startup_mode": "on_demand",
+          "startup_timeout_seconds": 10,
+          "end_to_end_soft_deadline_seconds": 2,
+          "publication_allowance_seconds": 0.2,
+          "max_admission_attempts": 2,
+          "max_worker_restarts": 2,
+          "restart_backoff_seconds": [
+            0.1,
+            1.0
+          ],
+          "fallback_budget_seconds": 0.1,
+          "memory_limit_mib": 1024,
+          "request_watchdog_seconds": 12
+        },
+        "math": {
+          "horizon": 60,
+          "step": 1,
+          "max_tasks": 32,
+          "max_routes": 20000,
+          "sigma": 1,
+          "interval": 5,
+          "timeout": 1,
+          "watchdog": 3,
+          "max_arcs": 30000,
+          "max_tail_ticks": 1200,
+          "memory_limit_mib": 1024,
+          "timing_mode": "D0",
+          "warm_start": true,
+          "warm_start_seconds": 0.05,
+          "joint_cabins": true,
+          "max_cabin_states": 30000,
+          "formulation": "grid",
+          "native_step": 0.1,
+          "native_actions": 0,
+          "native_pruning": true,
+          "native_cache": true
+        }
+      },
+      "timing_mode": "d1-staged-budget-v1",
+      "runs": 1,
+      "cases": [
+        "E1_S01_eligible_1__fixed__optimized__1001"
+      ],
+      "run_statuses": {
+        "SUCCESS": 1
+      },
+      "decisions": 13,
+      "accepted": 13,
+      "pending_at_end": 0,
+      "solver_statuses": {},
+      "decision_statuses": {
+        "COMMITTED": 13
+      },
+      "fallback_reasons": {},
+      "timing_available": true,
+      "timing_finalized_decisions": 13,
+      "cold_worker_decisions": 1,
+      "coverage_violations": 0,
+      "soft_budget_observed": 13,
+      "soft_budget_exceeded": 0,
+      "parent_seconds": {
+        "count": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "p99": null,
+        "unrecorded": 13
+      },
+      "request_sim_delay_seconds": {
+        "count": 13,
+        "mean": 0.30865608344499285,
+        "p50": 0.2401905837934457,
+        "p95": 0.49298684190027325,
+        "max": 0.5178991670720279,
+        "p99": 0.5129167020376769,
+        "unrecorded": 0
+      },
+      "application_wall_seconds": {
+        "count": 13,
+        "mean": 0.0008116986674184983,
+        "p50": 0.000691374996677041,
+        "p95": 0.0013095748145133257,
+        "max": 0.0013266250025480986,
+        "p99": 0.001323214964941144,
+        "unrecorded": 0
+      },
+      "control_measured_seconds": {
+        "count": 13,
+        "mean": 0.06110948080626818,
+        "p50": 0.03909266693517566,
+        "p95": 0.15374165810644586,
+        "max": 0.3185537082608789,
+        "p99": 0.28559129822999213,
+        "unrecorded": 0
+      },
+      "publication_prepaid_seconds": {
+        "count": 13,
+        "mean": 0.20000000000000004,
+        "p50": 0.2,
+        "p95": 0.2,
+        "max": 0.2,
+        "p99": 0.2,
+        "unrecorded": 0
+      },
+      "queue_sim_wait_seconds": {
+        "count": 13,
+        "mean": 0.048358301306143235,
+        "p50": 0.0,
+        "p95": 0.23807894196361232,
+        "max": 0.2384012919384979,
+        "p99": 0.2383368219435208,
+        "unrecorded": 0
+      },
+      "stages": {
+        "admission_prepare": {
+          "count": 13,
+          "mean": 0.0008045128331734584,
+          "p50": 0.0007290840148925781,
+          "p95": 0.001177291665226221,
+          "max": 0.0012082918547093868,
+          "p99": 0.0012020918168127537,
+          "unrecorded": 0
+        },
+        "capture": {
+          "count": 13,
+          "mean": 0.0371265032579406,
+          "p50": 0.0365420829039067,
+          "p95": 0.040832058386877174,
+          "max": 0.04193770908750594,
+          "p99": 0.041716578947380185,
+          "unrecorded": 0
+        },
+        "compute": {
+          "count": 13,
+          "mean": 0.001307756443006488,
+          "p50": 0.0012405000161379576,
+          "p95": 0.0018513665068894615,
+          "max": 0.002305916976183653,
+          "p99": 0.002215006882324814,
+          "unrecorded": 0
+        },
+        "publication": {
+          "count": 13,
+          "mean": 0.0008116986674184983,
+          "p50": 0.000691374996677041,
+          "p95": 0.0013095748145133257,
+          "max": 0.0013266250025480986,
+          "p99": 0.001323214964941144,
+          "unrecorded": 0
+        },
+        "startup": {
+          "count": 1,
+          "mean": 0.2737671248614788,
+          "p50": 0.2737671248614788,
+          "p95": 0.2737671248614788,
+          "max": 0.2737671248614788,
+          "p99": 0.2737671248614788,
+          "unrecorded": 12
+        }
+      },
+      "scope": "exclusive control phases; parent_seconds unavailable; startup/RPC reports overlap phases"
+    },
+    {
+      "group_hash": "cf355927d6920c089589da8685d7cf0d82b455badabf4ceafc3a131d8f60ba4e",
+      "policy": "rh_cpsat_native",
+      "scenario_hash": "f58731fb216f1edb2aec43cc2b96dd0ade9acaac915cd0ae1d4a7281fb6898cf",
+      "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+      "settings": {
+        "decision": {
+          "timing_protocol": "d1-staged-budget-v1",
+          "startup_mode": "on_demand",
+          "startup_timeout_seconds": 10,
+          "end_to_end_soft_deadline_seconds": 2,
+          "publication_allowance_seconds": 0.2,
+          "max_admission_attempts": 2,
+          "max_worker_restarts": 2,
+          "restart_backoff_seconds": [
+            0.1,
+            1.0
+          ],
+          "fallback_budget_seconds": 0.1,
+          "memory_limit_mib": 1024,
+          "request_watchdog_seconds": 12
+        },
+        "math": {
+          "horizon": 40,
+          "step": 2,
+          "max_tasks": 8,
+          "max_routes": 20000,
+          "sigma": 0,
+          "interval": 5,
+          "timeout": 0.25,
+          "watchdog": 3,
+          "max_arcs": 30000,
+          "max_tail_ticks": 1200,
+          "memory_limit_mib": 1024,
+          "timing_mode": "D0",
+          "warm_start": true,
+          "warm_start_seconds": 0.05,
+          "joint_cabins": true,
+          "max_cabin_states": 30000,
+          "formulation": "native",
+          "native_step": 0.1,
+          "native_actions": 4,
+          "native_pruning": true,
+          "native_cache": true
+        }
+      },
+      "timing_mode": "d1-staged-budget-v1",
+      "runs": 1,
+      "cases": [
+        "E1_S01_eligible_1__fixed__rh_cpsat_native__1001"
+      ],
+      "run_statuses": {
+        "SUCCESS": 1
+      },
+      "decisions": 13,
+      "accepted": 10,
+      "pending_at_end": 0,
+      "solver_statuses": {},
+      "decision_statuses": {
+        "COMMITTED": 10,
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "ALL_DEFERRED_RECOVERY": 2
+      },
+      "fallback_reasons": {
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "ALL_DEFERRED_RECOVERY": 2
+      },
+      "timing_available": true,
+      "timing_finalized_decisions": 13,
+      "cold_worker_decisions": 1,
+      "coverage_violations": 0,
+      "soft_budget_observed": 13,
+      "soft_budget_exceeded": 0,
+      "parent_seconds": {
+        "count": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "p99": null,
+        "unrecorded": 13
+      },
+      "request_sim_delay_seconds": {
+        "count": 13,
+        "mean": 0.45249470146372867,
+        "p50": 0.3468002483248682,
+        "p95": 0.9703223400469868,
+        "max": 1.0086730398237704,
+        "p99": 1.0010028998684137,
+        "unrecorded": 0
+      },
+      "application_wall_seconds": {
+        "count": 13,
+        "mean": 0.0008085994766308711,
+        "p50": 0.0007072919979691505,
+        "p95": 0.001227691676467657,
+        "max": 0.0012705419212579727,
+        "p99": 0.0012619718722999096,
+        "unrecorded": 0
+      },
+      "control_measured_seconds": {
+        "count": 13,
+        "mean": 0.16747218596104246,
+        "p50": 0.04006145871244371,
+        "p95": 0.5302943582646544,
+        "max": 0.7454650818835944,
+        "p99": 0.7024309371598061,
+        "unrecorded": 0
+      },
+      "publication_prepaid_seconds": {
+        "count": 13,
+        "mean": 0.20000000000000004,
+        "p50": 0.2,
+        "p95": 0.2,
+        "max": 0.2,
+        "p99": 0.2,
+        "unrecorded": 0
+      },
+      "queue_sim_wait_seconds": {
+        "count": 13,
+        "mean": 0.08583111497931717,
+        "p50": 0.0,
+        "p95": 0.3214119323994957,
+        "max": 0.4447552068624645,
+        "p99": 0.4200865519698706,
+        "unrecorded": 0
+      },
+      "stages": {
+        "admission_prepare": {
+          "count": 10,
+          "mean": 0.0007108248770236969,
+          "p50": 0.0006970415124669671,
+          "p95": 0.0008064953959546981,
+          "max": 0.0008698329329490662,
+          "p99": 0.0008571654255501926,
+          "unrecorded": 3
+        },
+        "capture": {
+          "count": 13,
+          "mean": 0.037575445424478784,
+          "p50": 0.037182874977588654,
+          "p95": 0.04053324083797634,
+          "max": 0.04069629078730941,
+          "p99": 0.04066368079744279,
+          "unrecorded": 0
+        },
+        "compute": {
+          "count": 13,
+          "mean": 0.06747039432565753,
+          "p50": 0.0014695420395582914,
+          "p95": 0.29513807496987277,
+          "max": 0.3124521248973906,
+          "p99": 0.308989314911887,
+          "unrecorded": 0
+        },
+        "fallback_compute": {
+          "count": 3,
+          "mean": 0.03775511138762037,
+          "p50": 0.03815229213796556,
+          "p95": 0.039154291665181515,
+          "max": 0.03926562494598329,
+          "p99": 0.039243358289822936,
+          "unrecorded": 10
+        },
+        "fallback_prepare": {
+          "count": 3,
+          "mean": 0.0011781249195337296,
+          "p50": 0.001159291947260499,
+          "p95": 0.0012723912717774511,
+          "max": 0.0012849578633904457,
+          "p99": 0.0012824445450678467,
+          "unrecorded": 10
+        },
+        "publication": {
+          "count": 13,
+          "mean": 0.0008085994766308711,
+          "p50": 0.0007072919979691505,
+          "p95": 0.001227691676467657,
+          "max": 0.0012705419212579727,
+          "p99": 0.0012619718722999096,
+          "unrecorded": 0
+        },
+        "startup": {
+          "count": 1,
+          "mean": 0.6771227498538792,
+          "p50": 0.6771227498538792,
+          "p95": 0.6771227498538792,
+          "max": 0.6771227498538792,
+          "p99": 0.6771227498538792,
+          "unrecorded": 12
+        }
+      },
+      "scope": "exclusive control phases; parent_seconds unavailable; startup/RPC reports overlap phases"
+    },
+    {
+      "group_hash": "dc426a55b306b8eb3c2d87581875ffa9ac4ea06c23af7d42d7f963ed4e3979cd",
+      "policy": "baseline",
+      "scenario_hash": "f58731fb216f1edb2aec43cc2b96dd0ade9acaac915cd0ae1d4a7281fb6898cf",
+      "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+      "settings": {
+        "decision": {
+          "timing_protocol": "d1-staged-budget-v1",
+          "startup_mode": "on_demand",
+          "startup_timeout_seconds": 10,
+          "end_to_end_soft_deadline_seconds": 2,
+          "publication_allowance_seconds": 0.2,
+          "max_admission_attempts": 2,
+          "max_worker_restarts": 2,
+          "restart_backoff_seconds": [
+            0.1,
+            1.0
+          ],
+          "fallback_budget_seconds": 0.1,
+          "memory_limit_mib": 1024,
+          "request_watchdog_seconds": 12
+        },
+        "math": {
+          "horizon": 60,
+          "step": 1,
+          "max_tasks": 32,
+          "max_routes": 20000,
+          "sigma": 1,
+          "interval": 5,
+          "timeout": 1,
+          "watchdog": 3,
+          "max_arcs": 30000,
+          "max_tail_ticks": 1200,
+          "memory_limit_mib": 1024,
+          "timing_mode": "D0",
+          "warm_start": true,
+          "warm_start_seconds": 0.05,
+          "joint_cabins": true,
+          "max_cabin_states": 30000,
+          "formulation": "grid",
+          "native_step": 0.1,
+          "native_actions": 0,
+          "native_pruning": true,
+          "native_cache": true
+        }
+      },
+      "timing_mode": "d1-staged-budget-v1",
+      "runs": 1,
+      "cases": [
+        "E1_S01_eligible_1__fixed__baseline__1001"
+      ],
+      "run_statuses": {
+        "SUCCESS": 1
+      },
+      "decisions": 13,
+      "accepted": 13,
+      "pending_at_end": 0,
+      "solver_statuses": {},
+      "decision_statuses": {
+        "COMMITTED": 13
+      },
+      "fallback_reasons": {},
+      "timing_available": true,
+      "timing_finalized_decisions": 13,
+      "cold_worker_decisions": 1,
+      "coverage_violations": 0,
+      "soft_budget_observed": 13,
+      "soft_budget_exceeded": 0,
+      "parent_seconds": {
+        "count": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "p99": null,
+        "unrecorded": 13
+      },
+      "request_sim_delay_seconds": {
+        "count": 13,
+        "mean": 0.3090254768550107,
+        "p50": 0.24020133311860192,
+        "p95": 0.49426405758596864,
+        "max": 0.5187252064235508,
+        "p99": 0.5138329766560343,
+        "unrecorded": 0
+      },
+      "application_wall_seconds": {
+        "count": 13,
+        "mean": 0.0008014006575999352,
+        "p50": 0.00071387505158782,
+        "p95": 0.0012085333932191132,
+        "max": 0.0012574580032378435,
+        "p99": 0.0012476730812340975,
+        "unrecorded": 0
+      },
+      "control_measured_seconds": {
+        "count": 13,
+        "mean": 0.06143824335259314,
+        "p50": 0.039641707902774215,
+        "p95": 0.15494250794872602,
+        "max": 0.3194617065601051,
+        "p99": 0.2865578668378291,
+        "unrecorded": 0
+      },
+      "publication_prepaid_seconds": {
+        "count": 13,
+        "mean": 0.20000000000000004,
+        "p50": 0.2,
+        "p95": 0.2,
+        "max": 0.2,
+        "p99": 0.2,
+        "unrecorded": 0
+      },
+      "queue_sim_wait_seconds": {
+        "count": 13,
+        "mean": 0.04838863416001757,
+        "p50": 0.0,
+        "p95": 0.2376100162975483,
+        "max": 0.23815754107199538,
+        "p99": 0.23804803611710595,
+        "unrecorded": 0
+      },
+      "stages": {
+        "admission_prepare": {
+          "count": 13,
+          "mean": 0.000793884526221798,
+          "p50": 0.0007325001060962677,
+          "p95": 0.0011494414880871772,
+          "max": 0.0011614169925451279,
+          "p99": 0.0011590218916535378,
+          "unrecorded": 0
+        },
+        "capture": {
+          "count": 13,
+          "mean": 0.037354413276681535,
+          "p50": 0.037085457937791944,
+          "p95": 0.04131959970109165,
+          "max": 0.04171712487004697,
+          "p99": 0.041637619836255906,
+          "unrecorded": 0
+        },
+        "compute": {
+          "count": 13,
+          "mean": 0.0013492692870875965,
+          "p50": 0.0012020841240882874,
+          "p95": 0.0020319337490946037,
+          "max": 0.0027620841283351183,
+          "p99": 0.0026160540524870143,
+          "unrecorded": 0
+        },
+        "publication": {
+          "count": 13,
+          "mean": 0.0008014006575999352,
+          "p50": 0.00071387505158782,
+          "p95": 0.0012085333932191132,
+          "max": 0.0012574580032378435,
+          "p99": 0.0012476730812340975,
+          "unrecorded": 0
+        },
+        "startup": {
+          "count": 1,
+          "mean": 0.2748105828650296,
+          "p50": 0.2748105828650296,
+          "p95": 0.2748105828650296,
+          "max": 0.2748105828650296,
+          "p99": 0.2748105828650296,
+          "unrecorded": 12
+        }
+      },
+      "scope": "exclusive control phases; parent_seconds unavailable; startup/RPC reports overlap phases"
+    },
+    {
+      "group_hash": "e6a3338ca5a0be1e84f51c2592fcd1791d88fc30a821b11ba85814a71576379b",
+      "policy": "rh_milp_grid",
+      "scenario_hash": "f58731fb216f1edb2aec43cc2b96dd0ade9acaac915cd0ae1d4a7281fb6898cf",
+      "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+      "settings": {
+        "decision": {
+          "timing_protocol": "d1-staged-budget-v1",
+          "startup_mode": "on_demand",
+          "startup_timeout_seconds": 10,
+          "end_to_end_soft_deadline_seconds": 2,
+          "publication_allowance_seconds": 0.2,
+          "max_admission_attempts": 2,
+          "max_worker_restarts": 2,
+          "restart_backoff_seconds": [
+            0.1,
+            1.0
+          ],
+          "fallback_budget_seconds": 0.1,
+          "memory_limit_mib": 1024,
+          "request_watchdog_seconds": 12
+        },
+        "math": {
+          "horizon": 40,
+          "step": 2,
+          "max_tasks": 8,
+          "max_routes": 20000,
+          "sigma": 0,
+          "interval": 5,
+          "timeout": 0.25,
+          "watchdog": 3,
+          "max_arcs": 30000,
+          "max_tail_ticks": 1200,
+          "memory_limit_mib": 1024,
+          "timing_mode": "D0",
+          "warm_start": true,
+          "warm_start_seconds": 0.05,
+          "joint_cabins": true,
+          "max_cabin_states": 30000,
+          "formulation": "grid",
+          "native_step": 0.1,
+          "native_actions": 4,
+          "native_pruning": true,
+          "native_cache": true
+        }
+      },
+      "timing_mode": "d1-staged-budget-v1",
+      "runs": 1,
+      "cases": [
+        "E1_S01_eligible_1__fixed__rh_milp_grid__1001"
+      ],
+      "run_statuses": {
+        "SUCCESS": 1
+      },
+      "decisions": 13,
+      "accepted": 10,
+      "pending_at_end": 0,
+      "solver_statuses": {},
+      "decision_statuses": {
+        "COMMITTED": 10,
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "STALE_AVAILABILITY": 1,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "fallback_reasons": {
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "STALE_AVAILABILITY": 1,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "timing_available": true,
+      "timing_finalized_decisions": 13,
+      "cold_worker_decisions": 1,
+      "coverage_violations": 0,
+      "soft_budget_observed": 13,
+      "soft_budget_exceeded": 0,
+      "parent_seconds": {
+        "count": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "p99": null,
+        "unrecorded": 13
+      },
+      "request_sim_delay_seconds": {
+        "count": 13,
+        "mean": 0.41506446793747026,
+        "p50": 0.43693366753868546,
+        "p95": 0.6958895760122676,
+        "max": 0.7658412515651434,
+        "p99": 0.7518509164545681,
+        "unrecorded": 0
+      },
+      "application_wall_seconds": {
+        "count": 13,
+        "mean": 0.005061955083734714,
+        "p50": 0.0007135409396141768,
+        "p95": 0.023363491287454883,
+        "max": 0.056370666017755866,
+        "p99": 0.04976923107169563,
+        "unrecorded": 0
+      },
+      "control_measured_seconds": {
+        "count": 13,
+        "mean": 0.15175372423031008,
+        "p50": 0.040769541868939996,
+        "p95": 0.43166168434545393,
+        "max": 0.44555145944468677,
+        "p99": 0.4427735044248402,
+        "unrecorded": 0
+      },
+      "publication_prepaid_seconds": {
+        "count": 13,
+        "mean": 0.20000000000000004,
+        "p50": 0.2,
+        "p95": 0.2,
+        "max": 0.2,
+        "p99": 0.2,
+        "unrecorded": 0
+      },
+      "queue_sim_wait_seconds": {
+        "count": 13,
+        "mean": 0.06837269879089497,
+        "p50": 0.0,
+        "p95": 0.23829458290710975,
+        "max": 0.23878133301623095,
+        "p99": 0.2386839829944067,
+        "unrecorded": 0
+      },
+      "stages": {
+        "admission_prepare": {
+          "count": 11,
+          "mean": 0.0029068825851109896,
+          "p50": 0.0007124580442905426,
+          "p95": 0.012790229404345155,
+          "max": 0.024084833916276693,
+          "p99": 0.021825913013890395,
+          "unrecorded": 2
+        },
+        "capture": {
+          "count": 13,
+          "mean": 0.03750017946227812,
+          "p50": 0.036936790915206075,
+          "p95": 0.04136729226447641,
+          "max": 0.04320154199376702,
+          "p99": 0.0428346920479089,
+          "unrecorded": 0
+        },
+        "compute": {
+          "count": 13,
+          "mean": 0.07067750310167097,
+          "p50": 0.0013823339249938726,
+          "p95": 0.3104315917938946,
+          "max": 0.3632487920112908,
+          "p99": 0.3526853519678115,
+          "unrecorded": 0
+        },
+        "fallback_compute": {
+          "count": 3,
+          "mean": 0.03762325031372408,
+          "p50": 0.03737004194408655,
+          "p95": 0.039272604254074396,
+          "max": 0.039484000066295266,
+          "p99": 0.03944172090385109,
+          "unrecorded": 10
+        },
+        "fallback_prepare": {
+          "count": 3,
+          "mean": 0.0010540693377455075,
+          "p50": 0.0010995829943567514,
+          "p95": 0.0012939084088429808,
+          "max": 0.001315500121563673,
+          "p99": 0.0013111817790195347,
+          "unrecorded": 10
+        },
+        "publication": {
+          "count": 13,
+          "mean": 0.005061955083734714,
+          "p50": 0.0007135409396141768,
+          "p95": 0.023363491287454883,
+          "max": 0.056370666017755866,
+          "p99": 0.04976923107169563,
+          "unrecorded": 0
+        },
+        "startup": {
+          "count": 1,
+          "mean": 0.3526754581835121,
+          "p50": 0.3526754581835121,
+          "p95": 0.3526754581835121,
+          "max": 0.3526754581835121,
+          "p99": 0.3526754581835121,
+          "unrecorded": 12
+        }
+      },
+      "scope": "exclusive control phases; parent_seconds unavailable; startup/RPC reports overlap phases"
+    },
+    {
+      "group_hash": "f2d0fd822d23a57e591b04b3d6c6f164a234d8a3ea492db7b0ef76ff2f290379",
+      "policy": "rh_cpsat_linear",
+      "scenario_hash": "f58731fb216f1edb2aec43cc2b96dd0ade9acaac915cd0ae1d4a7281fb6898cf",
+      "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+      "settings": {
+        "decision": {
+          "timing_protocol": "d1-staged-budget-v1",
+          "startup_mode": "on_demand",
+          "startup_timeout_seconds": 10,
+          "end_to_end_soft_deadline_seconds": 2,
+          "publication_allowance_seconds": 0.2,
+          "max_admission_attempts": 2,
+          "max_worker_restarts": 2,
+          "restart_backoff_seconds": [
+            0.1,
+            1.0
+          ],
+          "fallback_budget_seconds": 0.1,
+          "memory_limit_mib": 1024,
+          "request_watchdog_seconds": 12
+        },
+        "math": {
+          "horizon": 40,
+          "step": 2,
+          "max_tasks": 8,
+          "max_routes": 20000,
+          "sigma": 0,
+          "interval": 5,
+          "timeout": 0.25,
+          "watchdog": 3,
+          "max_arcs": 30000,
+          "max_tail_ticks": 1200,
+          "memory_limit_mib": 1024,
+          "timing_mode": "D0",
+          "warm_start": true,
+          "warm_start_seconds": 0.05,
+          "joint_cabins": true,
+          "max_cabin_states": 30000,
+          "formulation": "grid",
+          "native_step": 0.1,
+          "native_actions": 4,
+          "native_pruning": true,
+          "native_cache": true
+        }
+      },
+      "timing_mode": "d1-staged-budget-v1",
+      "runs": 1,
+      "cases": [
+        "E1_S01_eligible_1__fixed__rh_cpsat_linear__1001"
+      ],
+      "run_statuses": {
+        "SUCCESS": 1
+      },
+      "decisions": 13,
+      "accepted": 11,
+      "pending_at_end": 0,
+      "solver_statuses": {},
+      "decision_statuses": {
+        "COMMITTED": 11,
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "STALE_AVAILABILITY": 1
+      },
+      "fallback_reasons": {
+        "NO_INCUMBENT_TIMEOUT": 1,
+        "STALE_AVAILABILITY": 1
+      },
+      "timing_available": true,
+      "timing_finalized_decisions": 13,
+      "cold_worker_decisions": 1,
+      "coverage_violations": 0,
+      "soft_budget_observed": 13,
+      "soft_budget_exceeded": 0,
+      "parent_seconds": {
+        "count": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "p99": null,
+        "unrecorded": 13
+      },
+      "request_sim_delay_seconds": {
+        "count": 13,
+        "mean": 0.511100596651577,
+        "p50": 0.4753019161056713,
+        "p95": 1.0074311413057144,
+        "max": 1.115910790953785,
+        "p99": 1.0942148610241709,
+        "unrecorded": 0
+      },
+      "application_wall_seconds": {
+        "count": 13,
+        "mean": 0.007921394086084686,
+        "p50": 0.0006828340701758862,
+        "p95": 0.038407516013830766,
+        "max": 0.09400966600514948,
+        "p99": 0.08288923600688568,
+        "unrecorded": 0
+      },
+      "control_measured_seconds": {
+        "count": 13,
+        "mean": 0.18017093919647428,
+        "p50": 0.038606332149356604,
+        "p95": 0.5836284992285069,
+        "max": 0.7358629999216646,
+        "p99": 0.7054160997830329,
+        "unrecorded": 0
+      },
+      "publication_prepaid_seconds": {
+        "count": 13,
+        "mean": 0.20000000000000004,
+        "p50": 0.2,
+        "p95": 0.2,
+        "max": 0.2,
+        "p99": 0.2,
+        "unrecorded": 0
+      },
+      "queue_sim_wait_seconds": {
+        "count": 13,
+        "mean": 0.1388510515411881,
+        "p50": 0.19114787583239234,
+        "p95": 0.3166677750181399,
+        "max": 0.4351113748736679,
+        "p99": 0.4114226549025622,
+        "unrecorded": 0
+      },
+      "stages": {
+        "admission_prepare": {
+          "count": 12,
+          "mean": 0.004045607754960656,
+          "p50": 0.0006999796023592353,
+          "p95": 0.018816839426290217,
+          "max": 0.039930124999955297,
+          "p99": 0.035707467885222305,
+          "unrecorded": 1
+        },
+        "capture": {
+          "count": 13,
+          "mean": 0.03661009617364751,
+          "p50": 0.035943625029176474,
+          "p95": 0.040749433077871794,
+          "max": 0.04160570818930864,
+          "p99": 0.041434453167021275,
+          "unrecorded": 0
+        },
+        "compute": {
+          "count": 13,
+          "mean": 0.07447459310508119,
+          "p50": 0.0014657920692116022,
+          "p95": 0.32142637525685114,
+          "max": 0.39880812517367303,
+          "p99": 0.3833317751903086,
+          "unrecorded": 0
+        },
+        "fallback_compute": {
+          "count": 2,
+          "mean": 0.03840081242378801,
+          "p50": 0.03840081242378801,
+          "p95": 0.04029829372884706,
+          "max": 0.04050912498496473,
+          "p99": 0.0404669587337412,
+          "unrecorded": 11
+        },
+        "fallback_prepare": {
+          "count": 2,
+          "mean": 0.001376125030219555,
+          "p50": 0.001376125030219555,
+          "p95": 0.0014414129313081504,
+          "max": 0.0014486671425402164,
+          "p99": 0.0014472163002938031,
+          "unrecorded": 11
+        },
+        "publication": {
+          "count": 13,
+          "mean": 0.007921394086084686,
+          "p50": 0.0006828340701758862,
+          "p95": 0.038407516013830766,
+          "max": 0.09400966600514948,
+          "p99": 0.08288923600688568,
+          "unrecorded": 0
+        },
+        "startup": {
+          "count": 1,
+          "mean": 0.6670419578440487,
+          "p50": 0.6670419578440487,
+          "p95": 0.6670419578440487,
+          "max": 0.6670419578440487,
+          "p99": 0.6670419578440487,
+          "unrecorded": 12
+        }
+      },
+      "scope": "exclusive control phases; parent_seconds unavailable; startup/RPC reports overlap phases"
+    }
+  ],
+  "input_manifest_hash": "e40244ad8682593c7aa1f6c4323675344332f68df32c149b927e260b289c093a",
+  "input_result_hashes": {
+    "E1_S01_eligible_1__fixed__rh_milp_grid__1001.json": "2cbf30c6b1de91266919555b75a1aca11d8ff5bca57fa1cf1b84375f55ffce6c",
+    "E1_S01_eligible_1__fixed__rh_cpsat_linear__1001.json": "27abbda63f1f6a8449326321a6e9f143a0951c5d032f61df471faccca1dcacd0",
+    "E1_S01_eligible_1__fixed__baseline__1001.json": "273140cc2a36d1b540dac60618c31a40f9c203a7aad4a1f1780d6e1096bb934f",
+    "E1_S01_eligible_1__fixed__optimized__1001.json": "8cc60020e6126c97d2e5419ad8df22079f4b1f3a6e0c20aa4097b5eb72566cfb",
+    "E1_S01_eligible_1__fixed__rh_cpsat_native__1001.json": "082c796cc4168c369a4752dacf0c5a7450f4f2baa3c182b0c16c8e40fb2dd663"
+  },
+  "scope": "descriptive decision timings only; unrecorded includes unstarted/unknown, not zero; no CI or recommendation"
+}

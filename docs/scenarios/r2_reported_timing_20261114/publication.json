@@ -1,0 +1,43 @@
+{
+  "schema": "clover-r2-snapshot-publication-v1",
+  "date": "2026-11-14",
+  "raw_root": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_R2_snapshot_benchmark_20261114",
+  "validation": {
+    "py311_full": {
+      "counts": {
+        "tests": 573,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "2c521a6d2db5141338290a6b8566cbee89eac8cd05775aa656307ef230a79003"
+    },
+    "py314_targeted": {
+      "counts": {
+        "tests": 43,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "367164752511d635ffd7546b5c789272d0793987e75e31b6c6d45b28bfb91da3"
+    }
+  },
+  "source_commit": "8327f84d2727e3c522593ab41e067dfcab80d1d9",
+  "scope": "48 static solver arms, zero new closed-loop simulations; 3 late returns retained; no inference or recommendation",
+  "raw_bytes": 13666100,
+  "files_sha256": {
+    "execution.json": "4ae0d2ca957aff2f12a5b931d66208fecc62af2ebb724bc6b5aa5ab2fe69bb07",
+    "manifests/S01_eligible_1/manifest.json": "5dcb45192389917bd36f254c81f6e4020192faa44e227f03cf153e3aa6c17253",
+    "manifests/S04_mixed_soc/manifest.json": "8b00ddc9357ff329fe6e1300f7d56f33f036f19b1d9e8da874c03fe325c69dc0",
+    "manifests/S08_two_cars/manifest.json": "026b64cd1a8db414a3185af11197ae3284a0ccad340bac8e78529b169ebb2a6f",
+    "manifests/S11_budget_2/manifest.json": "676419c13f75446308dbf9f9ccbabfc2b71f7c2033704dfd709617ca1e05108e",
+    "preflight.json": "fdefd6e16e0f514b91d7d25d11da4405ae7a69875d7031956d745c58f4e67399",
+    "protocol.json": "a38a2b0bc92edf38fa3f4db7b95eca9ff4727e88abb6ce52a81f91dd5a82b38e",
+    "receipt.json": "056fe92ccd072a5be5cd573d87a87e724d83f419a67a4dc0d34cb255fe483389",
+    "snapshots/S01_eligible_1.json": "e8281bb69031747aba425d6aab9f1ea56532cc138777676c0578ff929b7d0741",
+    "snapshots/S04_mixed_soc.json": "dbb254b0b8fc45d43a55c32a472856c1c7ac87d13a0ed06e21e176f0cf08ff4b",
+    "snapshots/S08_two_cars.json": "b46e94d8008f54eaf00426144f8e7941569f89c2396433e50766f4de8b9a9c1e",
+    "snapshots/S11_budget_2.json": "ed231c50162ccac04f2bf588c7ddc6d80d33e54c6374c8f4bbffdc93fe9a0934",
+    "summary.csv": "3804b3024f032c846a3eb2f27436532096e7941efe32bd2a2dc0d2b31c619ef0"
+  }
+}

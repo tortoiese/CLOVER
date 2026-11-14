@@ -1,0 +1,1222 @@
+{
+  "scope": "12 synthetic training reference windows; D0 optimized only",
+  "source_hash": "192e456b789a4f940588631079177d75062770b5e374c81098d87141c4e360c5",
+  "cases": [
+    {
+      "case": "training_S00_low",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S00_low/training_S00_low__optimized__11001.json",
+      "result_sha256": "e2ff3b8ee43abec0f958f9bc0444c257076520d68a842ed09a9972066a676709",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S00_low/calibration.json",
+      "calibration_sha256": "959f3adfd49e19b3290d9896849f7ce44f89dc0d94d295459f5729de591edffe",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.399999999998954
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.800000000002
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.39999999999782
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.79999999999973
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 35,
+          "throughput_per_min": 1.75,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 34,
+          "throughput_per_min": 1.7,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 37,
+          "throughput_per_min": 1.85,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 34,
+          "throughput_per_min": 1.7,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 35,
+          "throughput_per_min": 1.75,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 35,
+          "throughput_per_min": 1.75,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "training_S01_eligible_1",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S01_eligible_1/training_S01_eligible_1__optimized__11001.json",
+      "result_sha256": "3c948eb4e09da62a097fc58fac25a0ddcdb8df78de2cfbf2115d2a9f9c275a55",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S01_eligible_1/calibration.json",
+      "calibration_sha256": "99070d258512377289d8f026145eabed4a3c83c58965671ee30bd3914f0569a9",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 7,
+          "throughput_per_min": 8.4,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "training_S02_width_1p3",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S02_width_1p3/training_S02_width_1p3__optimized__11001.json",
+      "result_sha256": "3e9ba1456d77899591dddb7c1e00325615f4b070392afac5ec2a7fdec652d0d2",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S02_width_1p3/calibration.json",
+      "calibration_sha256": "856dc2d33f14afc785b0edb7c3d89a5a32f2d4600a7c88818bba01035368bfed",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 0,
+          "wip_before_end": 7
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 5,
+          "throughput_per_min": 6.0,
+          "wip_before_start": 7,
+          "wip_before_end": 2
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "training_S03_on",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S03_on/training_S03_on__optimized__11001.json",
+      "result_sha256": "8319896510265c56e10ebaf87d265f0fcc5db97b99a2e3fb562fc0f128bfcb8a",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S03_on/calibration.json",
+      "calibration_sha256": "df2c8b53af6b8a651637bcf4f26ce155cc5eafc0c29aa31a628a4eb72cf5496b",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 0,
+          "wip_before_end": 6
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 6,
+          "wip_before_end": 4
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 3,
+          "throughput_per_min": 3.6,
+          "wip_before_start": 4,
+          "wip_before_end": 1
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "training_S04_mixed_soc",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S04_mixed_soc/training_S04_mixed_soc__optimized__11001.json",
+      "result_sha256": "72d880d5859352842185006bd9854fd5273975c40877cc99a92340a127d948c5",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S04_mixed_soc/calibration.json",
+      "calibration_sha256": "60e50a01be8c3ca730dfd68f42c3ec8eff04adac52cbf1627e6e5cb0a9ca9cb4",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 437.2499999999999
+        },
+        "R1": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 369.0
+        },
+        "R2": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 489.0
+        },
+        "R3": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 501.0
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 38,
+          "throughput_per_min": 1.9,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 47,
+          "throughput_per_min": 2.35,
+          "wip_before_start": 0,
+          "wip_before_end": 4
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 45,
+          "throughput_per_min": 2.25,
+          "wip_before_start": 4,
+          "wip_before_end": 1
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 40,
+          "throughput_per_min": 2.0,
+          "wip_before_start": 1,
+          "wip_before_end": 10
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 49,
+          "throughput_per_min": 2.45,
+          "wip_before_start": 10,
+          "wip_before_end": 7
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 49,
+          "throughput_per_min": 2.45,
+          "wip_before_start": 7,
+          "wip_before_end": 9
+        }
+      ]
+    },
+    {
+      "case": "training_S05_hotspot_70",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S05_hotspot_70/training_S05_hotspot_70__optimized__11001.json",
+      "result_sha256": "99474f0e3a08aee54a33102ffb3db0b28e41ab3a74382d4027cd5de1a12b6b84",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S05_hotspot_70/calibration.json",
+      "calibration_sha256": "12f6c13f423a2e3c824b2db8f647d0d2a1c4367888df19e22546125493cf5e2f",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 260.99999999999795
+        },
+        "R1": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 263.39999999999804
+        },
+        "R2": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 262.2000000000014
+        },
+        "R3": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 262.19999999999914
+        },
+        "R4": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 227.4000000000001
+        },
+        "R5": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 258.9999999999998
+        },
+        "R6": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 265.8000000000004
+        },
+        "R7": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 259.4
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 204,
+          "throughput_per_min": 10.2,
+          "wip_before_start": 4,
+          "wip_before_end": 31
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 213,
+          "throughput_per_min": 10.65,
+          "wip_before_start": 31,
+          "wip_before_end": 33
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 222,
+          "throughput_per_min": 11.1,
+          "wip_before_start": 33,
+          "wip_before_end": 38
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 209,
+          "throughput_per_min": 10.45,
+          "wip_before_start": 38,
+          "wip_before_end": 55
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 201,
+          "throughput_per_min": 10.05,
+          "wip_before_start": 55,
+          "wip_before_end": 65
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 220,
+          "throughput_per_min": 11.0,
+          "wip_before_start": 65,
+          "wip_before_end": 104
+        }
+      ]
+    },
+    {
+      "case": "training_S06_burst_2",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S06_burst_2/training_S06_burst_2__optimized__11001.json",
+      "result_sha256": "902d4a49cf0b2000da6e61db73189a5c1b7eb8876234aeb3826387a954174ef0",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S06_burst_2/calibration.json",
+      "calibration_sha256": "8a9cb36a9f7417007a290ebbcc7c21b6256be6d1ebb3ca5ccd8756a6b15d6431",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 124.39999999999941
+        },
+        "R1": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 157.60000000000105
+        },
+        "R2": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 125.99999999999795
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 96.00000000000136
+        },
+        "R4": {
+          "completed": 6,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 190.79999999999814
+        },
+        "R5": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 157.19999999999914
+        },
+        "R6": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 127.60000000000105
+        },
+        "R7": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 125.99999999999795
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 201,
+          "throughput_per_min": 10.05,
+          "wip_before_start": 1,
+          "wip_before_end": 3
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 200,
+          "throughput_per_min": 10.0,
+          "wip_before_start": 3,
+          "wip_before_end": 1
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 260,
+          "throughput_per_min": 13.0,
+          "wip_before_start": 1,
+          "wip_before_end": 6
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 265,
+          "throughput_per_min": 13.25,
+          "wip_before_start": 6,
+          "wip_before_end": 0
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 181,
+          "throughput_per_min": 9.05,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 182,
+          "throughput_per_min": 9.1,
+          "wip_before_start": 2,
+          "wip_before_end": 2
+        }
+      ]
+    },
+    {
+      "case": "training_S07_speed_mix",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S07_speed_mix/training_S07_speed_mix__optimized__11001.json",
+      "result_sha256": "80bd41c1c0b06b46ff3945923b5443954ec312c7dc9fdc9c7dad8ebef3f3125c",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S07_speed_mix/calibration.json",
+      "calibration_sha256": "30e6bf23f7a6ab5bc2ca6776f7d643027b88a77582e865021e22aff20eb13e6c",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 7,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 248.20000000000164
+        },
+        "R1": {
+          "completed": 6,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 212.9999999999984
+        },
+        "R2": {
+          "completed": 6,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 218.60000000000014
+        },
+        "R3": {
+          "completed": 7,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 248.19999999999823
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 103,
+          "throughput_per_min": 5.15,
+          "wip_before_start": 3,
+          "wip_before_end": 2
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 93,
+          "throughput_per_min": 4.65,
+          "wip_before_start": 2,
+          "wip_before_end": 1
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 88,
+          "throughput_per_min": 4.4,
+          "wip_before_start": 1,
+          "wip_before_end": 11
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 82,
+          "throughput_per_min": 4.1,
+          "wip_before_start": 11,
+          "wip_before_end": 0
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 102,
+          "throughput_per_min": 5.1,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 113,
+          "throughput_per_min": 5.65,
+          "wip_before_start": 1,
+          "wip_before_end": 2
+        }
+      ]
+    },
+    {
+      "case": "training_S08_two_cars",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S08_two_cars/training_S08_two_cars__optimized__11001.json",
+      "result_sha256": "712d27c2f50b4c59971880ee5921a46ba86c4c67834499c5c8a66fbef7d10a3d",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S08_two_cars/calibration.json",
+      "calibration_sha256": "810fd7e4d0372d1d2dcfd776df3b859a5fb881acd8931689a43a38f0df037ba7",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 3,
+          "throughput_per_min": 3.6,
+          "wip_before_start": 0,
+          "wip_before_end": 5
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 4,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 5,
+          "wip_before_end": 1
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "training_S09_station_active",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S09_station_active/training_S09_station_active__optimized__11001.json",
+      "result_sha256": "1a319f07de9dc6cb3891f2f70adc8b27e5bdfe2fe7d8012646fc76eb88fbbd5b",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S09_station_active/calibration.json",
+      "calibration_sha256": "06dd52bced73719266ef5f6f82a7eccf4b773a6b8e174eef02cc209700b94d19",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 16,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 188.0
+        },
+        "R1": {
+          "completed": 17,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 167.99999999999997
+        },
+        "R2": {
+          "completed": 15,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 180.0
+        },
+        "R3": {
+          "completed": 16,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 151.99999999999997
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 200.0,
+          "completions": 18,
+          "throughput_per_min": 5.4,
+          "wip_before_start": 0,
+          "wip_before_end": 3
+        },
+        {
+          "start": 200.0,
+          "end": 400.0,
+          "completions": 24,
+          "throughput_per_min": 7.2,
+          "wip_before_start": 3,
+          "wip_before_end": 4
+        },
+        {
+          "start": 400.0,
+          "end": 600.0,
+          "completions": 17,
+          "throughput_per_min": 5.1,
+          "wip_before_start": 4,
+          "wip_before_end": 1
+        },
+        {
+          "start": 600.0,
+          "end": 800.0,
+          "completions": 15,
+          "throughput_per_min": 4.5,
+          "wip_before_start": 1,
+          "wip_before_end": 3
+        },
+        {
+          "start": 800.0,
+          "end": 1000.0,
+          "completions": 15,
+          "throughput_per_min": 4.5,
+          "wip_before_start": 3,
+          "wip_before_end": 1
+        },
+        {
+          "start": 1000.0,
+          "end": 1200.0,
+          "completions": 16,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 1,
+          "wip_before_end": 4
+        }
+      ]
+    },
+    {
+      "case": "training_S10_lambda_0p26",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S10_lambda_0p26/training_S10_lambda_0p26__optimized__11001.json",
+      "result_sha256": "ebd7edf89f185897983c6b4ff2e23dfbb379e0b8052a42fe16dce7f3777096dd",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S10_lambda_0p26/calibration.json",
+      "calibration_sha256": "03a48c59b598b1a0d18e38d85b944ebd848d07829654b78e85a5d5a3e7cdda84",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 584.9999999999989
+        },
+        "R1": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 642.999999999999
+        },
+        "R2": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 588.9999999999998
+        },
+        "R3": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 590.9999999999991
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 1300.0,
+          "completions": 121,
+          "throughput_per_min": 5.584615384615384,
+          "wip_before_start": 0,
+          "wip_before_end": 243
+        },
+        {
+          "start": 1300.0,
+          "end": 2600.0,
+          "completions": 132,
+          "throughput_per_min": 6.092307692307692,
+          "wip_before_start": 243,
+          "wip_before_end": 437
+        },
+        {
+          "start": 2600.0,
+          "end": 3900.0,
+          "completions": 116,
+          "throughput_per_min": 5.3538461538461535,
+          "wip_before_start": 437,
+          "wip_before_end": 672
+        },
+        {
+          "start": 3900.0,
+          "end": 5200.0,
+          "completions": 132,
+          "throughput_per_min": 6.092307692307692,
+          "wip_before_start": 672,
+          "wip_before_end": 875
+        },
+        {
+          "start": 5200.0,
+          "end": 6500.0,
+          "completions": 124,
+          "throughput_per_min": 5.723076923076923,
+          "wip_before_start": 875,
+          "wip_before_end": 1066
+        },
+        {
+          "start": 6500.0,
+          "end": 7800.0,
+          "completions": 129,
+          "throughput_per_min": 5.953846153846154,
+          "wip_before_start": 1066,
+          "wip_before_end": 1256
+        }
+      ]
+    },
+    {
+      "case": "training_S11_budget_2",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S11_budget_2/training_S11_budget_2__optimized__11001.json",
+      "result_sha256": "05ed5881ad13ba09afbecc9f8b6d51595a809b9037eb2b82134fbf518e6bae12",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/development_calibration/training_S11_budget_2/calibration.json",
+      "calibration_sha256": "0ba13c7d4407e2300b4e5fafa8e61f2db954e7ce9d9dd12220c706b5d23fbcbc",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.39999999999895
+        },
+        "R1": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 131.59999999999968
+        },
+        "R2": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 133.19999999999823
+        },
+        "R3": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 133.19999999999823
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 77,
+          "throughput_per_min": 3.85,
+          "wip_before_start": 1,
+          "wip_before_end": 2
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 98,
+          "throughput_per_min": 4.9,
+          "wip_before_start": 2,
+          "wip_before_end": 1
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 99,
+          "throughput_per_min": 4.95,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 84,
+          "throughput_per_min": 4.2,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 82,
+          "throughput_per_min": 4.1,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 103,
+          "throughput_per_min": 5.15,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        }
+      ]
+    }
+  ]
+}

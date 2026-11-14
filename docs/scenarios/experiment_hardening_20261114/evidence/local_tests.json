@@ -1,0 +1,47 @@
+{
+  "core311": {
+    "sha256": "8aae926093ed906bccf84f2ad3a9f484fe317a49b02ce908c4382dd1743a6e52",
+    "summary": [
+      "600 passed, 1 deselected, 3 warnings in 165.09s (0:02:45)"
+    ]
+  },
+  "related314": {
+    "sha256": "cbf0c89c2d82ea5e61ba5b11e42e04e7695140ca0b0d04a5dd8d97ac215453ce",
+    "summary": [
+      "114 passed, 3 warnings in 25.19s"
+    ]
+  },
+  "integrity311": {
+    "sha256": "015678208dacc6b7fe67e85b5923dbf3d62a00bf7afee9212bad97029e31de51",
+    "summary": [
+      "24 passed in 2.40s"
+    ]
+  },
+  "integrity314": {
+    "sha256": "3486683df3906c08423baa426bfb009db6549d514351fb9595644e3c4aab3799",
+    "summary": [
+      "24 passed in 2.48s"
+    ]
+  },
+  "gui_original_full": {
+    "sha256": "e291795e6fe3cf4824b81a72f6445736ea40e8e61ff54c0e7ab3152241493467",
+    "summary": [
+      "FAILED gui/test_rh_gui.py::test_settings_and_default_factory_gui_response - a...",
+      "1 failed, 600 passed, 3 warnings in 183.27s (0:03:03)"
+    ]
+  },
+  "gui_isolated": {
+    "sha256": "e8dd4f3f780481d7f0a850814b7fd3027722d768ac8236e45304f5d17cc7e720",
+    "summary": [
+      "FAILED gui/test_rh_gui.py::test_settings_and_default_factory_gui_response - a...",
+      "1 failed in 7.92s"
+    ]
+  },
+  "gui_baseline": {
+    "sha256": "98c01723b1c3dabfbf1f1e49fab509f126d64f752499b7b5bc55116ae16c811a",
+    "summary": [
+      "FAILED gui/test_rh_gui.py::test_settings_and_default_factory_gui_response - a...",
+      "1 failed in 8.57s"
+    ]
+  }
+}

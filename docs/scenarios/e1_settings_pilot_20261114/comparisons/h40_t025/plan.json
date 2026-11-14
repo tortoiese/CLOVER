@@ -1,0 +1,86 @@
+{
+  "schema": "clover-paired-analysis-plan-v1",
+  "purpose": "training",
+  "control": "optimized",
+  "candidates": [
+    "baseline",
+    "rh_milp_grid",
+    "rh_cpsat_linear",
+    "rh_cpsat_native"
+  ],
+  "metrics": [
+    "throughput_per_min",
+    "late_due_rate",
+    "energy_per_completed",
+    "mean_wip",
+    "charge_queue_robot_seconds",
+    "arrival_to_start_p95",
+    "recorded_run_wall_seconds",
+    "batch_makespan"
+  ],
+  "confidence": 0.95,
+  "bootstrap_resamples": 5000,
+  "bootstrap_seed": 1001,
+  "minimum_seed_pairs": 10,
+  "minimum_layouts": 3,
+  "layout_sampling_independent": false,
+  "hardware_id": "jm-local-mac-arm64-20261114",
+  "blocks": [
+    {
+      "condition": "S01_eligible_1",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S01",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": false,
+      "demand_kind": "finite_batch",
+      "scenario": "E1_S01_eligible_1__fixed",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b06_h40_t025_S01_eligible_1/E1_S01_eligible_1__fixed/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S08_two_cars",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S08",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": false,
+      "demand_kind": "finite_batch",
+      "scenario": "E1_S08_two_cars__fixed",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b08_h40_t025_S08_two_cars/E1_S08_two_cars__fixed/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S11_budget_2",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S11",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": true,
+      "demand_kind": "stream",
+      "scenario": "E1_S11_budget_2__s1001",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b11_h40_t025_S11_budget_2/E1_S11_budget_2__s1001/manifest.json",
+      "unstarted_status": null
+    },
+    {
+      "condition": "S04_mixed_soc",
+      "layout": "synthetic-reference-v1-e1-screen-20261114:S04",
+      "replicate": "1001",
+      "seed": 1001,
+      "stochastic": true,
+      "demand_kind": "stream",
+      "scenario": "E1_S04_mixed_soc__s1001",
+      "suite": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b12_h40_t025_S04_mixed_soc/E1_S04_mixed_soc__s1001/manifest.json",
+      "unstarted_status": null
+    }
+  ],
+  "draft_from": {
+    "manifest": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b06_h40_t025_S01_eligible_1/manifest.json",
+    "sha256": "17ae11f8b856f0cb7c2a50094b421ad49eea628923e4f2454d13381e46f87d9f",
+    "unidentified_parent_arm_slots": 0,
+    "all_prepared_manifests": {
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b06_h40_t025_S01_eligible_1/manifest.json": "17ae11f8b856f0cb7c2a50094b421ad49eea628923e4f2454d13381e46f87d9f",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b08_h40_t025_S08_two_cars/manifest.json": "66924724e7d95fa0d5232ccd08292169421a7c72e2766503d99bbcdc49d9d77e",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b11_h40_t025_S11_budget_2/manifest.json": "09b92184f687c5b3070b3a46a9ce44220cb8fbab0f34f372eaf3e34b0ae86cfb",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_E1_settings_pilot_20261114/runs/b12_h40_t025_S04_mixed_soc/manifest.json": "589689bf6d1b6e7a699c8d1499141f85a8129dbfcdadb52065e5c273c9c1660d"
+    }
+  },
+  "scope": "preregistered synthetic one-seed settings feasibility screen; no inference or recommendation"
+}

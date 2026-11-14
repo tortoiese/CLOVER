@@ -1,0 +1,10 @@
+{
+  "original_source_commit": "8327f84d2727e3c522593ab41e067dfcab80d1d9",
+  "original_source_hash": "1fc29e26b2e4ed788719be81e5a3d89e46ac0db16d50b3a25ad15dfac5638e86",
+  "original_arms": 48,
+  "raw_root": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_R2_snapshot_benchmark_20261114",
+  "problem": "Backend report total was captured before final action decoding and return construction; not a complete-call timing",
+  "physical_plan_audits_remain_valid": true,
+  "raw_files_changed": false,
+  "resolution": "preserve this cohort and run all 48 arms under a new source with an RPC wrapper measuring complete Backend.solve; do not pool timing cohorts"
+}
