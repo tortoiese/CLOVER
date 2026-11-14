@@ -1,0 +1,22 @@
+{
+  "schema": "clover-main-integration-canary-v1",
+  "source_commit": "aec9b5360e6580061712467ffba811fcf5e230d6",
+  "source_hash": "05722215372a262cd554a0e9c1a22327f5a2354934eb1cf79a115ef29298b41d",
+  "scope": "post-main-integration functional checks, not statistical policy ranking",
+  "cells": [
+    "S02_width_1p3",
+    "S04_mixed_soc",
+    "S08_two_cars"
+  ],
+  "timings": [
+    "D0",
+    "D1"
+  ],
+  "planned_runs": 42,
+  "seed": 1001,
+  "same_scenario_initial_trace_as_original": true,
+  "input_manifest_sha256": "c8f6ac8d12a87b54da04544d3eb2ee9d918b90f4ad77134d3d8ab11727f26a8d",
+  "driver_sha256": "0e0eeecd7cb69aebcac0b411592c855bd57899ac8616ba30430c4df0219c4979",
+  "run_wall_limit_seconds": 120,
+  "group_wall_limit_seconds": 1200
+}

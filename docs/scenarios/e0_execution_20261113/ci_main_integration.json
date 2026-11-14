@@ -1,0 +1,63 @@
+{
+  "schema": "clover-integration-ci-v1",
+  "source_commit": "aec9b5360e6580061712467ffba811fcf5e230d6",
+  "main_commit": "69bb83ccae87cc6fa95f89125b129d990188360c",
+  "run_id": 43436824192,
+  "url": "https://github.com/tortoiese/CLOVER/actions/runs/43436824192",
+  "jobs": [
+    {
+      "job": "acceptance (windows-latest, 3.11)",
+      "job_id": 131923983949,
+      "conclusion": "success",
+      "summary": [
+        "499 passed, 3 warnings in 174.81s (0:02:54)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (ubuntu-latest, 3.14)",
+      "job_id": 131923984348,
+      "conclusion": "success",
+      "summary": [
+        "499 passed, 1 warning in 95.60s (0:01:35)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (macos-latest, 3.11)",
+      "job_id": 131923984430,
+      "conclusion": "success",
+      "summary": [
+        "499 passed, 3 warnings in 127.86s (0:02:07)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (windows-latest, 3.14)",
+      "job_id": 131923984442,
+      "conclusion": "success",
+      "summary": [
+        "499 passed, 4 warnings in 171.44s (0:02:51)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (ubuntu-latest, 3.11)",
+      "job_id": 131923984499,
+      "conclusion": "success",
+      "summary": [
+        "499 passed in 123.10s (0:02:03)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (macos-latest, 3.14)",
+      "job_id": 131923984554,
+      "conclusion": "success",
+      "summary": [
+        "499 passed, 4 warnings in 162.93s (0:02:42)"
+      ],
+      "unhandled_thread_warning": false
+    }
+  ]
+}

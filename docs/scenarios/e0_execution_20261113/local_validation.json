@@ -1,0 +1,30 @@
+{
+  "schema": "clover-local-code-validation-v1",
+  "source_commit": "ddc94f457732ee3e85b6fa05c31ae35bbbfe6871",
+  "source_hash": "556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e",
+  "tests": {
+    "311": {
+      "tests": 487,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "a12a356a0dda3e53398bbb04d909354d5eb910da9e89b20a1107d59b7a8f9851",
+      "unhandled_thread_warnings": "treated as errors"
+    },
+    "314": {
+      "tests": 487,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "9948e91278ce38dc37a3ad15a9c5f71650be8df1615fcecd1c7561fa956c0eb9",
+      "unhandled_thread_warnings": "treated as errors"
+    }
+  },
+  "post_fix_canary_runs": 42,
+  "canary_passed": 42,
+  "original_e0_runs": 185,
+  "original_e0_commit": "4f6dc5e748735318cdb4fa068b86f4e8db9b894c",
+  "old_source_results_relabelled": false,
+  "dependency_deprecations_remain": true,
+  "scope": "local macOS tests and separate source-frozen functional simulations; not general policy performance"
+}

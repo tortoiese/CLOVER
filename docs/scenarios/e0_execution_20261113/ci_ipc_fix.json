@@ -1,0 +1,54 @@
+{
+  "run_id": 43435970526,
+  "source_commit": "ddc94f457732ee3e85b6fa05c31ae35bbbfe6871",
+  "jobs": [
+    {
+      "job": "acceptance (macos-latest, 3.11)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed, 3 warnings in 106.93s (0:01:46)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (windows-latest, 3.11)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed, 3 warnings in 135.43s (0:02:15)\r"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (windows-latest, 3.14)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed, 4 warnings in 157.69s (0:02:37)\r"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (macos-latest, 3.14)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed, 4 warnings in 129.77s (0:02:09)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed in 101.16s (0:01:41)"
+      ],
+      "unhandled_thread_warning": false
+    },
+    {
+      "job": "acceptance (ubuntu-latest, 3.14)",
+      "conclusion": "success",
+      "summary": [
+        "487 passed, 1 warning in 80.07s (0:01:20)"
+      ],
+      "unhandled_thread_warning": false
+    }
+  ]
+}

@@ -13,6 +13,21 @@ from threading import Thread
 from simulation.planning.contracts import PreparedInput, Report, Result, Snapshot
 
 
+def _exchange(connection: Connection, payload: object, responses: Queue[tuple[bool, object]]) -> None:
+    """Return transport failures when watchdog disposal interrupts an exchange."""
+    try:
+        connection.send(payload)
+        responses.put((True, connection.recv()))
+    except (EOFError, OSError) as exc:
+        responses.put((False, str(exc)))
+    except TypeError as exc:
+        # On POSIX, a blocked send can resume after close() clears its handle.
+        # Keep genuine serialization/programming errors visible on open pipes.
+        if not connection.closed:
+            raise
+        responses.put((False, f"connection closed during exchange: {exc}"))
+
+
 def _worker(connection: Connection) -> None:
     ready_policy = None
     try:
@@ -158,15 +173,7 @@ class SolverProcess:
                        "started": started}
             responses: Queue[tuple[bool, object]] = Queue()
             connection = self.connection
-
-            def exchange() -> None:
-                try:
-                    connection.send(payload)
-                    responses.put((True, connection.recv()))
-                except (EOFError, BrokenPipeError, OSError) as exc:
-                    responses.put((False, str(exc)))
-
-            self.rpc_thread = Thread(target=exchange, daemon=True)
+            self.rpc_thread = Thread(target=_exchange, args=(connection, payload, responses), daemon=True)
             self.rpc_thread.start()
             monitor = psutil.Process(self.process.pid)
             while True:
@@ -241,17 +248,10 @@ class SolverProcess:
         try:
             responses: Queue[tuple[bool, object]] = Queue()
             connection = self.connection
-
-            def exchange() -> None:
-                try:
-                    connection.send((snapshot, started, backend))
-                    responses.put((True, connection.recv()))
-                except (EOFError, BrokenPipeError, OSError) as exc:
-                    responses.put((False, str(exc)))
-
             # Large IPC can block too. The owner must remain able to reap the
             # worker even if the child never reads or finishes a response.
-            self.rpc_thread = Thread(target=exchange, daemon=True)
+            self.rpc_thread = Thread(target=_exchange, args=(connection, (snapshot, started, backend), responses),
+                                     daemon=True)
             self.rpc_thread.start()
             monitor = psutil.Process(self.process.pid)
             while True:
