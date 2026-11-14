@@ -26,13 +26,24 @@ METRICS = {
     "arrival_to_start_p95": ("sim-second; observed starts only", "lower"),
     "recorded_run_wall_seconds": ("runner wall-second; excludes preflight, final disposal and storage", "lower"),
     "batch_makespan": ("sim-second from first release to last completion; whole declared batch", "lower"),
+    "dispatch_timely_acceptance_rate": ("timely primary accepts / deadline-observable dispatch requests", "higher"),
+    "dispatch_deadline_exceeded_rate": ("late or pending cycles / deadline-observable dispatch requests", "lower"),
+    "dispatch_fallback_rate": ("fallback / fully observed eligible dispatch requests", "lower"),
+    "dispatch_latency_p95": ("sim-second; finalized deadline-observable dispatch requests", "lower"),
+    "dispatch_latency_p99": ("sim-second; finalized deadline-observable dispatch requests", "lower"),
 }
 
 
 def validate_plan(plan: dict[str, Any]) -> None:
     """Validate exploratory scope and declared sampling units before reading runs."""
-    if plan.get("schema") != PLAN_SCHEMA or plan.get("purpose") not in {"e0", "training"}:
-        raise ValueError("expected exploratory E0/training analysis plan; held-out freeze is not implemented")
+    if plan.get("schema") != PLAN_SCHEMA or plan.get("purpose") not in {
+        "e0", "training", "validation", "heldout", "stress"
+    }:
+        raise ValueError("expected E0/training or registered validation/held-out/stress paired analysis plan")
+    if plan.get("registered_study") or plan["purpose"] in {"validation", "heldout", "stress"}:
+        from simulation.evaluation.study import verify_registered_plan
+
+        verify_registered_plan(plan)
     control, candidates, metrics = plan["control"], plan["candidates"], plan["metrics"]
     if (control not in POLICIES or not candidates or len(set(candidates)) != len(candidates)
             or control in candidates or set(candidates) - set(POLICIES)):
@@ -52,6 +63,9 @@ def validate_plan(plan: dict[str, Any]) -> None:
         raise ValueError("comparison plan has no declared blocks")
     seen = set()
     for block in plan["blocks"]:
+        selected = block.get("candidates", candidates)
+        if not selected or len(set(selected)) != len(selected) or set(selected) - set(candidates):
+            raise ValueError("invalid block-specific candidates")
         for name in ("condition", "layout", "replicate", "scenario"):
             if not isinstance(block[name], str) or not block[name]:
                 raise ValueError("missing analysis block label: " + name)
@@ -77,6 +91,14 @@ def metric_value(arm: dict[str, Any], metric: str, demand_kind: str) -> float | 
         return None
     if metric == "batch_makespan" and demand_kind != "finite_batch":
         return None
+    if metric.startswith("dispatch_"):
+        summary = run.get("control_summary", {})
+        if not summary.get("available"):
+            return None
+        cohort = summary["by_kind"]["dispatch"]
+        if metric in {"dispatch_latency_p95", "dispatch_latency_p99"}:
+            return cohort["latency"][metric.removeprefix("dispatch_latency_")] if cohort["pending"] == 0 else None
+        return cohort[metric.removeprefix("dispatch_")]
     if metric == "arrival_to_start_p95":
         value = run["arrival_to_start"]["p95"]
     elif metric == "charge_queue_robot_seconds":
@@ -129,7 +151,7 @@ def compare_plan(path: Path) -> dict[str, Any]:
     for block in plan["blocks"]:
         suite = ((path.parent / block["suite"]).resolve() if block["suite"] is not None else None)
         arms = {}
-        for policy in [plan["control"], *plan["candidates"]]:
+        for policy in [plan["control"], *block.get("candidates", plan["candidates"])]:
             if suite is None:
                 arm = {"policy": policy, "status": block["unstarted_status"], "result": None,
                        "failure": "parent did not start this declared block"}
@@ -168,7 +190,7 @@ def compare_plan(path: Path) -> dict[str, Any]:
                              "faults": run["faults"] if run else None,
                              "measurement_energy": run["measurement_energy"] if run else None})
         control = arms[plan["control"]]
-        for candidate in plan["candidates"]:
+        for candidate in block.get("candidates", plan["candidates"]):
             target = arms[candidate]
             pair_issues = []
             if not control.get("full_observation") or not target.get("full_observation"):
@@ -289,7 +311,7 @@ def compare_plan(path: Path) -> dict[str, Any]:
         policy_statuses[policy] = {"planned_arms": len(selected), "statuses": statuses,
                                    "full_observation_arms": sum(a["full_observation"] for a in selected),
                                    "non_success_or_unstarted_fraction":
-                                   (len(selected) - statuses.get("SUCCESS", 0)) / len(selected)}
+                                   (len(selected) - statuses.get("SUCCESS", 0)) / len(selected) if selected else None}
     return {"schema": "clover-paired-analysis-v1", "purpose": plan["purpose"], "analysis_plan_sha256": plan_sha,
             "analysis_source": analysis_source, "analysis_environment": environment_manifest(),
             "analysis_plan": plan, "input_file_sha256": files, "planned_blocks": len(plan["blocks"]),
@@ -302,6 +324,7 @@ def compare_plan(path: Path) -> dict[str, Any]:
             "interval_scope": "pointwise exploratory; Holm adjusts p-values, not confidence intervals",
             "layout_scope": "equal configured-layout weights; sampling declarations do not prove representativeness",
             "recommendation": None, "heldout_validated": False,
+            "registered_phase_verified": bool(plan.get("registered_study")),
             "scope": "R5 exploratory infrastructure; no algorithm selection, equivalence or superiority verdict"}
 
 

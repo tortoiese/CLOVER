@@ -46,6 +46,14 @@ def summarize(group: dict[str, Any], key: str) -> dict[str, Any]:
         "run_statuses": dict(group["statuses"]),
         "decisions": n,
         "accepted": accepted,
+        "timely_accepted": sum(bool(r.get("timely_accepted", False)) for r in rows),
+        "late_accepted": sum(bool(r["accepted"] and r.get("soft_deadline_exceeded", False)) for r in rows),
+        "by_request_kind": {kind or "unrecorded": {
+            "decisions": sum(r.get("request_kind") == kind for r in rows),
+            "accepted": sum(bool(r["accepted"]) for r in rows if r.get("request_kind") == kind),
+            "timely_accepted": sum(bool(r.get("timely_accepted", False))
+                                   for r in rows if r.get("request_kind") == kind),
+        } for kind in ("dispatch", "auxiliary", None)},
         "pending_at_end": n - complete,
         "solver_statuses": {},
         "decision_statuses": dict(statuses),

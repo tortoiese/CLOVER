@@ -18,7 +18,7 @@ import simpy
 import config
 from simulation.path_graph import Route
 from simulation.task_generator import TaskState
-from simulation.telemetry import observe_wait
+from simulation.telemetry import observe_charge, observe_wait
 from simulation.traffic_rules import LaneRequest, TrafficBlocked, tail_clearance_seconds
 from utils.config_models import RobotConfig
 from utils.event_types import RobotState
@@ -827,6 +827,8 @@ class Robot:
             engine.metrics.record_charge_wait(self.env.now - wait_start)
             self._set_state(RobotState.CHARGING)
             self.charge_sessions += 1
+            charge_started, charge_completed = self.env.now, False
+            observe_charge(self, charger.id, charge_started)
             charger.occupants.add(self.robot_id)
             try:
                 while self.alive and charger.active:
@@ -836,6 +838,7 @@ class Robot:
                         target_pct = engine.scheduler.charge_target(self, engine)
                     target = target_pct / 100.0 * self.capacity
                     if self.battery_pct >= target_pct - 1e-6:
+                        charge_completed = True
                         break
                     rate = max(1e-9, float(charger.cfg.charge_rate))
                     step = min(config.CHARGE_STEP, (target - self.battery) / rate)
@@ -843,6 +846,7 @@ class Robot:
                     yield self.env.timeout(step)
                     self._settle_charge()
             finally:
+                observe_charge(self, charger.id, charge_started, completed=charge_completed)
                 charger.occupants.discard(self.robot_id)
         self.forced_charge = False
         self.target_id = None
