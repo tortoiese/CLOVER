@@ -1,0 +1,1798 @@
+{
+  "spec_sha256": "ac95a36de2dd1ba07f313a14f414c4ae2806e749546bc3ef30851eaa5fb6b226",
+  "cases": [
+    {
+      "id": "training_S00_low",
+      "phase": "training",
+      "condition": "S00_low",
+      "layout": "training_geometry_S00_low",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "bb82f5b81a665b03c18b618deb2cf7faf87038411ddc43071951f5e68e2b1a4f",
+      "trace_hash": "4a97e055bf2239d854435d8636b786581364d2f9bf5c3a9d5be7b652dc6b6a1e",
+      "physical_input_hash": "ac1528a1014dfeeba7b5c0f841b71c20ba8a570ab7e680990237b736df10d531",
+      "load": {
+        "lambda_tasks_per_second": 0.03,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02935897435897436,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.15
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 229
+    },
+    {
+      "id": "training_S01_eligible_1",
+      "phase": "training",
+      "condition": "S01_eligible_1",
+      "layout": "training_geometry_S01_eligible_1",
+      "seed": 11001,
+      "stochastic": false,
+      "geometry_hash": "1394e64f6d008ddb9a17a2a69cc991983cc2b4436cf5e238650e7f07c5577ded",
+      "scenario_hash": "4fd10a6263c7e0292f5d3edacb4cb499b7adf7e29ecb76fdf68d01faaaa38928",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "938819dcfcf2dcf6b9131abd9204651018b3d36c9ee81a497e1a151f3c791ff5",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "training_S02_width_1p3",
+      "phase": "training",
+      "condition": "S02_width_1p3",
+      "layout": "training_geometry_S02_width_1p3",
+      "seed": 11001,
+      "stochastic": false,
+      "geometry_hash": "15dd4b4be7f83fbc9263f1f7db79af286d03ce9309ab44ba82b98fb22d127bdf",
+      "scenario_hash": "7d948021d16f6cbb4eb5d36944244a263b63cc315c12f0e678b9f2511b120608",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "62afe221fff041145da9efbb1192b1b35c53d840527826ea371a9c77d9446c72",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "training_S03_on",
+      "phase": "training",
+      "condition": "S03_on",
+      "layout": "training_geometry_S03_on",
+      "seed": 11001,
+      "stochastic": false,
+      "geometry_hash": "39bfa85c5771f8af8fd766e4058b617bc7401892131dcb17afc0422fa6f2fe69",
+      "scenario_hash": "f113db1c623e94f4da1d963de0ddc468419ca7043d1fa7b9ec1f05b7b1dfff82",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "b24c1c6464b64f52fc8d512064536ce7203ebf25072c38e2469befd00f3b91db",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "training_S04_mixed_soc",
+      "phase": "training",
+      "condition": "S04_mixed_soc",
+      "layout": "training_geometry_S04_mixed_soc",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "cf4593f487653d6acf73a51403885c07eb8c31ff496fd424c4b3cb2fa2307140",
+      "trace_hash": "ab12946e16a1dc2c8c076846ca29576be2fbf4af2f835048de6d6e69e6d34426",
+      "physical_input_hash": "ffac38267bbbea1ccbcfaff6f63692c5ea49cf557b4a0ee160cabaf4c240358c",
+      "load": {
+        "lambda_tasks_per_second": 0.04,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.03807692307692308,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.19999999999999998
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 297
+    },
+    {
+      "id": "training_S05_hotspot_70",
+      "phase": "training",
+      "condition": "S05_hotspot_70",
+      "layout": "training_geometry_S05_hotspot_70",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "fed172f84a6967e8f9a2d70ca7bbe9c8c1ff40ee0298008469fd38b8bfc6190f",
+      "trace_hash": "94df9a008d29dd00b48288908e2c03628cfaf496b463cc7a22f52751b622dce7",
+      "physical_input_hash": "e913e0280194122b3a09699ace8cae8f69751eebcba3329a5688a01365fcd7e5",
+      "load": {
+        "lambda_tasks_per_second": 0.18,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.1891025641025641,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.8999999999999999
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1475
+    },
+    {
+      "id": "training_S06_burst_2",
+      "phase": "training",
+      "condition": "S06_burst_2",
+      "layout": "training_geometry_S06_burst_2",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "9f3f108ca8912cc6626d76a40b58c23b601dc39f06606e48985f250af2cb19c2",
+      "trace_hash": "23c9a09aefd4ecff36ea920980d7d9132ac472416d0c2240167a6a0922a24909",
+      "physical_input_hash": "c8060d5e2a68d2ebba8e7387b47ae28b6d5c0931c2275e7cc3de94851e0b56a2",
+      "load": {
+        "lambda_tasks_per_second": 0.17,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.17833333333333334,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.85
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1391
+    },
+    {
+      "id": "training_S07_speed_mix",
+      "phase": "training",
+      "condition": "S07_speed_mix",
+      "layout": "training_geometry_S07_speed_mix",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "f8283509e7b4c4844b81cd16c7fec9789adde66864d9981d8359fdcb6eb30d2c",
+      "scenario_hash": "989239b220a1c3ace9a36779f96015c5faa9bacb3b57fbd64be4ed128fb825af",
+      "trace_hash": "4137fe3a13bc950e5967268f1c60875d5334b398f3563a43db6f98bb6a423eb3",
+      "physical_input_hash": "48d466770015da6f040dc85e9ec9a0bc0917d2cd6a8a0d4b5f7a63cf83804152",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08038461538461539,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 627
+    },
+    {
+      "id": "training_S08_two_cars",
+      "phase": "training",
+      "condition": "S08_two_cars",
+      "layout": "training_geometry_S08_two_cars",
+      "seed": 11001,
+      "stochastic": false,
+      "geometry_hash": "aa2296631d3aaf380aaa1c65229fd9ea02d6207ea12d0d0706652ad9f79bb0f4",
+      "scenario_hash": "b226c21b1e7f7a2257b2195d16bd158be7d81f26ff77326ec2a5ede01e50fd9e",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "bc040facf086fc844e489ad35a811f75c18e60eb036713f7314f94462dfa2a4a",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "training_S09_station_active",
+      "phase": "training",
+      "condition": "S09_station_active",
+      "layout": "training_geometry_S09_station_active",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "2d0859890946e7e7603d6fbf07be5819d67912075ba5f1c4759909ae447ffb2b",
+      "trace_hash": "4fef62d603fa23e9170236e11ca28a1fe1c5e0b8371a35ebf8d5d633323ce23d",
+      "physical_input_hash": "a3421368b4a2c18a3f487d13f0d70da1a7906db90b9665d2d9f2f2f1952f2f3b",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.09083333333333334,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 1200,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 109
+    },
+    {
+      "id": "training_S10_lambda_0p26",
+      "phase": "training",
+      "condition": "S10_lambda_0p26",
+      "layout": "training_geometry_S10_lambda_0p26",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "dd99bb10d8f4669ddd3e64eaf5ac0a98e3c750b51b6f81c51502a26acff03351",
+      "scenario_hash": "18699dad22da200da6c5055116360c8fefa68697bbf8935f9b841fb027bdf905",
+      "trace_hash": "3c2239daabaf41d57c617050b45ff82a0a419ca1cc61cf4dd4e2975e4470d70d",
+      "physical_input_hash": "03bd7a87b0e879241134c6f5cae60a2c57b0632dca1ae5c87b32e8feb8b5fd09",
+      "load": {
+        "lambda_tasks_per_second": 0.26,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.25769230769230766,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 1.3
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 2010
+    },
+    {
+      "id": "training_S11_budget_2",
+      "phase": "training",
+      "condition": "S11_budget_2",
+      "layout": "training_geometry_S11_budget_2",
+      "seed": 11001,
+      "stochastic": true,
+      "geometry_hash": "2af6214c6916576d44bef6513e1c9a9ce8bac81d1040f207ad37f5efb48b1a44",
+      "scenario_hash": "b1eadbe2562aee6cc462d8cd70fbb89685ff975df38f1f6c7e881d215315690c",
+      "trace_hash": "7ddbc9ee0a44b2a8db817b602d14f834cdc1847745c26a71d526b1e8fa5ebcf7",
+      "physical_input_hash": "a789df93907f0fc1a96cfa9a60d330a7d3609b7dd418f551dd9e4ec0b4fb9507",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.07435897435897436,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 580
+    },
+    {
+      "id": "validation_S00_low",
+      "phase": "validation",
+      "condition": "S00_low",
+      "layout": "validation_geometry_S00_low",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "1eb16af1451170a2d080804c82f442b2025fe8ea869eb68cc8650def5384364a",
+      "trace_hash": "59b8331c8b462d2bd756e040b17b95e8e97254de8d1f55ec11583c0d2d2f2eae",
+      "physical_input_hash": "d0e98d11164a9da7aa834d889770edc853d092ac38389870bcbb0f5a028e2a76",
+      "load": {
+        "lambda_tasks_per_second": 0.03,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.027564102564102563,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.15
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 215
+    },
+    {
+      "id": "validation_S01_eligible_1",
+      "phase": "validation",
+      "condition": "S01_eligible_1",
+      "layout": "validation_geometry_S01_eligible_1",
+      "seed": 12001,
+      "stochastic": false,
+      "geometry_hash": "e98e50b00290b5ded756e878a6e207efb23253e91b9d0dca1a79c237f91568fc",
+      "scenario_hash": "30d0dd5e5b24d9f8b12e993323df0df3e696594af69921af52027b6db769cebb",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "5e39a2483822f59f300a84ccd20c9f214aa44ca687ec4cb875a01173ad3360fb",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "validation_S02_width_1p3",
+      "phase": "validation",
+      "condition": "S02_width_1p3",
+      "layout": "validation_geometry_S02_width_1p3",
+      "seed": 12001,
+      "stochastic": false,
+      "geometry_hash": "abe6fbc37bd0f8a0f6769ee9c3f79bb877adf0a0ece8b9ca07fcc399e3aa23bc",
+      "scenario_hash": "158925a207a5bdc44a102bf9ffee6af72d9133a280aad0a27efb97a6846b09c4",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "21182c04907f62dc7f0bbbf84a1d1323eedc55e0413c5315b2cbde6701c7180b",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "validation_S03_on",
+      "phase": "validation",
+      "condition": "S03_on",
+      "layout": "validation_geometry_S03_on",
+      "seed": 12001,
+      "stochastic": false,
+      "geometry_hash": "54ea3e12699e0447380ad4b8857fb390566d147e95c8d3fed0a68bcff2fe53f6",
+      "scenario_hash": "b7e03598f19477a1c60e08f2df7e4b4e6e4707c0dfe381fee59d12371a70a440",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "988effdaf2fddb19bfe75ce405ff2ba57e4d4869d3b8d3218c0ae1e898855d76",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "validation_S04_mixed_soc",
+      "phase": "validation",
+      "condition": "S04_mixed_soc",
+      "layout": "validation_geometry_S04_mixed_soc",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "1b8d65d43b6b29d3f586bcb7ef496a21ac21a63f53801819000f9d5db82c4122",
+      "trace_hash": "7c6875dba4652a699fc29de32ef07c2c2834a8a9ac861346ee63412fb45a68b0",
+      "physical_input_hash": "6c72b8078c3fba76be771e22237d6aad6f3c921de3955689dfd8f3ac330677fd",
+      "load": {
+        "lambda_tasks_per_second": 0.04,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.038717948717948716,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.19999999999999998
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 302
+    },
+    {
+      "id": "validation_S05_hotspot_70",
+      "phase": "validation",
+      "condition": "S05_hotspot_70",
+      "layout": "validation_geometry_S05_hotspot_70",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "37034b9184dfd94d2fb1974313f355621ad744070778559c108750eca15ab7bc",
+      "trace_hash": "189ce01ea4080de53b7875e989a6012a27c00f431ab0f571f75890a8a78cf778",
+      "physical_input_hash": "61e0174ad14fcc0435b4667872b15fb5443cff7ca360d1143b7607a34f250906",
+      "load": {
+        "lambda_tasks_per_second": 0.18,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.18153846153846154,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.8999999999999999
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1416
+    },
+    {
+      "id": "validation_S06_burst_2",
+      "phase": "validation",
+      "condition": "S06_burst_2",
+      "layout": "validation_geometry_S06_burst_2",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "7650aca07cfa6e27c5378a8e9c3340a21cc5bac4de0acb9757a75bf595cf1c91",
+      "trace_hash": "0070fb960b09daef5729dd78f8b774f7a0a48c4f973edfab3c981262eaa471a4",
+      "physical_input_hash": "c5da127be815d4fb17402d153e11edb11a5cf0b05e95ab940a04ccbc1a7b1ef4",
+      "load": {
+        "lambda_tasks_per_second": 0.17,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.16782051282051283,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.85
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1309
+    },
+    {
+      "id": "validation_S07_speed_mix",
+      "phase": "validation",
+      "condition": "S07_speed_mix",
+      "layout": "validation_geometry_S07_speed_mix",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "45706b0d67977ae4846f63dcc34afc1e26d741b8e1efeb9d64f4ca24b9200330",
+      "scenario_hash": "6889c301226947c2730ce17410abade2c40e95b34eb4fc760fc65559ed601cff",
+      "trace_hash": "732167bf6c7c8c10aea57ad836b0ee6b29d3419168085083714a74421e84a936",
+      "physical_input_hash": "2902cc634a91234b822f1c1a00ea5999565c70d7c93ca50e1b11ccb376ec9c36",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.0841025641025641,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 656
+    },
+    {
+      "id": "validation_S08_two_cars",
+      "phase": "validation",
+      "condition": "S08_two_cars",
+      "layout": "validation_geometry_S08_two_cars",
+      "seed": 12001,
+      "stochastic": false,
+      "geometry_hash": "a12b0779bc4acaf1dd1f84b201fa4e9bf7ad4b140f701a2cac913d346dec2f43",
+      "scenario_hash": "4ab4403647cb840945b75edf404c649cc6691215767b9b77a584954e28e9e202",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "fb5288ac3fa7e261c016fc864507cf96e79c48e1ebca41dd5eb1ff23eede50f4",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "validation_S09_station_active",
+      "phase": "validation",
+      "condition": "S09_station_active",
+      "layout": "validation_geometry_S09_station_active",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "d3961ae330fb5949137e47209784657eb50723065982e9a7500c41a0543ecb5a",
+      "trace_hash": "680510f83ebd510aa752c5aa26dd7b5358cf8cca3ba012341f67e6486de7572e",
+      "physical_input_hash": "30ae2808e06fb299060aee86986510b7616d2a9563af7a055bf3cfe6707905cd",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.07583333333333334,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 1200,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 91
+    },
+    {
+      "id": "validation_S10_lambda_0p26",
+      "phase": "validation",
+      "condition": "S10_lambda_0p26",
+      "layout": "validation_geometry_S10_lambda_0p26",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "952aa2e46d64c29f0cab724de4671456495fcd44ec429400ca653a126b3ffe1c",
+      "scenario_hash": "e5d71e30c92fe1c7c779255d2fa4248389a0de38fa743297b191570a646aa9b3",
+      "trace_hash": "5a807ccab5a5f24219f3fa16d5117cc4482a517916b6523859a9cc7814f690f3",
+      "physical_input_hash": "4587e09d51befc2a9056a7dd4820e4765da986f87a93bc8bd5ab9a0192997c64",
+      "load": {
+        "lambda_tasks_per_second": 0.26,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.2508974358974359,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 1.3
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1957
+    },
+    {
+      "id": "validation_S11_budget_2",
+      "phase": "validation",
+      "condition": "S11_budget_2",
+      "layout": "validation_geometry_S11_budget_2",
+      "seed": 12001,
+      "stochastic": true,
+      "geometry_hash": "90a1bdabdff8e0334177d2dd8659d25ea2a54ae5ae6daa7670f7800e0d94dc50",
+      "scenario_hash": "2d8360d76840a0ec5cd87ef17d672ca9ae05f26edd33a7cf6e00ba4eb5aa579b",
+      "trace_hash": "5324c253966647a4f53d1af544769cb42afe24633f37f7a33ef392663dd89c3b",
+      "physical_input_hash": "45069cfc51588d712bef5995ea97507a1ee5d6d4427d21b62ce5c34c1774dc49",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08615384615384615,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 672
+    },
+    {
+      "id": "heldout_S00_low",
+      "phase": "heldout",
+      "condition": "S00_low",
+      "layout": "heldout_geometry_S00_low",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "c99cc55fb35aa1ed5d79bc08a45fe0d7e6167dd01bf624727d1ea2506bc81edc",
+      "trace_hash": "bcccdfa31df3838a63990282306bc9b9abb416a01218f55950904e57ad0f4511",
+      "physical_input_hash": "3025c627b27018fefbc7f96361c465bb8d7651f9a7e8669931d8df7153d3b43e",
+      "load": {
+        "lambda_tasks_per_second": 0.03,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02717948717948718,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.15
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 212
+    },
+    {
+      "id": "heldout_S01_eligible_1",
+      "phase": "heldout",
+      "condition": "S01_eligible_1",
+      "layout": "heldout_geometry_S01_eligible_1",
+      "seed": 21001,
+      "stochastic": false,
+      "geometry_hash": "d7e3c3af6b233f9449e8d5e506905c3a92034be60ebe1de3ebcf47a336a461e4",
+      "scenario_hash": "d82311d9d54642dbbecea0887c3fb095c5bfd245cdd6f07907a74f13ceb9a38b",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "a9acf94171073402bedff5f08e40dcf113c9cda8b76777e928f44f2bf6832cfd",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "heldout_S02_width_1p3",
+      "phase": "heldout",
+      "condition": "S02_width_1p3",
+      "layout": "heldout_geometry_S02_width_1p3",
+      "seed": 21001,
+      "stochastic": false,
+      "geometry_hash": "df44c4237ca9d9aeac3b73ed04dbf3589b0ad516c8990dd73b6de755f9742556",
+      "scenario_hash": "ee1a73381cd15498862cf599087ed17b77c3a3ec7cf3981ff111c60367d403a3",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "803f374c534710942fea383f05bf4906722e35fa7a6c65917befe3610cc2494e",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "heldout_S03_on",
+      "phase": "heldout",
+      "condition": "S03_on",
+      "layout": "heldout_geometry_S03_on",
+      "seed": 21001,
+      "stochastic": false,
+      "geometry_hash": "062b18b86c3c62379695ed113acb07fc21d5c102f9a0954a9d8cb3ea770df8ac",
+      "scenario_hash": "36e943da882a4dbed72fe32ddb5ed4cec0f765211de413110f49565758c4ec79",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "e15013529489dabd3c0ec500e6946bc5e6197c3d064e9f713dc8ea87a6aa122b",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "heldout_S04_mixed_soc",
+      "phase": "heldout",
+      "condition": "S04_mixed_soc",
+      "layout": "heldout_geometry_S04_mixed_soc",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "f412142ae392907064f5822a80331f7652d6e23cc787b9f8c607d826c01d9cee",
+      "trace_hash": "6827577db85e173201ace56b3aeff7d6b6608b72cfd52a385a8af13b0b62cbce",
+      "physical_input_hash": "fa6b5aadfb20f9aa370bd64667a0394e5d662afb0da42201ac8ca524b6aa2cb1",
+      "load": {
+        "lambda_tasks_per_second": 0.04,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.0391025641025641,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.19999999999999998
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 305
+    },
+    {
+      "id": "heldout_S05_hotspot_70",
+      "phase": "heldout",
+      "condition": "S05_hotspot_70",
+      "layout": "heldout_geometry_S05_hotspot_70",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "fb6bd26f9149f881a413217e3adfdb45df1d6c19ecd27ab8cfc648ae45fe14db",
+      "trace_hash": "65022a16e7a2c66279564b57682c82bc5640c2e8a1a68d154ba08b4cdb267226",
+      "physical_input_hash": "430f77e4be730536a9479c05d5b121f28013a000524d3cfa5e3a64e3f671cb1e",
+      "load": {
+        "lambda_tasks_per_second": 0.18,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.17910256410256412,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.8999999999999999
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1397
+    },
+    {
+      "id": "heldout_S06_burst_2",
+      "phase": "heldout",
+      "condition": "S06_burst_2",
+      "layout": "heldout_geometry_S06_burst_2",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "037363b9138b40cd6f94dfc1133f108e9fc412e8551de27b96a8057828eba6f1",
+      "trace_hash": "09138972e352b01d73fe2ac899186ce20b7b09bab6f6c771a55215007501c9f1",
+      "physical_input_hash": "637394a68c9cacd2921ff438020d833f788a8da480aa89c2c5c5124345272077",
+      "load": {
+        "lambda_tasks_per_second": 0.17,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.16166666666666665,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.85
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1261
+    },
+    {
+      "id": "heldout_S07_speed_mix",
+      "phase": "heldout",
+      "condition": "S07_speed_mix",
+      "layout": "heldout_geometry_S07_speed_mix",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1a0bb83707d428bdc6e896b4866cd71ee5c316421b81e467abc08854f82cccc",
+      "scenario_hash": "b09ab7829e62cd2cb873342be3335784fe860c0b783b444adacf25961ddf6951",
+      "trace_hash": "d9cc995a895b74691eafee1d6420d485ea1732af664ab83b7bf74fbae6172620",
+      "physical_input_hash": "0bfa784769f509a2542fe6de79dfe2035dbabd3656bb57f3a163e8eb9588055b",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.07871794871794872,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 614
+    },
+    {
+      "id": "heldout_S08_two_cars",
+      "phase": "heldout",
+      "condition": "S08_two_cars",
+      "layout": "heldout_geometry_S08_two_cars",
+      "seed": 21001,
+      "stochastic": false,
+      "geometry_hash": "85bd0aaa4eeacbeb7cb39bc365e33875288d6c5c00ec6ba146ecc1cd4549c058",
+      "scenario_hash": "b751b133926c8c9047385636f5f8800f22842486104ec516450bfb6cfc812ef2",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "86405d9fb20c0a6e73128f3e5f71fe6b126c51ab9b243ed3096875b0eadab48a",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "heldout_S09_station_active",
+      "phase": "heldout",
+      "condition": "S09_station_active",
+      "layout": "heldout_geometry_S09_station_active",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "19b5700df5390fa6d47ac28b48da8c9f07979d18d60af7e7ab305a48566d6e3f",
+      "trace_hash": "fba7b6800a76c9ee6206e169c731791651b7e477a9f9f265237f280be1d9e33e",
+      "physical_input_hash": "ff97364d11a9c78cea578f4efcacb5d7733db4cd86006d3b144ee6ec31e123f8",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08583333333333333,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 1200,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 103
+    },
+    {
+      "id": "heldout_S10_lambda_0p26",
+      "phase": "heldout",
+      "condition": "S10_lambda_0p26",
+      "layout": "heldout_geometry_S10_lambda_0p26",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b1ac16f732872d7329a594aa29ae288652ce0d2acae5aa13a5f7a8392c96e888",
+      "scenario_hash": "479bb2e111c7d36395c61f805ffd6773adfe57a41f4592f18a7fb5367bb4b6bc",
+      "trace_hash": "9fe37d4808fc790d5aa6d29e9f8907e4e21c45f19c83008bcae14c0caf48bd7b",
+      "physical_input_hash": "f1f00ccf4460f443d43c3d04a727f618c440d87ae70bf99cb5a1d49aaaa5d58e",
+      "load": {
+        "lambda_tasks_per_second": 0.26,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.2652564102564103,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 1.3
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 2069
+    },
+    {
+      "id": "heldout_S11_budget_2",
+      "phase": "heldout",
+      "condition": "S11_budget_2",
+      "layout": "heldout_geometry_S11_budget_2",
+      "seed": 21001,
+      "stochastic": true,
+      "geometry_hash": "b959173a2bfcdc0381b586515e94eae4333c9b288ad77d3709493c97ec5479ac",
+      "scenario_hash": "42008d7a51016a7c65ee74be9254b08a5f2aa066210b493414ee04ada90a8c4b",
+      "trace_hash": "ed4e576bc29c699aeed1ae1733579b7c0d565fe391d5861ae97af431b98cd519",
+      "physical_input_hash": "abd9ecf8c39663cc1c45c87af01fdd8ccdfde5b596c033b78397d3c666903a00",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.0808974358974359,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 631
+    },
+    {
+      "id": "stress_S00_low",
+      "phase": "stress",
+      "condition": "S00_low",
+      "layout": "stress_geometry_S00_low",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "6dcd24638128a6ba24f31317590f006865541d0ba29c328e972f79f78e896c0b",
+      "trace_hash": "1c4a20f89610b7aa0bee1a9dec3fccd125ab35cf804568ff62f0db6d983ccc31",
+      "physical_input_hash": "c5931a8a97f4669fafbf92658973ce93ea69fed866400559e019085575a48f8c",
+      "load": {
+        "lambda_tasks_per_second": 0.03,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.03,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.15
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 234
+    },
+    {
+      "id": "stress_S01_eligible_1",
+      "phase": "stress",
+      "condition": "S01_eligible_1",
+      "layout": "stress_geometry_S01_eligible_1",
+      "seed": 31001,
+      "stochastic": false,
+      "geometry_hash": "c5a91b550a26ab173e9a120a39e5df57b56bb9b15ee018605cdcbf53cfcae1fd",
+      "scenario_hash": "fb99b2313eab5a21d33afd9dfa3f4590f21ec36c39c5022c29123868a1343f3c",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "56634791690c2760c0d76490ab00ff5963e840117ae004df9cca06bd1e33991b",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "stress_S02_width_1p3",
+      "phase": "stress",
+      "condition": "S02_width_1p3",
+      "layout": "stress_geometry_S02_width_1p3",
+      "seed": 31001,
+      "stochastic": false,
+      "geometry_hash": "265d4e4dc8a340c338fbc515095dd987d725ef527f49af6c0f44751fb961e78c",
+      "scenario_hash": "b580bbf7a0a663fae6fea944a15f38e73e76f3b48af9543e7799895e2df0a3e1",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "e1604d8d2d5ee8128ee841e8826abd3d6dd7d1920c708fb947bdbccb3ef1ba20",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "stress_S03_on",
+      "phase": "stress",
+      "condition": "S03_on",
+      "layout": "stress_geometry_S03_on",
+      "seed": 31001,
+      "stochastic": false,
+      "geometry_hash": "11bb4903e22e62c3c8ae25add7d5b5174ebf6eadad4c7dd234d8d3187e5d6913",
+      "scenario_hash": "92b6b9c2a39cf3b651dfd2a94f591d55542b25dc909d11bfe3091a83da809786",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "3fc59aab7287f493ddb889fc9e8986c0cc8db4f93ec338e944023d5cf931a527",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "stress_S04_mixed_soc",
+      "phase": "stress",
+      "condition": "S04_mixed_soc",
+      "layout": "stress_geometry_S04_mixed_soc",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "610139b936a2c10054d470605ede3697cf4d770087e96065a0aaf206082a3751",
+      "trace_hash": "b760aebf9d50633a4a1d2835aac00e590ddafd347d32d68fad62e5b8a16e482e",
+      "physical_input_hash": "85fbd1d2798abd3150f18eb2740cfb463e46efa0a3c5014db744adfa11b9276d",
+      "load": {
+        "lambda_tasks_per_second": 0.04,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.04,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.19999999999999998
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 312
+    },
+    {
+      "id": "stress_S05_hotspot_70",
+      "phase": "stress",
+      "condition": "S05_hotspot_70",
+      "layout": "stress_geometry_S05_hotspot_70",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "526ed6d423c1c75017d0902e0481c8da77ac612455c04f34dabe7bd8c02a372c",
+      "trace_hash": "1ea08ce70e141f3c16fd72999e6ca34d340b9e8ada6e74fe6af6355233881633",
+      "physical_input_hash": "e67019310429b829cc764614c17d72371ce360c6f3ac15234ca04b37706a8f36",
+      "load": {
+        "lambda_tasks_per_second": 0.18,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.16807692307692307,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.8999999999999999
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1311
+    },
+    {
+      "id": "stress_S06_burst_2",
+      "phase": "stress",
+      "condition": "S06_burst_2",
+      "layout": "stress_geometry_S06_burst_2",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "36b3a1fbaad20ba42f550a658ef92696f63f2acc529cf14329df1964791cbb2d",
+      "trace_hash": "a8cabaf2f6353d6486eb075acff553601c9f5d0bff408da3c27f4ca78b8f668d",
+      "physical_input_hash": "6168d752f7f2d055063fa75274fdaac36239729e080a99b160a96d27bc24a913",
+      "load": {
+        "lambda_tasks_per_second": 0.17,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.1753846153846154,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.85
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 1368
+    },
+    {
+      "id": "stress_S07_speed_mix",
+      "phase": "stress",
+      "condition": "S07_speed_mix",
+      "layout": "stress_geometry_S07_speed_mix",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "14aa12f17fb3183ff91a8fe386e0cb0eb09c0cd5b345da73346195523ffd1803",
+      "scenario_hash": "7af4e5a567ded85d84aa0eee7d70f66a74e9a9559703ec2ca0347f8c112a4cfd",
+      "trace_hash": "e124293454ba225ab37e693803561db0623d609813c988846c27a35ec9f653bd",
+      "physical_input_hash": "06f43ddd68b462835c147755f3da7ca6982bdcd14e3648c9fd94f43679727f88",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08423076923076923,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 657
+    },
+    {
+      "id": "stress_S08_two_cars",
+      "phase": "stress",
+      "condition": "S08_two_cars",
+      "layout": "stress_geometry_S08_two_cars",
+      "seed": 31001,
+      "stochastic": false,
+      "geometry_hash": "a43db91809f72b7866187533a542412bbef23a3b340b699ff4a1b8757648c75c",
+      "scenario_hash": "6dbbaaf9606bd065c80fefa11885d39042498458d06b80faab0c43d6e798c4bb",
+      "trace_hash": "098d138bdad649a26a981ecf0d18e590d7e730406f6d85c82f35d23a74b88f53",
+      "physical_input_hash": "b16fdaf1b4944326c368c3ce3983982854be39ca032e0c0e99953b123493b6c7",
+      "load": {
+        "lambda_tasks_per_second": 0.02666666666666667,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.02666666666666667,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.13333333333333333
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 8
+    },
+    {
+      "id": "stress_S09_station_active",
+      "phase": "stress",
+      "condition": "S09_station_active",
+      "layout": "stress_geometry_S09_station_active",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "5414b8d23d291b8bb5768626cb9850eab1d5f1bc04293b52b335fa9709385cfe",
+      "trace_hash": "2f99f5db6201715e81e9a1ce29c4584c05d141397dd0715e97ae4f14e729f3bb",
+      "physical_input_hash": "9ce2a1165db6d6b240ac26be90380d90681a0f57cf85da0c99aa865e9584f61c",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.085,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 1200,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 102
+    },
+    {
+      "id": "stress_S10_lambda_0p26",
+      "phase": "stress",
+      "condition": "S10_lambda_0p26",
+      "layout": "stress_geometry_S10_lambda_0p26",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "ea7655768a336e7e3f6c941b3ea5c45f2ba84be03bee8bb0970eac5cc440cac3",
+      "scenario_hash": "3bc8ab35734399f28d645fa4f6a1d3da35d64af560ef5b23a222215c547d8d41",
+      "trace_hash": "049f6b91a4c77f668b98ea11a14afdaaeb5fa3680623e0796a0e92af9e959dee",
+      "physical_input_hash": "52472da6f56dfb5a925dd597c5a939bb45910fd419949e306aeb58e797f96f54",
+      "load": {
+        "lambda_tasks_per_second": 0.26,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.26256410256410256,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 1.3
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear"
+      ],
+      "jobs": 2048
+    },
+    {
+      "id": "stress_S11_budget_2",
+      "phase": "stress",
+      "condition": "S11_budget_2",
+      "layout": "stress_geometry_S11_budget_2",
+      "seed": 31001,
+      "stochastic": true,
+      "geometry_hash": "9889da39cb8a6c45f25adf6d4781a8684e9e3a02279f5b7decc224bcd3c4645a",
+      "scenario_hash": "75185b0fb50252722c6e67ac492524ab911269dd0e1086af052fe0aae4d17271",
+      "trace_hash": "960682e1e2d0c935c23a39559bea014c6c1c801eaad35455e57bcecb681ebd2d",
+      "physical_input_hash": "ac8ca28ca7f62605e09334fca0f6b6128d76949d8ac334e76a1c91e5af7e2a4c",
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.07948717948717948,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration.",
+        "reference_rho": 0.39999999999999997
+      },
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 7800,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 7200,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "jobs": 620
+    }
+  ],
+  "scope": "48 configured inputs: 12 families x 4 phases; not 48 independent sampled layouts"
+}

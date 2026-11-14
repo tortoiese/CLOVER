@@ -16,7 +16,7 @@ python -B -m simulation.evaluation benchmark-snapshot \
   --suite-wall-limit 300
 ```
 
-`--decision`은0부터 시작하는 명시적 index다. worker 반환 계획이 없는 결정은 사용할 수 없다. worker가 계획을 반환했지만 D1 기한 때문에 거절된 결정은 사용할 수 있으며, 그 이유와 원래 accepted 값을 provenance에 남긴다. 원래 실행 소스는 변경하지 않고 새 artifact의 생성 소스를 따로 기록한다.
+`--decision`은0부터 시작하는 명시적 index다. 기존 기록은 worker 반환 계획이 있어야 한다. [D1 v2](STUDY_PROTOCOL.md)처럼 RPC 전 CAS 입력이 남은 기록은 worker의 계획 반환이 없어도 사용할 수 있다. 이때 route/모델 준비는 export 시 새로 수행하며 원래 worker가 준비를 완료했다는 뜻이 아니다. 반환 계획이 존재하면 CAS 관측으로 재생성한 입력과도 대조한다. 기한 때문에 거절된 반환 계획 역시 사용할 수 있으며, 입력 출처·반환 여부·거절 이유와 원래 accepted 값을 provenance에 남긴다. 원래 실행 소스는 변경하지 않고 새 artifact의 생성 소스를 따로 기록한다.
 
 동결 파일은 PreparedInput·모델/입력/시작해 해시·checked 시작해·공통 준비 비용을 포함한다. 파일을 다시 읽을 때 route를 실제 기하와 대조하고 공통 sparse Model을 한 번 재구성해 해시/시작해를 확인한다. 각 backend에 같은 객체의 격리된 사본을 보내며 저장용 pickle은 사용하지 않는다. source가 달라졌다면 원래 기록에서 새 artifact를 만들어야 한다. 과거 artifact의 source hash를 고치지 않는다.
 
