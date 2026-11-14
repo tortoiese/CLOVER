@@ -1,0 +1,58 @@
+{
+  "schema": "clover-r5-saved-review-protocol-v1",
+  "analysis_commit": "691458e3b340c1e66701046dc5380459b236b72b",
+  "analysis_source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+  "source_files_checked": 170,
+  "driver_sha256": "6dd3a740990091b87d81b2e23e5ba9e50de3f23fd9aa3630f7bf3a3a0f140a7c",
+  "studies": {
+    "original_d0": [
+      "representatives_d0",
+      84
+    ],
+    "original_d1": [
+      "representatives_d1",
+      42
+    ],
+    "original_mixed_soc_d1": [
+      "mixed_soc_d1",
+      7
+    ],
+    "ipc_d0": [
+      "ipc_release_canary/D0",
+      21
+    ],
+    "ipc_d1": [
+      "ipc_release_canary/D1",
+      21
+    ],
+    "main69bb_d0": [
+      "main_integration_canary/D0",
+      21
+    ],
+    "main69bb_d1": [
+      "main_integration_canary/D1",
+      21
+    ],
+    "main_pr14_d0": [
+      "roam_integration_canary/D0",
+      7
+    ],
+    "main_pr14_d1": [
+      "roam_integration_canary/D1",
+      7
+    ]
+  },
+  "control": "optimized",
+  "candidates": [
+    "baseline",
+    "assignment_milp_legacy",
+    "rh_milp_grid",
+    "rh_cpsat_linear",
+    "rh_cpsat_interval",
+    "rh_cpsat_native"
+  ],
+  "planned_loaded_pair_arms": 231,
+  "planned_baseline_only_references": 52,
+  "inference_purpose": "e0",
+  "scope": "read-only validation of prior 283 runs; no new simulations or independence claims"
+}

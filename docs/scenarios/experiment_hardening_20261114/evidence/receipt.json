@@ -1,0 +1,72 @@
+{
+  "schema": "clover-experiment-hardening-review-v1",
+  "status": "SYNTHETIC_PILOT_VERIFIED",
+  "confirmatory_ready": false,
+  "code": {
+    "commit": "89afcdcce55ee3b38106d571084ddd2001754f36",
+    "python_matches_head": true,
+    "changed_python": []
+  },
+  "source_hash": "192e456b789a4f940588631079177d75062770b5e374c81098d87141c4e360c5",
+  "python_files": 179,
+  "raw_root": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified",
+  "final_runs": 45,
+  "policy_runs": 20,
+  "development_calibration_runs": 24,
+  "long_charge_runs": 1,
+  "native_free_replays": 20,
+  "raw_files": 191,
+  "raw_bytes": 129634656,
+  "planning_inputs": 37,
+  "cohorts": {
+    "dispatch": {
+      "triggered": 66,
+      "eligible": 65,
+      "accepted": 45,
+      "timely_accepted": 45,
+      "late_accepted": 0,
+      "deadline_exceeded": 0,
+      "pending": 0,
+      "right_censored_deadline": 1,
+      "fallback": 20
+    },
+    "auxiliary": {
+      "triggered": 160,
+      "eligible": 154,
+      "accepted": 154,
+      "timely_accepted": 154,
+      "late_accepted": 0,
+      "deadline_exceeded": 0,
+      "pending": 0,
+      "right_censored_deadline": 6,
+      "fallback": 0
+    }
+  },
+  "charge_completions_per_robot": {
+    "R0": 36,
+    "R1": 36,
+    "R2": 37,
+    "R3": 36
+  },
+  "charge_faults": 0,
+  "charge_rescue_energy": 0.0,
+  "calibration_reports_reconstructed": 25,
+  "previous_cohort": {
+    "root": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114",
+    "source_hash": "dfa8a4675e1b3725aeaf39ef1b040f11a1c023eac81da6c2e4b2f3b05adcd8bc",
+    "runs": 45,
+    "reason": "preserved before calibration input-hash hardening; final complete matrix repeated on final code"
+  },
+  "remaining": [
+    "review neutral reference capacity/load labels for confirmatory use",
+    "replicated independent layout/seed main experiment",
+    "data-driven profile-selection receipt and recommendation"
+  ],
+  "limits": [
+    "synthetic finite windows; not real-factory validity or stationarity",
+    "smoke phase names do not make a pilot confirmatory",
+    "old GUI timing failure reproduced on unchanged base",
+    "busy local host; wall timings are functional evidence, not portable rankings"
+  ],
+  "input_pairing_ok": true
+}

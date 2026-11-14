@@ -1,0 +1,28 @@
+{
+  "schema": "clover-r5-local-validation-v1",
+  "source_commit": "691458e3b340c1e66701046dc5380459b236b72b",
+  "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+  "checks": {
+    "python311_full": {
+      "tests": 553,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "2d4fbabdbe314cf642ceadf96fdc50c08bb9188c44d8d6ad84a040545b934584"
+    },
+    "python314_comparison": {
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "014225208196641652dc659c6797fcda4643d1f25861d6273683216208382750"
+    }
+  },
+  "unhandled_thread_warnings": "treated as errors",
+  "new_simulations_for_review": 0,
+  "saved_records_reviewed": 283,
+  "paired_analysis_arms": 231,
+  "baseline_only_arms": 52,
+  "inferred_confidence_intervals": 0,
+  "scope": "R5 infrastructure and E0 descriptive analysis; not confirmatory performance"
+}

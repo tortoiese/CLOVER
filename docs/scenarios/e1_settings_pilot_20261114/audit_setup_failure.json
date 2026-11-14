@@ -1,0 +1,7 @@
+{
+  "stage": "audit_output_setup",
+  "error": "FileNotFoundError for review/profiles/b01.json before any arm audit",
+  "fix": "create profile and comparison subdirectories in the external audit driver",
+  "simulation_results_changed": false,
+  "simulation_reruns": 0
+}

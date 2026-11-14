@@ -1,0 +1,172 @@
+{
+  "schema": "clover-r5-saved-review-v1",
+  "analysis_commit": "691458e3b340c1e66701046dc5380459b236b72b",
+  "analysis_source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+  "source_files_checked": 170,
+  "studies": [
+    {
+      "study": "original_d0",
+      "original_manifest": "representatives_d0/manifest.json",
+      "loaded_arms": 84,
+      "blocks": 12,
+      "comparisons": 576,
+      "holm_family_size": 1152,
+      "original_source_hashes": [
+        "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30"
+      ],
+      "plan_sha256": "bad8273bc4031a8bd8501fc9eee05594d27e0b424263f97556a1f80b37f9de63",
+      "analysis_sha256": "f243fcf38f398d4007728ae77dbc896102d79d98456375094a17b8566275cab9",
+      "effects_csv_sha256": "2e7a8fbfa52e28ce2404a23de2f959bd06206da42bcc24a86094da285c5492d7",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "original_d1",
+      "original_manifest": "representatives_d1/manifest.json",
+      "loaded_arms": 42,
+      "blocks": 6,
+      "comparisons": 288,
+      "holm_family_size": 576,
+      "original_source_hashes": [
+        "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30"
+      ],
+      "plan_sha256": "2ed0a496209793d6d301b29d925fb41cec62873d9abd8ce0897b7b8123bb1559",
+      "analysis_sha256": "d4eeebd5a2ae8975d284f6a58d929f1535bc1a62ac1f37b63209b35c548a8661",
+      "effects_csv_sha256": "63640176bca5d88a2e843c5a8598b4fa9b98aba1df5905d20b82fe7508b47b66",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "original_mixed_soc_d1",
+      "original_manifest": "mixed_soc_d1/manifest.json",
+      "loaded_arms": 7,
+      "blocks": 1,
+      "comparisons": 48,
+      "holm_family_size": 96,
+      "original_source_hashes": [
+        "ce930fb2f8c26ea2a0911d3394863ef7da2bc2a61f78211450a2a706d9dbab30"
+      ],
+      "plan_sha256": "aa9439d56b8cf2bd5948952233ef188c45f7b9c181ee2be0593e2766e606ba30",
+      "analysis_sha256": "1da3fd5f66d9fa06ecf0f2c26bb2ddf0e77c30696abc8690ba488f57c30cece4",
+      "effects_csv_sha256": "27153409ceb09c33fe7480c38309b65ad6ba496f7e2039e6f50e2a01120ff0a0",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "ipc_d0",
+      "original_manifest": "ipc_release_canary/D0/manifest.json",
+      "loaded_arms": 21,
+      "blocks": 3,
+      "comparisons": 144,
+      "holm_family_size": 288,
+      "original_source_hashes": [
+        "556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e"
+      ],
+      "plan_sha256": "9f4d8df4f2e798c1253e49d21a3832f19a538c6a355ee9e009b95fb5a46536b9",
+      "analysis_sha256": "6b18d9a7f7dddcd1fef2b85cbdf3826d8ee01e731e5db8396b496e2499f06d71",
+      "effects_csv_sha256": "ddd6daa778d9f1059fb507632e965d6c86add44980b581fd5b75ab9ccc748c31",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "ipc_d1",
+      "original_manifest": "ipc_release_canary/D1/manifest.json",
+      "loaded_arms": 21,
+      "blocks": 3,
+      "comparisons": 144,
+      "holm_family_size": 288,
+      "original_source_hashes": [
+        "556d428ba1f98dce50f083a20d3a0351c31f0888e42d14cd2c540367415ae68e"
+      ],
+      "plan_sha256": "46af004c32b5f37a24e7cbb613b4225f0d5dde524bb1d84aa7fa4806a09c1041",
+      "analysis_sha256": "e7a998292203f2f55e43fb57e179f9bf505fea7efde22da614cd666529ced7a3",
+      "effects_csv_sha256": "80e5dc2fd58a38f193d59567229723386a7e85d39df5facc5764bc8bf0a059d9",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "main69bb_d0",
+      "original_manifest": "main_integration_canary/D0/manifest.json",
+      "loaded_arms": 21,
+      "blocks": 3,
+      "comparisons": 144,
+      "holm_family_size": 288,
+      "original_source_hashes": [
+        "05722215372a262cd554a0e9c1a22327f5a2354934eb1cf79a115ef29298b41d"
+      ],
+      "plan_sha256": "27a87d140ad144c210648d30b1a42af29ebf5f5eebe68506be17d2d1a7931818",
+      "analysis_sha256": "b89fc921c474f2ef09d2acd27465cf6fcb98e8aee5f6e921b29e417cfce55272",
+      "effects_csv_sha256": "fbd389df4880376a50be25f0846ecfc62096ba40eb3b59cc6ceb0ab2a277d124",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "main69bb_d1",
+      "original_manifest": "main_integration_canary/D1/manifest.json",
+      "loaded_arms": 21,
+      "blocks": 3,
+      "comparisons": 144,
+      "holm_family_size": 288,
+      "original_source_hashes": [
+        "05722215372a262cd554a0e9c1a22327f5a2354934eb1cf79a115ef29298b41d"
+      ],
+      "plan_sha256": "0fefe5f542c1108bc1c3cb32047d3e7396603d1ee41610644177df873bc78499",
+      "analysis_sha256": "e941bf679a43b0850e56dc9c0f8ab778c9e48516f4749e99e0642c6095ee237c",
+      "effects_csv_sha256": "a6584d8cd91a88329283c5d6986381a48c255345af1c0a89ddd5ce83820706a1",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "main_pr14_d0",
+      "original_manifest": "roam_integration_canary/D0/manifest.json",
+      "loaded_arms": 7,
+      "blocks": 1,
+      "comparisons": 48,
+      "holm_family_size": 96,
+      "original_source_hashes": [
+        "e3e1943aa191c7dc17cbc359633f621a121ca1766e7f02332abb9eb8649dc762"
+      ],
+      "plan_sha256": "22d11156bd13b68320d38a74fa22b3ff87e533ae92f4ac29bb250aeb596acca7",
+      "analysis_sha256": "4fd6465c0867fb3da48deb4c27d0ed3fa3fce7383761408a9c60427e4ff0f54b",
+      "effects_csv_sha256": "a3d08e3b838e3adcfaa119ebaddd92173c49d1019049487f8df0be7a1864738e",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    },
+    {
+      "study": "main_pr14_d1",
+      "original_manifest": "roam_integration_canary/D1/manifest.json",
+      "loaded_arms": 7,
+      "blocks": 1,
+      "comparisons": 48,
+      "holm_family_size": 96,
+      "original_source_hashes": [
+        "e3e1943aa191c7dc17cbc359633f621a121ca1766e7f02332abb9eb8649dc762"
+      ],
+      "plan_sha256": "d3eae0d6e437fecbf0c91087800be31248b8cd0c7be9ba2b4c67d3f6422ded75",
+      "analysis_sha256": "d79c9499348a44dcaac217be532933fc774b59045b62910db5fa3de5f7fba317",
+      "effects_csv_sha256": "18fd95594d6a1c278048e0dacf97369ca0b0f9bb9cc543984d17be3b481c4ee7",
+      "confidence_intervals": 0,
+      "p_values": 0,
+      "passed": true
+    }
+  ],
+  "reviewed_existing_arms": 283,
+  "paired_analysis_arms": 231,
+  "baseline_only_references": 52,
+  "new_simulations": 0,
+  "eligible_intervals": 0,
+  "original_result_digests_match": true,
+  "policy_recommendation": null,
+  "protocol_sha256": "1e620e923e488d4b55a3d461a6755ec679d3e6541a1728900910008cc7fa76d8",
+  "effect_summary_sha256": "71f7252ba02df4b14bf2716da680f78abe45ee7ba30c21c331bd6e5c8c0d1eb0",
+  "unpaired_reference_sha256": "54f6adaf23e775ad5e29b907aea30804d8acd9259c5591fdcc226d2a9cc55f35",
+  "scope": "R5 infrastructure/E0 descriptive review; not E1 tuning, heldout or superiority"
+}

@@ -67,8 +67,110 @@ def main(argv: list[str] | None = None) -> int:
     execute.add_argument("--decision-settings", type=Path)
     execute.add_argument("--run-wall-limit", type=float, default=240)
     execute.add_argument("--suite-wall-limit", type=float)
+    comparison_plan = commands.add_parser("comparison-plan", help="draft an exploratory paired-analysis plan")
+    comparison_plan.add_argument("--manifest", type=Path, required=True)
+    comparison_plan.add_argument("--control", choices=POLICIES, default="optimized")
+    comparison_plan.add_argument("--candidates", choices=POLICIES, nargs="+",
+                                 default=["rh_milp_grid", "rh_cpsat_linear"])
+    comparison_plan.add_argument("--output", type=Path, required=True)
+    comparison = commands.add_parser("compare", help="verify saved arms and compute gated paired statistics")
+    comparison.add_argument("--plan", type=Path, required=True)
+    comparison.add_argument("--output", type=Path, required=True, help="new directory for JSON/CSV/notes")
+    freeze = commands.add_parser("freeze-snapshot", help="freeze one returned grid input and common hint")
+    freeze.add_argument("--run", type=Path, required=True)
+    freeze.add_argument("--decision", type=int, required=True)
+    freeze.add_argument("--output", type=Path, required=True)
+    freeze.add_argument("--preparation-limit", type=float, default=30)
+    benchmark = commands.add_parser("benchmark-snapshot", help="compare compilers of one frozen grid model")
+    benchmark.add_argument("--snapshot", type=Path, required=True)
+    benchmark.add_argument("--output", type=Path, required=True)
+    benchmark.add_argument("--budgets", type=float, nargs="+", default=[.25, 2])
+    benchmark.add_argument("--repeats", type=int, default=3)
+    benchmark.add_argument("--order-seed", type=int, default=20261114)
+    benchmark.add_argument("--startup-limit", type=float, default=10)
+    benchmark.add_argument("--request-allowance", type=float, default=3)
+    benchmark.add_argument("--memory-limit-mib", type=float, default=1024)
+    benchmark.add_argument("--suite-wall-limit", type=float, default=300)
+    calibration = commands.add_parser("calibrate-window", help="audit fixed-window and completed-charge exposure")
+    calibration.add_argument("--run", type=Path, required=True)
+    calibration.add_argument("--window", type=Path, required=True)
+    calibration.add_argument("--output", type=Path, required=True)
+    study_freeze = commands.add_parser("freeze-study", help="seal phase inputs, code, settings and analysis")
+    study_freeze.add_argument("--spec", type=Path, required=True)
+    study_freeze.add_argument("--output", type=Path, required=True)
+    study_run = commands.add_parser("run-study", help="execute every preregistered arm of one phase")
+    study_run.add_argument("--frozen", type=Path, required=True)
+    study_run.add_argument("--phase", choices=("training", "validation", "heldout", "stress"), required=True)
+    study_run.add_argument("--output", type=Path, required=True)
+    study_run.add_argument("--run-wall-limit", type=float, default=240)
+    study_run.add_argument("--suite-wall-limit", type=float, default=3600)
+    study_analysis = commands.add_parser("study-analysis-plan", help="derive exactly the registered phase analysis")
+    study_analysis.add_argument("--manifest", type=Path, required=True)
+    study_analysis.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command in {"freeze-study", "run-study", "study-analysis-plan", "calibrate-window"}:
+            from simulation.evaluation.calibration import calibrate
+            from simulation.evaluation.study import freeze_study, run_study, study_plan
+
+            if args.output.exists():
+                raise ValueError("output already exists; preserve prior evidence")
+            if args.command == "freeze-study":
+                result = freeze_study(args.spec, args.output)
+                status = "FROZEN_" + result["stage"].upper()
+            elif args.command == "run-study":
+                result = run_study(args.frozen, args.output, phase=args.phase,
+                                   run_wall_limit=args.run_wall_limit, suite_wall_limit=args.suite_wall_limit)
+                status = result["status"]
+            else:
+                result = (study_plan(args.manifest) if args.command == "study-analysis-plan" else
+                          calibrate(args.run, json.loads(args.window.read_text(encoding="utf-8"))))
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                with args.output.open("x", encoding="utf-8", newline="\n") as stream:
+                    json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                    stream.write("\n")
+                status = result.get("status", "REGISTERED_ANALYSIS_PLAN")
+            print(json.dumps({"status": status, "output": str(args.output)}))
+            return 1 if status in {"FAIL", "PARTIAL"} else 0
+        if args.command == "freeze-snapshot":
+            from simulation.evaluation.frozen_snapshot import freeze_snapshot
+
+            result = freeze_snapshot(args.run, args.decision, args.output, preparation_limit=args.preparation_limit)
+            print(json.dumps({"status": "FROZEN", "model_hash": result["model_hash"],
+                              "variables": result["variables"]}))
+            return 0
+        if args.command == "benchmark-snapshot":
+            from simulation.evaluation.snapshot_benchmark import benchmark_snapshot
+
+            result = benchmark_snapshot(
+                args.snapshot, args.output, budgets=tuple(args.budgets), repeats=args.repeats,
+                order_seed=args.order_seed, startup_limit=args.startup_limit,
+                request_allowance=args.request_allowance, memory_limit_mib=args.memory_limit_mib,
+                suite_wall_limit=args.suite_wall_limit,
+            )
+            print(json.dumps({"status": result["status"], "runs": len(result["runs"]),
+                              "statuses": result["statuses"]}))
+            return 0 if result["status"] == "SUCCESS" else 1
+        if args.command in {"comparison-plan", "compare"}:
+            from simulation.evaluation.comparison import compare_plan, validate_plan, write_comparison
+            from simulation.evaluation.comparison_inputs import draft_plan
+
+            if args.output.exists():
+                raise ValueError("output already exists; preserve prior analysis")
+            if args.command == "comparison-plan":
+                result = draft_plan(args.manifest, control=args.control, candidates=tuple(args.candidates))
+                validate_plan(result)
+                status = "DRAFT_DESCRIPTIVE_PLAN"
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                with args.output.open("x", encoding="utf-8", newline="\n") as stream:
+                    json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                    stream.write("\n")
+            else:
+                result = compare_plan(args.plan)
+                write_comparison(result, args.output)
+                status = "EXPLORATORY_ANALYSIS"
+            print(json.dumps({"status": status, "output": str(args.output)}))
+            return 0
         if args.command == "prepare-design":
             from simulation.evaluation.design import prepare_design
             from simulation.evaluation.design_references import synthetic_references
@@ -169,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(json.dumps({"status": result["status"], "runs": len(result["runs"])}))
             return 0 if result["status"] == "SUCCESS" else 1
-        result = replay(json.loads(args.run.read_text(encoding="utf-8")))
+        result = replay(json.loads(args.run.read_text(encoding="utf-8")), input_root=args.run.resolve().parent)
         print(json.dumps({key: value for key, value in result.items() if key != "result"}))
         return 0 if result["matches"] else 1
     except (ValueError, TypeError, KeyError, OSError) as exc:
