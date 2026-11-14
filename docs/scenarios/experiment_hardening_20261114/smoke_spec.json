@@ -1,0 +1,3335 @@
+{
+  "schema": "clover-study-spec-v1",
+  "stage": "pilot",
+  "provenance": {
+    "kind": "synthetic_research",
+    "reviewed_by": "user approved synthetic validation on 2026-11-14",
+    "description": "Reviewed design-v3 synthetic reference geometry; explicit scale variants are designed examples, not independent factory samples."
+  },
+  "decision_settings": {
+    "timing_protocol": "d1-primary-deadline-v2",
+    "startup_mode": "on_demand",
+    "startup_timeout_seconds": 10,
+    "end_to_end_soft_deadline_seconds": 2,
+    "publication_allowance_seconds": 0.2,
+    "max_admission_attempts": 2,
+    "max_worker_restarts": 2,
+    "restart_backoff_seconds": [
+      0.1,
+      1.0
+    ],
+    "fallback_budget_seconds": 0.1,
+    "memory_limit_mib": 1024,
+    "request_watchdog_seconds": 12,
+    "primary_deadline_policy": "reject_late_primary",
+    "admission_reserve_seconds": 0.1,
+    "record_planning_inputs": true
+  },
+  "planning_settings": {
+    "horizon": 40,
+    "step": 2,
+    "max_tasks": 8,
+    "max_routes": 20000,
+    "sigma": 0,
+    "interval": 5,
+    "timeout": 2,
+    "watchdog": 3,
+    "max_arcs": 30000,
+    "max_tail_ticks": 1200,
+    "memory_limit_mib": 1024,
+    "timing_mode": "D0",
+    "warm_start": true,
+    "warm_start_seconds": 0.05,
+    "joint_cabins": true,
+    "max_cabin_states": 30000,
+    "formulation": "grid",
+    "native_step": 0.1,
+    "native_actions": 4,
+    "native_pruning": true,
+    "native_cache": true
+  },
+  "selection": {
+    "method": "a_priori",
+    "rationale": "H40/t2 is a prespecified research reference informed by the historical pilot, not a demonstrated optimum; weights unchanged. No heldout outcome used.",
+    "heldout_used": false,
+    "calibration_reports": []
+  },
+  "analysis": {
+    "control": "optimized",
+    "candidates": [
+      "baseline",
+      "rh_milp_grid",
+      "rh_cpsat_linear",
+      "rh_cpsat_native"
+    ],
+    "metrics": [
+      "throughput_per_min",
+      "late_due_rate",
+      "energy_per_completed",
+      "measurement_energy_consumed",
+      "mean_wip",
+      "unfinished",
+      "charge_queue_robot_seconds",
+      "arrival_to_start_p95",
+      "batch_makespan",
+      "recorded_run_wall_seconds",
+      "dispatch_timely_acceptance_rate",
+      "dispatch_deadline_exceeded_rate",
+      "dispatch_fallback_rate",
+      "dispatch_latency_p95",
+      "dispatch_latency_p99"
+    ],
+    "primary_metrics": [
+      "throughput_per_min"
+    ],
+    "practical_difference": {
+      "throughput_per_min": 0.1
+    },
+    "guardrails": {
+      "nominal_faults": 0,
+      "nominal_rescue_energy": 0,
+      "max_energy_balance_error": 1e-07,
+      "late_due_rate_max_absolute_increase": 0.02,
+      "control_coverage_required": true,
+      "exposure": "report completed meaningful charge sessions and WIP trend per held-out arm; withhold a self-sustaining claim if unexposed"
+    },
+    "selection_rule": "No automatic recommendation. Main study needs independent layout/seed evidence; require primary practical improvement with no guardrail regression and report censored/failed arms. Pilot never declares a winner.",
+    "confidence": 0.95,
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 20261114,
+    "minimum_seed_pairs": 10,
+    "minimum_layouts": 3,
+    "layout_sampling_independent": false,
+    "hardware_id": "local_mac_arm64_synthetic_research"
+  },
+  "cases": [
+    {
+      "id": "training_S01_eligible_1",
+      "phase": "training",
+      "condition": "S01_eligible_1",
+      "layout": "training_geometry_S01_eligible_1",
+      "seed": 11001,
+      "stochastic": false,
+      "demand_generation": {
+        "generator": "design-v3 materialize e0; common 90s prefix",
+        "seed": 11001,
+        "design_hash": "7586f322f5c758b93e3ae2ec68a908960dbbf4e81223223e8dbb76aeeba9b161",
+        "reference_hash": "f930a153cab7fd2bf692bf3b11c7b71000c2dd63526f8d9369d151d94cfbbd4e",
+        "factors": {
+          "eligible_station_count": 1
+        }
+      },
+      "scenario": {
+        "schema": "clover-scenario-v1",
+        "id": "smoke_S01_eligible_1",
+        "units": {
+          "coordinates": "px",
+          "metres_per_pixel": 0.1,
+          "dimensions": "m",
+          "time": "sim-s",
+          "energy": "battery-unit"
+        },
+        "factory": {
+          "profile": {
+            "id": 1,
+            "factory_name": "Default Factory",
+            "floor_width": 400,
+            "floor_height": 400,
+            "grid_cell_size": 50.0,
+            "edge_clearance": 0.4,
+            "side_clearance": 0.3,
+            "floor_travel_sec": 4.0,
+            "door_time_sec": 6.0,
+            "floor_count": 1
+          },
+          "stations": [
+            {
+              "id": "S0",
+              "label": "S0",
+              "x": 120,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S1",
+              "label": "S1",
+              "x": 150,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S2",
+              "label": "S2",
+              "x": 120,
+              "y": 300,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S3",
+              "label": "S3",
+              "x": 150,
+              "y": 300,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "chargers": [
+            {
+              "id": "C0",
+              "x": 114,
+              "y": 100,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "C1",
+              "x": 158,
+              "y": 100,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "C2",
+              "x": 114,
+              "y": 300,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "C3",
+              "x": 158,
+              "y": 300,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "robots": [
+            {
+              "id": "R0",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R1",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R2",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R3",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            }
+          ],
+          "obstacles": [],
+          "nodes": [
+            {
+              "id": 1,
+              "x": 100,
+              "y": 100,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 2,
+              "x": 114,
+              "y": 100,
+              "node_type": "charger",
+              "linked_station_id": "C0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 3,
+              "x": 120,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 4,
+              "x": 130,
+              "y": 100,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 5,
+              "x": 150,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 6,
+              "x": 158,
+              "y": 100,
+              "node_type": "charger",
+              "linked_station_id": "C1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 7,
+              "x": 100,
+              "y": 300,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 8,
+              "x": 114,
+              "y": 300,
+              "node_type": "charger",
+              "linked_station_id": "C2",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 9,
+              "x": 120,
+              "y": 300,
+              "node_type": "station",
+              "linked_station_id": "S2",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 10,
+              "x": 130,
+              "y": 300,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 11,
+              "x": 150,
+              "y": 300,
+              "node_type": "station",
+              "linked_station_id": "S3",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 12,
+              "x": 158,
+              "y": 300,
+              "node_type": "charger",
+              "linked_station_id": "C3",
+              "floor": 1,
+              "capacity": null
+            }
+          ],
+          "edges": [
+            {
+              "id": 1,
+              "from_node": 1,
+              "to_node": 2,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 2,
+              "from_node": 2,
+              "to_node": 3,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 3,
+              "from_node": 3,
+              "to_node": 4,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 4,
+              "from_node": 4,
+              "to_node": 5,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 5,
+              "from_node": 5,
+              "to_node": 6,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 6,
+              "from_node": 7,
+              "to_node": 8,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 7,
+              "from_node": 8,
+              "to_node": 9,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 8,
+              "from_node": 9,
+              "to_node": 10,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 9,
+              "from_node": 10,
+              "to_node": 11,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 10,
+              "from_node": 11,
+              "to_node": 12,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 11,
+              "from_node": 1,
+              "to_node": 7,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            }
+          ],
+          "elevators": []
+        },
+        "duration": 90,
+        "warmup": 0,
+        "check_interval": 1,
+        "initial_robots": {
+          "R0": {
+            "x": 130,
+            "y": 100,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R1": {
+            "x": 100,
+            "y": 100,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R2": {
+            "x": 130,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R3": {
+            "x": 100,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          }
+        },
+        "initial_cabins": {},
+        "plant": {
+          "work_drain_per_sec": 0.1,
+          "fault_recovery_time": 60.0,
+          "rescue_battery_pct": 15.0
+        },
+        "workload": {
+          "kind": "trace",
+          "jobs": [
+            {
+              "uid": "b:0",
+              "at": 0,
+              "station": "S0",
+              "allowed": [
+                "S0"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:1",
+              "at": 0,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:2",
+              "at": 0,
+              "station": "S2",
+              "allowed": [
+                "S2"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:3",
+              "at": 0,
+              "station": "S3",
+              "allowed": [
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:4",
+              "at": 0,
+              "station": "S0",
+              "allowed": [
+                "S0"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:5",
+              "at": 0,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:6",
+              "at": 0,
+              "station": "S2",
+              "allowed": [
+                "S2"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:7",
+              "at": 0,
+              "station": "S3",
+              "allowed": [
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            }
+          ]
+        },
+        "interventions": []
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 90,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 90,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "load": {
+        "lambda_tasks_per_second": 0.08888888888888889,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08888888888888889,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration."
+      }
+    },
+    {
+      "id": "validation_S04_mixed_soc",
+      "phase": "validation",
+      "condition": "S04_mixed_soc",
+      "layout": "validation_geometry_S04_mixed_soc",
+      "seed": 12001,
+      "stochastic": true,
+      "demand_generation": {
+        "generator": "design-v3 materialize e0; common 90s prefix",
+        "seed": 12001,
+        "design_hash": "7586f322f5c758b93e3ae2ec68a908960dbbf4e81223223e8dbb76aeeba9b161",
+        "reference_hash": "f930a153cab7fd2bf692bf3b11c7b71000c2dd63526f8d9369d151d94cfbbd4e",
+        "factors": {
+          "initial_soc_pct": [
+            20,
+            40,
+            60,
+            80
+          ]
+        }
+      },
+      "scenario": {
+        "schema": "clover-scenario-v1",
+        "id": "smoke_S04_mixed_soc",
+        "units": {
+          "coordinates": "px",
+          "metres_per_pixel": 0.1,
+          "dimensions": "m",
+          "time": "sim-s",
+          "energy": "battery-unit"
+        },
+        "factory": {
+          "profile": {
+            "id": 1,
+            "factory_name": "Default Factory",
+            "floor_width": 400,
+            "floor_height": 400,
+            "grid_cell_size": 50.0,
+            "edge_clearance": 0.4,
+            "side_clearance": 0.3,
+            "floor_travel_sec": 4.0,
+            "door_time_sec": 6.0,
+            "floor_count": 1
+          },
+          "stations": [
+            {
+              "id": "S0",
+              "label": "S0",
+              "x": 100,
+              "y": 200,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S1",
+              "label": "S1",
+              "x": 300,
+              "y": 200,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S2",
+              "label": "S2",
+              "x": 200,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S3",
+              "label": "S3",
+              "x": 200,
+              "y": 300,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "chargers": [
+            {
+              "id": "C",
+              "x": 200,
+              "y": 200,
+              "capacity": 1,
+              "charge_rate": 0.25,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "robots": [
+            {
+              "id": "R0",
+              "robot_type": "AGV",
+              "battery_capacity": 20,
+              "move_speed": 1,
+              "battery_drain_rate": 0.2,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R1",
+              "robot_type": "AGV",
+              "battery_capacity": 20,
+              "move_speed": 1,
+              "battery_drain_rate": 0.2,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R2",
+              "robot_type": "AGV",
+              "battery_capacity": 20,
+              "move_speed": 1,
+              "battery_drain_rate": 0.2,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R3",
+              "robot_type": "AGV",
+              "battery_capacity": 20,
+              "move_speed": 1,
+              "battery_drain_rate": 0.2,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            }
+          ],
+          "obstacles": [],
+          "nodes": [
+            {
+              "id": 1,
+              "x": 200,
+              "y": 200,
+              "node_type": "charger",
+              "linked_station_id": "C",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 2,
+              "x": 100,
+              "y": 200,
+              "node_type": "station",
+              "linked_station_id": "S0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 3,
+              "x": 300,
+              "y": 200,
+              "node_type": "station",
+              "linked_station_id": "S1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 4,
+              "x": 200,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S2",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 5,
+              "x": 200,
+              "y": 300,
+              "node_type": "station",
+              "linked_station_id": "S3",
+              "floor": 1,
+              "capacity": null
+            }
+          ],
+          "edges": [
+            {
+              "id": 1,
+              "from_node": 1,
+              "to_node": 2,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 2,
+              "from_node": 1,
+              "to_node": 3,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 3,
+              "from_node": 1,
+              "to_node": 4,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 4,
+              "from_node": 1,
+              "to_node": 5,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            }
+          ],
+          "elevators": []
+        },
+        "duration": 90,
+        "warmup": 0,
+        "check_interval": 1,
+        "initial_robots": {
+          "R0": {
+            "x": 200,
+            "y": 200,
+            "floor": 1,
+            "soc_pct": 20
+          },
+          "R1": {
+            "x": 200,
+            "y": 200,
+            "floor": 1,
+            "soc_pct": 40
+          },
+          "R2": {
+            "x": 200,
+            "y": 200,
+            "floor": 1,
+            "soc_pct": 60
+          },
+          "R3": {
+            "x": 200,
+            "y": 200,
+            "floor": 1,
+            "soc_pct": 80
+          }
+        },
+        "initial_cabins": {},
+        "plant": {
+          "work_drain_per_sec": 0.5,
+          "fault_recovery_time": 60.0,
+          "rescue_battery_pct": 15.0
+        },
+        "workload": {
+          "kind": "trace",
+          "jobs": [
+            {
+              "uid": "j:0",
+              "at": 74.11670133280836,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": -0.7829658404643407,
+              "deadline": 194.11670133280836
+            },
+            {
+              "uid": "j:1",
+              "at": 79.91410314962803,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 1.6050031943816225,
+              "deadline": 199.91410314962803
+            }
+          ]
+        },
+        "interventions": []
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 90,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 90,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "load": {
+        "lambda_tasks_per_second": 0.04,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.022222222222222223,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration."
+      }
+    },
+    {
+      "id": "heldout_S08_two_cars",
+      "phase": "heldout",
+      "condition": "S08_two_cars",
+      "layout": "heldout_geometry_S08_two_cars",
+      "seed": 21001,
+      "stochastic": false,
+      "demand_generation": {
+        "generator": "design-v3 materialize e0; common 90s prefix",
+        "seed": 21001,
+        "design_hash": "7586f322f5c758b93e3ae2ec68a908960dbbf4e81223223e8dbb76aeeba9b161",
+        "reference_hash": "f930a153cab7fd2bf692bf3b11c7b71000c2dd63526f8d9369d151d94cfbbd4e",
+        "factors": {
+          "active_cabins": 2
+        }
+      },
+      "scenario": {
+        "schema": "clover-scenario-v1",
+        "id": "smoke_S08_two_cars",
+        "units": {
+          "coordinates": "px",
+          "metres_per_pixel": 0.1,
+          "dimensions": "m",
+          "time": "sim-s",
+          "energy": "battery-unit"
+        },
+        "factory": {
+          "profile": {
+            "id": 1,
+            "factory_name": "Default Factory",
+            "floor_width": 400,
+            "floor_height": 400,
+            "grid_cell_size": 50.0,
+            "edge_clearance": 0.4,
+            "side_clearance": 0.3,
+            "floor_travel_sec": 4.0,
+            "door_time_sec": 6.0,
+            "floor_count": 2
+          },
+          "stations": [
+            {
+              "id": "S0",
+              "label": "S0",
+              "x": 50,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 2
+            },
+            {
+              "id": "S1",
+              "label": "S1",
+              "x": 150,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 2
+            },
+            {
+              "id": "S2",
+              "label": "S2",
+              "x": 250,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 2
+            },
+            {
+              "id": "S3",
+              "label": "S3",
+              "x": 350,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 2
+            },
+            {
+              "id": "S4",
+              "label": "S4",
+              "x": 50,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S5",
+              "label": "S5",
+              "x": 150,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S6",
+              "label": "S6",
+              "x": 250,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S7",
+              "label": "S7",
+              "x": 350,
+              "y": 100,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "chargers": [
+            {
+              "id": "C0",
+              "x": 100,
+              "y": 300,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "C1",
+              "x": 300,
+              "y": 300,
+              "capacity": 2,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "robots": [
+            {
+              "id": "R0",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R1",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R2",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R3",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            }
+          ],
+          "obstacles": [],
+          "nodes": [
+            {
+              "id": 1,
+              "x": 100,
+              "y": 200,
+              "node_type": "elevator",
+              "linked_station_id": "E0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 2,
+              "x": 100,
+              "y": 200,
+              "node_type": "elevator",
+              "linked_station_id": "E0",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 3,
+              "x": 300,
+              "y": 200,
+              "node_type": "elevator",
+              "linked_station_id": "E1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 4,
+              "x": 300,
+              "y": 200,
+              "node_type": "elevator",
+              "linked_station_id": "E1",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 5,
+              "x": 100,
+              "y": 300,
+              "node_type": "charger",
+              "linked_station_id": "C0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 6,
+              "x": 300,
+              "y": 300,
+              "node_type": "charger",
+              "linked_station_id": "C1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 10,
+              "x": 50,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S0",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 11,
+              "x": 150,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S1",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 12,
+              "x": 250,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S2",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 13,
+              "x": 350,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S3",
+              "floor": 2,
+              "capacity": null
+            },
+            {
+              "id": 14,
+              "x": 50,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S4",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 15,
+              "x": 150,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S5",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 16,
+              "x": 250,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S6",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 17,
+              "x": 350,
+              "y": 100,
+              "node_type": "station",
+              "linked_station_id": "S7",
+              "floor": 1,
+              "capacity": null
+            }
+          ],
+          "edges": [
+            {
+              "id": 1,
+              "from_node": 5,
+              "to_node": 1,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 2,
+              "from_node": 6,
+              "to_node": 3,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 3,
+              "from_node": 5,
+              "to_node": 6,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 4,
+              "from_node": 2,
+              "to_node": 4,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 5,
+              "from_node": 2,
+              "to_node": 10,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 6,
+              "from_node": 2,
+              "to_node": 11,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 7,
+              "from_node": 4,
+              "to_node": 12,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 8,
+              "from_node": 4,
+              "to_node": 13,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 9,
+              "from_node": 1,
+              "to_node": 14,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 10,
+              "from_node": 1,
+              "to_node": 15,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 11,
+              "from_node": 3,
+              "to_node": 16,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 12,
+              "from_node": 3,
+              "to_node": 17,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            }
+          ],
+          "elevators": [
+            {
+              "id": "E0",
+              "label": "E0",
+              "x": 100,
+              "y": 200,
+              "width": 60.0,
+              "height": 60.0,
+              "travel_time": 4.0,
+              "capacity": 1,
+              "is_active": true
+            },
+            {
+              "id": "E1",
+              "label": "E1",
+              "x": 300,
+              "y": 200,
+              "width": 60.0,
+              "height": 60.0,
+              "travel_time": 4.0,
+              "capacity": 1,
+              "is_active": true
+            }
+          ]
+        },
+        "duration": 90,
+        "warmup": 0,
+        "check_interval": 1,
+        "initial_robots": {
+          "R0": {
+            "x": 100,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R1": {
+            "x": 100,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R2": {
+            "x": 300,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R3": {
+            "x": 300,
+            "y": 300,
+            "floor": 1,
+            "soc_pct": 80
+          }
+        },
+        "initial_cabins": {
+          "E0": 1,
+          "E1": 1
+        },
+        "plant": {
+          "work_drain_per_sec": 0.1,
+          "fault_recovery_time": 60.0,
+          "rescue_battery_pct": 15.0
+        },
+        "workload": {
+          "kind": "trace",
+          "jobs": [
+            {
+              "uid": "b:0",
+              "at": 0,
+              "station": "S0",
+              "allowed": [
+                "S0"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:1",
+              "at": 0,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:2",
+              "at": 0,
+              "station": "S2",
+              "allowed": [
+                "S2"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:3",
+              "at": 0,
+              "station": "S3",
+              "allowed": [
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:4",
+              "at": 0,
+              "station": "S0",
+              "allowed": [
+                "S0"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:5",
+              "at": 0,
+              "station": "S1",
+              "allowed": [
+                "S1"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:6",
+              "at": 0,
+              "station": "S2",
+              "allowed": [
+                "S2"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            },
+            {
+              "uid": "b:7",
+              "at": 0,
+              "station": "S3",
+              "allowed": [
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 0,
+              "deadline": 120
+            }
+          ]
+        },
+        "interventions": []
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 90,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 90,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "load": {
+        "lambda_tasks_per_second": 0.08888888888888889,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.08888888888888889,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration."
+      }
+    },
+    {
+      "id": "stress_S11_budget_2",
+      "phase": "stress",
+      "condition": "S11_budget_2",
+      "layout": "stress_geometry_S11_budget_2",
+      "seed": 31001,
+      "stochastic": true,
+      "demand_generation": {
+        "generator": "design-v3 materialize e0; common 90s prefix",
+        "seed": 31001,
+        "design_hash": "7586f322f5c758b93e3ae2ec68a908960dbbf4e81223223e8dbb76aeeba9b161",
+        "reference_hash": "f930a153cab7fd2bf692bf3b11c7b71000c2dd63526f8d9369d151d94cfbbd4e",
+        "factors": {
+          "common_end_to_end_soft_deadline_s": 2
+        }
+      },
+      "scenario": {
+        "schema": "clover-scenario-v1",
+        "id": "smoke_S11_budget_2",
+        "units": {
+          "coordinates": "px",
+          "metres_per_pixel": 0.1,
+          "dimensions": "m",
+          "time": "sim-s",
+          "energy": "battery-unit"
+        },
+        "factory": {
+          "profile": {
+            "id": 1,
+            "factory_name": "Default Factory",
+            "floor_width": 400,
+            "floor_height": 400,
+            "grid_cell_size": 50.0,
+            "edge_clearance": 0.4,
+            "side_clearance": 0.3,
+            "floor_travel_sec": 4.0,
+            "door_time_sec": 6.0,
+            "floor_count": 1
+          },
+          "stations": [
+            {
+              "id": "S0",
+              "label": "S0",
+              "x": 20.0,
+              "y": 20.0,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S1",
+              "label": "S1",
+              "x": 300.0,
+              "y": 20.0,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S2",
+              "label": "S2",
+              "x": 20.0,
+              "y": 300.0,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            },
+            {
+              "id": "S3",
+              "label": "S3",
+              "x": 300.0,
+              "y": 300.0,
+              "width": 80.0,
+              "height": 60.0,
+              "task_type": "inspection",
+              "avg_process_time": 8,
+              "process_time_std": 0,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "chargers": [
+            {
+              "id": "C",
+              "x": 180.0,
+              "y": 180.0,
+              "capacity": 4,
+              "charge_rate": 5,
+              "is_active": true,
+              "floor": 1
+            }
+          ],
+          "robots": [
+            {
+              "id": "R0",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R1",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R2",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            },
+            {
+              "id": "R3",
+              "robot_type": "AGV",
+              "battery_capacity": 100.0,
+              "move_speed": 1,
+              "battery_drain_rate": 0.1,
+              "charge_threshold": 20.0,
+              "is_active": true,
+              "width": 0.6,
+              "length": 0.8
+            }
+          ],
+          "obstacles": [],
+          "nodes": [
+            {
+              "id": 1,
+              "x": 20.0,
+              "y": 20.0,
+              "node_type": "station",
+              "linked_station_id": "S0",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 2,
+              "x": 60.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 3,
+              "x": 100.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 4,
+              "x": 140.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 5,
+              "x": 180.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 6,
+              "x": 220.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 7,
+              "x": 260.0,
+              "y": 20.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 8,
+              "x": 300.0,
+              "y": 20.0,
+              "node_type": "station",
+              "linked_station_id": "S1",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 9,
+              "x": 20.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 10,
+              "x": 60.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 11,
+              "x": 100.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 12,
+              "x": 140.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 13,
+              "x": 180.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 14,
+              "x": 220.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 15,
+              "x": 260.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 16,
+              "x": 300.0,
+              "y": 60.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 17,
+              "x": 20.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 18,
+              "x": 60.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 19,
+              "x": 100.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 20,
+              "x": 140.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 21,
+              "x": 180.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 22,
+              "x": 220.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 23,
+              "x": 260.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 24,
+              "x": 300.0,
+              "y": 100.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 25,
+              "x": 20.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 26,
+              "x": 60.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 27,
+              "x": 100.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 28,
+              "x": 140.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 29,
+              "x": 180.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 30,
+              "x": 220.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 31,
+              "x": 260.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 32,
+              "x": 300.0,
+              "y": 140.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 33,
+              "x": 20.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 34,
+              "x": 60.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 35,
+              "x": 100.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 36,
+              "x": 140.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 37,
+              "x": 180.0,
+              "y": 180.0,
+              "node_type": "charger",
+              "linked_station_id": "C",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 38,
+              "x": 220.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 39,
+              "x": 260.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 40,
+              "x": 300.0,
+              "y": 180.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 41,
+              "x": 20.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 42,
+              "x": 60.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 43,
+              "x": 100.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 44,
+              "x": 140.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 45,
+              "x": 180.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 46,
+              "x": 220.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 47,
+              "x": 260.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 48,
+              "x": 300.0,
+              "y": 220.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 49,
+              "x": 20.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 50,
+              "x": 60.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 51,
+              "x": 100.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 52,
+              "x": 140.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 53,
+              "x": 180.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 54,
+              "x": 220.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 55,
+              "x": 260.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 56,
+              "x": 300.0,
+              "y": 260.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 57,
+              "x": 20.0,
+              "y": 300.0,
+              "node_type": "station",
+              "linked_station_id": "S2",
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 58,
+              "x": 60.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 59,
+              "x": 100.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 60,
+              "x": 140.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 61,
+              "x": 180.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 62,
+              "x": 220.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 63,
+              "x": 260.0,
+              "y": 300.0,
+              "node_type": "waypoint",
+              "linked_station_id": null,
+              "floor": 1,
+              "capacity": null
+            },
+            {
+              "id": 64,
+              "x": 300.0,
+              "y": 300.0,
+              "node_type": "station",
+              "linked_station_id": "S3",
+              "floor": 1,
+              "capacity": null
+            }
+          ],
+          "edges": [
+            {
+              "id": 1,
+              "from_node": 1,
+              "to_node": 2,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 2,
+              "from_node": 2,
+              "to_node": 3,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 3,
+              "from_node": 3,
+              "to_node": 4,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 4,
+              "from_node": 4,
+              "to_node": 5,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 5,
+              "from_node": 5,
+              "to_node": 6,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 6,
+              "from_node": 6,
+              "to_node": 7,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 7,
+              "from_node": 7,
+              "to_node": 8,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 8,
+              "from_node": 9,
+              "to_node": 10,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 9,
+              "from_node": 10,
+              "to_node": 11,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 10,
+              "from_node": 11,
+              "to_node": 12,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 11,
+              "from_node": 12,
+              "to_node": 13,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 12,
+              "from_node": 13,
+              "to_node": 14,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 13,
+              "from_node": 14,
+              "to_node": 15,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 14,
+              "from_node": 15,
+              "to_node": 16,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 15,
+              "from_node": 17,
+              "to_node": 18,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 16,
+              "from_node": 18,
+              "to_node": 19,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 17,
+              "from_node": 19,
+              "to_node": 20,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 18,
+              "from_node": 20,
+              "to_node": 21,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 19,
+              "from_node": 21,
+              "to_node": 22,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 20,
+              "from_node": 22,
+              "to_node": 23,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 21,
+              "from_node": 23,
+              "to_node": 24,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 22,
+              "from_node": 25,
+              "to_node": 26,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 23,
+              "from_node": 26,
+              "to_node": 27,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 24,
+              "from_node": 27,
+              "to_node": 28,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 25,
+              "from_node": 28,
+              "to_node": 29,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 26,
+              "from_node": 29,
+              "to_node": 30,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 27,
+              "from_node": 30,
+              "to_node": 31,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 28,
+              "from_node": 31,
+              "to_node": 32,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 29,
+              "from_node": 33,
+              "to_node": 34,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 30,
+              "from_node": 34,
+              "to_node": 35,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 31,
+              "from_node": 35,
+              "to_node": 36,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 32,
+              "from_node": 36,
+              "to_node": 37,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 33,
+              "from_node": 37,
+              "to_node": 38,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 34,
+              "from_node": 38,
+              "to_node": 39,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 35,
+              "from_node": 39,
+              "to_node": 40,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 36,
+              "from_node": 41,
+              "to_node": 42,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 37,
+              "from_node": 42,
+              "to_node": 43,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 38,
+              "from_node": 43,
+              "to_node": 44,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 39,
+              "from_node": 44,
+              "to_node": 45,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 40,
+              "from_node": 45,
+              "to_node": 46,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 41,
+              "from_node": 46,
+              "to_node": 47,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 42,
+              "from_node": 47,
+              "to_node": 48,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 43,
+              "from_node": 49,
+              "to_node": 50,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 44,
+              "from_node": 50,
+              "to_node": 51,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 45,
+              "from_node": 51,
+              "to_node": 52,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 46,
+              "from_node": 52,
+              "to_node": 53,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 47,
+              "from_node": 53,
+              "to_node": 54,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 48,
+              "from_node": 54,
+              "to_node": 55,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 49,
+              "from_node": 55,
+              "to_node": 56,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 50,
+              "from_node": 57,
+              "to_node": 58,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 51,
+              "from_node": 58,
+              "to_node": 59,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 52,
+              "from_node": 59,
+              "to_node": 60,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 53,
+              "from_node": 60,
+              "to_node": 61,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 54,
+              "from_node": 61,
+              "to_node": 62,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 55,
+              "from_node": 62,
+              "to_node": 63,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 56,
+              "from_node": 63,
+              "to_node": 64,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 57,
+              "from_node": 1,
+              "to_node": 9,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 58,
+              "from_node": 2,
+              "to_node": 10,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 59,
+              "from_node": 3,
+              "to_node": 11,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 60,
+              "from_node": 4,
+              "to_node": 12,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 61,
+              "from_node": 5,
+              "to_node": 13,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 62,
+              "from_node": 6,
+              "to_node": 14,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 63,
+              "from_node": 7,
+              "to_node": 15,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 64,
+              "from_node": 8,
+              "to_node": 16,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 65,
+              "from_node": 9,
+              "to_node": 17,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 66,
+              "from_node": 10,
+              "to_node": 18,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 67,
+              "from_node": 11,
+              "to_node": 19,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 68,
+              "from_node": 12,
+              "to_node": 20,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 69,
+              "from_node": 13,
+              "to_node": 21,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 70,
+              "from_node": 14,
+              "to_node": 22,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 71,
+              "from_node": 15,
+              "to_node": 23,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 72,
+              "from_node": 16,
+              "to_node": 24,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 73,
+              "from_node": 17,
+              "to_node": 25,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 74,
+              "from_node": 18,
+              "to_node": 26,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 75,
+              "from_node": 19,
+              "to_node": 27,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 76,
+              "from_node": 20,
+              "to_node": 28,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 77,
+              "from_node": 21,
+              "to_node": 29,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 78,
+              "from_node": 22,
+              "to_node": 30,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 79,
+              "from_node": 23,
+              "to_node": 31,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 80,
+              "from_node": 24,
+              "to_node": 32,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 81,
+              "from_node": 25,
+              "to_node": 33,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 82,
+              "from_node": 26,
+              "to_node": 34,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 83,
+              "from_node": 27,
+              "to_node": 35,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 84,
+              "from_node": 28,
+              "to_node": 36,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 85,
+              "from_node": 29,
+              "to_node": 37,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 86,
+              "from_node": 30,
+              "to_node": 38,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 87,
+              "from_node": 31,
+              "to_node": 39,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 88,
+              "from_node": 32,
+              "to_node": 40,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 89,
+              "from_node": 33,
+              "to_node": 41,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 90,
+              "from_node": 34,
+              "to_node": 42,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 91,
+              "from_node": 35,
+              "to_node": 43,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 92,
+              "from_node": 36,
+              "to_node": 44,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 93,
+              "from_node": 37,
+              "to_node": 45,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 94,
+              "from_node": 38,
+              "to_node": 46,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 95,
+              "from_node": 39,
+              "to_node": 47,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 96,
+              "from_node": 40,
+              "to_node": 48,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 97,
+              "from_node": 41,
+              "to_node": 49,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 98,
+              "from_node": 42,
+              "to_node": 50,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 99,
+              "from_node": 43,
+              "to_node": 51,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 100,
+              "from_node": 44,
+              "to_node": 52,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 101,
+              "from_node": 45,
+              "to_node": 53,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 102,
+              "from_node": 46,
+              "to_node": 54,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 103,
+              "from_node": 47,
+              "to_node": 55,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 104,
+              "from_node": 48,
+              "to_node": 56,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 105,
+              "from_node": 49,
+              "to_node": 57,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 106,
+              "from_node": 50,
+              "to_node": 58,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 107,
+              "from_node": 51,
+              "to_node": 59,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 108,
+              "from_node": 52,
+              "to_node": 60,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 109,
+              "from_node": 53,
+              "to_node": 61,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 110,
+              "from_node": 54,
+              "to_node": 62,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 111,
+              "from_node": 55,
+              "to_node": 63,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            },
+            {
+              "id": 112,
+              "from_node": 56,
+              "to_node": 64,
+              "distance": null,
+              "is_bidirectional": true,
+              "width": 5
+            }
+          ],
+          "elevators": []
+        },
+        "duration": 90,
+        "warmup": 0,
+        "check_interval": 1,
+        "initial_robots": {
+          "R0": {
+            "x": 180.0,
+            "y": 180.0,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R1": {
+            "x": 180.0,
+            "y": 180.0,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R2": {
+            "x": 180.0,
+            "y": 180.0,
+            "floor": 1,
+            "soc_pct": 80
+          },
+          "R3": {
+            "x": 180.0,
+            "y": 180.0,
+            "floor": 1,
+            "soc_pct": 80
+          }
+        },
+        "initial_cabins": {},
+        "plant": {
+          "work_drain_per_sec": 0.1,
+          "fault_recovery_time": 60.0,
+          "rescue_battery_pct": 15.0
+        },
+        "workload": {
+          "kind": "trace",
+          "jobs": [
+            {
+              "uid": "j:0",
+              "at": 45.701290903714465,
+              "station": "S2",
+              "allowed": [
+                "S0",
+                "S1",
+                "S2",
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": 1.4238938880502066,
+              "deadline": 165.70129090371447
+            },
+            {
+              "uid": "j:1",
+              "at": 65.85128023419713,
+              "station": "S1",
+              "allowed": [
+                "S0",
+                "S1",
+                "S2",
+                "S3"
+              ],
+              "operation": "inspection",
+              "priority": 2,
+              "noise": -1.5563982847283282,
+              "deadline": 185.85128023419713
+            }
+          ]
+        },
+        "interventions": []
+      },
+      "policies": [
+        "baseline",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 90,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 90,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": false
+      },
+      "load": {
+        "lambda_tasks_per_second": 0.08,
+        "reference_capacity_tasks_per_second": 0.2,
+        "calibration_status": "UNCALIBRATED",
+        "realized_release_rate_tasks_per_second": 0.022222222222222223,
+        "method": "UNCALIBRATED design mu 0.2 tasks/s; rho is provisional, not measured bottleneck capacity. Stochastic lambda follows the generator; finite-batch lambda is releases/duration."
+      }
+    }
+  ]
+}

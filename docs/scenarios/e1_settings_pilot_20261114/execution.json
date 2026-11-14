@@ -1,0 +1,410 @@
+{
+  "schema": "clover-e1-settings-screen-runs-v1",
+  "status": "SUCCESS",
+  "protocol": {
+    "schema": "clover-e1-settings-screen-v1",
+    "date": "2026-11-14",
+    "purpose": "training_feasibility",
+    "source_base_commit": "dd2a861f7c47b76f93669fdb0a5436560503d76f",
+    "source_hash": "75016001011187ca9bf4272169911a5698770bf32c87800f6690c280312d5f3a",
+    "hardware_id": "jm-local-mac-arm64-20261114",
+    "demand_seed": 1001,
+    "solver_seed": 42,
+    "order_seed": 20261114,
+    "phase": "e1-candidate",
+    "timing": "D1",
+    "planned_runs": 60,
+    "run_wall_limit_s": 120,
+    "study_wall_limit_s": 1800,
+    "profiles": [
+      "h40_t025",
+      "h40_t2",
+      "h60_t2"
+    ],
+    "cells": [
+      "S01_eligible_1",
+      "S04_mixed_soc",
+      "S08_two_cars",
+      "S11_budget_2"
+    ],
+    "blocks": [
+      {
+        "profile": "h60_t2",
+        "cell": "S04_mixed_soc",
+        "index": 1,
+        "policies": [
+          "rh_milp_grid",
+          "baseline",
+          "optimized",
+          "rh_cpsat_linear",
+          "rh_cpsat_native"
+        ]
+      },
+      {
+        "profile": "h40_t2",
+        "cell": "S04_mixed_soc",
+        "index": 2,
+        "policies": [
+          "optimized",
+          "rh_cpsat_native",
+          "rh_milp_grid",
+          "rh_cpsat_linear",
+          "baseline"
+        ]
+      },
+      {
+        "profile": "h40_t2",
+        "cell": "S01_eligible_1",
+        "index": 3,
+        "policies": [
+          "optimized",
+          "baseline",
+          "rh_cpsat_linear",
+          "rh_milp_grid",
+          "rh_cpsat_native"
+        ]
+      },
+      {
+        "profile": "h60_t2",
+        "cell": "S11_budget_2",
+        "index": 4,
+        "policies": [
+          "optimized",
+          "rh_milp_grid",
+          "baseline",
+          "rh_cpsat_linear",
+          "rh_cpsat_native"
+        ]
+      },
+      {
+        "profile": "h40_t2",
+        "cell": "S08_two_cars",
+        "index": 5,
+        "policies": [
+          "rh_cpsat_linear",
+          "optimized",
+          "baseline",
+          "rh_cpsat_native",
+          "rh_milp_grid"
+        ]
+      },
+      {
+        "profile": "h40_t025",
+        "cell": "S01_eligible_1",
+        "index": 6,
+        "policies": [
+          "rh_cpsat_linear",
+          "rh_cpsat_native",
+          "optimized",
+          "baseline",
+          "rh_milp_grid"
+        ]
+      },
+      {
+        "profile": "h60_t2",
+        "cell": "S08_two_cars",
+        "index": 7,
+        "policies": [
+          "rh_cpsat_native",
+          "optimized",
+          "rh_cpsat_linear",
+          "rh_milp_grid",
+          "baseline"
+        ]
+      },
+      {
+        "profile": "h40_t025",
+        "cell": "S08_two_cars",
+        "index": 8,
+        "policies": [
+          "rh_cpsat_native",
+          "optimized",
+          "rh_milp_grid",
+          "rh_cpsat_linear",
+          "baseline"
+        ]
+      },
+      {
+        "profile": "h40_t2",
+        "cell": "S11_budget_2",
+        "index": 9,
+        "policies": [
+          "rh_cpsat_native",
+          "rh_cpsat_linear",
+          "baseline",
+          "rh_milp_grid",
+          "optimized"
+        ]
+      },
+      {
+        "profile": "h60_t2",
+        "cell": "S01_eligible_1",
+        "index": 10,
+        "policies": [
+          "optimized",
+          "baseline",
+          "rh_cpsat_linear",
+          "rh_milp_grid",
+          "rh_cpsat_native"
+        ]
+      },
+      {
+        "profile": "h40_t025",
+        "cell": "S11_budget_2",
+        "index": 11,
+        "policies": [
+          "baseline",
+          "rh_milp_grid",
+          "optimized",
+          "rh_cpsat_native",
+          "rh_cpsat_linear"
+        ]
+      },
+      {
+        "profile": "h40_t025",
+        "cell": "S04_mixed_soc",
+        "index": 12,
+        "policies": [
+          "rh_cpsat_linear",
+          "rh_cpsat_native",
+          "baseline",
+          "rh_milp_grid",
+          "optimized"
+        ]
+      }
+    ],
+    "calibration_status": "UNCALIBRATED",
+    "inference": false,
+    "minimum_seed_pairs": 10,
+    "minimum_layouts": 3,
+    "repair_rule": {
+      "trigger": "publication allowance violation only",
+      "maximum_rounds": 1,
+      "publication_allowance_seconds": 0.5,
+      "rerun_scope": "all profiles and all policies of each affected cell",
+      "distinct_cohort": true
+    },
+    "stop_rule": "preserve all failed, partial and unstarted arms at budget exhaustion; no winner-based reruns",
+    "scope": "synthetic one-seed feasibility screen; no independent profile replicates, no E2/E3 or factory policy recommendation"
+  },
+  "blocks": [
+    {
+      "profile": "h60_t2",
+      "cell": "S04_mixed_soc",
+      "index": 1,
+      "policies": [
+        "rh_milp_grid",
+        "baseline",
+        "optimized",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "manifest": "runs/b01_h60_t2_S04_mixed_soc/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 21.93875562492758
+    },
+    {
+      "profile": "h40_t2",
+      "cell": "S04_mixed_soc",
+      "index": 2,
+      "policies": [
+        "optimized",
+        "rh_cpsat_native",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "baseline"
+      ],
+      "manifest": "runs/b02_h40_t2_S04_mixed_soc/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 16.2973785828799
+    },
+    {
+      "profile": "h40_t2",
+      "cell": "S01_eligible_1",
+      "index": 3,
+      "policies": [
+        "optimized",
+        "baseline",
+        "rh_cpsat_linear",
+        "rh_milp_grid",
+        "rh_cpsat_native"
+      ],
+      "manifest": "runs/b03_h40_t2_S01_eligible_1/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 21.450719209155068
+    },
+    {
+      "profile": "h60_t2",
+      "cell": "S11_budget_2",
+      "index": 4,
+      "policies": [
+        "optimized",
+        "rh_milp_grid",
+        "baseline",
+        "rh_cpsat_linear",
+        "rh_cpsat_native"
+      ],
+      "manifest": "runs/b04_h60_t2_S11_budget_2/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 42.04323104210198
+    },
+    {
+      "profile": "h40_t2",
+      "cell": "S08_two_cars",
+      "index": 5,
+      "policies": [
+        "rh_cpsat_linear",
+        "optimized",
+        "baseline",
+        "rh_cpsat_native",
+        "rh_milp_grid"
+      ],
+      "manifest": "runs/b05_h40_t2_S08_two_cars/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 12.18420804105699
+    },
+    {
+      "profile": "h40_t025",
+      "cell": "S01_eligible_1",
+      "index": 6,
+      "policies": [
+        "rh_cpsat_linear",
+        "rh_cpsat_native",
+        "optimized",
+        "baseline",
+        "rh_milp_grid"
+      ],
+      "manifest": "runs/b06_h40_t025_S01_eligible_1/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 9.308939083945006
+    },
+    {
+      "profile": "h60_t2",
+      "cell": "S08_two_cars",
+      "index": 7,
+      "policies": [
+        "rh_cpsat_native",
+        "optimized",
+        "rh_cpsat_linear",
+        "rh_milp_grid",
+        "baseline"
+      ],
+      "manifest": "runs/b07_h60_t2_S08_two_cars/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 13.946283165831119
+    },
+    {
+      "profile": "h40_t025",
+      "cell": "S08_two_cars",
+      "index": 8,
+      "policies": [
+        "rh_cpsat_native",
+        "optimized",
+        "rh_milp_grid",
+        "rh_cpsat_linear",
+        "baseline"
+      ],
+      "manifest": "runs/b08_h40_t025_S08_two_cars/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 7.742547791916877
+    },
+    {
+      "profile": "h40_t2",
+      "cell": "S11_budget_2",
+      "index": 9,
+      "policies": [
+        "rh_cpsat_native",
+        "rh_cpsat_linear",
+        "baseline",
+        "rh_milp_grid",
+        "optimized"
+      ],
+      "manifest": "runs/b09_h40_t2_S11_budget_2/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 33.09128325013444
+    },
+    {
+      "profile": "h60_t2",
+      "cell": "S01_eligible_1",
+      "index": 10,
+      "policies": [
+        "optimized",
+        "baseline",
+        "rh_cpsat_linear",
+        "rh_milp_grid",
+        "rh_cpsat_native"
+      ],
+      "manifest": "runs/b10_h60_t2_S01_eligible_1/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 24.201227666111663
+    },
+    {
+      "profile": "h40_t025",
+      "cell": "S11_budget_2",
+      "index": 11,
+      "policies": [
+        "baseline",
+        "rh_milp_grid",
+        "optimized",
+        "rh_cpsat_native",
+        "rh_cpsat_linear"
+      ],
+      "manifest": "runs/b11_h40_t025_S11_budget_2/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 25.103528457926586
+    },
+    {
+      "profile": "h40_t025",
+      "cell": "S04_mixed_soc",
+      "index": 12,
+      "policies": [
+        "rh_cpsat_linear",
+        "rh_cpsat_native",
+        "baseline",
+        "rh_milp_grid",
+        "optimized"
+      ],
+      "manifest": "runs/b12_h40_t025_S04_mixed_soc/manifest.json",
+      "status": "SUCCESS",
+      "arm_statuses": {
+        "SUCCESS": 5
+      },
+      "wall_seconds": 14.22000087494962
+    }
+  ],
+  "planned_runs": 60,
+  "wall_seconds": 242.04108066600747
+}

@@ -1,0 +1,8 @@
+{
+  "error": "RuntimeError: injected unexpected worker error",
+  "manifest_status": "RUNNING",
+  "planned_runs": 12,
+  "retained_rows": 0,
+  "worker_closed": true,
+  "scope": "fault-injected infrastructure reproduction; no native solve"
+}

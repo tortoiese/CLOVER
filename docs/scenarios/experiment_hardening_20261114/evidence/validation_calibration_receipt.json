@@ -1,0 +1,1222 @@
+{
+  "scope": "12 synthetic validation windows; D0 optimized only",
+  "source_hash": "192e456b789a4f940588631079177d75062770b5e374c81098d87141c4e360c5",
+  "cases": [
+    {
+      "case": "validation_S00_low",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S00_low/validation_S00_low__optimized__12001.json",
+      "result_sha256": "a6e4a11504e25d3b37c23a0c5a4f0c1afee1bcee5949e953f5bb7afdd003a118",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S00_low/calibration.json",
+      "calibration_sha256": "0da232f4617ccb6d0f467bd9796a520568bddd816ea39bdc93520cd8d8d6cc25",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.69999999999982
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.20000000000164
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.499999999997954
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.899999999999636
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 31,
+          "throughput_per_min": 1.55,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 31,
+          "throughput_per_min": 1.55,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 32,
+          "throughput_per_min": 1.6,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 35,
+          "throughput_per_min": 1.75,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 25,
+          "throughput_per_min": 1.25,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 42,
+          "throughput_per_min": 2.1,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        }
+      ]
+    },
+    {
+      "case": "validation_S01_eligible_1",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S01_eligible_1/validation_S01_eligible_1__optimized__12001.json",
+      "result_sha256": "5799745f3f1dd99210fa9516f66b0750c8c0c14c38f4ae435bf9f97034191f61",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S01_eligible_1/calibration.json",
+      "calibration_sha256": "a8ca3077eb43a1f99ae20824dcef41cc16bd8f41371c3873adb55344b2a69ad4",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 7,
+          "throughput_per_min": 8.4,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S02_width_1p3",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S02_width_1p3/validation_S02_width_1p3__optimized__12001.json",
+      "result_sha256": "99a7f5ecca25eb3b777c2911017ab8db32cba35bde30af317b16c7e6ea30ac6a",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S02_width_1p3/calibration.json",
+      "calibration_sha256": "058cb9f88dfcfe9ad41dfe82822761d3ccf8c4b2ccb742b314c70e5ba2e7835e",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 0,
+          "wip_before_end": 7
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 5,
+          "throughput_per_min": 6.0,
+          "wip_before_start": 7,
+          "wip_before_end": 2
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S03_on",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S03_on/validation_S03_on__optimized__12001.json",
+      "result_sha256": "3aa9c7a78278a64406e1723edaa73ff24598ebfa3bb42be75e0a8606580eccf2",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S03_on/calibration.json",
+      "calibration_sha256": "e748c955b570ccaf9d837bc1388f65c71a73f212ba4d54a129184eff62924e79",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 0,
+          "wip_before_end": 6
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 6,
+          "wip_before_end": 4
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 3,
+          "throughput_per_min": 3.6,
+          "wip_before_start": 4,
+          "wip_before_end": 1
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S04_mixed_soc",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S04_mixed_soc/validation_S04_mixed_soc__optimized__12001.json",
+      "result_sha256": "2645d9f14f3d362f38eb06ccf5a83cdb8be39a191f612ea4f378625285dc2f9e",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S04_mixed_soc/calibration.json",
+      "calibration_sha256": "f62bddea3f7413e9aefd2f05d12be1929361a6c7decd9eb8661dd7a15ce9282a",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 41,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 448.2000000000001
+        },
+        "R1": {
+          "completed": 40,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 456.1999999999999
+        },
+        "R2": {
+          "completed": 40,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 444.0
+        },
+        "R3": {
+          "completed": 40,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 447.9999999999999
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 48,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 1,
+          "wip_before_end": 7
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 48,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 7,
+          "wip_before_end": 7
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 49,
+          "throughput_per_min": 2.45,
+          "wip_before_start": 7,
+          "wip_before_end": 7
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 42,
+          "throughput_per_min": 2.1,
+          "wip_before_start": 7,
+          "wip_before_end": 6
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 48,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 6,
+          "wip_before_end": 0
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 43,
+          "throughput_per_min": 2.15,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        }
+      ]
+    },
+    {
+      "case": "validation_S05_hotspot_70",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S05_hotspot_70/validation_S05_hotspot_70__optimized__12001.json",
+      "result_sha256": "40d90a614b05d02d4c2a95071b029c53bea4ea14cfe328828b777972d5e2e58e",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S05_hotspot_70/calibration.json",
+      "calibration_sha256": "5c869f4be54859314157939b6e161123f03f3ecdc684ba50041710c35515509f",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 186.29999999999995
+        },
+        "R1": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 256.8999999999994
+        },
+        "R2": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 194.79999999999905
+        },
+        "R3": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 208.49999999999795
+        },
+        "R4": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 247.5999999999999
+        },
+        "R5": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 282.0999999999998
+        },
+        "R6": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 231.69999999999845
+        },
+        "R7": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 195.4999999999984
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 211,
+          "throughput_per_min": 10.55,
+          "wip_before_start": 2,
+          "wip_before_end": 10
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 201,
+          "throughput_per_min": 10.05,
+          "wip_before_start": 10,
+          "wip_before_end": 6
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 210,
+          "throughput_per_min": 10.5,
+          "wip_before_start": 6,
+          "wip_before_end": 25
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 201,
+          "throughput_per_min": 10.05,
+          "wip_before_start": 25,
+          "wip_before_end": 20
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 211,
+          "throughput_per_min": 10.55,
+          "wip_before_start": 20,
+          "wip_before_end": 43
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 215,
+          "throughput_per_min": 10.75,
+          "wip_before_start": 43,
+          "wip_before_end": 56
+        }
+      ]
+    },
+    {
+      "case": "validation_S06_burst_2",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S06_burst_2/validation_S06_burst_2__optimized__12001.json",
+      "result_sha256": "b8d6ea5db8eaca0b58974b8b5e761e70513c94c3ffb9ca6c6741b436224d238e",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S06_burst_2/calibration.json",
+      "calibration_sha256": "5169858740100cbde0cd69ed6d84beea109a044f7ffdf51d9a37d01194b1ae96",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 158.8999999999976
+        },
+        "R1": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 157.50000000000114
+        },
+        "R2": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 158.1000000000006
+        },
+        "R3": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 159.7000000000014
+        },
+        "R4": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 127.99999999999841
+        },
+        "R5": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 158.1000000000006
+        },
+        "R6": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 94.70000000000027
+        },
+        "R7": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 95.50000000000182
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 185,
+          "throughput_per_min": 9.25,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 165,
+          "throughput_per_min": 8.25,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 242,
+          "throughput_per_min": 12.1,
+          "wip_before_start": 1,
+          "wip_before_end": 7
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 288,
+          "throughput_per_min": 14.4,
+          "wip_before_start": 7,
+          "wip_before_end": 2
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 192,
+          "throughput_per_min": 9.6,
+          "wip_before_start": 2,
+          "wip_before_end": 1
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 148,
+          "throughput_per_min": 7.4,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S07_speed_mix",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S07_speed_mix/validation_S07_speed_mix__optimized__12001.json",
+      "result_sha256": "30a33c9423d5322c3e90b83de34253cc2acda7c6b467c9575e9b5d868ecf762b",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S07_speed_mix/calibration.json",
+      "calibration_sha256": "3be827039619d11e337934ff13a666f282d7227a71c4176a214160c769c1ea23",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 188.2000000000005
+        },
+        "R1": {
+          "completed": 6,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 218.49999999999795
+        },
+        "R2": {
+          "completed": 7,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 263.300000000001
+        },
+        "R3": {
+          "completed": 6,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 240.94999999999914
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 104,
+          "throughput_per_min": 5.2,
+          "wip_before_start": 1,
+          "wip_before_end": 3
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 91,
+          "throughput_per_min": 4.55,
+          "wip_before_start": 3,
+          "wip_before_end": 0
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 96,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 105,
+          "throughput_per_min": 5.25,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 104,
+          "throughput_per_min": 5.2,
+          "wip_before_start": 1,
+          "wip_before_end": 6
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 95,
+          "throughput_per_min": 4.75,
+          "wip_before_start": 6,
+          "wip_before_end": 1
+        }
+      ]
+    },
+    {
+      "case": "validation_S08_two_cars",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S08_two_cars/validation_S08_two_cars__optimized__12001.json",
+      "result_sha256": "33077516351d4c8f8bb6b21dc4ddfd188bf2f8710b339966d05e527a7fa4e9c3",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S08_two_cars/calibration.json",
+      "calibration_sha256": "d632fd331acbbff34c555bb0495732dcfaa64f0d2ee520a18f7d1a54262a3473",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 50.0,
+          "completions": 2,
+          "throughput_per_min": 2.4,
+          "wip_before_start": 0,
+          "wip_before_end": 6
+        },
+        {
+          "start": 50.0,
+          "end": 100.0,
+          "completions": 5,
+          "throughput_per_min": 6.0,
+          "wip_before_start": 6,
+          "wip_before_end": 1
+        },
+        {
+          "start": 100.0,
+          "end": 150.0,
+          "completions": 1,
+          "throughput_per_min": 1.2,
+          "wip_before_start": 1,
+          "wip_before_end": 0
+        },
+        {
+          "start": 150.0,
+          "end": 200.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 200.0,
+          "end": 250.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        },
+        {
+          "start": 250.0,
+          "end": 300.0,
+          "completions": 0,
+          "throughput_per_min": 0.0,
+          "wip_before_start": 0,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S09_station_active",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S09_station_active/validation_S09_station_active__optimized__12001.json",
+      "result_sha256": "c0f22a7946407ed05ff03d2c91834516633c49eeab34bee6bbdc1e87c9bfe7d9",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S09_station_active/calibration.json",
+      "calibration_sha256": "8f0d435e93788a17670ea70698491900da049f4f62937b412a6f56fca692f312",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 20,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 179.79999999999998
+        },
+        "R1": {
+          "completed": 19,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 175.79999999999993
+        },
+        "R2": {
+          "completed": 23,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 196.39999999999992
+        },
+        "R3": {
+          "completed": 19,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 167.60000000000008
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 200.0,
+          "completions": 16,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        },
+        {
+          "start": 200.0,
+          "end": 400.0,
+          "completions": 21,
+          "throughput_per_min": 6.3,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        },
+        {
+          "start": 400.0,
+          "end": 600.0,
+          "completions": 14,
+          "throughput_per_min": 4.2,
+          "wip_before_start": 0,
+          "wip_before_end": 1
+        },
+        {
+          "start": 600.0,
+          "end": 800.0,
+          "completions": 13,
+          "throughput_per_min": 3.9,
+          "wip_before_start": 1,
+          "wip_before_end": 3
+        },
+        {
+          "start": 800.0,
+          "end": 1000.0,
+          "completions": 13,
+          "throughput_per_min": 3.9,
+          "wip_before_start": 3,
+          "wip_before_end": 2
+        },
+        {
+          "start": 1000.0,
+          "end": 1200.0,
+          "completions": 14,
+          "throughput_per_min": 4.2,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        }
+      ]
+    },
+    {
+      "case": "validation_S10_lambda_0p26",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S10_lambda_0p26/validation_S10_lambda_0p26__optimized__12001.json",
+      "result_sha256": "8594e66696ec3209d14f607e5e036c5764c5e2c0dd5d68aeed1a5db5cc885a78",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S10_lambda_0p26/calibration.json",
+      "calibration_sha256": "22497778c728f7c9bb1b570af2daafb113dc086557ebdba3a284b94a6b7ff360",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 629.6000000000009
+        },
+        "R1": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 642.8000000000003
+        },
+        "R2": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 634.3999999999988
+        },
+        "R3": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 636.5000000000009
+        }
+      },
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 1300.0,
+          "completions": 126,
+          "throughput_per_min": 5.815384615384615,
+          "wip_before_start": 0,
+          "wip_before_end": 213
+        },
+        {
+          "start": 1300.0,
+          "end": 2600.0,
+          "completions": 123,
+          "throughput_per_min": 5.676923076923077,
+          "wip_before_start": 213,
+          "wip_before_end": 431
+        },
+        {
+          "start": 2600.0,
+          "end": 3900.0,
+          "completions": 121,
+          "throughput_per_min": 5.584615384615384,
+          "wip_before_start": 431,
+          "wip_before_end": 625
+        },
+        {
+          "start": 3900.0,
+          "end": 5200.0,
+          "completions": 126,
+          "throughput_per_min": 5.815384615384615,
+          "wip_before_start": 625,
+          "wip_before_end": 815
+        },
+        {
+          "start": 5200.0,
+          "end": 6500.0,
+          "completions": 118,
+          "throughput_per_min": 5.446153846153846,
+          "wip_before_start": 815,
+          "wip_before_end": 1012
+        },
+        {
+          "start": 6500.0,
+          "end": 7800.0,
+          "completions": 126,
+          "throughput_per_min": 5.815384615384615,
+          "wip_before_start": 1012,
+          "wip_before_end": 1217
+        }
+      ]
+    },
+    {
+      "case": "validation_S11_budget_2",
+      "run_status": "SUCCESS",
+      "status": "PASS",
+      "reasons": [],
+      "run": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S11_budget_2/validation_S11_budget_2__optimized__12001.json",
+      "result_sha256": "58af2b1400523fae90938755a2f6e493a99e0eb322d54dd4009bee35a300c3ed",
+      "calibration": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation_calibration/validation_S11_budget_2/calibration.json",
+      "calibration_sha256": "97dbb52b0f3c8b74263565f1690700ad6b6cf4e478572e55e90e4796d954d7ec",
+      "faults": 0,
+      "rescue_energy": 0.0,
+      "robots": {
+        "R0": {
+          "completed": 5,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 165.72000000000003
+        },
+        "R1": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.68000000000143
+        },
+        "R2": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.63999999999953
+        },
+        "R3": {
+          "completed": 4,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 135.88000000000022
+        }
+      },
+      "segments": [
+        {
+          "start": 600.0,
+          "end": 1800.0,
+          "completions": 109,
+          "throughput_per_min": 5.45,
+          "wip_before_start": 0,
+          "wip_before_end": 2
+        },
+        {
+          "start": 1800.0,
+          "end": 3000.0,
+          "completions": 96,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 2,
+          "wip_before_end": 3
+        },
+        {
+          "start": 3000.0,
+          "end": 4200.0,
+          "completions": 119,
+          "throughput_per_min": 5.95,
+          "wip_before_start": 3,
+          "wip_before_end": 1
+        },
+        {
+          "start": 4200.0,
+          "end": 5400.0,
+          "completions": 100,
+          "throughput_per_min": 5.0,
+          "wip_before_start": 1,
+          "wip_before_end": 1
+        },
+        {
+          "start": 5400.0,
+          "end": 6600.0,
+          "completions": 96,
+          "throughput_per_min": 4.8,
+          "wip_before_start": 1,
+          "wip_before_end": 2
+        },
+        {
+          "start": 6600.0,
+          "end": 7800.0,
+          "completions": 100,
+          "throughput_per_min": 5.0,
+          "wip_before_start": 2,
+          "wip_before_end": 0
+        }
+      ]
+    }
+  ]
+}

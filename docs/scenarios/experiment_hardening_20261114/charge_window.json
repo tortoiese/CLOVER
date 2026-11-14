@@ -1,0 +1,10 @@
+{
+  "mode": "finite_stream",
+  "arrival_cutoff": 7800,
+  "drain_seconds": 0,
+  "drain_in_measurement": true,
+  "minimum_observation_seconds": 7200,
+  "minimum_completed_charge_sessions_per_robot": 2,
+  "minimum_charge_fraction": 0.1,
+  "nominal": true
+}

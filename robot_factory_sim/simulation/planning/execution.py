@@ -12,7 +12,7 @@ from simulation.planning.contracts import Action, Arc, Result, Snapshot, Use
 from simulation.planning.snapshot import capture, topology_hash
 from simulation.planning.validation import validate
 from simulation.task_generator import TaskState
-from simulation.telemetry import observe_wait
+from simulation.telemetry import observe_charge, observe_wait
 from utils.event_types import RobotState
 
 if TYPE_CHECKING:
@@ -188,15 +188,19 @@ def execute(robot: Robot) -> Generator[Any, Any, None]:
                 engine.metrics.record_charge_wait(engine.now - since)
                 robot._set_state(RobotState.CHARGING)
                 robot.charge_sessions += 1
+                charge_started, charge_completed = engine.now, False
+                observe_charge(robot, charger.id, charge_started)
                 charger.occupants.add(robot.robot_id)
                 try:
                     gain = min(action.gain * 0.001, robot.capacity - robot.battery)
                     robot._planned_charge_until = engine.now + gain / charger.cfg.charge_rate
                     robot._charge_step = (engine.now, charger.cfg.charge_rate)
                     yield engine.env.timeout(gain / charger.cfg.charge_rate)
+                    charge_completed = True
                 finally:
                     robot._settle_charge()
                     robot._planned_charge_until = None
+                    observe_charge(robot, charger.id, charge_started, completed=charge_completed)
                     charger.occupants.discard(robot.robot_id)
         completed = arc.kind != "service" or engine._tasks_by_uid[arc.job].status == TaskState.COMPLETED
     finally:

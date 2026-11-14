@@ -1,0 +1,16 @@
+{
+  "timing_protocol": "d1-staged-budget-v1",
+  "startup_mode": "on_demand",
+  "startup_timeout_seconds": 10,
+  "end_to_end_soft_deadline_seconds": 2,
+  "publication_allowance_seconds": 0.2,
+  "max_admission_attempts": 2,
+  "max_worker_restarts": 2,
+  "restart_backoff_seconds": [
+    0.1,
+    1.0
+  ],
+  "fallback_budget_seconds": 0.1,
+  "memory_limit_mib": 1024,
+  "request_watchdog_seconds": 12
+}

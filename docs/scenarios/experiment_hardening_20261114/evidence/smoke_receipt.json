@@ -1,0 +1,1633 @@
+{
+  "schema": "clover-hardening-smoke-receipt-v1",
+  "runs": [
+    {
+      "phase": "training",
+      "case_id": "smoke_S01_eligible_1__rh_milp_grid__11001",
+      "policy": "rh_milp_grid",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/training/training_S01_eligible_1/smoke_S01_eligible_1__rh_milp_grid__11001.json",
+      "result_sha256": "8022a9d6af92d93d50373985776fe9571930ef69fa26e27285656dd44eda1688",
+      "events_sha256": "75aee33be260900837fe2db233174ccae0b6c68d2d1594c079dc04e87e37e418",
+      "input_key": "4b86fa345181375626a601bb790b31c8c78599a1a389b443ec2fa413d5fa7873",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 4,
+            "eligible": 4,
+            "right_censored_deadline": 0,
+            "finalized": 4,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 2,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 4,
+              "mean": 1.4828530527884136,
+              "p50": 1.816921104374341,
+              "p95": 1.9633882423560136,
+              "max": 1.9662012926768515,
+              "p99": 1.965638682612684
+            }
+          },
+          "auxiliary": {
+            "triggered": 10,
+            "eligible": 10,
+            "right_censored_deadline": 0,
+            "finalized": 10,
+            "pending": 0,
+            "accepted": 10,
+            "timely_accepted": 10,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 10,
+              "mean": 0.7089977832417934,
+              "p50": 0.4764831040520212,
+              "p95": 1.7525357666914338,
+              "max": 1.8598609169479445,
+              "p99": 1.8383958868966426
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 4,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 8,
+      "unfinished": 0,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "training",
+      "case_id": "smoke_S01_eligible_1__rh_cpsat_native__11001",
+      "policy": "rh_cpsat_native",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/training/training_S01_eligible_1/smoke_S01_eligible_1__rh_cpsat_native__11001.json",
+      "result_sha256": "fe733c442db854464ff991b0ccec4cdd9e22b91c470dd2ed2f9e05c7c6689377",
+      "events_sha256": "920b6d9ab40718d4a7c9306ea39f1ef737ab35b09e36dbb49d774df1dace7e7f",
+      "input_key": "4b86fa345181375626a601bb790b31c8c78599a1a389b443ec2fa413d5fa7873",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 5,
+            "eligible": 5,
+            "right_censored_deadline": 0,
+            "finalized": 5,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 4,
+            "timely_acceptance_rate": 0.2,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.8,
+            "latency": {
+              "count": 5,
+              "mean": 0.9460198844317329,
+              "p50": 0.7434664583299284,
+              "p95": 1.7622552502248434,
+              "max": 1.9623457084875557,
+              "p99": 1.9223276168350132
+            }
+          },
+          "auxiliary": {
+            "triggered": 9,
+            "eligible": 9,
+            "right_censored_deadline": 0,
+            "finalized": 9,
+            "pending": 0,
+            "accepted": 9,
+            "timely_accepted": 9,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 9,
+              "mean": 0.5492323103412571,
+              "p50": 0.23994241589680243,
+              "p95": 1.1613740093819782,
+              "max": 1.2562381261959654,
+              "p99": 1.237265302833168
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 4,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 8,
+      "unfinished": 0,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "training",
+      "case_id": "smoke_S01_eligible_1__optimized__11001",
+      "policy": "optimized",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/training/training_S01_eligible_1/smoke_S01_eligible_1__optimized__11001.json",
+      "result_sha256": "ace0f0fd2b895f19cf2644187198d306b7d9f91df265fc463d7df63c45ab9b00",
+      "events_sha256": "34f799d8d7963c0873665fcd57d628f3f3ca4f6a8ef822b04db3f18e3d6ae2ae",
+      "input_key": "4b86fa345181375626a601bb790b31c8c78599a1a389b443ec2fa413d5fa7873",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 4,
+            "eligible": 4,
+            "right_censored_deadline": 0,
+            "finalized": 4,
+            "pending": 0,
+            "accepted": 4,
+            "timely_accepted": 4,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 4,
+              "mean": 0.27495628101751135,
+              "p50": 0.24741506257560064,
+              "p95": 0.35100755554158114,
+              "max": 0.36780199906788624,
+              "p99": 0.3644431103626252
+            }
+          },
+          "auxiliary": {
+            "triggered": 9,
+            "eligible": 9,
+            "right_censored_deadline": 0,
+            "finalized": 9,
+            "pending": 0,
+            "accepted": 9,
+            "timely_accepted": 9,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 9,
+              "mean": 0.32209699984329443,
+              "p50": 0.24007783369161118,
+              "p95": 0.49902844193391444,
+              "max": 0.5139768752735108,
+              "p99": 0.5109871886055914
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 8,
+      "unfinished": 0,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "training",
+      "case_id": "smoke_S01_eligible_1__baseline__11001",
+      "policy": "baseline",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/training/training_S01_eligible_1/smoke_S01_eligible_1__baseline__11001.json",
+      "result_sha256": "50a420e0d4a9f1dc491f3b8160930cbf3c9c5b2617301d0c121c66e0193ad86f",
+      "events_sha256": "a2f15dc38457c368a7f47679d203befe1d4636ef321315d0cd6edb8eea6160d9",
+      "input_key": "4b86fa345181375626a601bb790b31c8c78599a1a389b443ec2fa413d5fa7873",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 4,
+            "eligible": 4,
+            "right_censored_deadline": 0,
+            "finalized": 4,
+            "pending": 0,
+            "accepted": 4,
+            "timely_accepted": 4,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 4,
+              "mean": 0.27005723923211844,
+              "p50": 0.24290714571252425,
+              "p95": 0.3410896808607491,
+              "max": 0.3575919995550052,
+              "p99": 0.35429153581615397
+            }
+          },
+          "auxiliary": {
+            "triggered": 9,
+            "eligible": 9,
+            "right_censored_deadline": 0,
+            "finalized": 9,
+            "pending": 0,
+            "accepted": 9,
+            "timely_accepted": 9,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 9,
+              "mean": 0.3212011483187477,
+              "p50": 0.240169334271922,
+              "p95": 0.4945609498489642,
+              "max": 0.5069574998226016,
+              "p99": 0.5044781898278742
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 8,
+      "unfinished": 0,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "training",
+      "case_id": "smoke_S01_eligible_1__rh_cpsat_linear__11001",
+      "policy": "rh_cpsat_linear",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/training/training_S01_eligible_1/smoke_S01_eligible_1__rh_cpsat_linear__11001.json",
+      "result_sha256": "7a9941985bd55f30dfa4bd644cf0f592c1bff5d64f1979e837d951927a701e4f",
+      "events_sha256": "cc4669cf0ede83f3cb3c5d061ce57d2c74d83571dce0dc3b71c50d9adea56e56",
+      "input_key": "4b86fa345181375626a601bb790b31c8c78599a1a389b443ec2fa413d5fa7873",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 5,
+            "eligible": 5,
+            "right_censored_deadline": 0,
+            "finalized": 5,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 4,
+            "timely_acceptance_rate": 0.2,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.8,
+            "latency": {
+              "count": 5,
+              "mean": 1.0365527831949275,
+              "p50": 0.8856514581013446,
+              "p95": 1.7846112168673423,
+              "max": 1.954837541887537,
+              "p99": 1.920792276883498
+            }
+          },
+          "auxiliary": {
+            "triggered": 9,
+            "eligible": 9,
+            "right_censored_deadline": 0,
+            "finalized": 9,
+            "pending": 0,
+            "accepted": 9,
+            "timely_accepted": 9,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 9,
+              "mean": 0.5384471809543254,
+              "p50": 0.23988162614405084,
+              "p95": 1.1566419755388035,
+              "max": 1.2514242918696237,
+              "p99": 1.2324678286034596
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 4,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 8,
+      "unfinished": 0,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "validation",
+      "case_id": "smoke_S04_mixed_soc__optimized__12001",
+      "policy": "optimized",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation/validation_S04_mixed_soc/smoke_S04_mixed_soc__optimized__12001.json",
+      "result_sha256": "3d753853c209d84cf55ecd23214027893ff57cd261e3bbf12fb60729cf3845b7",
+      "events_sha256": "b19ad0407062ce3d105e2769b7a236235eaa1b20ad2dc8d46c82f2ca404b3ae6",
+      "input_key": "d51a9ad8afb41a03215022a1ee69c5eea483cdd4128bd86f339da2811b8899fc",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.2740913339657851,
+              "p50": 0.2740913339657851,
+              "p95": 0.33616632213119996,
+              "max": 0.3430635430384683,
+              "p99": 0.3416840988570146
+            }
+          },
+          "auxiliary": {
+            "triggered": 16,
+            "eligible": 14,
+            "right_censored_deadline": 2,
+            "finalized": 14,
+            "pending": 0,
+            "accepted": 14,
+            "timely_accepted": 14,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 14,
+              "mean": 0.25335752663335936,
+              "p50": 0.20477074971422837,
+              "p95": 0.43294433990493786,
+              "max": 0.47602983289398254,
+              "p99": 0.4674127342961736
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 0,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "validation",
+      "case_id": "smoke_S04_mixed_soc__rh_milp_grid__12001",
+      "policy": "rh_milp_grid",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation/validation_S04_mixed_soc/smoke_S04_mixed_soc__rh_milp_grid__12001.json",
+      "result_sha256": "5dc0ef3fe33cf6e0ba66d9f76cd6306a316de0f1308f8c763bb8e5167b612316",
+      "events_sha256": "5d9cf89e1af7e6f4fc600f159e63ab54678327c151faa0485a0dab3d03588bbc",
+      "input_key": "d51a9ad8afb41a03215022a1ee69c5eea483cdd4128bd86f339da2811b8899fc",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 1,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 2,
+              "mean": 0.26007812486496107,
+              "p50": 0.26007812486496107,
+              "p95": 0.27633722486207546,
+              "max": 0.2781437915284215,
+              "p99": 0.2777824781951523
+            }
+          },
+          "auxiliary": {
+            "triggered": 13,
+            "eligible": 12,
+            "right_censored_deadline": 1,
+            "finalized": 12,
+            "pending": 0,
+            "accepted": 12,
+            "timely_accepted": 12,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 12,
+              "mean": 0.2872390733876609,
+              "p50": 0.20494764663745002,
+              "p95": 0.48587088264990896,
+              "max": 0.578876042086631,
+              "p99": 0.5602750101992867
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 0,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "validation",
+      "case_id": "smoke_S04_mixed_soc__rh_cpsat_native__12001",
+      "policy": "rh_cpsat_native",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation/validation_S04_mixed_soc/smoke_S04_mixed_soc__rh_cpsat_native__12001.json",
+      "result_sha256": "894a665346b870f1bc3356720a9cb211de05581d3e094c9b0031959d5f78dc2d",
+      "events_sha256": "4a8dc917c5aeaf1a0f9a40340e6dbaeeb086e7531f2c052530eccd49435dfb53",
+      "input_key": "d51a9ad8afb41a03215022a1ee69c5eea483cdd4128bd86f339da2811b8899fc",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 1,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 2,
+              "mean": 0.32867702043149905,
+              "p50": 0.32867702043149905,
+              "p95": 0.3825472886324889,
+              "max": 0.3885328739881544,
+              "p99": 0.38733575691702127
+            }
+          },
+          "auxiliary": {
+            "triggered": 13,
+            "eligible": 11,
+            "right_censored_deadline": 2,
+            "finalized": 11,
+            "pending": 0,
+            "accepted": 11,
+            "timely_accepted": 11,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 11,
+              "mean": 0.3216484659097445,
+              "p50": 0.2049509149976103,
+              "p95": 0.641910438146445,
+              "max": 0.8736025419086217,
+              "p99": 0.8272641211561865
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 0,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "validation",
+      "case_id": "smoke_S04_mixed_soc__rh_cpsat_linear__12001",
+      "policy": "rh_cpsat_linear",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation/validation_S04_mixed_soc/smoke_S04_mixed_soc__rh_cpsat_linear__12001.json",
+      "result_sha256": "c3b9f2b95a0a198e69ea21912f6fa8eba966df5f99cd63310b82c6f91c7d5889",
+      "events_sha256": "11c0b28cdd8ae2216b8989c1c4c76e5b67bb4ed823b2d4cabd8488cc232513c7",
+      "input_key": "d51a9ad8afb41a03215022a1ee69c5eea483cdd4128bd86f339da2811b8899fc",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 1,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 2,
+              "mean": 0.3515474793268396,
+              "p50": 0.3515474793268396,
+              "p95": 0.4176500229281402,
+              "max": 0.42499474999495135,
+              "p99": 0.4235258045815891
+            }
+          },
+          "auxiliary": {
+            "triggered": 13,
+            "eligible": 12,
+            "right_censored_deadline": 1,
+            "finalized": 12,
+            "pending": 0,
+            "accepted": 12,
+            "timely_accepted": 12,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 12,
+              "mean": 0.3135232991965831,
+              "p50": 0.20505185441579954,
+              "p95": 0.6272061472665547,
+              "max": 0.8926276688463985,
+              "p99": 0.8395433645304301
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 0,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "validation",
+      "case_id": "smoke_S04_mixed_soc__baseline__12001",
+      "policy": "baseline",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/validation/validation_S04_mixed_soc/smoke_S04_mixed_soc__baseline__12001.json",
+      "result_sha256": "1bd2cf60aae3f0f1a966e195b34b7db8cb3251c734ae0f4fa5f9804ef8a02b77",
+      "events_sha256": "7bf8cffc3dc75dd2a49aa59e97de2224a5e665b1c25dd8bf9f33278ce34c3659",
+      "input_key": "d51a9ad8afb41a03215022a1ee69c5eea483cdd4128bd86f339da2811b8899fc",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 3,
+            "eligible": 2,
+            "right_censored_deadline": 1,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.20488539598882483,
+              "p50": 0.20488539598882483,
+              "p95": 0.20493836458772705,
+              "max": 0.20494424998760508,
+              "p99": 0.20494307290762948
+            }
+          },
+          "auxiliary": {
+            "triggered": 1,
+            "eligible": 1,
+            "right_censored_deadline": 0,
+            "finalized": 1,
+            "pending": 0,
+            "accepted": 1,
+            "timely_accepted": 1,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 1,
+              "mean": 0.4792165412101895,
+              "p50": 0.4792165412101895,
+              "p95": 0.4792165412101895,
+              "max": 0.4792165412101895,
+              "p99": 0.4792165412101895
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 0,
+      "unfinished": 2,
+      "faults": 1,
+      "rescue": 0.0
+    },
+    {
+      "phase": "heldout",
+      "case_id": "smoke_S08_two_cars__rh_cpsat_native__21001",
+      "policy": "rh_cpsat_native",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/heldout/heldout_S08_two_cars/smoke_S08_two_cars__rh_cpsat_native__21001.json",
+      "result_sha256": "894985c4696f016c854f6240703745525f7412f46a462d3fb3d255c9a23f2a59",
+      "events_sha256": "ffdd631c1067adc6dbc88c6a36305ab141b08f893b14afd1986580843ef22279",
+      "input_key": "f9f735393301117022b7d3f890317c8efe9213e9050eda7494fc03a8428d176c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 4,
+            "eligible": 4,
+            "right_censored_deadline": 0,
+            "finalized": 4,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 2,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 4,
+              "mean": 0.5804275211412481,
+              "p50": 0.487041333504024,
+              "p95": 0.8895021567633378,
+              "max": 0.952269875537604,
+              "p99": 0.9397163317827507
+            }
+          },
+          "auxiliary": {
+            "triggered": 8,
+            "eligible": 8,
+            "right_censored_deadline": 0,
+            "finalized": 8,
+            "pending": 0,
+            "accepted": 8,
+            "timely_accepted": 8,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 8,
+              "mean": 0.3619383069162755,
+              "p50": 0.22369629091117815,
+              "p95": 0.7321607207576761,
+              "max": 0.885562249738723,
+              "p99": 0.8548819439425136
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 4,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 6,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "heldout",
+      "case_id": "smoke_S08_two_cars__rh_cpsat_linear__21001",
+      "policy": "rh_cpsat_linear",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/heldout/heldout_S08_two_cars/smoke_S08_two_cars__rh_cpsat_linear__21001.json",
+      "result_sha256": "1b8a5414a2d798af8bf72389c9431404e85b752bbe977917729fb4b92aa3ed8a",
+      "events_sha256": "97d5732695af50965d76aa60dad8a449a80120bb79b553e0eee4b239621475cb",
+      "input_key": "f9f735393301117022b7d3f890317c8efe9213e9050eda7494fc03a8428d176c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 5,
+            "eligible": 5,
+            "right_censored_deadline": 0,
+            "finalized": 5,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 3,
+            "timely_acceptance_rate": 0.4,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.6,
+            "latency": {
+              "count": 5,
+              "mean": 0.7098413464494389,
+              "p50": 0.439467626204717,
+              "p95": 1.656504526593366,
+              "max": 1.936129790823907,
+              "p99": 1.8802047379777989
+            }
+          },
+          "auxiliary": {
+            "triggered": 8,
+            "eligible": 8,
+            "right_censored_deadline": 0,
+            "finalized": 8,
+            "pending": 0,
+            "accepted": 8,
+            "timely_accepted": 8,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 8,
+              "mean": 0.5564624526945444,
+              "p50": 0.3349332075566096,
+              "p95": 1.1423244451358974,
+              "max": 1.2207019573543292,
+              "p99": 1.2050264549106429
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 5,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 6,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "heldout",
+      "case_id": "smoke_S08_two_cars__baseline__21001",
+      "policy": "baseline",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/heldout/heldout_S08_two_cars/smoke_S08_two_cars__baseline__21001.json",
+      "result_sha256": "130b28e5722f5e2297b95356ee3eea82150843b8188a08e66d2894da20e9e1d8",
+      "events_sha256": "01635371307c4a98ecde5ead738ea943076a8e0c4cb8c819376a532bd099f437",
+      "input_key": "f9f735393301117022b7d3f890317c8efe9213e9050eda7494fc03a8428d176c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 5,
+            "eligible": 5,
+            "right_censored_deadline": 0,
+            "finalized": 5,
+            "pending": 0,
+            "accepted": 5,
+            "timely_accepted": 5,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 5,
+              "mean": 0.2825727119457321,
+              "p50": 0.22449383307248638,
+              "p95": 0.3729845685819996,
+              "max": 0.3735818854934436,
+              "p99": 0.3734624221111548
+            }
+          },
+          "auxiliary": {
+            "triggered": 6,
+            "eligible": 6,
+            "right_censored_deadline": 0,
+            "finalized": 6,
+            "pending": 0,
+            "accepted": 6,
+            "timely_accepted": 6,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 6,
+              "mean": 0.3429523814935271,
+              "p50": 0.3344219993567137,
+              "p95": 0.48485331167467083,
+              "max": 0.49745233221910895,
+              "p99": 0.4949325281102213
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 5,
+      "unfinished": 3,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "heldout",
+      "case_id": "smoke_S08_two_cars__rh_milp_grid__21001",
+      "policy": "rh_milp_grid",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/heldout/heldout_S08_two_cars/smoke_S08_two_cars__rh_milp_grid__21001.json",
+      "result_sha256": "7f9ba60cce4ba154eacd91216769fcaf87bfa7df1549424284ec043e2baa64a8",
+      "events_sha256": "904a412ffe90eb607cd71ef2d8653836346f2adf8555c664625a927b93b6388b",
+      "input_key": "f9f735393301117022b7d3f890317c8efe9213e9050eda7494fc03a8428d176c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 4,
+            "eligible": 4,
+            "right_censored_deadline": 0,
+            "finalized": 4,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 2,
+            "timely_acceptance_rate": 0.5,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.5,
+            "latency": {
+              "count": 4,
+              "mean": 1.12393819796853,
+              "p50": 1.1324392916401864,
+              "p95": 1.9332620381796757,
+              "max": 1.9335290007758914,
+              "p99": 1.9334756082566482
+            }
+          },
+          "auxiliary": {
+            "triggered": 8,
+            "eligible": 8,
+            "right_censored_deadline": 0,
+            "finalized": 8,
+            "pending": 0,
+            "accepted": 8,
+            "timely_accepted": 8,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 8,
+              "mean": 0.6169012967788184,
+              "p50": 0.5213263531448348,
+              "p95": 1.3601029809052165,
+              "max": 1.5930951652582763,
+              "p99": 1.5464967283876643
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 4,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 6,
+      "unfinished": 2,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "heldout",
+      "case_id": "smoke_S08_two_cars__optimized__21001",
+      "policy": "optimized",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/heldout/heldout_S08_two_cars/smoke_S08_two_cars__optimized__21001.json",
+      "result_sha256": "a86c346a5d928333d8d74a514095aa65751f276d8a2b77af63416357c4ef79f6",
+      "events_sha256": "3016bfc0e5502bb7c75ecb738744aaaabb8642cb0544f14544710b4ba7608f90",
+      "input_key": "f9f735393301117022b7d3f890317c8efe9213e9050eda7494fc03a8428d176c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 5,
+            "eligible": 5,
+            "right_censored_deadline": 0,
+            "finalized": 5,
+            "pending": 0,
+            "accepted": 5,
+            "timely_accepted": 5,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 5,
+              "mean": 0.2826962727934466,
+              "p50": 0.22486358326860056,
+              "p95": 0.3729235053463739,
+              "max": 0.3735021379711938,
+              "p99": 0.3733864114462298
+            }
+          },
+          "auxiliary": {
+            "triggered": 6,
+            "eligible": 6,
+            "right_censored_deadline": 0,
+            "finalized": 6,
+            "pending": 0,
+            "accepted": 6,
+            "timely_accepted": 6,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 6,
+              "mean": 0.34231659741296455,
+              "p50": 0.3344388965750156,
+              "p95": 0.48186481266748304,
+              "max": 0.49348891717381776,
+              "p99": 0.4911640962725508
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 8,
+      "completed": 5,
+      "unfinished": 3,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "stress",
+      "case_id": "smoke_S11_budget_2__baseline__31001",
+      "policy": "baseline",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/stress/stress_S11_budget_2/smoke_S11_budget_2__baseline__31001.json",
+      "result_sha256": "2d7e2aabf6d8cc0e5de1f744d51635d4cf4c6881856b464e2668b127152de641",
+      "events_sha256": "122d2816c0f4a8e2e89e1981000b44a725cacdc94e472e9740312a7d4633abe4",
+      "input_key": "f27916bd546be9960fdd1902b7d7ca02b5b6e6646e9e7e53461c0991e2d5235c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.21877568743657605,
+              "p50": 0.21877568743657605,
+              "p95": 0.2193742813658929,
+              "max": 0.21944079180248366,
+              "p99": 0.2194274897151655
+            }
+          },
+          "auxiliary": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.3538523336639642,
+              "p50": 0.3538523336639642,
+              "p95": 0.4765296835568735,
+              "max": 0.4901605002116412,
+              "p99": 0.48743433688068766
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 1,
+      "unfinished": 1,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "stress",
+      "case_id": "smoke_S11_budget_2__rh_cpsat_linear__31001",
+      "policy": "rh_cpsat_linear",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/stress/stress_S11_budget_2/smoke_S11_budget_2__rh_cpsat_linear__31001.json",
+      "result_sha256": "f5c8ab5951884896a87b4f715c2b9fc917b00c5c8062e610e29d0df7218c7ecd",
+      "events_sha256": "004ea4e47780a25b7e8980a6114f517fcec44b325bdfe9084d015d66192d74c0",
+      "input_key": "f27916bd546be9960fdd1902b7d7ca02b5b6e6646e9e7e53461c0991e2d5235c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.5935675205430044,
+              "p50": 0.5935675205430044,
+              "p95": 0.6814598513650736,
+              "max": 0.6912256659008591,
+              "p99": 0.689272502993702
+            }
+          },
+          "auxiliary": {
+            "triggered": 6,
+            "eligible": 6,
+            "right_censored_deadline": 0,
+            "finalized": 6,
+            "pending": 0,
+            "accepted": 6,
+            "timely_accepted": 6,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 6,
+              "mean": 0.40406980581271484,
+              "p50": 0.3268726047361312,
+              "p95": 0.7816333432565457,
+              "max": 0.8962959989905357,
+              "p99": 0.8733634678437378
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 1,
+      "unfinished": 1,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "stress",
+      "case_id": "smoke_S11_budget_2__rh_milp_grid__31001",
+      "policy": "rh_milp_grid",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/stress/stress_S11_budget_2/smoke_S11_budget_2__rh_milp_grid__31001.json",
+      "result_sha256": "c048bcf47c42916396a41b85e2b33c54359e223bb96ecb509ad4fce77e93a676",
+      "events_sha256": "a9262725ec950c517fc589c09a53a47d28599bf2d66e61f0391235c5f8c3dee2",
+      "input_key": "f27916bd546be9960fdd1902b7d7ca02b5b6e6646e9e7e53461c0991e2d5235c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.4930364584317459,
+              "p50": 0.4930364584317459,
+              "p95": 0.5371852073702058,
+              "max": 0.5420906239189236,
+              "p99": 0.54110954060918
+            }
+          },
+          "auxiliary": {
+            "triggered": 6,
+            "eligible": 6,
+            "right_censored_deadline": 0,
+            "finalized": 6,
+            "pending": 0,
+            "accepted": 6,
+            "timely_accepted": 6,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 6,
+              "mean": 0.354314992615646,
+              "p50": 0.32630956261419186,
+              "p95": 0.5596298323362148,
+              "max": 0.600989999063313,
+              "p99": 0.5927179657178934
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 1,
+      "unfinished": 1,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "stress",
+      "case_id": "smoke_S11_budget_2__optimized__31001",
+      "policy": "optimized",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/stress/stress_S11_budget_2/smoke_S11_budget_2__optimized__31001.json",
+      "result_sha256": "d08f4d9bf7f8d07d928d3f37dbb06d27d06f1e347f235df1bcb6d1d9812b48cd",
+      "events_sha256": "d192aad702b68bc2c5e09debcf331807c3bdb4608095c79f81a3ecf172607ba0",
+      "input_key": "f27916bd546be9960fdd1902b7d7ca02b5b6e6646e9e7e53461c0991e2d5235c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.2176155839581071,
+              "p50": 0.2176155839581071,
+              "p95": 0.219213234214115,
+              "max": 0.219390750909227,
+              "p99": 0.2193552475702046
+            }
+          },
+          "auxiliary": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.3563886461080997,
+              "p50": 0.3563886461080997,
+              "p95": 0.48131444047903654,
+              "max": 0.49519508429802955,
+              "p99": 0.49241895553423093
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 0,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 1,
+      "unfinished": 1,
+      "faults": 0,
+      "rescue": 0.0
+    },
+    {
+      "phase": "stress",
+      "case_id": "smoke_S11_budget_2__rh_cpsat_native__31001",
+      "policy": "rh_cpsat_native",
+      "status": "SUCCESS",
+      "full_observation": true,
+      "replay_matches": true,
+      "result": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_EXPERIMENT_HARDENING_20261114_verified/stress/stress_S11_budget_2/smoke_S11_budget_2__rh_cpsat_native__31001.json",
+      "result_sha256": "71ddfd9f1187003bb15b8e2fa189ef7c1489010df3c2c8e1ca3ad72e33f0235a",
+      "events_sha256": "f3b74006ea63514417edaaf188f222ef0a24b0eb577a31cf74f7a2b85f7a2dc6",
+      "input_key": "f27916bd546be9960fdd1902b7d7ca02b5b6e6646e9e7e53461c0991e2d5235c",
+      "summary": {
+        "available": true,
+        "window": [
+          0,
+          90.0
+        ],
+        "by_kind": {
+          "dispatch": {
+            "triggered": 2,
+            "eligible": 2,
+            "right_censored_deadline": 0,
+            "finalized": 2,
+            "pending": 0,
+            "accepted": 2,
+            "timely_accepted": 2,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 2,
+              "mean": 0.9528719379333808,
+              "p50": 0.9528719379333808,
+              "p95": 1.1203426058520591,
+              "max": 1.1389504578430234,
+              "p99": 1.1352288874448306
+            }
+          },
+          "auxiliary": {
+            "triggered": 6,
+            "eligible": 6,
+            "right_censored_deadline": 0,
+            "finalized": 6,
+            "pending": 0,
+            "accepted": 6,
+            "timely_accepted": 6,
+            "late_accepted": 0,
+            "deadline_exceeded": 0,
+            "fallback": 0,
+            "timely_acceptance_rate": 1.0,
+            "deadline_exceeded_rate": 0.0,
+            "fallback_rate": 0.0,
+            "latency": {
+              "count": 6,
+              "mean": 0.40487613892183044,
+              "p50": 0.3276178127387581,
+              "p95": 0.7847189581370926,
+              "max": 0.9003091662190854,
+              "p99": 0.8771911246026869
+            }
+          }
+        },
+        "scope": "decision opportunities, not jobs; late-window triggers censored; latency observed completions only"
+      },
+      "planning_inputs": 2,
+      "late_primary_accepted": [],
+      "disposed": {
+        "process": true,
+        "connection": true,
+        "rpc_thread": true,
+        "application_processes": true
+      },
+      "offered": 2,
+      "completed": 1,
+      "unfinished": 1,
+      "faults": 0,
+      "rescue": 0.0
+    }
+  ],
+  "status": "PASS",
+  "code": {
+    "commit": "89afcdcce55ee3b38106d571084ddd2001754f36",
+    "python_matches_head": true,
+    "changed_python": []
+  },
+  "source_hash": "192e456b789a4f940588631079177d75062770b5e374c81098d87141c4e360c5",
+  "scope": "20 arm functional synthetic smoke, not independent 20-seed evidence"
+}

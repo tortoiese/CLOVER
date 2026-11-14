@@ -1,0 +1,71 @@
+{
+  "schema": "clover-r2-snapshot-publication-v1",
+  "date": "2026-11-14",
+  "raw_root": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_R2_snapshot_benchmark_20261114_complete_call",
+  "validation": {
+    "py311_full": {
+      "counts": {
+        "tests": 574,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "ac13c819f2c96d600c697252250da904f26e4cd838acaa87c800042455800565"
+    },
+    "py314_targeted": {
+      "counts": {
+        "tests": 44,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_sha256": "b5bb001df9508f8471b4cc7872be38bf698ccba7503936a24d013087f449ad89"
+    }
+  },
+  "source_commit": "f43908ad1516a8064c02c1ce76024ec117eea2fb",
+  "timing_revision": "complete_backend_call-v2",
+  "earlier_cohort": "../r2_reported_timing_20261114/publication.json",
+  "primary_arms": 48,
+  "preserved_prior_arms": 48,
+  "total_solver_arms": 96,
+  "cohorts_pooled": false,
+  "previous_input_model_hint_identity": {
+    "S08_two_cars": {
+      "input_hash": true,
+      "model_hash": true,
+      "hint_hash": true
+    },
+    "S04_mixed_soc": {
+      "input_hash": true,
+      "model_hash": true,
+      "hint_hash": true
+    },
+    "S11_budget_2": {
+      "input_hash": true,
+      "model_hash": true,
+      "hint_hash": true
+    },
+    "S01_eligible_1": {
+      "input_hash": true,
+      "model_hash": true,
+      "hint_hash": true
+    }
+  },
+  "scope": "48 static solver arms in the complete-call cohort, zero new closed-loop simulations; 3 late returns retained; no inference or recommendation",
+  "raw_bytes": 13666695,
+  "files_sha256": {
+    "execution.json": "4c3d0caaf683f1f7ca601424e554d49af861e780fa37fbf487a3fd1f41a33555",
+    "manifests/S01_eligible_1/manifest.json": "134c2842100d4c65277b3f644523ff523d25d6e9bf61dc1c3bb01dd5ec478dfd",
+    "manifests/S04_mixed_soc/manifest.json": "e1dd3bdfaac4614fa6525bb4a2e940138128e3f592aaa9d46829095c07df3519",
+    "manifests/S08_two_cars/manifest.json": "3fcaaae00b4ba000e678128402c3299ab46749a2e53e8a94f1f818f9bd426274",
+    "manifests/S11_budget_2/manifest.json": "ee028293dec0489dbf608b7960bca916399b4e1adf486b7232c8e368e2368b03",
+    "preflight.json": "bd2d13612dc70ce5fc5607c539e07f9ed39a24ff187595f5aa0a176a0468b54e",
+    "protocol.json": "a38a2b0bc92edf38fa3f4db7b95eca9ff4727e88abb6ce52a81f91dd5a82b38e",
+    "receipt.json": "e350b0549e3ccf30c6a4452e084831c2d5381dcb397aab79e87a457e4de4969b",
+    "snapshots/S01_eligible_1.json": "c467d747233c024f760d0f3ea1754894dec6bef3c4a9c535144657f88931c2c6",
+    "snapshots/S04_mixed_soc.json": "c075db4eb569278784bc677219d00ef18e61848b818dad4f2c41b0b25e1c1e5f",
+    "snapshots/S08_two_cars.json": "870c5cfeb1cab4c9ed5c45c3aa63016cfc7cc38d96b27800ca623ed8cb44d7d2",
+    "snapshots/S11_budget_2.json": "c1703b14dd5f801050ced91f09ccf9d72e961016186251e805bc528542afd06c",
+    "summary.csv": "557e839262ad9a353f8a60d9d5016042c123096643653901b076d1532ed8d3e0"
+  }
+}
