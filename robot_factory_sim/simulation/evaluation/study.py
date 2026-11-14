@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import re
 import subprocess
 import time
@@ -132,16 +133,24 @@ def validate_spec(spec: dict[str, Any]) -> list[dict[str, Any]]:
         if row["stochastic"] and case.workload["kind"] == "trace" and not row.get("demand_generation"):
             raise ValueError("materialized stochastic traces require their generation recipe")
         load = row["load"]
-        lam = number(load["lambda_tasks_per_second"], "lambda")
-        mu = number(load["reference_capacity_tasks_per_second"], "reference capacity", .000001)
+        batch = load.get("kind") == "finite_batch"
+        if batch:
+            if (row["window"]["mode"] != "finite_batch" or load["lambda_tasks_per_second"] is not None
+                    or load["reference_capacity_tasks_per_second"] is not None
+                    or load["job_count"] != len(case.workload["jobs"])):
+                raise ValueError("finite batch needs a job count, not a fictitious arrival rate/capacity")
+            lam, mu = None, None
+        else:
+            lam = number(load["lambda_tasks_per_second"], "lambda")
+            mu = number(load["reference_capacity_tasks_per_second"], "reference capacity", .000001)
         if not load.get("method") or (case.workload["kind"] == "poisson" and abs(lam - case.workload["rate"]) > 1e-12):
             raise ValueError("absolute load and its neutral capacity method must match input")
-        if spec["stage"] == "confirmatory" and (
+        if spec["stage"] == "confirmatory" and not batch and (
             load.get("calibration_status") not in {"REVIEWED_ANALYTICAL", "CALIBRATED"}
             or not load.get("capacity_evidence")
         ):
             raise ValueError("confirmatory requires reference capacity calibration/review and evidence")
-        row["load"]["reference_rho"] = lam / mu
+        row["load"]["reference_rho"] = lam / mu if mu is not None else None
         trace = [asdict(t) for t in make_trace(case, row["seed"])]
         row.update(scenario=case.to_dict(), scenario_hash=fingerprint(case.to_dict()), trace_hash=fingerprint(trace),
                    geometry_hash=_geometry(case))
@@ -181,7 +190,10 @@ def validate_spec(spec: dict[str, Any]) -> list[dict[str, Any]]:
         raise ValueError("training and validation demand seeds overlap")
     if spec["stage"] == "confirmatory" and any(not geometries[p] for p in PHASES):
         raise ValueError("confirmatory protocol requires all four explicit phases")
-    validate_plan({"schema": PLAN_SCHEMA, "purpose": "e0", **{k: analysis[k] for k in ANALYSIS_KEYS}, "blocks": blocks})
+    validate_plan({"schema": PLAN_SCHEMA, "purpose": "e0", **{k: analysis[k] for k in ANALYSIS_KEYS}, "blocks": blocks,
+                   **{k: analysis[k] for k in ("effect_nulls", "multiplicity_scope", "inferential_metrics",
+                                               "condition_effect_nulls", "condition_inferential_metrics")
+                      if k in analysis}})
     return cases
 
 
@@ -191,6 +203,10 @@ def freeze_study(spec_path: Path, output: Path) -> dict[str, Any]:
         raise ValueError("frozen study output already exists")
     spec, digest = read_json(spec_path)
     cases = validate_spec(spec)
+    if spec.get("main_study_design"):
+        from simulation.evaluation.main_protocol import verify_main_design
+
+        verify_main_design(spec, cases, spec_path.resolve().parent)
     identity, source = code_identity(), source_manifest()
     evidence = []
     for reference in spec["selection"].get("calibration_reports", []):
@@ -213,7 +229,9 @@ def freeze_study(spec_path: Path, output: Path) -> dict[str, Any]:
             if row["phase"] not in {"training", "validation"}:
                 continue
             if not any(e["report"]["scenario_hash"] == row["scenario_hash"]
-                       and e["report"]["window"] == row["window"] for e in evidence):
+                       and e["report"]["window"] == row["window"]
+                       and e["report"].get("trace_hash") == row["trace_hash"]
+                       and e["report"]["seed"] == row["seed"] for e in evidence):
                 raise ValueError("training/validation case lacks passing window calibration: " + row["id"])
         if spec["selection"]["method"] == "training_validation":
             raise ValueError("data-driven profile selection needs a separate reviewed selection receipt; use a_priori")
@@ -223,6 +241,7 @@ def freeze_study(spec_path: Path, output: Path) -> dict[str, Any]:
               "planning_settings": asdict(Settings(**spec["planning_settings"])),
               "decision_settings": DecisionSettings(**spec["decision_settings"]).to_dict(),
               "analysis": spec["analysis"], "cases": cases,
+              "execution": spec.get("execution"), "main_study_design": spec.get("main_study_design"),
               "scope": "synthetic research" if spec["provenance"]["kind"] == "synthetic_research" else "team inputs"}
     frozen["study_hash"] = _body_hash(frozen)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -241,18 +260,43 @@ def load_frozen(path: Path) -> tuple[dict[str, Any], str]:
 
 
 def run_study(frozen_path: Path, output: Path, *, phase: str,
-              run_wall_limit: float = 240, suite_wall_limit: float = 3600) -> dict[str, Any]:
+              run_wall_limit: float | None = None, suite_wall_limit: float = 3600,
+              shard_index: int = 0, shard_count: int = 1) -> dict[str, Any]:
     """Run every planned arm, retaining failures and unstarted rows explicitly."""
     frozen_path = frozen_path.resolve()
     frozen, sha = load_frozen(frozen_path)
     if phase not in PHASES:
         raise ValueError("unknown study execution phase")
-    if (source_manifest() != frozen["source"] or environment_manifest() != frozen["environment"]
-            or code_identity() != frozen["code"]):
+    identity = code_identity()
+    same_code = identity == frozen["code"] or (
+        identity.get("python_matches_head") and frozen["code"].get("python_matches_head"))
+    if (source_manifest() != frozen["source"] or environment_manifest() != frozen["environment"] or not same_code):
         raise ValueError("code/environment differs from frozen study")
+    execution = frozen.get("execution") or {}
+    if execution.get("require_readiness") and phase in {"heldout", "stress"}:
+        ready_path = Path(execution["readiness_path"])
+        if not ready_path.exists():
+            raise ValueError("main study requires its verified readiness receipt")
+        ready, _ = read_json(ready_path)
+        if (ready.get("status") != "READY" or ready.get("frozen_sha256") != sha
+                or ready.get("study_hash") != frozen["study_hash"]
+                or file_sha256(Path(ready["canary_manifest"])) != ready["canary_manifest_sha256"]):
+            raise ValueError("main readiness receipt differs or is no longer valid")
+    if execution.get("hardware_id"):
+        from simulation.evaluation.main_protocol import hardware_id
+
+        if execution["hardware_id"] != hardware_id():
+            raise ValueError("hardware differs from locked main-study host")
+    locked_wall = execution.get("run_wall_limit_seconds")
+    run_wall_limit = run_wall_limit if run_wall_limit is not None else (locked_wall or 240)
+    if locked_wall is not None and run_wall_limit != locked_wall:
+        raise ValueError("per-arm wall limit differs from registration")
     number(run_wall_limit, "run wall limit", .001)
     number(suite_wall_limit, "study wall limit", .001)
-    selected = [c for c in frozen["cases"] if c["phase"] == phase]
+    phase_cases = [c for c in frozen["cases"] if c["phase"] == phase]
+    integer(shard_count, "shard count", 1, max(1, len(phase_cases)))
+    integer(shard_index, "shard index", 0, shard_count - 1)
+    selected = [c for i, c in enumerate(phase_cases) if i % shard_count == shard_index]
     if not selected:
         raise ValueError("phase has no planned cases")
     output.mkdir(parents=True, exist_ok=False)
@@ -261,7 +305,17 @@ def run_study(frozen_path: Path, output: Path, *, phase: str,
     manifest = {"schema": RUN_SCHEMA, "status": "RUNNING", "phase": phase, "stage": frozen["stage"],
                 "frozen": str(frozen_path), "frozen_sha256": sha, "study_hash": frozen["study_hash"],
                 "planned_runs": sum(len(c["policies"]) for c in selected), "entries": entries,
+                "phase_case_ids": [c["id"] for c in phase_cases],
+                "shard_index": shard_index, "shard_count": shard_count,
+                "execution_code": identity,
                 "run_wall_limit": run_wall_limit, "suite_wall_limit": suite_wall_limit}
+    manifest["owner_pid"] = os.getpid()
+    try:
+        import psutil
+
+        manifest["owner_created_at"] = psutil.Process().create_time()
+    except ImportError:
+        manifest["owner_created_at"] = None
     path, started, stop = output / "manifest.json", time.perf_counter(), None
     save(path, manifest)
     for case, entry in zip(selected, entries):
@@ -285,7 +339,8 @@ def run_study(frozen_path: Path, output: Path, *, phase: str,
                                policies=tuple(case["policies"]), run_wall_limit=run_wall_limit,
                                suite_wall_limit=max(.001, suite_wall_limit - (time.perf_counter() - started)),
                                planning_settings=frozen["planning_settings"],
-                               decision_settings=frozen["decision_settings"])
+                               decision_settings=frozen["decision_settings"],
+                               compress_artifacts=execution.get("archive_artifacts", False))
             entry["status"] = result["status"]
             entry["arms"] = [{"policy": r["policy"], "status": r["status"], "failure": r.get("failure")}
                              for r in result["runs"]]
@@ -313,13 +368,33 @@ def study_plan(manifest_path: Path) -> dict[str, Any]:
     frozen, sha = load_frozen(Path(parent["frozen"]))
     if sha != parent["frozen_sha256"] or frozen["study_hash"] != parent["study_hash"]:
         raise ValueError("registered study changed after execution")
-    cases = [c for c in frozen["cases"] if c["phase"] == parent["phase"]]
+    locked_wall = (frozen.get("execution") or {}).get("run_wall_limit_seconds")
+    if locked_wall is not None and parent.get("run_wall_limit") != locked_wall:
+        raise ValueError("saved wall budget differs from main registration")
+    phase_cases = [c for c in frozen["cases"] if c["phase"] == parent["phase"]]
+    if "parts" in parent:
+        from simulation.evaluation.study_shards import verify_collection
+
+        verify_collection(manifest_path, parent)
+        cases = phase_cases
+    else:
+        count, index = parent.get("shard_count", 1), parent.get("shard_index", 0)
+        integer(count, "saved shard count", 1, len(phase_cases))
+        integer(index, "saved shard index", 0, count - 1)
+        if parent.get("phase_case_ids", [c["id"] for c in phase_cases]) != [c["id"] for c in phase_cases]:
+            raise ValueError("saved phase matrix differs from registration")
+        cases = [c for i, c in enumerate(phase_cases) if i % count == index]
     if ([e["id"] for e in parent["entries"]] != [c["id"] for c in cases]
             or parent["planned_runs"] != sum(len(c["policies"]) for c in cases)):
         raise ValueError("phase parent matrix differs from frozen study")
     blocks = []
     for case, entry in zip(cases, parent["entries"]):
-        suite = inside(manifest_path.parent, entry["suite"]) if entry["suite"] else None
+        if entry.get("suite_origin"):
+            from simulation.evaluation.study_shards import collected_suite
+
+            suite = collected_suite(entry)
+        else:
+            suite = inside(manifest_path.parent, entry["suite"]) if entry["suite"] else None
         # An unexpected evaluator exception may leave an incomplete suite; keep
         # all planned arms visible rather than treating missing files as successes.
         if entry["status"] == "EVALUATION_ERROR" or (suite is not None and not suite.exists()):
@@ -346,13 +421,19 @@ def study_plan(manifest_path: Path) -> dict[str, Any]:
                        "seed": case["seed"], "stochastic": case["stochastic"], "scenario": case["scenario"]["id"],
                        "demand_kind": "finite_batch" if case["window"]["mode"] == "finite_batch" else "stream",
                        "suite": str(suite) if suite is not None else None, "unstarted_status": entry["status"],
+                       "inferential": case.get("inferential", True),
                        "candidates": [p for p in case["policies"] if p != frozen["analysis"]["control"]]})
-    purpose = parent["phase"] if frozen["stage"] == "confirmatory" else "e0"
+    complete_phase = len(cases) == len(phase_cases)
+    purpose = parent["phase"] if frozen["stage"] == "confirmatory" and complete_phase else "e0"
     return {"schema": PLAN_SCHEMA, "purpose": purpose, **{k: frozen["analysis"][k] for k in ANALYSIS_KEYS},
+            **{k: frozen["analysis"][k] for k in ("effect_nulls", "multiplicity_scope", "inferential_metrics",
+                                                "condition_effect_nulls", "condition_inferential_metrics")
+               if k in frozen["analysis"]},
             "blocks": blocks, "registered_study": {"manifest": str(manifest_path), "sha256": digest,
                                                    "study_hash": frozen["study_hash"], "phase": parent["phase"]},
             "registered_criteria": {k: frozen["analysis"][k] for k in (
                 "primary_metrics", "practical_difference", "guardrails", "selection_rule")},
+            "condition_criteria": frozen["analysis"].get("condition_criteria"),
             "scope": "registered phase; synthetic pilot remains descriptive"}
 
 
