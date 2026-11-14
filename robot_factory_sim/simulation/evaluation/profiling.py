@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 
+from simulation.evaluation.comparison_inputs import read_json
 from simulation.evaluation.scenario import fingerprint
 from simulation.evaluation.statistics import distribution
 
@@ -58,8 +59,7 @@ def profile_manifest(path: Path) -> dict[str, Any]:
         target = (path.parent / relative).resolve()
         if relative.is_absolute() or not target.is_relative_to(path.parent):
             raise ValueError("timing result path escapes suite directory")
-        result_raw = target.read_bytes()
-        run = json.loads(result_raw)
+        run, _ = read_json(target)
         if (
             run.get("schema") not in {"clover-headless-run-v4","clover-headless-run-v5"}
             or run["case_id"] != case
@@ -110,7 +110,7 @@ def profile_manifest(path: Path) -> dict[str, Any]:
             group["control"]=True
             group["decisions"].extend(control["decisions"])
             group["fallbacks"].update(control["fallbacks"])
-        digests[relative.as_posix()] = fingerprint(json.loads(result_raw))
+        digests[relative.as_posix()] = fingerprint(run)
     summary = []
     for key, group in sorted(groups.items()):
         if group.get("control"):

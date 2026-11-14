@@ -18,7 +18,9 @@ from simulation.evaluation.scenario import POLICIES, fingerprint, integer, numbe
 METRICS = {
     "throughput_per_min": ("tasks/min", "higher"),
     "late_due_rate": ("fraction of due jobs", "lower"),
+    "urgent_late_due_rate": ("late fraction of input priority0 jobs due inside the window", "lower"),
     "energy_per_completed": ("battery-unit/completion in measurement window", "lower"),
+    "energy_per_completed_relative_change": ("ratio to matched control energy/completion minus one", "lower"),
     "measurement_energy_consumed": ("battery-unit in measurement window", "lower"),
     "mean_wip": ("tasks", "lower"),
     "unfinished": ("tasks at observation end", "lower"),
@@ -50,6 +52,21 @@ def validate_plan(plan: dict[str, Any]) -> None:
         raise ValueError("invalid comparison policies")
     if not metrics or len(set(metrics)) != len(metrics) or set(metrics) - set(METRICS):
         raise ValueError("unknown or duplicate comparison metrics")
+    if set(plan.get("effect_nulls", {})) - set(metrics):
+        raise ValueError("effect nulls must refer to declared metrics")
+    for value in plan.get("effect_nulls", {}).values():
+        number(value, "effect null", -float("inf"))
+    if plan.get("multiplicity_scope", "all_estimates") not in {"all_estimates", "across_layouts_only"}:
+        raise ValueError("unknown multiplicity scope")
+    if set(plan.get("inferential_metrics", metrics)) - set(metrics):
+        raise ValueError("inferential metrics must be declared measurements")
+    for overrides in plan.get("condition_effect_nulls", {}).values():
+        if set(overrides) - set(metrics):
+            raise ValueError("condition effect null refers to an undeclared metric")
+        for value in overrides.values():
+            number(value, "condition null", -float("inf"))
+    if any(set(values) - set(metrics) for values in plan.get("condition_inferential_metrics", {}).values()):
+        raise ValueError("condition inferential metric is undeclared")
     number(plan["confidence"], "confidence", .5, .999)
     integer(plan["bootstrap_resamples"], "bootstrap resamples", 1000, 50000)
     integer(plan["bootstrap_seed"], "bootstrap seed", 0, 2**32 - 1)
@@ -63,6 +80,8 @@ def validate_plan(plan: dict[str, Any]) -> None:
         raise ValueError("comparison plan has no declared blocks")
     seen = set()
     for block in plan["blocks"]:
+        if type(block.get("inferential", True)) is not bool:
+            raise ValueError("inference eligibility must be explicit boolean")
         selected = block.get("candidates", candidates)
         if not selected or len(set(selected)) != len(selected) or set(selected) - set(candidates):
             raise ValueError("invalid block-specific candidates")
@@ -91,6 +110,8 @@ def metric_value(arm: dict[str, Any], metric: str, demand_kind: str) -> float | 
         return None
     if metric == "batch_makespan" and demand_kind != "finite_batch":
         return None
+    if metric == "energy_per_completed_relative_change":
+        return run["energy_per_completed"]
     if metric.startswith("dispatch_"):
         summary = run.get("control_summary", {})
         if not summary.get("available"):
@@ -114,15 +135,27 @@ def metric_value(arm: dict[str, Any], metric: str, demand_kind: str) -> float | 
     return number(value, metric)
 
 
-def _inference(values: list[float], reasons: list[str], plan: dict[str, Any], label: str) -> dict[str, Any]:
+def paired_metric_values(control: dict[str, Any], target: dict[str, Any], metric: str,
+                         demand_kind: str) -> tuple[float | None, float | None]:
+    """Retain paired ratio denominators and leave zero/undefined control energy unknown."""
+    c, t = (metric_value(a, metric, demand_kind) for a in (control, target))
+    if metric == "energy_per_completed_relative_change":
+        return (1.0, t / c) if c is not None and c > 0 and t is not None else (None, None)
+    return c, t
+
+
+def _inference(values: list[float], reasons: list[str], plan: dict[str, Any], label: str,
+               null_difference: float = 0) -> dict[str, Any]:
     seed = int(fingerprint([plan["bootstrap_seed"], label])[:8], 16)
     if reasons:
         return {"n": len(values), "mean_difference": float(np.mean(values)) if values else None,
                 "t_interval": None, "p_value": None, "bootstrap_percentile_interval": None,
-                "withheld": sorted(set(reasons)), "bootstrap_seed": seed}
+                "withheld": sorted(set(reasons)), "bootstrap_seed": seed, "null_difference": null_difference,
+                "holm_p_value": None}
     result = mean_inference(values, confidence=plan["confidence"],
-                            resamples=plan["bootstrap_resamples"], seed=seed)
+                            resamples=plan["bootstrap_resamples"], seed=seed, null_difference=null_difference)
     result["withheld"] = [result["withheld"]] if result["withheld"] else []
+    result["holm_p_value"] = None
     return result
 
 
@@ -184,6 +217,8 @@ def compare_plan(path: Path) -> dict[str, Any]:
                              "cancelled": run["cancelled"] if run else None,
                              "due_jobs": run["due_jobs"] if run else None,
                              "due_cohort_hash": run["due_cohort_hash"] if run else None,
+                             "urgent_due_jobs": run.get("urgent_due_jobs") if run else None,
+                             "urgent_due_cohort_hash": run.get("urgent_due_cohort_hash") if run else None,
                              "start_cohort_jobs": run["start_cohort_jobs"] if run else None,
                              "observed_starts": run["arrival_to_start"]["count"] if run else None,
                              "censored_start_count": run["censored_start_count"] if run else None,
@@ -207,19 +242,23 @@ def compare_plan(path: Path) -> dict[str, Any]:
                 context = fingerprint(identity)
                 contexts_registry[context] = identity
             for metric in plan["metrics"]:
-                c, t = (metric_value(a, metric, block["demand_kind"]) for a in (control, target))
+                c, t = paired_metric_values(control, target, metric, block["demand_kind"])
                 reasons = list(pair_issues)
                 if c is None or t is None:
                     reasons.append("UNDEFINED_METRIC")
                 if (metric == "late_due_rate" and control["result"] and target["result"]
                         and control["result"]["due_cohort_hash"] != target["result"]["due_cohort_hash"]):
                     reasons.append("DUE_COHORT_MISMATCH")
+                if (metric == "urgent_late_due_rate" and control["result"] and target["result"]
+                        and control["result"]["urgent_due_cohort_hash"] != target["result"]["urgent_due_cohort_hash"]):
+                    reasons.append("URGENT_DUE_COHORT_MISMATCH")
                 censoring = (metric == "arrival_to_start_p95" and any(
                     a["result"] and a["result"]["censored_start_count"] for a in (control, target)))
                 incomplete_starts = (metric == "arrival_to_start_p95" and any(
                     a["result"] and a["result"]["arrival_to_start"]["count"] < a["result"]["start_cohort_jobs"]
                     for a in (control, target)))
                 groups[(block["condition"], candidate, metric)].append({
+                    "inferential": block.get("inferential", True),
                     "layout": block["layout"], "replicate": block["replicate"], "seed": block["seed"],
                     "stochastic": block["stochastic"], "control": c, "candidate": t,
                     "difference": t - c if not reasons else None, "issues": reasons,
@@ -243,6 +282,8 @@ def compare_plan(path: Path) -> dict[str, Any]:
             records = sorted(records, key=lambda p: (p["replicate"], p["seed"]))
             differences = [p["difference"] for p in records if p["difference"] is not None]
             reasons = []
+            if not all(p.get("inferential", True) for p in records):
+                reasons.append("PREREGISTERED_EXPLORATORY_CONDITION")
             if plan["purpose"] == "e0":
                 reasons.append("E0_DESCRIPTIVE_ONLY")
             if parent_unknown:
@@ -269,14 +310,20 @@ def compare_plan(path: Path) -> dict[str, Any]:
                 raise ValueError("one layout label refers to different factory configurations")
             observed_layout_hashes.extend(physical)
             seed_sets.append({p["seed"] for p in records})
-            estimate = _inference(differences, reasons, plan, label + layout)
+            null = plan.get("condition_effect_nulls", {}).get(condition, {}).get(
+                metric, plan.get("effect_nulls", {}).get(metric, 0))
+            estimate = _inference(differences, reasons, plan, label + layout, null)
             row = {"layout": layout, "planned_pairs": len(records), "observed_pairs": len(differences),
                    "distinct_inputs": len(set(hashes)), "control_mean": float(np.mean(
                        [p["control"] for p in records if p["difference"] is not None])) if differences else None,
                    "candidate_mean": float(np.mean(
                        [p["candidate"] for p in records if p["difference"] is not None])) if differences else None,
                    "estimate": estimate}
-            hypotheses.append(estimate)
+            if plan.get("multiplicity_scope", "all_estimates") == "all_estimates":
+                hypotheses.append(estimate)
+            else:
+                estimate["p_value"] = None
+                estimate["test_scope"] = "descriptive within-layout interval only"
             layout_summaries.append(row)
             if differences:
                 layout_values.append(float(np.mean(differences)))
@@ -289,8 +336,16 @@ def compare_plan(path: Path) -> dict[str, Any]:
             layout_reasons.append("REPEATED_FACTORY_UNDER_LAYOUT_LABELS")
         if any(a & b for i, a in enumerate(seed_sets) for b in seed_sets[i + 1:]):
             layout_reasons.append("SHARED_SEEDS_REQUIRE_CROSSED_CLUSTER_METHOD")
-        aggregate = _inference(layout_values, layout_reasons, plan, label + ":layouts")
-        hypotheses.append(aggregate)
+        inferential = (metric in plan.get("condition_inferential_metrics", {}).get(
+            condition, plan.get("inferential_metrics", plan["metrics"]))
+                       and all(p.get("inferential", True) for p in pairs))
+        if not inferential:
+            layout_reasons.append("PREREGISTERED_DESCRIPTIVE_METRIC_OR_CONDITION")
+        aggregate = _inference(layout_values, layout_reasons, plan, label + ":layouts",
+                               plan.get("condition_effect_nulls", {}).get(condition, {}).get(
+                                   metric, plan.get("effect_nulls", {}).get(metric, 0)))
+        if plan.get("multiplicity_scope", "all_estimates") == "all_estimates" or inferential:
+            hypotheses.append(aggregate)
         output.append({"condition": condition, "candidate": candidate, "control": plan["control"],
                        "metric": metric, "unit": METRICS[metric][0], "preferred_direction": METRICS[metric][1],
                        "difference_definition": "candidate minus control", "pairs": pairs,
@@ -321,7 +376,7 @@ def compare_plan(path: Path) -> dict[str, Any]:
             "policy_statuses": policy_statuses,
             "arms": arm_rows, "contexts": contexts_registry,
             "comparisons": output, "holm_family_size": len(hypotheses),
-            "interval_scope": "pointwise exploratory; Holm adjusts p-values, not confidence intervals",
+            "interval_scope": "pointwise intervals; Holm adjusts only the registered test family, not intervals",
             "layout_scope": "equal configured-layout weights; sampling declarations do not prove representativeness",
             "recommendation": None, "heldout_validated": False,
             "registered_phase_verified": bool(plan.get("registered_study")),
@@ -342,6 +397,8 @@ def write_comparison(report: dict[str, Any], output: Path) -> None:
                          "units_in_descriptive_mean": estimate["n"], "control_mean": layout.get("control_mean"),
                          "candidate_mean": layout.get("candidate_mean"),
                          "mean_difference": estimate["mean_difference"],
+                         "test_null_difference": estimate.get("null_difference", 0),
+                         "test_scope": estimate.get("test_scope", "registered aggregate"),
                          "t_ci_lower": ci[0] if ci else None, "t_ci_upper": ci[1] if ci else None,
                          "bootstrap_lower": boot[0] if boot else None, "bootstrap_upper": boot[1] if boot else None,
                          "p_value": estimate["p_value"], "holm_p_value": estimate["holm_p_value"],

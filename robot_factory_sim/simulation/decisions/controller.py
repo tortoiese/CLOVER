@@ -321,195 +321,208 @@ class DecisionScheduler(BaseScheduler):
             else:
 
                 def read_observations() -> tuple[Any, Any]:
-                    observation = capture(
-                        engine,
-                        self.name,
-                        row["token"],
-                        self.policy_state,
-                        deadline=time.perf_counter() + max(0, self._primary_remaining(row)),
-                    )
-                    snapshot = None
-                    if self.name in ALL_RH_BACKENDS and dispatch and engine.pending_tasks:
-                        from simulation.planning.snapshot import capture as capture_rh
+                    if original is not None and original.get("capture_timeout"):
+                        row["capture_timeout"] = original["capture_timeout"]
+                        return None, None
+                    try:
+                        observation = capture(
+                            engine,
+                            self.name,
+                            row["token"],
+                            self.policy_state,
+                            deadline=time.perf_counter() + max(0, self._primary_remaining(row)),
+                        )
+                        snapshot = None
+                        if self.name in ALL_RH_BACKENDS and dispatch and engine.pending_tasks:
+                            from simulation.planning.snapshot import capture as capture_rh
 
-                        snapshot = capture_rh(engine, self.math, row["token"])
-                    return observation, snapshot
+                            snapshot = capture_rh(engine, self.math, row["token"])
+                        return observation, snapshot
+
+                    except TimeoutError as exc:
+                        if self.settings.primary_deadline_policy != "reject_late_primary":
+                            raise
+                        row["capture_timeout"] = str(exc)
+                        return None, None
 
                 observation, snapshot = yield from ledger.call_process("capture", read_observations)
-                row["observed_at"] = observation.now
-                if original is not None and original["observation_hash"] != observation.hash:
-                    raise ValueError("decision replay observation differs from current plant")
-                row["observation_hash"] = observation.hash
-                if snapshot is not None and self.settings.record_planning_inputs:
-                    def retain_input() -> str:
-                        ref = self.input_store.put(snapshot)
-                        row["planning_input_ref"] = ref
-                        if original is not None and original.get("planning_input_ref") != ref:
-                            raise ValueError("replayed planning input differs")
-                        return ref
-
-                    yield from ledger.call_process("planning_input_record", retain_input)
-                remaining = self._primary_remaining(row)
-                if remaining <= 0:
-                    row["reason"] = "DEADLINE_AFTER_CAPTURE"
+                if observation is None:
+                    row["reason"] = "OBSERVATION_BUDGET_EXCEEDED"
                 else:
-                    is_rh = snapshot is not None
-                    row["primary_kind"] = "rh_plan" if is_rh else "selector"
-                    options = {
-                        "dispatch": dispatch and self.name not in ALL_RH_BACKENDS,
-                        "charge_robots": tuple(charges),
-                        "target_robots": tuple(targets),
-                    }
-                    payload = {"observation": observation, "options": options}
-                    if is_rh:
-                        data = json.loads(observation.payload)
-                        forced = tuple(r["robot_id"] for r in data["robots"] if r["forced_charge"])
-                        payload = {
-                            "snapshot": snapshot,
-                            "observation": replace(observation, policy="safe_fallback"),
-                            "options": {
-                                "dispatch": False,
-                                "charge_robots": forced,
-                                "target_robots": tuple(targets),
-                            },
-                        }
-                    elif self.name in ALL_RH_BACKENDS:
-                        payload["observation"] = replace(observation, policy="safe_fallback")
+                    row["observed_at"] = observation.now
+                    if original is not None and original["observation_hash"] != observation.hash:
+                        raise ValueError("decision replay observation differs from current plant")
+                    row["observation_hash"] = observation.hash
+                    if snapshot is not None and self.settings.record_planning_inputs:
+                        def retain_input() -> str:
+                            ref = self.input_store.put(snapshot)
+                            row["planning_input_ref"] = ref
+                            if original is not None and original.get("planning_input_ref") != ref:
+                                raise ValueError("replayed planning input differs")
+                            return ref
 
-                    def compute() -> dict[str, Any]:
-                        remaining_now = self._primary_remaining(row)
-                        row["compute_budget_seconds"] = max(0, remaining_now)
+                        yield from ledger.call_process("planning_input_record", retain_input)
+                    remaining = self._primary_remaining(row)
+                    if remaining <= 0:
+                        row["reason"] = "DEADLINE_AFTER_CAPTURE"
+                    else:
+                        is_rh = snapshot is not None
+                        row["primary_kind"] = "rh_plan" if is_rh else "selector"
+                        options = {
+                            "dispatch": dispatch and self.name not in ALL_RH_BACKENDS,
+                            "charge_robots": tuple(charges),
+                            "target_robots": tuple(targets),
+                        }
+                        payload = {"observation": observation, "options": options}
                         if is_rh:
-                            snap = payload["snapshot"]
-                            timeout = min(snap.settings.timeout, max(0.000001, remaining_now))
-                            row["effective_solver_timeout_seconds"] = timeout
-                            payload["snapshot"] = replace(snap, settings=replace(snap.settings, timeout=timeout))
-                        if original is not None:
-                            saved = dict(original["compute"])
-                            if saved["status"] == "OK":
-                                saved["value"] = (
-                                    {
-                                        "plan": decode_rh(saved["value"]["plan"]),
-                                        "auxiliary": decode(saved["value"]["auxiliary"]),
-                                    }
-                                    if is_rh
-                                    else decode(saved["value"])
-                                )
-                                if is_rh:
-                                    plan = saved["value"]["plan"]
-                                    expected = replace(
-                                        payload["snapshot"],
-                                        settings=replace(
-                                            payload["snapshot"].settings, timeout=plan.input.snapshot.settings.timeout
-                                        ),
+                            data = json.loads(observation.payload)
+                            forced = tuple(r["robot_id"] for r in data["robots"] if r["forced_charge"])
+                            payload = {
+                                "snapshot": snapshot,
+                                "observation": replace(observation, policy="safe_fallback"),
+                                "options": {
+                                    "dispatch": False,
+                                    "charge_robots": forced,
+                                    "target_robots": tuple(targets),
+                                },
+                            }
+                        elif self.name in ALL_RH_BACKENDS:
+                            payload["observation"] = replace(observation, policy="safe_fallback")
+
+                        def compute() -> dict[str, Any]:
+                            remaining_now = self._primary_remaining(row)
+                            row["compute_budget_seconds"] = max(0, remaining_now)
+                            if is_rh:
+                                snap = payload["snapshot"]
+                                timeout = min(snap.settings.timeout, max(0.000001, remaining_now))
+                                row["effective_solver_timeout_seconds"] = timeout
+                                payload["snapshot"] = replace(snap, settings=replace(snap.settings, timeout=timeout))
+                            if original is not None:
+                                saved = dict(original["compute"])
+                                if saved["status"] == "OK":
+                                    saved["value"] = (
+                                        {
+                                            "plan": decode_rh(saved["value"]["plan"]),
+                                            "auxiliary": decode(saved["value"]["auxiliary"]),
+                                        }
+                                        if is_rh
+                                        else decode(saved["value"])
                                     )
-                                    if expected != plan.input.snapshot:
-                                        raise ValueError("recorded RH computation input differs")
-                                elif saved["value"].observation != payload["observation"]:
-                                    raise ValueError("recorded selector computation input differs")
+                                    if is_rh:
+                                        plan = saved["value"]["plan"]
+                                        expected = replace(
+                                            payload["snapshot"],
+                                            settings=replace(
+                                                payload["snapshot"].settings, timeout=plan.input.snapshot.settings.timeout
+                                            ),
+                                        )
+                                        if expected != plan.input.snapshot:
+                                            raise ValueError("recorded RH computation input differs")
+                                    elif saved["value"].observation != payload["observation"]:
+                                        raise ValueError("recorded selector computation input differs")
+                                return saved
+                            saved = self.worker.request(
+                                "rh" if is_rh else "propose",
+                                self.name,
+                                payload,
+                                request_id=row["token"],
+                                epoch=engine.execution_epoch,
+                                timeout=min(
+                                    self.settings.request_watchdog_seconds,
+                                    max(0.001, remaining_now),
+                                ),
+                                memory_limit_mib=self.settings.memory_limit_mib,
+                            )
+                            row["compute"] = {key: value for key, value in saved.items() if key != "value"}
+                            returned = saved.get("value")
+                            row["compute"]["value"] = (
+                                (
+                                    {"plan": encode_rh(returned["plan"]), "auxiliary": encode(returned["auxiliary"])}
+                                    if is_rh
+                                    else encode(returned)
+                                )
+                                if returned is not None
+                                else None
+                            )
                             return saved
-                        saved = self.worker.request(
-                            "rh" if is_rh else "propose",
-                            self.name,
-                            payload,
-                            request_id=row["token"],
-                            epoch=engine.execution_epoch,
-                            timeout=min(
-                                self.settings.request_watchdog_seconds,
-                                max(0.001, remaining_now),
-                            ),
-                            memory_limit_mib=self.settings.memory_limit_mib,
+
+                        reply = yield from ledger.call_process("compute", compute)
+                        self.lifecycle.append(
+                            {
+                                "schema": "clover-worker-lifecycle-v1",
+                                "token": row["token"],
+                                "requested_at": row["phases"][-1]["at"],
+                                "returned_at": engine.now,
+                                "state": "READY" if reply["status"] == "OK" else "REAPED",
+                                "reply": {k: v for k, v in reply.items() if k != "value"},
+                            }
                         )
-                        row["compute"] = {key: value for key, value in saved.items() if key != "value"}
-                        returned = saved.get("value")
+                        row["compute"] = {key: value for key, value in reply.items() if key != "value"}
+                        value = reply.get("value")
                         row["compute"]["value"] = (
                             (
-                                {"plan": encode_rh(returned["plan"]), "auxiliary": encode(returned["auxiliary"])}
+                                {
+                                    "plan": encode_rh(value["plan"]),
+                                    "auxiliary": encode(value["auxiliary"]),
+                                }
                                 if is_rh
-                                else encode(returned)
+                                else encode(value)
                             )
-                            if returned is not None
+                            if value is not None
                             else None
                         )
-                        return saved
+                        if reply["status"] != "OK":
+                            row["reason"] = reply["status"]
+                            self.ready = False
+                        elif engine.now - row["triggered_at"] >= self.settings.end_to_end_soft_deadline_seconds:
+                            row["reason"] = "END_TO_END_SOFT_DEADLINE"
+                        elif is_rh:
+                            auxiliary = value["auxiliary"]
+                            value = value["plan"]
+                            row["rh_result"] = encode_rh(value)
+                            if value.report.status not in {"OPTIMAL", "FEASIBLE"}:
+                                row["reason"] = value.report.status
+                            elif len(value.deferred) == len(value.input.snapshot.jobs) and not any(
+                                a.arc.kind == "charge" for a in value.actions
+                            ):
+                                row["reason"] = "ALL_DEFERRED_RECOVERY"
+                            else:
 
-                    reply = yield from ledger.call_process("compute", compute)
-                    self.lifecycle.append(
-                        {
-                            "schema": "clover-worker-lifecycle-v1",
-                            "token": row["token"],
-                            "requested_at": row["phases"][-1]["at"],
-                            "returned_at": engine.now,
-                            "state": "READY" if reply["status"] == "OK" else "REAPED",
-                            "reply": {k: v for k, v in reply.items() if k != "value"},
-                        }
-                    )
-                    row["compute"] = {key: value for key, value in reply.items() if key != "value"}
-                    value = reply.get("value")
-                    row["compute"]["value"] = (
-                        (
-                            {
-                                "plan": encode_rh(value["plan"]),
-                                "auxiliary": encode(value["auxiliary"]),
-                            }
-                            if is_rh
-                            else encode(value)
-                        )
-                        if value is not None
-                        else None
-                    )
-                    if reply["status"] != "OK":
-                        row["reason"] = reply["status"]
-                        self.ready = False
-                    elif engine.now - row["triggered_at"] >= self.settings.end_to_end_soft_deadline_seconds:
-                        row["reason"] = "END_TO_END_SOFT_DEADLINE"
-                    elif is_rh:
-                        auxiliary = value["auxiliary"]
-                        value = value["plan"]
-                        row["rh_result"] = encode_rh(value)
-                        if value.report.status not in {"OPTIMAL", "FEASIBLE"}:
-                            row["reason"] = value.report.status
-                        elif len(value.deferred) == len(value.input.snapshot.jobs) and not any(
-                            a.arc.kind == "charge" for a in value.actions
-                        ):
-                            row["reason"] = "ALL_DEFERRED_RECOVERY"
+                                def prepare_rh() -> tuple[bool, str]:
+                                    staged, reason = admission.revalidate_rh(engine, value, observation)
+                                    return staged is not None, reason
+
+                                def publish_rh() -> dict[str, Any]:
+                                    receipt = admission.publish_rh(engine, value, observation)
+                                    if receipt["accepted"]:
+                                        auxiliary_receipt = admission.publish(engine, auxiliary, self.approved_charge)
+                                        receipt["auxiliary"] = auxiliary_receipt
+                                        receipt["accepted"] &= auxiliary_receipt["accepted"]
+                                        if not receipt["accepted"]:
+                                            receipt["reason"] = "PARTIAL_AUXILIARY: " + auxiliary_receipt["reason"]
+                                        self._notify(charges, targets, auxiliary_receipt["accepted"])
+                                    return receipt
+
+                                receipt = yield from self._admit_process(ledger, row, prepare_rh, publish_rh)
+                                row.update(accepted=receipt["accepted"], reason=receipt["reason"], receipt=receipt)
+                                finished = receipt["accepted"]
                         else:
+                            row["proposal"] = encode(value)
 
-                            def prepare_rh() -> tuple[bool, str]:
-                                staged, reason = admission.revalidate_rh(engine, value, observation)
-                                return staged is not None, reason
+                            def prepare() -> tuple[bool, str]:
+                                errors = admission.check(engine, value)
+                                return not errors, ";".join(errors)
 
-                            def publish_rh() -> dict[str, Any]:
-                                receipt = admission.publish_rh(engine, value, observation)
+                            def publish() -> dict[str, Any]:
+                                receipt = admission.publish(engine, value, self.approved_charge)
                                 if receipt["accepted"]:
-                                    auxiliary_receipt = admission.publish(engine, auxiliary, self.approved_charge)
-                                    receipt["auxiliary"] = auxiliary_receipt
-                                    receipt["accepted"] &= auxiliary_receipt["accepted"]
-                                    if not receipt["accepted"]:
-                                        receipt["reason"] = "PARTIAL_AUXILIARY: " + auxiliary_receipt["reason"]
-                                    self._notify(charges, targets, auxiliary_receipt["accepted"])
+                                    self.policy_state = value.state
+                                    self._notify(charges, targets, True)
                                 return receipt
 
-                            receipt = yield from self._admit_process(ledger, row, prepare_rh, publish_rh)
+                            receipt = yield from self._admit_process(ledger, row, prepare, publish)
                             row.update(accepted=receipt["accepted"], reason=receipt["reason"], receipt=receipt)
                             finished = receipt["accepted"]
-                    else:
-                        row["proposal"] = encode(value)
-
-                        def prepare() -> tuple[bool, str]:
-                            errors = admission.check(engine, value)
-                            return not errors, ";".join(errors)
-
-                        def publish() -> dict[str, Any]:
-                            receipt = admission.publish(engine, value, self.approved_charge)
-                            if receipt["accepted"]:
-                                self.policy_state = value.state
-                                self._notify(charges, targets, True)
-                            return receipt
-
-                        receipt = yield from self._admit_process(ledger, row, prepare, publish)
-                        row.update(accepted=receipt["accepted"], reason=receipt["reason"], receipt=receipt)
-                        finished = receipt["accepted"]
             if not finished:
                 yield from self._fallback_process(ledger, row, charges, targets, original)
             row["time"] = engine.now

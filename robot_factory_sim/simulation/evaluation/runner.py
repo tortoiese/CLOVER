@@ -571,6 +571,8 @@ def run_suite(
     suite_wall_limit: float | None = None,
     planning_settings: dict[str, Any] | None = None,
     decision_settings: dict[str, Any] | None = None,
+    compress_artifacts: bool = False,
+    archive_codec: str = "gzip",
 ) -> dict[str, Any]:
     """Run paired arms in randomized block order and checkpoint every outcome."""
     if not scenarios or len({s.id for s in scenarios}) != len(scenarios):
@@ -670,6 +672,11 @@ def run_suite(
                         )
                     }
                     row.update(scenario=scenario.id, result=f"{case_id}.json", events=f"{case_id}.events.jsonl")
+                    if compress_artifacts:
+                        from simulation.artifacts import archive_run, events_for_result
+
+                        archived, archive = archive_run(output / f"{case_id}.json", archive_codec)
+                        row.update(result=archived.name, events=events_for_result(archived).name, **archive)
                     row["same_source"] = result["source"]["source_hash"] == manifest["source"]["source_hash"]
                 manifest["runs"].append(row)
                 checkpoint()
