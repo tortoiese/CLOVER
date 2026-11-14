@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 from simulation.evaluation.analysis import analyze
 from simulation.evaluation.comparison_inputs import read_json
-from simulation.evaluation.scenario import Scenario, integer, number
+from simulation.evaluation.scenario import Scenario, fingerprint, integer, number
 
 
 def validate_window(case: Scenario, window: dict[str, Any]) -> None:
@@ -49,6 +50,10 @@ def calibrate(run_path: Path, window: dict[str, Any], *, bins: int = 6) -> dict[
     run_path = run_path.resolve()
     run, run_sha = read_json(run_path)
     case = Scenario.from_dict(run["scenario"])
+    initial = {"robots": {k: asdict(v) for k, v in case.initial_robots.items()}, "cabins": case.initial_cabins}
+    if (fingerprint(case.to_dict()) != run["scenario_hash"]
+            or fingerprint(run["trace"]) != run["trace_hash"] or fingerprint(initial) != run["initial_hash"]):
+        raise ValueError("calibration scenario/trace/initial hash mismatch")
     validate_window(case, window)
     integer(bins, "calibration bins", 2, 100)
     audit = analyze(run_path)
@@ -100,6 +105,8 @@ def calibrate(run_path: Path, window: dict[str, Any], *, bins: int = 6) -> dict[
         if start["time"] < run["observed_seconds"]:
             robots[key[0]]["open"] += 1
     required = window["minimum_completed_charge_sessions_per_robot"]
+    if required and not robots:
+        reasons.append("NO_ACTIVE_ROBOTS_FOR_CHARGE_EXPOSURE")
     if any(r["completed"] < required for r in robots.values()):
         reasons.append("INSUFFICIENT_COMPLETED_CHARGE_EXPOSURE")
     tasks, segments = run["tasks"], []
@@ -117,8 +124,11 @@ def calibrate(run_path: Path, window: dict[str, Any], *, bins: int = 6) -> dict[
     return {"schema": "clover-window-calibration-v1", "status": "PASS" if not reasons else "FAIL",
             "reasons": reasons, "run": str(run_path), "result_sha256": run_sha,
             "events_sha256": audit["input_events_sha256"], "source": run["source"],
-            "scenario_hash": run["scenario_hash"], "scenario": case.to_dict(), "seed": run["seed"],
+            "scenario_hash": run["scenario_hash"], "trace_hash": run["trace_hash"],
+            "initial_hash": run["initial_hash"], "scenario": case.to_dict(), "seed": run["seed"],
             "policy": run["policy"], "window": window, "measurement_window": [case.warmup, case.duration],
             "charge_starts": starts, "charge_ends": ends, "robots": robots, "segments": segments,
+            "charge_energy_scope": "full sessions ending in window; exact window energy is measurement_energy",
+            "measurement_energy": run["measurement_energy"],
             "faults": run["faults"], "rescue_energy": run["energy"]["rescue"],
             "scope": "synthetic/input exposure audit; PASS does not prove stationarity or real-factory validity"}

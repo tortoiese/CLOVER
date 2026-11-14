@@ -161,6 +161,13 @@ def test_calibration_actual_sessions_and_common_window(tmp_path: Path) -> None:
     contract["drain_seconds"] = 5
     with pytest.raises(ValueError, match="cutoff"):
         validate_window(case, contract)
+    contract["drain_seconds"] = 0
+    path = tmp_path / f"{result['case_id']}.json"
+    tampered = json.loads(path.read_text())
+    tampered["scenario"]["factory"]["stations"][0]["x"] += 1
+    dump(path, tampered)
+    with pytest.raises(ValueError, match="hash mismatch"):
+        calibrate(path, contract)
 
 
 def test_registered_cli_execution_and_analysis(tmp_path: Path) -> None:
