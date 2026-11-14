@@ -10,7 +10,18 @@ import simpy
 if TYPE_CHECKING:
     from simulation.robot import Robot
 
-OBSERVATION_EVENTS = frozenset({"resource_wait_start", "resource_wait_end", "cabin_phase_start", "cabin_phase_end"})
+OBSERVATION_EVENTS = frozenset({"resource_wait_start", "resource_wait_end", "cabin_phase_start", "cabin_phase_end",
+                                "charge_session_start", "charge_session_end"})
+
+
+def observe_charge(robot: Robot, charger: str, start: float, *, completed: bool | None = None) -> None:
+    """Record an existing charging transition without yielding or changing it."""
+    robot.engine.ledger.emit(
+        "charge_session_start" if completed is None else "charge_session_end",
+        robot=robot.robot_id, robot_instance=robot.color_index, session=robot.charge_sessions,
+        charger=charger, start=start, completed=completed,
+        charged_energy_units=robot.charged_energy_units, capacity_units=robot.capacity, soc_pct=robot.battery_pct,
+    )
 
 
 def observe_wait(robot: Robot, request: simpy.Event, channel: str, resource: str) -> Generator[Any, Any, None]:

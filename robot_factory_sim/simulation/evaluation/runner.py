@@ -266,6 +266,10 @@ def run_case(
             replay_controls=replay_controls,
             roam=False,
         )
+        if decision_settings is not None:
+            from simulation.decisions.input_store import PlanningInputStore
+
+            engine.scheduler.input_store = PlanningInputStore(output)
         external_processes = [
             engine.env.process(_inject(engine, trace)),
             engine.env.process(_intervene(engine, scenario)),
@@ -346,6 +350,13 @@ def run_case(
             "lifecycle":scheduler.lifecycle,"lifecycle_hash":fingerprint(scheduler.lifecycle),
             "policy_state":scheduler.policy_state,"fallbacks":dict(scheduler.fallbacks),
             "coverage_ok":scheduler.coverage_ok,"restarts":scheduler.restarts}
+        from simulation.decisions.contracts import digest as decision_digest
+
+        control["planning_inputs"] = scheduler.input_store.records
+        control["planning_inputs_hash"] = decision_digest(scheduler.input_store.records)
+        from simulation.decisions.metrics import control_summary
+
+        control["summary"] = control_summary(control, scenario.warmup, observed)
         if not scheduler.coverage_ok:
             status,failure="TIMING_COVERAGE_VIOLATION","publication cost exceeded prepaid allowance"
         control_errors=[r["reason"] for r in scheduler.records if r["reason"].startswith("DECISION_ERROR")]
@@ -434,7 +445,7 @@ def run_case(
         "final_audit": audit,
         "final_physical_state": _physical_state(engine) if engine is not None else None,
         "timing_mode": (
-            "d1-staged-budget-v1; measured phases plus prepaid publication allowance"
+            control["settings"]["timing_protocol"] + "; measured phases plus prepaid publication allowance"
             if control is not None else
             "D1-RH; measured proposal wall delay injected; apply revalidation wall time recorded separately"
             if planning and planning["timing_mode"] == "D1"
@@ -493,7 +504,8 @@ def run_case(
     return result
 
 
-def replay(result: dict[str, Any], *, require_same_source: bool = True) -> dict[str, Any]:
+def replay(result: dict[str, Any], *, require_same_source: bool = True,
+           input_root: Path | None = None) -> dict[str, Any]:
     """Re-run exact recorded plant input and trace, checking physical event identity."""
     if result.get("schema") not in {RESULT_SCHEMA, DECISION_RESULT_SCHEMA}:
         raise ValueError("unsupported replay schema")
@@ -507,6 +519,21 @@ def replay(result: dict[str, Any], *, require_same_source: bool = True) -> dict[
         raise ValueError("replay trace hash mismatch")
     planning = result.get("planning")
     control = result.get("control")
+    if control and "planning_inputs" in control:
+        from simulation.decisions.contracts import digest as decision_digest
+        from simulation.decisions.input_store import load_planning_input
+
+        index = control["planning_inputs"]
+        if decision_digest(index) != control["planning_inputs_hash"]:
+            raise ValueError("recorded planning input index hash mismatch")
+        for row in control["decisions"]:
+            ref = row.get("planning_input_ref")
+            if ref is None:
+                continue
+            if ref not in index:
+                raise ValueError("recorded planning input reference is missing")
+            if input_root is not None or "inline" in index[ref]:
+                load_planning_input(control, ref, input_root)
     if control is not None:
         if (fingerprint(control["decisions"])!=control["decisions_hash"]
                 or fingerprint(control["lifecycle"])!=control["lifecycle_hash"]):

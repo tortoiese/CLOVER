@@ -91,8 +91,47 @@ def main(argv: list[str] | None = None) -> int:
     benchmark.add_argument("--request-allowance", type=float, default=3)
     benchmark.add_argument("--memory-limit-mib", type=float, default=1024)
     benchmark.add_argument("--suite-wall-limit", type=float, default=300)
+    calibration = commands.add_parser("calibrate-window", help="audit fixed-window and completed-charge exposure")
+    calibration.add_argument("--run", type=Path, required=True)
+    calibration.add_argument("--window", type=Path, required=True)
+    calibration.add_argument("--output", type=Path, required=True)
+    study_freeze = commands.add_parser("freeze-study", help="seal phase inputs, code, settings and analysis")
+    study_freeze.add_argument("--spec", type=Path, required=True)
+    study_freeze.add_argument("--output", type=Path, required=True)
+    study_run = commands.add_parser("run-study", help="execute every preregistered arm of one phase")
+    study_run.add_argument("--frozen", type=Path, required=True)
+    study_run.add_argument("--phase", choices=("training", "validation", "heldout", "stress"), required=True)
+    study_run.add_argument("--output", type=Path, required=True)
+    study_run.add_argument("--run-wall-limit", type=float, default=240)
+    study_run.add_argument("--suite-wall-limit", type=float, default=3600)
+    study_analysis = commands.add_parser("study-analysis-plan", help="derive exactly the registered phase analysis")
+    study_analysis.add_argument("--manifest", type=Path, required=True)
+    study_analysis.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command in {"freeze-study", "run-study", "study-analysis-plan", "calibrate-window"}:
+            from simulation.evaluation.calibration import calibrate
+            from simulation.evaluation.study import freeze_study, run_study, study_plan
+
+            if args.output.exists():
+                raise ValueError("output already exists; preserve prior evidence")
+            if args.command == "freeze-study":
+                result = freeze_study(args.spec, args.output)
+                status = "FROZEN_" + result["stage"].upper()
+            elif args.command == "run-study":
+                result = run_study(args.frozen, args.output, phase=args.phase,
+                                   run_wall_limit=args.run_wall_limit, suite_wall_limit=args.suite_wall_limit)
+                status = result["status"]
+            else:
+                result = (study_plan(args.manifest) if args.command == "study-analysis-plan" else
+                          calibrate(args.run, json.loads(args.window.read_text(encoding="utf-8"))))
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                with args.output.open("x", encoding="utf-8", newline="\n") as stream:
+                    json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
+                    stream.write("\n")
+                status = result.get("status", "REGISTERED_ANALYSIS_PLAN")
+            print(json.dumps({"status": status, "output": str(args.output)}))
+            return 1 if status in {"FAIL", "PARTIAL"} else 0
         if args.command == "freeze-snapshot":
             from simulation.evaluation.frozen_snapshot import freeze_snapshot
 
@@ -232,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(json.dumps({"status": result["status"], "runs": len(result["runs"])}))
             return 0 if result["status"] == "SUCCESS" else 1
-        result = replay(json.loads(args.run.read_text(encoding="utf-8")))
+        result = replay(json.loads(args.run.read_text(encoding="utf-8")), input_root=args.run.resolve().parent)
         print(json.dumps({key: value for key, value in result.items() if key != "result"}))
         return 0 if result["matches"] else 1
     except (ValueError, TypeError, KeyError, OSError) as exc:

@@ -5,10 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
+from simulation.decisions.input_store import load_planning_input
 from simulation.evaluation.runner import source_manifest
 from simulation.evaluation.scenario import fingerprint, integer, number
 from simulation.planning.backend import check_incumbent, cost
@@ -62,11 +63,21 @@ def freeze_snapshot(run_path: Path, decision: int, output: Path, *, preparation_
     record = control["decisions"][decision]
     worker_plan = ((record.get("compute") or {}).get("value") or {}).get("plan")
     plan = worker_plan or record.get("rh_result")
-    if plan is None:
+    captured = record.get("planning_input_ref")
+    if plan is None and captured is None:
         raise ValueError("selected decision has no returned planning input")
     if worker_plan and record.get("rh_result") and worker_plan != record["rh_result"]:
         raise ValueError("worker and controller planning records differ")
-    data = decode(plan).input
+    if captured is not None:
+        snapshot = load_planning_input(control, captured, run_path.parent)
+        if "effective_solver_timeout_seconds" in record:
+            snapshot = replace(snapshot, settings=replace(
+                snapshot.settings, timeout=record["effective_solver_timeout_seconds"]))
+        data = prepare(snapshot, deadline=time.perf_counter() + preparation_limit)
+        if plan is not None and decode(plan).input != data:
+            raise ValueError("returned plan differs from pre-request observation")
+    else:
+        data = decode(plan).input
     if (data.snapshot.token != record["token"] or data.snapshot.epoch != run["execution_epoch"]
             or not 0 <= data.snapshot.now <= run["observed_seconds"]):
         raise ValueError("planning observation identity differs from the run")
@@ -83,7 +94,9 @@ def freeze_snapshot(run_path: Path, decision: int, output: Path, *, preparation_
                    "source_hash": run["source"]["source_hash"], "case_id": run["case_id"],
                    "run_status": run["status"], "policy": run["policy"], "decision_index": decision,
                    "decision_reason": record["reason"], "accepted": record["accepted"],
-                   "worker_return_used": worker_plan is not None},
+                   "worker_return_used": worker_plan is not None and captured is None,
+                   "worker_plan_present": worker_plan is not None,
+                   "input_origin": "pre_rpc_snapshot" if captured is not None else "returned_plan"},
         "prepared": encode(Result(data, Report("NOT_SOLVED"))),
         "input_hash": fingerprint(asdict(data)), "model_hash": model.fingerprint,
         "variables": len(model.variables), "constraints": len(model.rows),
