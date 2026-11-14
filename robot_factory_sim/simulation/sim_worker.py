@@ -113,9 +113,12 @@ class _SimController(QObject):
                 engine.close()
         factory = self._db.load_factory_config() if factory is None else copy.deepcopy(factory)
         epoch = datetime.now().replace(microsecond=0)
+        # 층 순회는 시각화용이다. RH 정책은 로봇 이동을 직접 계획하므로 순회가 계획을 무효화하고,
+        # 엔진마다 순회 여부가 다르면 ROI(에너지) 비교가 불공정해진다. RH 활성 시 모든 엔진에서 끈다.
+        roam = not any(mode.startswith("rh_") for mode in self._active_policies)
         self._engines = {
             mode: SimulationEngine(copy.deepcopy(factory), mode, config.RANDOM_SEED, epoch, {"task_rate": self._task_rate},
-                                   comparison_seed=config.RANDOM_SEED, demand_source="stochastic", roam=True)
+                                   comparison_seed=config.RANDOM_SEED, demand_source="stochastic", roam=roam)
             for mode in self._active_policies
         }
         from simulation.planning.controller import RollingHorizonScheduler
