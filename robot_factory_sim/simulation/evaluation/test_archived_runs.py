@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import lzma
 import shutil
 from pathlib import Path
 
@@ -22,27 +23,29 @@ from simulation.planning.contracts import Settings
 from simulation.planning.snapshot import capture
 
 
-def test_archive_keeps_original_on_conflicting_target(tmp_path: Path) -> None:
+@pytest.mark.parametrize("codec", ("gzip", "xz"))
+def test_archive_keeps_original_on_conflicting_target(tmp_path: Path, codec: str) -> None:
     first = tmp_path / "data.txt"
     first.write_bytes(b"original" * 100)
     original = first.read_bytes()
-    receipt = compress_file(first)
+    receipt = compress_file(first, codec)
     assert read_saved(first) == original
     assert receipt["logical_sha256"] == hashlib.sha256(original).hexdigest()
     assert receipt["stored_sha256"] == stored_sha256(first)
     first.write_bytes(b"different")
     with pytest.raises(ValueError, match="original preserved"):
-        compress_file(first)
+        compress_file(first, codec)
     assert first.read_bytes() == b"different"
 
 
-def test_archived_suite_raw_audit_profile_and_replay(tmp_path: Path) -> None:
+@pytest.mark.parametrize("codec", ("gzip", "xz"))
+def test_archived_suite_raw_audit_profile_and_replay(tmp_path: Path, codec: str) -> None:
     suite = run_suite((joint_batch(),), (101,), tmp_path / "suite",
-                      policies=("baseline", "optimized"), compress_artifacts=True)
+                      policies=("baseline", "optimized"), compress_artifacts=True, archive_codec=codec)
     assert suite["status"] == "SUCCESS"
     for row in suite["runs"]:
         path = tmp_path / "suite" / row["result"]
-        assert path.suffix == ".gz"
+        assert path.suffix == (".gz" if codec == "gzip" else ".xz")
         run, sha = read_json(path)
         assert analyze(path)["input_result_sha256"] == sha
         assert replay(run, input_root=path.parent)["matches"]
@@ -50,7 +53,8 @@ def test_archived_suite_raw_audit_profile_and_replay(tmp_path: Path) -> None:
     assert profile_manifest(tmp_path / "suite/manifest.json")["loaded_runs"] == 2
 
 
-def test_compressed_cas_checks_logical_hash_and_path(tmp_path: Path) -> None:
+@pytest.mark.parametrize("codec", ("gzip", "xz"))
+def test_compressed_cas_checks_logical_hash_and_path(tmp_path: Path, codec: str) -> None:
     from simulation.decisions.contracts import digest
     from simulation.engine import SimulationEngine
 
@@ -60,24 +64,25 @@ def test_compressed_cas_checks_logical_hash_and_path(tmp_path: Path) -> None:
         store = PlanningInputStore(tmp_path)
         ref = store.put(snapshot)
         path = tmp_path / store.records[ref]["path"]
-        compress_file(path)
+        compress_file(path, codec)
         control = {"planning_inputs": store.records, "planning_inputs_hash": digest(store.records)}
         assert load_planning_input(control, ref, tmp_path) == snapshot
         assert PlanningInputStore(tmp_path).put(snapshot) == ref
-        raw = path.with_name(path.name + ".gz")
+        raw = path.with_name(path.name + (".gz" if codec == "gzip" else ".xz"))
         raw.write_bytes(raw.read_bytes()[:20])
-        with pytest.raises((EOFError, OSError)):
+        with pytest.raises((EOFError, OSError, lzma.LZMAError)):
             load_planning_input(control, ref, tmp_path)
     finally:
         engine.close()
 
 
-def test_archived_real_rh_result_exports_same_model(saved: tuple, tmp_path: Path) -> None:
+@pytest.mark.parametrize("codec", ("gzip", "xz"))
+def test_archived_real_rh_result_exports_same_model(saved: tuple, tmp_path: Path, codec: str) -> None:
     run_path, frozen_path, index = saved
     folder = tmp_path / "copy"
     shutil.copytree(run_path.parent, folder)
     copied = folder / run_path.name
-    archived, receipt = archive_run(copied)
+    archived, receipt = archive_run(copied, codec)
     assert receipt["archive_bytes"] < receipt["logical_bytes"]
     frozen = freeze_snapshot(archived, index, tmp_path / "export.json")
     original = json.loads(frozen_path.read_text())

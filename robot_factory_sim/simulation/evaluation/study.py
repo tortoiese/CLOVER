@@ -342,7 +342,8 @@ def run_study(frozen_path: Path, output: Path, *, phase: str,
                                suite_wall_limit=max(.001, suite_wall_limit - (time.perf_counter() - started)),
                                planning_settings=frozen["planning_settings"],
                                decision_settings=frozen["decision_settings"],
-                               compress_artifacts=execution.get("archive_artifacts", False))
+                               compress_artifacts=execution.get("archive_artifacts", False),
+                               archive_codec=execution.get("archive_codec", "gzip"))
             entry["status"] = result["status"]
             entry["arms"] = [{"policy": r["policy"], "status": r["status"], "failure": r.get("failure")}
                              for r in result["runs"]]

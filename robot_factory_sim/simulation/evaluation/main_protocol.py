@@ -95,7 +95,7 @@ def _settings() -> dict[str, Any]:
                 "hardware_id": hardware_id()},
             "execution": {"hardware_id": hardware_id(), "run_wall_limit_seconds": 900,
                           "native_concurrency_per_host": 1, "minimum_free_disk_bytes": 2_000_000_000,
-                          "archive_artifacts": True},
+                          "archive_artifacts": True, "archive_codec": "xz"},
             "cases": []}
 
 
@@ -111,6 +111,7 @@ def build_main_spec(capacity: dict[str, Any], capacity_path: Path, *,
         "core_demand_repeats_per_layout": CORE_REPEATS, "aux_layouts": AUX_LAYOUTS,
         "aux_demand_repeats_per_layout": AUX_REPEATS, "development_repeats": DEV_REPEATS,
         "conditions": [c[0] for c in CONDITIONS],
+        "stress_scope": "support/failure and resource-cost description; timing-invalid runs never enter performance inference",
         "layout_distribution": "independent_monotone_grid_gap_uniform_0.8_1.25_v1",
         "scope": "conditional synthetic generator only; sample size is fixed, not a guaranteed power claim"}
     for phase in ("training", "validation", "heldout", "stress"):
@@ -189,6 +190,49 @@ def verify_main_design(spec: dict[str, Any], cases: list[dict[str, Any]], root: 
         raise ValueError("main-study case count mismatch")
 
 
+def build_canary_spec(spec: dict[str, Any], cases: list[dict[str, Any]],
+                      capacity: dict[str, Any]) -> dict[str, Any]:
+    """Cover each main policy/graph class, separating support stress from nominal validation."""
+    canary = copy.deepcopy(spec)
+    canary.update(stage="pilot", main_study_design=None,
+                  execution={"archive_artifacts": True, "archive_codec": "xz"})
+    canary["selection"]["calibration_reports"] = []
+    canary["cases"] = []
+    for family in ANCHORS:
+        row = copy.deepcopy(next(c for c in cases if c["phase"] == "training" and c["family"] == family))
+        row["id"] = "canary_" + family
+        case = Scenario.from_dict(row["scenario"])
+        if family != "S04":
+            case.duration, case.warmup = (1500 if family == "S09" else 300), 0
+            case.workload["jobs"] = [j for j in case.workload["jobs"] if j["at"] < case.duration]
+        case.id = row["id"]
+        row["scenario"], row["window"] = case.to_dict(), window(case, family)
+        row["load"]["job_count"] = len(case.workload["jobs"])
+        row["demand_generation"]["scope"] = "development canary, not a main outcome"
+        row["window"].update(minimum_completed_charge_sessions_per_robot=0, nominal=False)
+        row["inferential"] = False
+        row["canary_scope"] = "nominal_execution"
+        canary["cases"].append(row)
+    anchor, draw = layout("S11", "training", 90, large=True)
+    prediction = predict_reference(anchor, "S11", capacity)
+    seed = seed_for("S11", "training", 90, 9)
+    case = demand_case(anchor, "S11", "S11_grid256", seed, .9 * prediction["rate_tasks_per_second"])
+    case.duration, case.warmup, case.id = 300, 0, "canary_S11_large"
+    case.workload["jobs"] = [j for j in case.workload["jobs"] if j["at"] < 300]
+    row = copy.deepcopy(next(c for c in canary["cases"] if c["family"] == "S11"))
+    row.update(id=case.id, scenario=case.to_dict(), seed=seed, layout="canary_large_draw",
+               condition="S11_grid256", canary_scope="stress_budget", layout_draw=draw,
+               policies=[*CORE_POLICIES, "rh_cpsat_native"])
+    row["demand_generation"]["seed"] = seed
+    row["load"]["capacity_evidence"]["prediction"] = prediction
+    row["load"].update(lambda_tasks_per_second=.9 * prediction["rate_tasks_per_second"],
+                        reference_capacity_tasks_per_second=prediction["rate_tasks_per_second"],
+                        job_count=len(case.workload["jobs"]))
+    row["window"] = window(case, "S11", stress=True)
+    canary["cases"].append(row)
+    return canary
+
+
 def prepare_main(capacity_path: Path, output: Path, *, core_layouts: int = CORE_LAYOUTS,
                  development_from: Path | None = None) -> dict[str, Any]:
     """Audit development windows, seal the main matrix, and write immutable shard commands."""
@@ -253,46 +297,29 @@ def prepare_main(capacity_path: Path, output: Path, *, core_layouts: int = CORE_
                          "output": str((output / "runs" / phase / f"shard_{index:04d}").resolve())})
     save(output / "jobs.json", {"frozen": str((output / "frozen.json").resolve()),
                                "study_hash": frozen["study_hash"], "jobs": jobs})
-    canary = copy.deepcopy(spec)
-    canary.update(stage="pilot", main_study_design=None, execution={"archive_artifacts": True})
-    canary["selection"]["calibration_reports"] = []
-    canary["cases"] = []
-    for family in ("S01", "S02", "S04", "S08", "S11"):
-        row = copy.deepcopy(next(c for c in cases if c["phase"] == "training" and c["family"] == family))
-        row["id"] = "canary_" + family
-        case = Scenario.from_dict(row["scenario"])
-        if family != "S04":
-            case.duration, case.warmup = 300, 0
-            case.workload["jobs"] = [j for j in case.workload["jobs"] if j["at"] < 300]
-        case.id = row["id"]
-        row["scenario"], row["window"] = case.to_dict(), window(case, family)
-        row["load"]["job_count"] = len(case.workload["jobs"])
-        row["demand_generation"]["scope"] = "development canary, not a main outcome"
-        row["window"].update(minimum_completed_charge_sessions_per_robot=0, nominal=False)
-        row["inferential"] = False
-        canary["cases"].append(row)
-    anchor, draw = layout("S11", "training", 90, large=True)
-    prediction = predict_reference(anchor, "S11", capacity)
-    seed = seed_for("S11", "training", 90, 9)
-    case = demand_case(anchor, "S11", "S11_grid256", seed, .9 * prediction["rate_tasks_per_second"])
-    case.duration, case.warmup, case.id = 300, 0, "canary_S11_large"
-    case.workload["jobs"] = [j for j in case.workload["jobs"] if j["at"] < 300]
-    row = copy.deepcopy(next(c for c in canary["cases"] if c["family"] == "S11"))
-    row.update(id=case.id, scenario=case.to_dict(), seed=seed, layout="canary_large_draw",
-               layout_draw=draw, policies=["optimized", "rh_milp_grid", "rh_cpsat_linear", "rh_cpsat_native"])
-    row["demand_generation"]["seed"] = seed
-    row["load"]["capacity_evidence"]["prediction"] = prediction
-    row["load"].update(lambda_tasks_per_second=.9 * prediction["rate_tasks_per_second"],
-                        reference_capacity_tasks_per_second=prediction["rate_tasks_per_second"],
-                        job_count=len(case.workload["jobs"]))
-    row["window"] = window(case, "S11", stress=True)
-    canary["cases"].append(row)
+    canary = build_canary_spec(spec, cases, capacity)
     save(output / "canary_spec.json", canary)
     freeze_study(output / "canary_spec.json", output / "canary_frozen.json")
     state.update(status="PREPARED", matrix=counts, main_jobs=len(jobs), study_hash=frozen["study_hash"],
                  frozen_sha256=file_sha256(output / "frozen.json"), hardware_id=hardware_id())
     save(output / "preparation.json", state)
     return state
+
+
+def stress_canary_valid(run: dict[str, Any], full_observation: bool, metrics_match: bool) -> bool:
+    """Allow only fully recorded publication-budget failures in descriptive support stress.
+
+    This does not certify their timing/performance: they retain their failed status
+    and are withheld from performance inference. Other errors still block readiness.
+    """
+    status = run["status"]
+    return bool(metrics_match and run["final_audit"]["ok"]
+        and run["observed_seconds"] == run["scenario"]["duration"]
+        and run["max_energy_error"] < 1e-7
+        and run["source_hash_at_end"] == run["source"]["source_hash"]
+        and ((status == "SUCCESS" and full_observation)
+             or (status == "TIMING_COVERAGE_VIOLATION"
+                 and run["failure"] == "publication cost exceeded prepaid allowance")))
 
 
 def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, Any]:
@@ -334,23 +361,43 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
     save(bundle / "canary_analysis.json", report)
     reasons, arms, wall, storage = [], [], [], []
     canary_rows = {c["scenario"]["id"]: c for c in canary_frozen["cases"]}
+    stress_conditions = {c["condition"] for c in canary_frozen["cases"] if c.get("canary_scope") == "stress_budget"}
+    nominal_arms = [a for a in report["arms"] if a["condition"] not in stress_conditions]
+    expected_nominal = sum(len(c["policies"]) for c in canary_frozen["cases"]
+                           if c.get("canary_scope") != "stress_budget")
+    stress_limitations = []
     archive_cost = {}
     for entry in canary_parent["entries"]:
         suite, _ = read_json(canary_manifest.parent / entry["suite"])
         archive_cost.update({r["case_id"]: r.get("archive_wall_seconds", 0) for r in suite["runs"]})
-    if report["planned_arms"] != expected_arms or report["full_observation_arms"] != expected_arms:
+    if (report["planned_arms"] != expected_arms or len(nominal_arms) != expected_nominal
+            or sum(a["full_observation"] for a in nominal_arms) != expected_nominal):
         reasons.append("CANARY_MATRIX_INCOMPLETE")
     accepted_backends = set()
     for arm in report["arms"]:
-        if not arm["full_observation"]:
+        stress = arm["condition"] in stress_conditions
+        if not arm["full_observation"] and not stress:
             reasons.append("CANARY_PARTIAL_OR_FAILED")
         if arm["result"] is None:
+            reasons.append("CANARY_MISSING_RESULT")
             continue
         run, _ = read_json(Path(arm["result"]))
+        if stress:
+            from simulation.evaluation.analysis import analyze
+
+            audit = analyze(Path(arm["result"]))
+            if not stress_canary_valid(run, arm["full_observation"], audit["stored_metrics_match"]):
+                reasons.append("CANARY_STRESS_UNEXPECTED_FAILURE")
+            if run["status"] != "SUCCESS":
+                stress_limitations.append({"case_id": run["case_id"], "policy": run["policy"],
+                    "status": run["status"], "failure": run["failure"], "performance_inference": "WITHHELD"})
+        elif run["faults"] or run["energy"]["rescue"] > 1e-9:
+            reasons.append("CANARY_NOMINAL_FAULT_OR_RESCUE")
         replay_matches = replay(run, input_root=Path(arm["result"]).parent)["matches"]
         if not replay_matches:
             reasons.append("CANARY_REPLAY_MISMATCH")
-        if any(r.get("primary_kind") == "rh_plan" and r["accepted"] for r in run["control"]["decisions"]):
+        if not stress and any(r.get("primary_kind") == "rh_plan" and r["accepted"]
+                              for r in run["control"]["decisions"]):
             accepted_backends.add(run["policy"])
         if any(r["accepted"] and r["time"] is not None and r["time"] - r["triggered_at"] > 2 + 1e-9
                for r in run["control"]["decisions"]):
@@ -362,7 +409,9 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
         wall.append(run["wall_seconds"] * 2100 / run["scenario"]["duration"])
         storage.append(size * 2100 / run["scenario"]["duration"])
         arms.append({"case_id": run["case_id"], "policy": run["policy"], "status": run["status"],
+                     "result": arm["result"],
                      "replay_matches": replay_matches,
+                     "canary_scope": "stress_budget" if stress else "nominal_execution",
                      "wall_seconds": run["wall_seconds"] + archive_cost.get(run["case_id"], 0),
                      "duration": run["scenario"]["duration"], "bytes": size, "offered": run["offered"],
                      "family": canary_rows[run["scenario"]["id"]]["family"],
@@ -404,12 +453,15 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
               "jobs_sha256": file_sha256(bundle / "jobs.json"),
               "hardware_id": hardware_id(), "matrix": prepared["matrix"], "jobs": prepared["main_jobs"],
               "development_window_reports": len(prepared["development"]), "canary_arms": arms,
+              "nominal_canary_arms": expected_nominal, "stress_canary_arms": expected_arms - expected_nominal,
+              "stress_canary_limitations": stress_limitations,
               "budget": {"native_concurrency": 1, "per_arm_wall_limit_seconds": 900,
                          "planning_wall_hours": estimated_wall * 2 / 3600,
                          "planning_storage_bytes": estimate_bytes, "free_disk_bytes": free,
                          "scope": "policy/family/graph/fleet and offered-job scaled canary with factors2/3; "
                                   "not a guaranteed time/space bound; reserve2GB and stop between shards"},
               "main_shards_started": started_jobs,
-              "scope": "ready for the frozen synthetic study; no performance superiority or real-factory claim"}
+              "scope": "ready for nominal confirmatory cells and descriptive support stress; timing-invalid stress "
+                       "runs remain failed/withheld, never evidence of performance superiority or real-factory effect"}
     save(output, result)
     return result

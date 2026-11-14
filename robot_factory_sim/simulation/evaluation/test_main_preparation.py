@@ -159,6 +159,40 @@ def test_json_main_inputs_are_portable(main_spec: dict) -> None:
     assert restored["cases"] == main_spec["cases"]
 
 
+def test_canary_covers_all_policy_graph_classes_and_separates_stress(main_spec: dict) -> None:
+    from simulation.evaluation.main_protocol import build_canary_spec
+
+    capacity = json.loads(Path(main_spec["selection"]["capacity_receipt"]).read_text())
+    canary = build_canary_spec(main_spec, validate_spec(main_spec), capacity)
+    cases = validate_spec(canary)
+
+    def classes(rows: list[dict]) -> set[tuple[str, bool]]:
+        return {(policy, len(row["scenario"]["factory"]["nodes"]) > 128)
+                for row in rows for policy in row["policies"]}
+
+    assert classes(main_spec["cases"]) <= classes(cases)
+    assert sum(len(r["policies"]) for r in cases) == 57
+    assert sum(len(r["policies"]) for r in cases if r["canary_scope"] == "nominal_execution") == 52
+    assert {r["family"] for r in cases} == set(main_spec["main_study_design"]["conditions"][i][:3]
+                                               for i in range(20))
+    assert all(r["phase"] == "training" and not r["inferential"] for r in cases)
+
+
+def test_stress_canary_does_not_accept_unknown_errors_or_partial_physics() -> None:
+    from simulation.evaluation.main_protocol import stress_canary_valid
+
+    run = {"status": "TIMING_COVERAGE_VIOLATION", "failure": "publication cost exceeded prepaid allowance",
+           "final_audit": {"ok": True}, "observed_seconds": 300, "scenario": {"duration": 300},
+           "max_energy_error": 0, "source_hash_at_end": "source", "source": {"source_hash": "source"}}
+    assert stress_canary_valid(run, False, True)
+    assert not stress_canary_valid(run, False, False)
+    assert not stress_canary_valid({**run, "observed_seconds": 299}, False, True)
+    assert not stress_canary_valid({**run, "status": "FAILED"}, False, True)
+    assert not stress_canary_valid({**run, "failure": "DECISION_ERROR"}, False, True)
+    assert not stress_canary_valid({**run, "status": "SUCCESS"}, False, True)
+    assert stress_canary_valid({**run, "status": "SUCCESS"}, True, True)
+
+
 def test_main_registration_verifies_saved_settings(main_spec: dict, tmp_path: Path,
                                                   monkeypatch: pytest.MonkeyPatch) -> None:
     from simulation.evaluation import main_protocol

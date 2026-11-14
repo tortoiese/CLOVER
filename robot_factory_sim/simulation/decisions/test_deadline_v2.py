@@ -134,3 +134,33 @@ def test_deadline_cohort_censors_late_window_and_separates_auxiliary() -> None:
     assert summary["dispatch"]["right_censored_deadline"] == 1
     assert summary["dispatch"]["fallback_rate"] is None
     assert summary["auxiliary"]["eligible"] == 1
+
+
+def test_observation_deadline_falls_back_and_replays_without_fabricating_input(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from simulation.decisions import controller
+
+    actual_capture = controller.capture
+
+    def expired(*args: object, **kwargs: object) -> object:
+        if args[1] == "rh_milp_grid":
+            raise TimeoutError("policy observation exceeded budget")
+        return actual_capture(*args, **kwargs)
+
+    def ready_only(self: SolverProcess, command: str, *args: object, **kwargs: object) -> dict:
+        assert command == "ready", "no solver input exists after an observation timeout"
+        return {"status": "READY", "value": {}, "elapsed_seconds": 0, "peak_rss_mib": 0}
+
+    monkeypatch.setattr(controller, "capture", expired)
+    monkeypatch.setattr(SolverProcess, "request", ready_only)
+    case = joint_batch()
+    case.duration = 30
+    result = run_case(case, "rh_milp_grid", 1001, output=tmp_path, decision_settings=settings())
+    assert result["status"] == "SUCCESS", result["failure"]
+    timed_out = [r for r in result["control"]["decisions"] if r.get("capture_timeout")]
+    assert timed_out and all(r["reason"] == "OBSERVATION_BUDGET_EXCEEDED" for r in timed_out)
+    assert all(r["fallback"]["cause"] == "OBSERVATION_BUDGET_EXCEEDED" for r in timed_out)
+    assert not result["control"]["planning_inputs"]
+    monkeypatch.setattr(controller, "capture", actual_capture)
+    assert replay(result, input_root=tmp_path)["matches"]

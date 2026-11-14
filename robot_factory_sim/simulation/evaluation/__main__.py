@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import lzma
 import sys
 from pathlib import Path
 
@@ -333,7 +334,7 @@ def main(argv: list[str] | None = None) -> int:
         result = replay(read_json(args.run)[0], input_root=args.run.resolve().parent)
         print(json.dumps({key: value for key, value in result.items() if key != "result"}))
         return 0 if result["matches"] else 1
-    except (ValueError, TypeError, KeyError, OSError, EOFError) as exc:
+    except (ValueError, TypeError, KeyError, OSError, EOFError, lzma.LZMAError) as exc:
         print(json.dumps({"status": "INVALID_INPUT", "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2
 
