@@ -159,6 +159,42 @@ def test_json_main_inputs_are_portable(main_spec: dict) -> None:
     assert restored["cases"] == main_spec["cases"]
 
 
+def test_main_registration_verifies_saved_settings(main_spec: dict, tmp_path: Path,
+                                                  monkeypatch: pytest.MonkeyPatch) -> None:
+    from simulation.evaluation import main_protocol
+
+    restored = json.loads(json.dumps(main_spec))
+    restored["execution"].update(readiness_path=str((tmp_path / "readiness.json").resolve()),
+                                 require_readiness=True)
+    capacity_path = Path(restored["selection"]["capacity_receipt"])
+    capacity = json.loads(capacity_path.read_text())
+    for family in capacity["families"].values():
+        family["probes"] = []
+    monkeypatch.setattr(main_protocol, "verify_reference", lambda path: capacity)
+    cases = validate_spec(restored)
+    main_protocol.verify_main_design(restored, cases, tmp_path)
+    restored["decision_settings"]["restart_backoff_seconds"][0] = .2
+    with pytest.raises(ValueError, match="registration differs: decision_settings"):
+        main_protocol.verify_main_design(restored, cases, tmp_path)
+
+
+def test_committed_source_identity_detects_deleted_python(monkeypatch: pytest.MonkeyPatch) -> None:
+    from simulation.evaluation import study
+
+    original = study.subprocess.check_output
+
+    def with_deleted_file(args: list[str], **kwargs: object) -> object:
+        result = original(args, **kwargs)
+        if args[1] == "ls-tree":
+            result += b"100644 blob " + b"a" * 40 + b"\trobot_factory_sim/missing_at_runtime.py\0"
+        return result
+
+    monkeypatch.setattr(study.subprocess, "check_output", with_deleted_file)
+    identity = study.code_identity()
+    assert not identity["python_matches_head"]
+    assert "missing_at_runtime.py" in identity["changed_python"]
+
+
 def test_docs_only_revision_and_exploratory_descriptives(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from simulation.evaluation import study
 

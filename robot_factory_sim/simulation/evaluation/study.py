@@ -45,8 +45,10 @@ def code_identity() -> dict[str, Any]:
         tree = subprocess.check_output(["git", "ls-tree", "-rz", "HEAD", "--", "robot_factory_sim"], cwd=root)
         blobs = {row.split(b"\t", 1)[1].decode(): row.split(b" ")[2].split(b"\t")[0].decode()
                  for row in tree.split(b"\0") if row}
-        changed = []
-        for name in source_manifest()["source_hashes"]:
+        names = set(source_manifest()["source_hashes"])
+        tracked = {name.removeprefix("robot_factory_sim/") for name in blobs if name.endswith(".py")}
+        changed = sorted(tracked - names)
+        for name in sorted(names):
             data = (root / "robot_factory_sim" / name).read_bytes()
             blob = hashlib.new(algorithm, b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
             if blobs.get("robot_factory_sim/" + name) != blob:

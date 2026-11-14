@@ -179,7 +179,8 @@ def verify_main_design(spec: dict[str, Any], cases: list[dict[str, Any]], root: 
     expected = build_main_spec(capacity, capacity_path, core_layouts=spec["main_study_design"]["core_layouts"])
     expected["execution"].update(readiness_path=str((root / "readiness.json").resolve()), require_readiness=True)
     for key in ("planning_settings", "decision_settings", "analysis", "execution", "main_study_design"):
-        if spec[key] != expected[key]:
+        # JSON restores tuples (restart backoffs) as lists; compare their saved values.
+        if fingerprint(spec[key]) != fingerprint(expected[key]):
             raise ValueError("main-study registration differs: " + key)
     # Rebuild all geometry, demand and load values rather than trusting CALIBRATED labels.
     if spec["cases"] != expected["cases"]:
