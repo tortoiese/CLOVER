@@ -61,3 +61,24 @@ def test_pending_startup_at_end_replays_without_starting_new_worker() -> None:
     assert result["status"] == "SUCCESS"
     assert any(r["time"] is None for r in result["control"]["decisions"])
     assert replay(result)["matches"]
+
+
+def test_baseline_charges_after_work_with_a_queued_job_and_replays(tmp_path: Path) -> None:
+    from dataclasses import replace
+
+    from simulation.decisions.test_deadline_v2 import settings
+
+    case = examples()[4]
+    case.factory.robots = case.factory.robots[:1]
+    case.factory.robots[0].charge_threshold = 30
+    case.initial_robots = {"R0": replace(case.initial_robots["R0"], soc_pct=35)}
+    case.duration, case.warmup = 240, 0
+    case.workload = {"kind": "trace", "jobs": [
+        {"uid": f"job{i}", "at": at, "station": "S0", "allowed": ["S0"], "operation": "inspection",
+         "priority": 2, "noise": 0, "deadline": 240} for i, at in enumerate((3, 35, 140))]}
+    result = run_case(case, "baseline", 1001, output=tmp_path, decision_settings=settings())
+    assert result["status"] == "SUCCESS", result["failure"]
+    assert result["energy"]["charged"] > 0
+    assert result["faults"] == 0 and result["energy"]["rescue"] == 0
+    assert result["completed_total"] == 3
+    assert replay(result, input_root=tmp_path)["matches"]

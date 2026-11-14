@@ -112,6 +112,8 @@ def build_main_spec(capacity: dict[str, Any], capacity_path: Path, *,
         "aux_demand_repeats_per_layout": AUX_REPEATS, "development_repeats": DEV_REPEATS,
         "conditions": [c[0] for c in CONDITIONS],
         "stress_scope": "support/failure and resource-cost description; timing-invalid runs never enter performance inference",
+        "baseline_scope": "physical/recording audits remain mandatory; any reactive-policy battery faults/rescue "
+                          "are recorded service outcomes, never safety suitability evidence",
         "layout_distribution": "independent_monotone_grid_gap_uniform_0.8_1.25_v1",
         "scope": "conditional synthetic generator only; sample size is fixed, not a guaranteed power claim"}
     for phase in ("training", "validation", "heldout", "stress"):
@@ -365,7 +367,7 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
     nominal_arms = [a for a in report["arms"] if a["condition"] not in stress_conditions]
     expected_nominal = sum(len(c["policies"]) for c in canary_frozen["cases"]
                            if c.get("canary_scope") != "stress_budget")
-    stress_limitations = []
+    stress_limitations, baseline_limits = [], []
     archive_cost = {}
     for entry in canary_parent["entries"]:
         suite, _ = read_json(canary_manifest.parent / entry["suite"])
@@ -382,6 +384,9 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
             reasons.append("CANARY_MISSING_RESULT")
             continue
         run, _ = read_json(Path(arm["result"]))
+        if (run["policy"] == "baseline" and canary_rows[run["scenario"]["id"]]["family"] == "S04"
+                and run["energy"]["charged"] <= 0):
+            reasons.append("BASELINE_CHARGING_NOT_EXERCISED")
         if stress:
             from simulation.evaluation.analysis import analyze
 
@@ -392,7 +397,11 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
                 stress_limitations.append({"case_id": run["case_id"], "policy": run["policy"],
                     "status": run["status"], "failure": run["failure"], "performance_inference": "WITHHELD"})
         elif run["faults"] or run["energy"]["rescue"] > 1e-9:
-            reasons.append("CANARY_NOMINAL_FAULT_OR_RESCUE")
+            if run["policy"] == "baseline":
+                baseline_limits.append({"case_id": run["case_id"], "faults": run["faults"],
+                    "rescue_energy": run["energy"]["rescue"], "safety_recommendation": "WITHHELD"})
+            else:
+                reasons.append("CANARY_NOMINAL_FAULT_OR_RESCUE")
         replay_matches = replay(run, input_root=Path(arm["result"]).parent)["matches"]
         if not replay_matches:
             reasons.append("CANARY_REPLAY_MISMATCH")
@@ -455,6 +464,7 @@ def readiness(bundle: Path, canary_manifest: Path, output: Path) -> dict[str, An
               "development_window_reports": len(prepared["development"]), "canary_arms": arms,
               "nominal_canary_arms": expected_nominal, "stress_canary_arms": expected_arms - expected_nominal,
               "stress_canary_limitations": stress_limitations,
+              "baseline_service_limits": baseline_limits,
               "budget": {"native_concurrency": 1, "per_arm_wall_limit_seconds": 900,
                          "planning_wall_hours": estimated_wall * 2 / 3600,
                          "planning_storage_bytes": estimate_bytes, "free_disk_bytes": free,

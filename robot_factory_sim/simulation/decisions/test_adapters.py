@@ -73,3 +73,23 @@ def test_all_jobs_and_charger_insertion_order_are_preserved() -> None:
     proposal = propose(observation, dispatch=False, charge_robots=("R0",))
     assert proposal.observation == observation and len(engine.pending_tasks) == 45
     engine.close()
+
+
+def test_explicit_reactive_charge_request_precedes_new_assignment() -> None:
+    scenario = examples()[4]
+    engine = SimulationEngine(scenario.factory, "baseline", demand_source="disabled",
+                              initial_robots=scenario.initial_robots)
+    try:
+        initialize(engine)
+        robot = engine.robots["R2"]
+        robot.battery = robot.capacity * .05
+        for i in range(8):
+            engine.add_task("inspection", "S0", 2, external_uid=f"pending{i}")
+        observation = capture(engine, "baseline", "charge-before-dispatch")
+        proposal = propose(observation, charge_robots=("R2",))
+        assert any(i.kind == "charge_choice" and i.robot == "R2" for i in proposal.intents)
+        assert not any(i.kind == "assign" and i.robot == "R2" for i in proposal.intents)
+        assert any(i.kind == "assign" for i in proposal.intents)
+        assert robot.current_task is None and not robot.forced_charge
+    finally:
+        engine.close()

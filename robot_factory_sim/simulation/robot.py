@@ -392,6 +392,7 @@ class Robot:
                     yield from self._fault_process()
                     continue
                 if hasattr(self.engine.scheduler, "idle_charge_process") and self.current_task is None:
+                    self._set_state(RobotState.IDLE)
                     self._wake = self.env.event()
                     charging = yield from self.engine.scheduler.idle_charge_process(self)
                     self._wake = None

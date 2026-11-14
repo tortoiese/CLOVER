@@ -205,6 +205,14 @@ def propose(
     ):
         if key in state:
             setattr(scheduler, attribute, state[key])
+    # The robot's idle loop checks reactive charging before accepting new work.
+    # Preserve that order when charge and dispatch triggers share one observation.
+    for rid in charge_robots:
+        robot = view.robots.get(rid)
+        if robot is not None and robot.current_task is None and (
+            robot.forced_charge or scheduler.should_charge(robot, view)
+        ):
+            view.send_to_charge(robot)
     if dispatch:
         scheduler.dispatch(view)
     charging = {i.robot for i in view.intents if i.kind == "charge"}
