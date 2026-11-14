@@ -1,0 +1,64 @@
+{
+  "schema": "clover-main-source-ci-v1",
+  "commit": "2e5cf4b4a5e19ae5bb067aace5ab5e19452f7b6f",
+  "source_hash": "fac6d32ab3cbc9168b6a945344b9d699da7012f8706432c3591abdd4bfa0c3ad",
+  "url": "https://github.com/tortoiese/CLOVER/actions/runs/43600291866/attempts/2",
+  "initial_attempt": "code_ci_initial_v4.json",
+  "scope": "Four combinations passed first attempt; two GUI timing/async checks passed the failed-job retry; no source/test threshold changes",
+  "jobs": [
+    {
+      "id": 132463379436,
+      "name": "acceptance (macos-latest, 3.11)",
+      "attempt": 1,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T13:36:24.5614030Z 632 passed, 3 warnings in 187.80s (0:03:07)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132471849481,
+      "name": "acceptance (windows-latest, 3.11)",
+      "attempt": 2,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T14:11:52.2187753Z 632 passed, 3 warnings in 234.46s (0:03:54)\r",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379649,
+      "name": "acceptance (ubuntu-latest, 3.11)",
+      "attempt": 1,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T13:37:40.4227559Z 632 passed in 236.71s (0:03:56)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379663,
+      "name": "acceptance (windows-latest, 3.14)",
+      "attempt": 1,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T13:39:12.0908731Z 632 passed, 4 warnings in 281.04s (0:04:41)\r",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132471849637,
+      "name": "acceptance (macos-latest, 3.14)",
+      "attempt": 2,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T14:10:46.8378600Z 632 passed, 4 warnings in 207.49s (0:03:27)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379764,
+      "name": "acceptance (ubuntu-latest, 3.14)",
+      "attempt": 1,
+      "conclusion": "success",
+      "tests_passed": 632,
+      "summary": "2026-11-14T13:37:48.7208203Z 632 passed, 1 warning in 237.03s (0:03:57)",
+      "unhandled_thread_warnings": 0
+    }
+  ]
+}
