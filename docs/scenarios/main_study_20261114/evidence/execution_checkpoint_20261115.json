@@ -1,0 +1,167 @@
+{
+  "schema": "clover-main-operational-check-v1",
+  "checked_at": "2026-11-15T15:56:53.523366+09:00",
+  "status": "RUNNING",
+  "owner_pid": 37509,
+  "owner_create_time": 1794668406.104322,
+  "owner_alive": true,
+  "source_hash": "fac6d32ab3cbc9168b6a945344b9d699da7012f8706432c3591abdd4bfa0c3ad",
+  "study_hash": "d6c0c3ae7b523fcf314f19b0eb679907b8305813cde3396f134b7309448af441",
+  "code": {
+    "commit": "3a48b24a4e36f95694e2244b44a2bde6630d936a",
+    "python_matches_head": true,
+    "changed_python": []
+  },
+  "phases": {
+    "heldout": {
+      "planned": 894,
+      "recorded_shards": 324,
+      "terminal_shards": 324,
+      "statuses": {
+        "SUCCESS": 254,
+        "PARTIAL": 70
+      }
+    },
+    "stress": {
+      "planned": 27,
+      "recorded_shards": 0,
+      "terminal_shards": 0,
+      "statuses": {}
+    }
+  },
+  "terminal_shards": 324,
+  "planned_shards": 921,
+  "recorded_policy_results": 1398,
+  "planned_policy_results": 4020,
+  "policy_status_counts": {
+    "SUCCESS": 1325,
+    "TIMING_COVERAGE_VIOLATION": 73
+  },
+  "failure_reasons": {
+    "publication cost exceeded prepaid allowance": 73
+  },
+  "failure_groups": [
+    {
+      "family": "S00",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S02",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 5
+    },
+    {
+      "family": "S02",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 6
+    },
+    {
+      "family": "S04",
+      "policy": "baseline",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S04",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S04",
+      "policy": "rh_cpsat_native",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 4
+    },
+    {
+      "family": "S04",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S05",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S06",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S06",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 29
+    },
+    {
+      "family": "S07",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S08",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 6
+    },
+    {
+      "family": "S08",
+      "policy": "rh_cpsat_native",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S08",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S10",
+      "policy": "baseline",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S10",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 1
+    },
+    {
+      "family": "S10",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 3
+    },
+    {
+      "family": "S11",
+      "policy": "rh_cpsat_linear",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    },
+    {
+      "family": "S11",
+      "policy": "rh_milp_grid",
+      "status": "TIMING_COVERAGE_VIOLATION",
+      "count": 2
+    }
+  ],
+  "active": [],
+  "free_disk_bytes": 17632772096,
+  "frozen_source_environment_hardware_registration_match": true,
+  "within_suite_input_hash_consistency": true,
+  "recorded_energy_balance_errors": 0,
+  "new_supervisor_launched": false,
+  "policy_or_input_changes": false,
+  "scope": "operational status and integrity only; timing-invalid runs retained/withheld, no interim quality selection or shard retries"
+}
