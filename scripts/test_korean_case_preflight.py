@@ -159,7 +159,7 @@ class KoreanPreflightTest(unittest.TestCase):
         )
 
     def test_control_has_matching_sham_layout_updates(self) -> None:
-        """Layout reload side effects must occur at identical times in both arms."""
+        """Match requests; geometry-specific draining remains part of treatment."""
         cases = {}
         for condition in ("KR01_clear", "KR01_restricted"):
             entry = next(

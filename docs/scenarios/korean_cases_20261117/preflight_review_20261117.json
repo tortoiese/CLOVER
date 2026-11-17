@@ -3086,5 +3086,12 @@
   },
   "short_d1_context": "Earlier180s diagnostic briefly overlapped the last D0 reference process; not used as timing certification. The full-window canaries were serial.",
   "auxiliary_fix": "Version2 RH receipt retains a physically committed prefix; failed auxiliary requests are explicit and do not trigger a second fallback for that committed decision.",
-  "old_data_policy": "Old fac6 source, main study4020 outcomes and original recipes remain unchanged. Source groups and development reruns are not pooled as independent repeats."
+  "old_data_policy": "Old fac6 source, main study4020 outcomes and original recipes remain unchanged. Source groups and development reruns are not pooled as independent repeats.",
+  "traffic_reconfiguration_scope": {
+    "shared_control": "Same900/1200-second API requests and logical layout version updates.",
+    "treatment_specific": "Actual geometry changes can drain occupied traffic and reroute; same-width sham does not force these effects.",
+    "interpretation": "Operational reconfiguration effect, not an isolated static-width capacity effect. Request times are not guaranteed activation times.",
+    "final_width_restored_in_three_reference_runs": true,
+    "exact_activation_timestamps_claimed": false
+  }
 }
