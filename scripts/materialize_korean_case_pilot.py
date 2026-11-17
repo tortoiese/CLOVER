@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 import random
+import re
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -16,7 +17,13 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "robot_factory_sim"))
 
 from simulation.decisions.contracts import DecisionSettings
-from simulation.evaluation.scenario import Scenario, fingerprint, integer
+from simulation.evaluation.scenario import (
+    POLICIES,
+    Scenario,
+    fingerprint,
+    integer,
+    number,
+)
 from simulation.evaluation.study import source_manifest
 from simulation.path_graph import PathGraph
 from simulation.planning.contracts import Settings
@@ -43,6 +50,179 @@ PARAMETERS = {
     "cabins",
     "distributed_charging",
 }
+DEFAULT_PARAMETERS = {
+    "temporary_restriction": False,
+    "speed_mix": False,
+    "hotspot_share": 1 / 6,
+    "burst_multiplier": 1,
+    "charger_slots": 4,
+    "floors": 1,
+    "cabins": 1,
+    "distributed_charging": False,
+}
+AXIS_PARAMETER = {
+    "edge_width_at_900_to_1200": "temporary_restriction",
+    "speed_distribution_same_arithmetic_mean": "speed_mix",
+    "destination_distribution": "hotspot_share",
+    "arrival_shape_equal_realized_count": "burst_multiplier",
+    "charger_slots": "charger_slots",
+    "floor_reallocation_same_total_stations_and_robots": "floors",
+    "active_cabins": "cabins",
+    "charger_location_same_total_slots": "distributed_charging",
+}
+COMMON_KEYS = {
+    "floor_width_px",
+    "floor_height_px",
+    "robot_battery_capacity_units",
+    "robot_width_m",
+    "robot_length_m",
+    "travel_drain_units_per_m",
+    "work_drain_units_per_s",
+    "charge_rate_units_per_s_per_slot",
+    "initial_soc_pct_range",
+    "process_time_mean_s",
+    "process_time_std_s",
+    "edge_width_m",
+    "elevator_floor_travel_s",
+    "elevator_door_s",
+}
+FAMILY_KEYS = {
+    "id",
+    "source_id",
+    "robots",
+    "arrival_rate_tasks_per_s",
+    "urgent_fraction",
+    "deadline_slack_s",
+    "urgent_slack_s",
+    "battery_capacity_units",
+    "charge_rate_units_per_s_per_slot",
+    "controlled_edge_width_m",
+}
+
+
+def validate_design(design: dict[str, Any], sources: dict[str, Any]) -> None:
+    """Reject invalid values and undeclared multiple-factor comparisons early."""
+    if (
+        design.get("schema") != "clover-korean-case-design-v2"
+        or design.get("all_numeric_inputs_are_synthetic") is not True
+    ):
+        raise ValueError("explicit synthetic pilot v2 design required")
+    seeds, policies = design["seeds"], design["policies"]
+    if not seeds or len(seeds) != len(set(seeds)):
+        raise ValueError("unique nonempty demand seeds required")
+    for seed in seeds:
+        integer(seed, "demand seed")
+    if (
+        not policies
+        or len(policies) != len(set(policies))
+        or any(p not in POLICIES for p in policies)
+    ):
+        raise ValueError("unique supported policies required")
+    duration = number(design["duration"], "duration", 0.001, 86400)
+    warmup = number(design["warmup"], "warmup", 0, duration)
+    if warmup >= duration:
+        raise ValueError("warmup must precede observation end")
+    Settings(**design["rh_settings"]).validate()
+    if design["rh_settings"].get("timing_mode", "D0") != "D0":
+        raise ValueError(
+            "D1 uses decision settings; prototype RH D1 is unsupported here"
+        )
+    DecisionSettings(**design["d1_settings"]).validate()
+    common = design["common"]
+    if set(common) != COMMON_KEYS:
+        raise ValueError("unknown or missing common input key")
+    for key, value in common.items():
+        if key != "initial_soc_pct_range":
+            number(value, key, 0 if key == "process_time_std_s" else 0.000001)
+    low, high = common["initial_soc_pct_range"]
+    number(low, "initial SOC lower", 0, 100)
+    number(high, "initial SOC upper", low, 100)
+    families = {f["id"]: f for f in design["families"]}
+    if len(families) != len(design["families"]) or not families:
+        raise ValueError("unique nonempty families required")
+    source_ids = {s["id"] for s in sources["sources"]}
+    for family in families.values():
+        if set(family) - FAMILY_KEYS:
+            raise ValueError("unknown family input key")
+        if family["source_id"] not in source_ids:
+            raise ValueError("every family needs an established source id")
+        integer(family["robots"], "robots", 1, 64)
+        number(family["arrival_rate_tasks_per_s"], "arrival rate", 0.000001, 100)
+        number(family["urgent_fraction"], "urgent fraction", 0, 1)
+        for key in (
+            "deadline_slack_s",
+            "urgent_slack_s",
+            "battery_capacity_units",
+            "charge_rate_units_per_s_per_slot",
+            "controlled_edge_width_m",
+        ):
+            if key in family:
+                number(family[key], key, 0.000001)
+        if "controlled_edge_width_m" in family and not (
+            warmup < 900 and 1200 < duration
+        ):
+            raise ValueError(
+                "control and sham updates must be inside measurement window"
+            )
+    rows = {c["id"]: c for c in design["conditions"]}
+    if not rows or len(rows) != len(design["conditions"]):
+        raise ValueError("unique nonempty conditions required")
+    for condition in rows.values():
+        family_id, params = condition["family"], condition["parameters"]
+        if family_id not in families or set(params) - PARAMETERS:
+            raise ValueError("unknown family or parameter")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,40}", condition["id"]):
+            raise ValueError(
+                "condition id must be a safe identifier of at most40 characters"
+            )
+        p = {**DEFAULT_PARAMETERS, **params}
+        for key in ("temporary_restriction", "speed_mix", "distributed_charging"):
+            if type(p[key]) is not bool:
+                raise ValueError(key + " must be boolean")
+        integer(p["floors"], "floors", 1, 3)
+        integer(p["cabins"], "cabins", 1, 2)
+        integer(p["charger_slots"], "charger slots", 1, 64)
+        number(p["hotspot_share"], "hotspot share", 0, 1)
+        number(p["burst_multiplier"], "burst multiplier", 1, 9.999999)
+        if p["speed_mix"] and families[family_id]["robots"] % 4:
+            raise ValueError("speed mix requires complete four-speed groups")
+        if p["distributed_charging"] and p["floors"] != 3:
+            raise ValueError("three-slot distributed charging requires three floors")
+        if p["temporary_restriction"] and not (warmup < 900 and 1200 < duration):
+            raise ValueError(
+                "restriction and recovery must be inside measurement window"
+            )
+        if p["temporary_restriction"] and p["floors"] != 1:
+            raise ValueError(
+                "restriction target is defined only on the single-floor map"
+            )
+        if (
+            p["temporary_restriction"]
+            and "controlled_edge_width_m" not in families[family_id]
+        ):
+            raise ValueError("restriction requires matching sham control updates")
+        parent_id, axis = condition["compare_to"], condition["changed_axis"]
+        if parent_id is None:
+            if axis is not None:
+                raise ValueError("anchor cannot declare a comparison axis")
+            continue
+        if (
+            parent_id not in rows
+            or rows[parent_id]["family"] != family_id
+            or parent_id == condition["id"]
+        ):
+            raise ValueError("comparison needs a distinct parent in the same family")
+        old = {**DEFAULT_PARAMETERS, **rows[parent_id]["parameters"]}
+        delta = {k for k in p if p[k] != old[k]}
+        if axis not in AXIS_PARAMETER or delta != {AXIS_PARAMETER[axis]}:
+            raise ValueError("comparison must change exactly its declared axis")
+    for start in rows:
+        seen, current = set(), start
+        while current is not None:
+            if current in seen:
+                raise ValueError("comparison parent cycle")
+            seen.add(current)
+            current = rows[current]["compare_to"]
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -76,7 +256,9 @@ def factory_for(
         RobotConfig(
             f"R{i}",
             move_speed=1.05,
-            battery_capacity=common["robot_battery_capacity_units"],
+            battery_capacity=family.get(
+                "battery_capacity_units", common["robot_battery_capacity_units"]
+            ),
             battery_drain_rate=common["travel_drain_units_per_m"],
             width=common["robot_width_m"],
             length=common["robot_length_m"],
@@ -97,12 +279,10 @@ def factory_for(
         base = 100 * floor
         if floors == 1:
             nodes.extend(
-                PathNodeConfig(
-                    base + i + 1, x, 200, "intersection" if i == 1 else "waypoint"
-                )
+                PathNodeConfig(base + i + 1, x, 200, "waypoint")
                 for i, x in enumerate((100, 300, 500))
             )
-            link(base + 1, base + 2)
+            link(base + 1, base + 2, family.get("controlled_edge_width_m"))
             link(base + 2, base + 3)
             coordinates = [(x, y) for y in (100, 300) for x in (100, 300, 500)]
         else:
@@ -152,7 +332,10 @@ def factory_for(
                 300,
                 350,
                 capacity=slots,
-                charge_rate=common["charge_rate_units_per_s_per_slot"],
+                charge_rate=family.get(
+                    "charge_rate_units_per_s_per_slot",
+                    common["charge_rate_units_per_s_per_slot"],
+                ),
                 floor=floor,
                 is_active=active,
             )
@@ -278,11 +461,7 @@ def materialize(output: Path) -> dict[str, Any]:
     """Build a new input directory and retain hashes, treatments and limitations."""
     design = json.loads((DATA / "design.json").read_text(encoding="utf-8"))
     sources = json.loads((DATA / "sources.json").read_text(encoding="utf-8"))
-    if (
-        design["schema"] != "clover-korean-case-design-v1"
-        or not design["all_numeric_inputs_are_synthetic"]
-    ):
-        raise ValueError("explicit synthetic pilot design required")
+    validate_design(design, sources)
     seeds = design["seeds"]
     if len(seeds) != len(set(seeds)) or not seeds:
         raise ValueError("unique nonempty demand seeds required")
@@ -306,12 +485,14 @@ def materialize(output: Path) -> dict[str, Any]:
     output.mkdir(parents=True, exist_ok=False)
     (output / "inputs").mkdir()
     manifest = {
-        "schema": "clover-korean-case-pilot-v1",
+        "schema": "clover-korean-case-pilot-v2",
         "status": design["status"],
         "source_hash": source_manifest()["source_hash"],
         "generator_sha256": file_sha(Path(__file__)),
         "design_sha256": file_sha(DATA / "design.json"),
         "sources_sha256": file_sha(DATA / "sources.json"),
+        "design_content_hash": fingerprint(design),
+        "sources_content_hash": fingerprint(sources),
         "policies": design["policies"],
         "entries": [],
         "source_claim": "case-inspired synthetic; not a site replica",
@@ -338,11 +519,22 @@ def materialize(output: Path) -> dict[str, Any]:
                 [
                     {"at": t, "kind": "edge_width", "target": "1", "value": width}
                     for t, width in (
-                        (900, 1.3),
-                        (1200, design["common"]["edge_width_m"]),
+                        (
+                            900,
+                            1.3
+                            if params.get("temporary_restriction")
+                            else family["controlled_edge_width_m"],
+                        ),
+                        (
+                            1200,
+                            family.get(
+                                "controlled_edge_width_m",
+                                design["common"]["edge_width_m"],
+                            ),
+                        ),
                     )
                 ]
-                if params.get("temporary_restriction")
+                if "controlled_edge_width_m" in family
                 else []
             )
             case = Scenario.from_dict(
@@ -427,8 +619,21 @@ def materialize(output: Path) -> dict[str, Any]:
                 and old["initial_robots"] != new["initial_robots"]
             ):
                 raise ValueError("treatment changed initial robot state")
-    write_json(output / "rh_settings.json", design["rh_settings"])
-    write_json(output / "d1_settings.json", design["d1_settings"])
+    write_json(output / "rh_settings.json", asdict(Settings(**design["rh_settings"])))
+    write_json(
+        output / "d1_settings.json", DecisionSettings(**design["d1_settings"]).to_dict()
+    )
+    write_json(output / "design.json", design)
+    write_json(output / "sources.json", sources)
+    manifest["support_files"] = {
+        name: file_sha(output / name)
+        for name in (
+            "rh_settings.json",
+            "d1_settings.json",
+            "design.json",
+            "sources.json",
+        )
+    }
     manifest["planned_policy_runs_per_timing_mode"] = len(manifest["entries"]) * len(
         manifest["policies"]
     )

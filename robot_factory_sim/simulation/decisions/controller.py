@@ -334,7 +334,9 @@ class DecisionScheduler(BaseScheduler):
                         )
                         snapshot = None
                         if self.name in ALL_RH_BACKENDS and dispatch and engine.pending_tasks:
-                            from simulation.planning.snapshot import capture as capture_rh
+                            from simulation.planning.snapshot import (
+                                capture as capture_rh,
+                            )
 
                             snapshot = capture_rh(engine, self.math, row["token"])
                         return observation, snapshot
@@ -493,14 +495,11 @@ class DecisionScheduler(BaseScheduler):
                                     return staged is not None, reason
 
                                 def publish_rh() -> dict[str, Any]:
-                                    receipt = admission.publish_rh(engine, value, observation)
-                                    if receipt["accepted"]:
-                                        auxiliary_receipt = admission.publish(engine, auxiliary, self.approved_charge)
-                                        receipt["auxiliary"] = auxiliary_receipt
-                                        receipt["accepted"] &= auxiliary_receipt["accepted"]
-                                        if not receipt["accepted"]:
-                                            receipt["reason"] = "PARTIAL_AUXILIARY: " + auxiliary_receipt["reason"]
-                                        self._notify(charges, targets, auxiliary_receipt["accepted"])
+                                    receipt = admission.publish_rh_with_auxiliary(
+                                        engine, value, observation, auxiliary, self.approved_charge
+                                    )
+                                    if receipt.get("primary_accepted"):
+                                        self._notify(charges, targets, receipt["auxiliary_accepted"])
                                     return receipt
 
                                 receipt = yield from self._admit_process(ledger, row, prepare_rh, publish_rh)

@@ -1,5 +1,12 @@
 # 다중 알고리즘 구현과 D1 지연 적용 범위
 
+2026-11-17 수정: staged D1의 RH prefix가 이미 commit된 뒤 보조 충전 intent가 stale이면,
+`clover-rh-publication-receipt-v2`의 `accepted`/`primary_accepted`는 실제 prefix 반영을 뜻한다.
+보조 요청은 `auxiliary_accepted=false`와 `COMMITTED_AUXILIARY_DEFERRED`로 별도 기록하고
+기다리던 호출자에게 거부를 통지한다. 이미 반영한 prefix를 전체 실패로 집계하거나 그 결정의
+fallback을 다시 실행하지 않는다. 과거 소스의 `PARTIAL_AUXILIARY` 결과를 이 의미로 소급 해석하지 않는다.
+기본 정책·목적·가중치·시간 예산은 그대로다. [한국 사례 후속 검수](../docs/scenarios/korean_cases_20261117/PREFLIGHT_REVIEW_20261117.md)를 따른다.
+
 2026-11-13 추가: [D1_STARTUP.md](D1_STARTUP.md)의 새 공통 controller로 일곱 정책 모두 staged D1을 지원한다.
 아래 표와 D1 시범 설명은 별도로 보존한 기존 D0/v4 경로에 관한 것이다. 신규 v5와 혼합 집계하지 않는다.
 

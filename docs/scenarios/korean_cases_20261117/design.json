@@ -1,5 +1,5 @@
 {
-  "schema": "clover-korean-case-design-v1",
+  "schema": "clover-korean-case-design-v2",
   "status": "DEVELOPMENT_PILOT_NOT_REGISTERED_CONFIRMATORY",
   "seeds": [2026111701, 2026111702, 2026111703],
   "policies": ["baseline", "optimized", "rh_milp_grid", "rh_cpsat_linear"],
@@ -12,12 +12,12 @@
     "travel_drain_units_per_m": 0.1, "work_drain_units_per_s": 0.1,
     "charge_rate_units_per_s_per_slot": 0.5, "initial_soc_pct_range": [60, 80],
     "process_time_mean_s": 8, "process_time_std_s": 0,
-    "edge_width_m": 2.2, "elevator_floor_travel_s": 4, "elevator_door_s": 6
+    "edge_width_m": 5.0, "elevator_floor_travel_s": 4, "elevator_door_s": 6
   },
   "families": [
-    {"id": "KR01", "source_id": "HTS_SEOSAN", "robots": 4, "arrival_rate_tasks_per_s": 0.08, "urgent_fraction": 0.05, "deadline_slack_s": 150, "urgent_slack_s": 75},
+    {"id": "KR01", "source_id": "HTS_SEOSAN", "robots": 4, "arrival_rate_tasks_per_s": 0.08, "controlled_edge_width_m": 2.2, "urgent_fraction": 0.05, "deadline_slack_s": 150, "urgent_slack_s": 75},
     {"id": "KR02", "source_id": "LG_CHANGWON", "robots": 8, "arrival_rate_tasks_per_s": 0.16, "urgent_fraction": 0.05, "deadline_slack_s": 150, "urgent_slack_s": 75},
-    {"id": "KR03", "source_id": "CJ_GUNPO", "robots": 8, "arrival_rate_tasks_per_s": 0.16, "urgent_fraction": 0.15, "deadline_slack_s": 120, "urgent_slack_s": 45},
+    {"id": "KR03", "source_id": "CJ_GUNPO", "robots": 8, "arrival_rate_tasks_per_s": 0.08, "battery_capacity_units": 60, "charge_rate_units_per_s_per_slot": 0.25, "urgent_fraction": 0.15, "deadline_slack_s": 120, "urgent_slack_s": 45},
     {"id": "KR04", "source_id": "NAVER_1784", "robots": 6, "arrival_rate_tasks_per_s": 0.06, "urgent_fraction": 0.10, "deadline_slack_s": 240, "urgent_slack_s": 120}
   ],
   "conditions": [

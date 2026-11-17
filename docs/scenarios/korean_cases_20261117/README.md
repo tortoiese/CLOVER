@@ -2,6 +2,8 @@
 
 한국 소재 현장의 공개 운영 사례를 조사해 **4가족·12조건·3수요seed = 36개의 실행 가능한 합성 입력**으로 구성했다. 공통 비교 정책4개로 실행하면 **시간 모드당144회**다. 제조 사례2가족과 비제조 확장2가족을 별도로 해석한다. 이번 입력은 개발 파일럿이며, 완료된4,020회 본 실험의 입력/결과를 변경하거나 그 표본에 합치지 않는다.
 
+추가 검수에서 초기v1의 중앙 교차점 병목과 충전 미발생을 확인해 현재 recipe/manifest를 **v2**로 수정했다. [수정 후 검수](PREFLIGHT_REVIEW_20261117.md)와 [기계 근거](preflight_review_20261117.json)를 먼저 읽는다. 기존 `verification.json`은 최초v1의 짧은 기능 검사 기록으로 보존하며 현재v2 성능 검증으로 해석하지 않는다.
+
 공개 자료로 확인한 것은 운영 방식이다. 아래 로봇 수·지도·폭·속도·도착률·납기·충전/SOC 수치는 모두 연구용 가정이며 실제 업체 제원이나 측정 trace가 아니다. 자료에 없는 긴급 주문·충전 부족·수요 집중을 해당 현장의 실제 문제라고 주장하지 않는다. 공급자 발표의 생산성 향상 수치를 MILP/CP-SAT의 기대 개선율로 사용하지 않는다.
 
 ## 1. 실제 사례에서 가져온 것
@@ -21,12 +23,12 @@
 
 | 조건 | 층/로봇 | 직전 대조 조건 | 변경 내용 |
 |---|---|---|---|
-| `KR01_clear` | 1층/4대 | 기준 | 2.2m 공유 통로, 수요0.08건/s |
+| `KR01_clear` | 1층/4대 | 기준 | 2.2m 공유 통로, 수요0.08건/s. 같은900/1200초에 원래 폭을 재적용하는 sham 갱신 |
 | `KR01_restricted` | 1층/4대 | clear | t=900~1200s에 지정 통로 하나를2.2→1.3m로 축소 후 복원 |
 | `KR02_uniform` | 1층/8대 | 기준 | 속도1.05m/s, 목적지6곳 균등, 수요0.16건/s |
 | `KR02_speed_mix` | 1층/8대 | uniform | 속도0.6/0.9/1.2/1.5m/s 각2대. 산술평균1.05m/s 유지 |
 | `KR02_hotspot` | 1층/8대 | uniform | 한 목적지 선택 확률70%, 나머지5곳에 나머지 분배 |
-| `KR03_smooth` | 1층/8대 | 기준 | 수요0.16건/s, 긴급 비중15%, 충전4슬롯 |
+| `KR03_smooth` | 1층/8대 | 기준 | 수요0.08건/s, 긴급 비중15%, 배터리60unit, 슬롯당0.25unit/s, 충전4슬롯 |
 | `KR03_burst4` | 1층/8대 | smooth | 실제 총 작업 수/속성은 유지하고 측정창45~55% 구간에 기대 도착 강도4배 |
 | `KR03_burst4_slot1` | 1층/8대 | burst4 | 같은 장소·슬롯당 충전율에서 슬롯4→1 |
 | `KR04_2f_cabin1` | 2층/6대 | 기준 | 목적지 총6곳, 활성 캐빈1개, 충전3슬롯 모두1층 |
@@ -38,7 +40,9 @@
 
 - 1px=0.1m. 층별 외곽은600×400px=60×40m이며 실제 현장 도면이 아니다. 통로/목적지 점유가 이 외곽 면적 전체를 쓰는 것은 아니다.
 - 기본 관측은2,100초(준비300초+측정1,800초). 긴급 비중은 입력 확률이며 실제 긴급 작업 수는 seed별로 다르다.
-- 배터리100unit, 이동0.1unit/m·작업0.1unit/s, 초기SOC60~80%를 seed별로 고정. 충전율0.5unit/s/점유 슬롯. Wh나 비용으로 환산하지 않는다.
+- 기본 배터리100unit, 이동0.1unit/m·작업0.1unit/s, 초기SOC60~80%를 seed별로 고정. 기본 충전율0.5unit/s/점유 슬롯. KR03 세 조건은 모두 배터리60unit·충전율0.25unit/s/점유 슬롯으로 고정해 유한 창 안의 충전 경쟁을 관찰한다. Wh나 비용으로 환산하지 않는다.
+- 공통 통로 폭은5.0m, KR01의 지정 통로 하나는2.2m에서 시작한다. 단층 중앙은 waypoint이며 전체 흐름을 한 번에1대로 제한하던 초기v1의 intersection 슬롯을 제거했다. KR01 복원 폭은 원래2.2m다. 이 지도는 실제 안전 동선 도면이나 충돌 회피 검증이 아니다.
+- KR01 비교군에도900/1200초의 동일한 레이아웃 갱신을 넣었다. 폭 변경 때 발생하는 계획 무효화/재대기 효과를 양쪽에 동일하게 주고, 첫 갱신의 폭1.3/2.2m만 다르게 한다.
 - 서비스 시간 평균8초·표준편차0. 입력의 `inspection`은 현행 엔진의 공통 서비스 태그다. 실제 공정 검사를 재현했다는 뜻이 아니다. 현재 작업은 로봇 현재 위치에서 목적지로 이동해 서비스를 수행하며, 고정 창고에서 매번 적재하는 pickup-delivery 모델이 아니다.
 - KR01/KR02의 일반/긴급 납기 여유150/75초, KR03은120/45초, KR04는240/120초다. 모두 `도착시각 + 입력 slack`으로 만들고 정책 완료시간을 사용하지 않는다.
 - 도착률은 **미보정 절대 가정값**이다. 실제 수요나 포화 비율로 부르지 않으며, 후속 개발용 참조 용량/기전 확인 뒤 새 실험으로 고정해야 한다.
@@ -79,30 +83,37 @@ python -B scripts/materialize_korean_case_pilot.py \
   --output /tmp/clover-korean-pilot-20261117
 ```
 
-`manifest.json`에 입력36개의 상대 경로·seed·파일/내용/trace hash·출처 ID·대조축·경로 검사 수·실험 소스 hash를 기록한다. 같은 코드/recipe는 같은 바이트를 만든다. 생성된 원본 전체는 Git에 넣지 않고 이 recipe와 검증 영수증을 공유한다.
+`manifest.json`에 입력36개의 상대 경로·seed·파일/내용/trace hash·출처 ID·대조축·경로 검사 수·실험 소스 hash를 기록한다. v2는 전체 math/decision 설정과 recipe/출처 사본의 byte hash도 잠근다. 같은 코드/recipe는 같은 바이트를 만든다. 생성된 원본 전체는 Git에 넣지 않고 이 recipe와 검증 영수증을 공유한다.
 
-먼저 사례1개·수요1seed의 D0 기전 실험을 실행하는 예:
+입력 검수 명령은 solver를 실행하지 않는다. v1 묶음·파일 변경·비교축 오류·소스 불일치·중복/누락 condition/seed를 거부한다.
 
 ```bash
-cd robot_factory_sim
-PYTHONPATH=. QT_QPA_PLATFORM=offscreen CLOVER_RAG_ENABLED=0 CLOVER_RAG_ALLOW_NETWORK=0 \
-python -B -m simulation.evaluation suite \
-  --scenario /tmp/clover-korean-pilot-20261117/inputs/KR01_restricted_2026111701.json \
-  --seeds 2026111701 \
-  --policies baseline optimized rh_milp_grid rh_cpsat_linear \
-  --rh-settings /tmp/clover-korean-pilot-20261117/rh_settings.json \
-  --run-wall-limit 900 --suite-wall-limit 3600 \
-  --output /tmp/clover-kr01-d0
+python -B scripts/audit_korean_case_pilot.py \
+  --bundle /tmp/clover-korean-pilot-20261117 \
+  --output /tmp/clover-kr-audit.json
 ```
 
-36입력을 전부 실행하려면 manifest를 seed별로 묶어 **seed당12입력×정책4개**를 각각 새 suite 출력에 실행한다. D0는 계산 중 공장 진행 비용을 넣지 않은 기전 비교다. D1 진단은 위 명령에 `--decision-settings /tmp/clover-korean-pilot-20261117/d1_settings.json`을 추가하고 다른 출력 경로를 사용한다. D1의 시간 검증 실패를 보존하며 D0와 합산하지 않는다. 기존 publication 시간 문제가 해결·재검증되기 전 이 설계를 새 본 실험 READY라고 부르지 않는다.
+개발 실행은 stage를 명시한다. 아래는 사전 고정 순서의 입력1개×4정책이며 각 입력에 등록된 seed를 정확히 한 번 사용한다. 출력은 기존에 없는 디렉터리여야 한다.
+
+```bash
+QT_QPA_PLATFORM=offscreen CLOVER_RAG_ENABLED=0 CLOVER_RAG_ALLOW_NETWORK=0 \
+python -B scripts/audit_korean_case_pilot.py \
+  --bundle /tmp/clover-korean-pilot-20261117 \
+  --stage d0-pilot --limit 1 --output /tmp/clover-kr-d0-pilot
+```
+
+검수 후36입력을 모두 실행하려면 `--limit 36`을 사용한다. XZ 압축·출력 여유2GB·source/설정 재확인·정책당900초/입력당3600초·checkpoint를 적용한다. `batch.json`은 미실행까지 포함한36입력/144정책 분모를 남긴다. 실패가 있는 suite도 그대로 기록하며 기존 출력이나 실패를 덮어쓰지 않는다. 이 개발 실행기는 이어쓰기/성공할 때까지 재시도를 제공하지 않는다.
+
+D0는 계산 중 공장 진행 비용을 넣지 않은 기전 비교다. 별도 D1 진단은 `--stage d1-diagnostic`과 다른 출력 경로를 사용한다. 짧은 canary가 통과해도 장시간/다른 조건의 timing 지원이 확정되지는 않는다. D1 시간 실패를 보존하고 D0와 합산하지 않으며, 본 실험 READY나 정책 우세를 자동으로 판정하지 않는다. 호스트 ID·환경도 기록하며 다른 PC의 결정 지연을 같은 조건으로 합치지 않는다. D1은 다른 시뮬레이션과 동시에 실행하지 않는다.
+
+이 개발 실행기끼리는 호스트 단위 잠금으로 동시에 시작하지 못하게 한다. 이미 반영한 RH 계획의 보조 충전 실패를 구분하는 새 receipt를 사용하므로, source가 다른 이전 실험과 수락률/성능을 합치지 않는다. 조건 간 납기율은 도착시각 변형으로 분모가 달라질 수 있다. 정책 비교는 같은 조건의 고정 due UID를 사용하고, 조건 간 비교는 공통 due UID 결과도 함께 확인한다.
 
 입력 계약 검사:
 
 ```bash
-python -B -m unittest discover -s scripts -p test_korean_case_pilot.py -v
+python -B -m unittest discover -s scripts -p 'test_korean_case*.py' -v
 ```
 
-검수 상태와 실행한 짧은 기능 검사는 [검증 영수증](verification.json)을 따른다. 짧은 검사는 입력을 줄인 별도 D0 기능 확인이며, 원본2,100초·144회 성능 실험의 완료를 뜻하지 않는다.
+현재 검수는 [수정 후 검수](PREFLIGHT_REVIEW_20261117.md)를 따른다. [최초v1 기능 검사](verification.json)는 이전 조건의240초·별도 작은 RH 설정 기록이다. 개발용 참조 진단과 canary를 원본144회 RH 비교 완료나 통계적 우세로 세지 않는다.
 
-[생성 스크립트](../../../scripts/materialize_korean_case_pilot.py), [설계값](design.json), [기존 본 실험 결과와 후속 설계](../../MAIN_STUDY_RESULTS_AND_SCENARIO_PLAN_20261117.md), [전체 PRD](../../PRD_ALGORITHM_EXPERIMENTS_v2.md).
+[생성 스크립트](../../../scripts/materialize_korean_case_pilot.py), [검수·개발 실행기](../../../scripts/audit_korean_case_pilot.py), [설계값](design.json), [기존 본 실험 결과와 후속 설계](../../MAIN_STUDY_RESULTS_AND_SCENARIO_PLAN_20261117.md), [전체 PRD](../../PRD_ALGORITHM_EXPERIMENTS_v2.md).
