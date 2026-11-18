@@ -95,8 +95,13 @@ def test_gui_policy_activation_async_solver_and_clean_shutdown(tmp_path: Path, m
         wait_until(lambda: window._state.mode == mode)
         assert window._state.sim_time == 0
         assert mode in window._state.active_policies
-        window._worker.send_command(ActionKind.SET_SPEED, {"speed": 5})
+        # A cold request may take up to five wall seconds. At 5x that advances
+        # beyond this 12-second horizon, so safe fallback can finish the only
+        # job before any plan is accepted. Test acceptance at real-time speed;
+        # expiry and fallback are covered separately with controlled plant time.
+        window._worker.send_command(ActionKind.SET_SPEED, {"speed": 1})
         window._worker.send_command(ActionKind.START)
+        wait_until(lambda: window._state.planning[mode]["accepted"] >= 1, timeout=12)
         wait_until(lambda: window._state.engine_kpis.get(mode, {}).get("completed_units", 0) >= 1, timeout=12)
         assert window._state.planning[mode]["accepted"] >= 1, window._state.planning[mode]
         assert "교통" in window._factory._mode.text()

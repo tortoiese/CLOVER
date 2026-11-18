@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any
 
-import numpy as np
 import pytest
 
 from database.seed_data import build_default_config
@@ -122,6 +121,34 @@ def test_solver_without_incumbent_does_not_fabricate_schedule(monkeypatch: Any) 
     engine.scheduler.dispatch(engine)
     assert task.robot_id is None
     assert engine.scheduler.solve_records == [{"status": 1, "gap": None}]
+
+
+def test_milp_reuses_energy_estimates_only_within_one_dispatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Repeated jobs share robot/station facts, but a later dispatch observes them again."""
+    from collections import Counter
+    from types import SimpleNamespace
+
+    engine = SimulationEngine(build_default_config(), demand_source="external")
+    engine.env.run(until=.1)
+    scheduler = RollingMilpScheduler(horizon=300)
+    engine.scheduler = scheduler
+    for _ in range(8):
+        engine.add_task("A", "WS-01", 2, ("WS-01", "WS-02"))
+    calls: Counter[tuple[str, str]] = Counter()
+    original = scheduler._energy_needed
+
+    def measured(robot: Any, plant: Any, station_id: str, distance: float) -> float:
+        calls[robot.robot_id, station_id] += 1
+        return original(robot, plant, station_id, distance)
+
+    monkeypatch.setattr(scheduler, "_energy_needed", measured)
+    monkeypatch.setattr(milp_scheduler, "milp", lambda *args, **kwargs: SimpleNamespace(status=1, x=None, mip_gap=None))
+    scheduler._dispatch(engine, engine.robot_list())
+    assert calls and set(calls.values()) == {1}
+    first = calls.copy()
+    engine.robot_list()[0].cfg.move_speed *= .5
+    scheduler._dispatch(engine, engine.robot_list())
+    assert calls == Counter({key: value * 2 for key, value in first.items()})
 
 
 def test_energy_meter_includes_partial_movement_once() -> None:

@@ -14,7 +14,8 @@ from threading import Thread
 from typing import TYPE_CHECKING, Any
 
 from simulation.decisions.admission import publish_rh
-from simulation.decisions.observation import capture as observe
+from simulation.decisions.contracts import Observation
+from simulation.decisions.observation import capture_rh_cohort as observe
 from simulation.planning.contracts import (
     PreparedInput,
     Report,
@@ -132,7 +133,7 @@ class LiveRollingHorizonScheduler(RollingHorizonScheduler):
     def __init__(self, backend: str, settings: Settings) -> None:
         super().__init__(settings=settings, backend=backend)
         self.worker = LiveSolverProcess()
-        self.pending_observation: Any = None
+        self.pending_observation: Observation | None = None
         self.last_result: Result | None = None
         self.last_execution = "WAITING"
         self.serial = 0
