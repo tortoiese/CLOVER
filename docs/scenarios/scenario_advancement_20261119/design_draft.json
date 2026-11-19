@@ -2,6 +2,9 @@
   "schema": "clover-scenario-advancement-design-draft-v1",
   "written_on": "2026-11-19",
   "timezone": "Asia/Seoul",
+  "document_version": "0.2",
+  "owner": "강재민",
+  "separate_scenario_teammate": false,
   "status": "PLAN_ONLY_NOT_EXECUTABLE",
   "execution_allowed": false,
   "accepted_by_current_materializer": false,
@@ -10,6 +13,7 @@
   "inference_allowed_in_m2_m3": false,
   "reference": {
     "documentation_head_before_plan": "a561bfd",
+    "revision_baseline_commit": "28da044",
     "previous_execution_commit": "b18ecb14a0b65405a58a87cac2bd35b7b2ecaef9",
     "previous_source_hash": "0f735f9e688fde917db590b25b049c743c17d2490fa68016102bdb54e8645944",
     "previous_design_path": "docs/scenarios/korean_cases_20261117/design.json",
@@ -22,6 +26,20 @@
     "input_manifest_sha256": null,
     "hardware_id": null,
     "readiness_receipt": null
+  },
+  "static_scope_required": {
+    "interventions": [],
+    "layout_changes_during_run_allowed": false,
+    "db_gui_hot_reload_allowed": false,
+    "factory_fixed_before_each_run": true,
+    "static_corridor_capacity_occupancy_route_audit_required": true,
+    "dynamic_reconfiguration_fix_required_for_m1_m2_m3": false
+  },
+  "deferred_dynamic_reconfiguration": {
+    "status": "KNOWN_UNRESOLVED_EXCLUDED_FROM_CURRENT_SCOPE",
+    "existing_failed_runs_preserved": 12,
+    "fix_and_regression_required_before_enabling": true,
+    "static_scope_same_error_requires_investigation": true
   },
   "gates": {
     "G0_RELIABILITY": "NOT_RUN",
@@ -152,11 +170,9 @@
     "d1_inputs": [
       "ADV_L06_C4_A1",
       "ADV_L10_C2_A4",
-      "ADV_L13_C1_A4",
-      "regenerated_KR01_restricted",
-      "regenerated_KR04_3f_distributed"
+      "ADV_L13_C1_A4"
     ],
-    "d1_policy_runs": 20,
+    "d1_policy_runs": 12,
     "d0_input_count": 2,
     "d0_policy_runs": 8,
     "scope": "technical only; excluded from M2/M3 and independent performance samples"
@@ -642,11 +658,11 @@
     "selected": false
   },
   "planned_counts": {
-    "m1_operational_runs": 28,
+    "m1_operational_runs": 20,
     "m2_operational_runs": 360,
     "m3_operational_runs": 240,
-    "required_operational_runs": 628,
-    "with_optional_long_window_operational_runs": 652,
+    "required_operational_runs": 620,
+    "with_optional_long_window_operational_runs": 644,
     "optional_snapshot_calls_separate": 72,
     "confirmatory_runs": null
   },
@@ -672,6 +688,8 @@
   },
   "restrictions": [
     "This is a documentation design matrix, not an input accepted by the current runtime CLI.",
+    "One owner performs scenario design, implementation and evaluation; no teammate handoff is assumed.",
+    "M1/M2/M3 use static layouts; dynamic changes and hot reload are excluded, not fixed or certified.",
     "No new simulator or solver execution is authorized by a READY flag in this draft.",
     "Five demand seeds are exploratory, below the existing ten-pair inference gate.",
     "Each validation layout has distinct demand seeds; same input seeds per policy are intentional.",
