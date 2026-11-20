@@ -64,7 +64,7 @@
     "run_wall_seconds": 900,
     "job_wall_seconds": 3600,
     "disk_reserve_bytes": 2147483648,
-    "archive_codec": "gzip"
+    "archive_codec": "xz"
   },
   "load_reference_tasks_per_s": 0.08,
   "loads": {
