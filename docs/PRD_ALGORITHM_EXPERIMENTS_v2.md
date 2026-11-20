@@ -973,3 +973,15 @@ M1은 대표 고정 입력3개×4정책=12 D1와2입력×4정책=8 D0의20회다
 M1 첫 고부하 조건4정책은 모두 정상 종료했고 static/자원/에너지 감사가 통과했다. MILP/CP-SAT native search 반환과 primary prefix 반영(각128/163회)이 관측됐다. 안전 재검증에서 거절한 일부 계획과 fallback 사유도 보존한다. 이1seed 기술 결과를 성능 우세로 해석하지 않는다.
 
 저장 예산 검토에서 gzip이 arm당 약15~18MB로 커서 남은600회 추정이 현재 디스크 여유를 넘는 것을 확인했다. 알고리즘·입력·예산을 바꾸지 않고 실행 후 압축만 XZ로 개정한다. 원본 보존·입력/도구 동일성·저장/논리 hash 검증을 요구하는 `repack_static_canaries.py`와 실제 압축 회귀2개를 추가했다. M1이20회 모두 성공한 뒤에만 같은 실행자료를 별도 저장 캠페인에 복사할 수 있다. 이 복사는 새로운 운영 실행이나 추가 표본으로 세지 않으며, G1의 원시 감사·재생·디스크 예산 검토는 새 저장 캠페인에서 다시 수행한다.
+
+### 38.1 M1 완료 및 개발 실험 착수
+
+실행 구현 `33fcc9d`, 저장 보완 `7445390`의 application source hash는 `94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05`로 같다. 고정 입력155개 항목/경로 검사14,880건이 통과했다. M1의 D1 12회+D0 8회는 **20/20 SUCCESS**다. gzip 자료193MiB를 원본 보존 상태로 XZ 약21MiB의 별도 저장 캠페인에 복사했으며,921개 파일의 저장/논리 hash와 총2,347,496,333 논리 바이트를 검증했다. 복사본은 추가 실행이나 표본으로 합산하지 않는다.
+
+G1은 **PASS**다. 20개 원시 이벤트·입력 CAS·자원/작업/에너지 감사와 네 정책의 기록 재생4/4가 일치했다. D1 native search 반환 증거는 MILP372/CP-SAT401회, primary prefix 반영은287/327회였다. D1 전12개 arm에서 충전이 노출됐고 전체 납기모집단1624·긴급232건이 관측됐다(정책별 반복을 포함한 기술검사 분모). 거절된 resource-capacity 계획2개는 원래 snapshot에서 독립 검증 오류가 없었으며, 반영 전 갱신된 자원 달력에서 거절되고 fallback으로 이어졌다. 실제 계획 반영 횟수는 작업 완료 수가 아니다.
+
+XZ 기준 남은600회 저장량은 canary 최대 arm 크기×600×1.5로 약1.86GB, 임시 저장 추정260MB, 보존 여유2GiB다. G1 당시 약7.10GB 여유로 예산 검사를 통과했다. 미관측 지도 크기의 보장 상한은 아니므로 실행 중 여유 검사와 실패 보존은 계속 유지한다. 관측창에 충전·납기가 노출됐음을 확인한 것이며 정상상태 처리 용량이나 최종 표본 정밀도를 입증한 것은 아니다.
+
+[검수 요약](scenarios/static_study_20261120/evidence/implementation_review_20261120.json), [G1 원시 감사·재생 영수증](scenarios/static_study_20261120/evidence/readiness_20261120.json), [거절 계획 검토](scenarios/static_study_20261120/evidence/proposal_rejection_review_20261120.json)에 근거를 남겼다. `7445390`은 GitHub의 Windows/macOS/Ubuntu×Python3.11/3.14 전6조합과 CodeQL이 통과했다([acceptance](https://github.com/tortoiese/CLOVER/actions/runs/44689842198), [CodeQL](https://github.com/tortoiese/CLOVER/actions/runs/44689842218)).
+
+현재 M2a 개발 실험을 시작했다. 실행 소스는 `7445390` detached checkout으로 고정하며 M2a180회→M2b180회→M3 240회를 직렬 수행한다. 실패·시간/디스크 제한·native 실행/primary 반영0이 확인되면 다음 단계로 진행하지 않고 기록을 보존한다. 아직 M2/M3 완료·최종 알고리즘 선택·M4 등록을 주장하지 않는다. 기존288/4020회 자료와 이번620회 계획은 합산하지 않는다.
