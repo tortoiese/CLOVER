@@ -951,3 +951,21 @@ M1~M3는 각 실행 시작 전 factory를 확정하고 `interventions=[]`, 실�
 M1은 대표 고정 입력3개×4정책=12 D1와2입력×4정책=8 D0의20회다. M2 개발360회·M3 지도검증240회는 유지해 예정 필수운영검사는 총620회이며 선택적 장기24회 포함 시644회다. snapshot72기술호출과 확인 실험의 미확정 표본수는 별도로 둔다.
 
 기존 동적 통로12회 실패는 보존하고 미해결 상태를 유지한다. 동적 변경·제한 후 복구·운영 중배치수정 기능을 평가할 때 관련 수정·회귀를 선행한다. 업데이트한 [계획서](PRD_SIMULATOR_SCENARIO_ADVANCEMENT_20261119.md), [직접 작성 체크리스트](scenarios/scenario_advancement_20261119/SCENARIO_WORKBOOK.md), [설계 초안](scenarios/scenario_advancement_20261119/design_draft.json)에 같은 범위와 분모를 반영했다. 새 코드 수정이나 시뮬레이션은 실행하지 않았다.
+
+## 38. 고정 지도 계획의 실행 구현 (2026-11-20)
+
+§37은 계획 작성 당시 이력이다. 사용자 후속 실행 지시에 따라 [실행 가능한 설계와 안내](scenarios/static_study_20261120/README.md)를 별도 추가했다. 기존 288회 입력·원시자료는 보존하고 이전 실행 소스 b18ecb1은 별도 detached checkout으로 보존했다. 새 캠페인과 합산하지 않는다.
+
+구현한 범위는 다음과 같다.
+
+- headless runner에 선택적 static_layout 검사: 빈 intervention trace를 요구하고, 초기 및 매 check_interval마다 factory hash와 layout version을 비교한다. 실행 중 변경을 발견하면 부분 결과와 실패를 보존한다. 기본 정책과 기존 비정적 실행 동작은 유지한다.
+- `materialize_static_scenario_study.py`: 18조건 개발 지도와 구조가 다른 3지도, 기술·개발·검증 seed 분리, 155개 입력 항목/620개 운영 arm 생성. 슬롯 대조의 trace·SOC 유지, burst4의 작업 수·UID·속성·납기 여유 유지.
+- `audit_static_scenario_study.py`: 코드와 root 실행 도구·설정·입력 hash, 전체 분모, 경로 이탈, 중복, 결정적 recipe 재생성 및 도달성 검사. 파일을 수정하고 hash만 다시 계산해도 recipe와 다르면 거부한다.
+- `run_static_scenario_study.py`: 소스 커밋 확인, 호스트 직렬 lock, 620 arm 사전등록, 단계 gate, 미실행 job만 재개, 실패·중단 무재시도, 디스크 reserve, 손실 없는 gzip 보존, 원시자료 감사와 기록 재생에 근거한 readiness 계산.
+- `static_scenario_metrics.py`: 긴급/일반 납기 모집단, 미시작 대기 censoring, 60초 backlog·추세, 에너지·자원 대기, dispatch/auxiliary 시간, worker 호출·반환·native search 증거·실제 prefix 반영·fallback 구분. 탐색적 같은 입력 정책차이를 JSON/MD로 보고한다.
+
+현재 실행 창은 2100초/워밍업300초, 공통 run/job 벽시간 한도는 900/3600초 후보를 기술검사에 적용한다. M1 결과로 충전·납기 노출, 실행시간·메모리·압축용량과 남은 예산을 검토하고, 변경이 필요하면 새 입력 묶음으로 분리한다. D1은 기존 staged decision settings로 구현하며 기본 수학 설정 timing_mode=D0을 그대로 쓴다. 단순 플래그 변경으로 D1을 켜지 않는다.
+
+검증: Python3.11 전체 pytest 642개 통과(기존638+정적범위4), 기존 한국 사례 입력·실행 unittest23개 통과. 신규 설계·검수·실행기 unittest7개는 Python3.11/3.14에서 통과했다. root 도구 lint와 planner/decisions/evaluation의 CI 오류 검사도 통과했다. 최초 sandbox 검사에서 로컬 HTTP 모의 서버의 bind가 거부되어 해당 환경 제한을 해소한 전체 실행으로 재검증했다. 새 입력 묶음·M1 실행 영수증은 완료되는 대로 추가한다.
+
+이 구현 기록만으로 G1·M2·M3 또는 최종 알고리즘 선택 완료를 주장하지 않는다. M4 확인 실험의 독립 표본수·지도·선택 기준 등록과 동적 지도 변경 수정은 후속이다.
