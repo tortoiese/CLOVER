@@ -79,3 +79,20 @@ M1 기술검사20/20 SUCCESS, G1 PASS, 원시자료20개 감사와 기록 재생
 [결과 종합 보고서](../../STATIC_SCENARIO_RESULTS_20261121.md)에 조건별 처리량·납기·에너지·대기·fallback·중단 상태와 남은 검증을 정리했다. 관측된10개 입력에서 휴리스틱 대비 처리량 상대차 평균은 MILP+4.0% / CP-SAT+5.5%였으나, 큰 개선이 고부하·충전1슬롯의 한 입력에 집중됐다. 그 입력을 제외한9개 평균은+0.3%/+0.5%다. 전체 시나리오의 우승이나 기본 정책 변경을 확정할 근거는 아직 부족하다.
 
 M2b 급증180회와 M3 지도검증240회는 미실행이다. job033의 미완료 저장과 미실행2정책에 대한 복구 규칙을 정하고, 실행 관리의 상태/종료 확인을 보완한 뒤 남은 실험을 진행해야 한다. 이번 보고서 작성에서 solver 재실행은 하지 않았다.
+
+## 2026-11-21 재개 절차
+
+`resume_static_scenario_study.py`는 원래 환경·입력 묶음·application source·기존 실행 도구 hash가 같은지 확인하고 새 재개 세션을 등록한다. 수학 모델·기본 정책·가중치·수요·SOC·개별 실행900초·결정2초 예산은 바꾸지 않는다.
+
+먼저 job033의 검수된 원시 MILP를 새 하위 폴더에 복사해 압축하고, 원래 JSON·이벤트·부분압축파일은 보존한다. 복사본의 논리 hash와 원시 이벤트/입력 CAS를 검수한 뒤 SUCCESS로 승격한다. 새 solver 실행으로 세지 않는다. 그다음 같은 입력에서 미실행인 baseline/CP-SAT만 원래 정책 순서대로 실행한다. 실패·취소·시간초과 정책은 자동으로 다시 돌리지 않는다.
+
+감시 프로세스는 기존 단계 실행기를 별도 자식 프로세스로 실행한다. 15초 heartbeat, PID+생성 시각, 자식 종료코드와 종료 영수증을 남긴다. 단계별 native 사용/실제 계획 반영이 없거나 실패·예산 문제가 있으면 후속 단계로 넘어가지 않는다. macOS에서는 분리 세션과 실행 중 idle sleep 방지로 장시간 실행을 시작한다. 상태는 저장된 RUNNING만 읽지 않고 실제 생존 여부로 판단한다.
+
+```sh
+python scripts/resume_static_scenario_study.py --bundle /absolute/path/static_inputs --output /absolute/path/static_runs --session resume_20261121 --mode supervise
+python scripts/resume_static_scenario_study.py --bundle /absolute/path/static_inputs --output /absolute/path/static_runs --mode status
+```
+
+`resume_sessions/<session>/protocol.json`에 실행 전에 남은558개 arm·입력 순서·도구hash·예산·세션을 기록한다. 중단 배치는 이전 압축 구간의 정확한 경과 시간이 없으므로, 재개 구간의 active wall 한도3600초를 별도로 적용하고 원래 배치 전체가3600초 이내였다고 주장하지 않는다. 개별 정책900초와2초 결정 예산은 그대로다. 이 교차 세션 배치와 기존 세션을 보존하고, 최종 분석에서 포함/제외 민감도를 함께 보고한다.
+
+신규 재개 회귀11개가 로컬 Python3.11/3.14에서 통과했다. 원본·부분압축 보존, 압축된 CAS 복구, 원래 정책 순서, 미실행만 선택, 원시 검수 전 승격 거부, 자식 실패 종료 기록, PID 재사용·접근 거부·고아 자식·heartbeat 지연 판정을 검증했다. 현재 확보자료 종합 보고서는 중단 시점의 고정 이력으로 유지한다.
