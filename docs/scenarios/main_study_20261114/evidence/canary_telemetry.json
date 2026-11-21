@@ -1,0 +1,964 @@
+{
+  "arms": [
+    {
+      "case_id": "canary_S00__optimized__200000002",
+      "policy": "optimized",
+      "decisions": 55,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 55
+      },
+      "sampled_peak_worker_rss_mib": 42.578125,
+      "rss_observations": 56,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S00__baseline__200000002",
+      "policy": "baseline",
+      "decisions": 31,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 31
+      },
+      "sampled_peak_worker_rss_mib": 41.75,
+      "rss_observations": 32,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S00__rh_milp_grid__200000002",
+      "policy": "rh_milp_grid",
+      "decisions": 71,
+      "accepted_rh_plans": 9,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 65,
+        "ALL_DEFERRED_RECOVERY": 5,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 96.359375,
+      "rss_observations": 72,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S00__rh_cpsat_linear__200000002",
+      "policy": "rh_cpsat_linear",
+      "decisions": 64,
+      "accepted_rh_plans": 8,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 57,
+        "ALL_DEFERRED_RECOVERY": 6,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 116.234375,
+      "rss_observations": 65,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S01__optimized__200100001",
+      "policy": "optimized",
+      "decisions": 13,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 13
+      },
+      "sampled_peak_worker_rss_mib": 42.15625,
+      "rss_observations": 14,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S01__baseline__200100001",
+      "policy": "baseline",
+      "decisions": 14,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 14
+      },
+      "sampled_peak_worker_rss_mib": 41.9375,
+      "rss_observations": 15,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S01__rh_milp_grid__200100001",
+      "policy": "rh_milp_grid",
+      "decisions": 11,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 7,
+        "HARD_TIMEOUT": 1,
+        "STALE_AVAILABILITY": 1,
+        "ALL_DEFERRED_RECOVERY": 2
+      },
+      "sampled_peak_worker_rss_mib": 193.046875,
+      "rss_observations": 13,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S01__rh_cpsat_linear__200100001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 11,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 7,
+        "HARD_TIMEOUT": 2,
+        "DEADLINE_BEFORE_OBSERVATION": 1,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "sampled_peak_worker_rss_mib": 163.796875,
+      "rss_observations": 13,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S01__rh_cpsat_native__200100001",
+      "policy": "rh_cpsat_native",
+      "decisions": 11,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 7,
+        "HARD_TIMEOUT": 1,
+        "ALL_DEFERRED_RECOVERY": 3
+      },
+      "sampled_peak_worker_rss_mib": 161.296875,
+      "rss_observations": 13,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S02__optimized__200200001",
+      "policy": "optimized",
+      "decisions": 88,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 88
+      },
+      "sampled_peak_worker_rss_mib": 42.484375,
+      "rss_observations": 89,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S02__baseline__200200001",
+      "policy": "baseline",
+      "decisions": 49,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 49
+      },
+      "sampled_peak_worker_rss_mib": 42.421875,
+      "rss_observations": 50,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S02__rh_milp_grid__200200001",
+      "policy": "rh_milp_grid",
+      "decisions": 105,
+      "accepted_rh_plans": 12,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 93,
+        "ALL_DEFERRED_RECOVERY": 8,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 4
+      },
+      "sampled_peak_worker_rss_mib": 87.671875,
+      "rss_observations": 106,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S02__rh_cpsat_linear__200200001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 104,
+      "accepted_rh_plans": 12,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 92,
+        "ALL_DEFERRED_RECOVERY": 8,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 4
+      },
+      "sampled_peak_worker_rss_mib": 112.609375,
+      "rss_observations": 105,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S03__optimized__200300002",
+      "policy": "optimized",
+      "decisions": 53,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 53
+      },
+      "sampled_peak_worker_rss_mib": 42.390625,
+      "rss_observations": 54,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S03__baseline__200300002",
+      "policy": "baseline",
+      "decisions": 21,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 21
+      },
+      "sampled_peak_worker_rss_mib": 41.90625,
+      "rss_observations": 22,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S03__rh_milp_grid__200300002",
+      "policy": "rh_milp_grid",
+      "decisions": 61,
+      "accepted_rh_plans": 9,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 60,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "sampled_peak_worker_rss_mib": 77.5,
+      "rss_observations": 62,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S03__rh_cpsat_linear__200300002",
+      "policy": "rh_cpsat_linear",
+      "decisions": 61,
+      "accepted_rh_plans": 9,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 60,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "sampled_peak_worker_rss_mib": 111.8125,
+      "rss_observations": 62,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S04__optimized__200400001",
+      "policy": "optimized",
+      "decisions": 1985,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 1985
+      },
+      "sampled_peak_worker_rss_mib": 45.015625,
+      "rss_observations": 1986,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S04__baseline__200400001",
+      "policy": "baseline",
+      "decisions": 1851,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 1851
+      },
+      "sampled_peak_worker_rss_mib": 45.0625,
+      "rss_observations": 1852,
+      "faults": 19,
+      "rescue_energy": 53.99999999999977
+    },
+    {
+      "case_id": "canary_S04__rh_milp_grid__200400001",
+      "policy": "rh_milp_grid",
+      "decisions": 1778,
+      "accepted_rh_plans": 5,
+      "late_primary_accepted": 0,
+      "pending": 1,
+      "decision_reasons": {
+        "COMMITTED": 670,
+        "ALL_DEFERRED_RECOVERY": 11,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 4,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 13,
+        "HARD_TIMEOUT": 3,
+        "DEADLINE_BEFORE_OBSERVATION": 1,
+        "STALE_JOB_SET": 3,
+        "BACKEND_NOT_READY": 1073
+      },
+      "sampled_peak_worker_rss_mib": 114.671875,
+      "rss_observations": 707,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S04__rh_cpsat_linear__200400001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 1827,
+      "accepted_rh_plans": 5,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 1733,
+        "ALL_DEFERRED_RECOVERY": 32,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 49,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 9,
+        "STALE_JOB_SET": 4
+      },
+      "sampled_peak_worker_rss_mib": 114.765625,
+      "rss_observations": 1828,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S04__rh_cpsat_native__200400001",
+      "policy": "rh_cpsat_native",
+      "decisions": 1836,
+      "accepted_rh_plans": 5,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 1742,
+        "ALL_DEFERRED_RECOVERY": 31,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 40,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 17,
+        "STALE_JOB_SET": 6
+      },
+      "sampled_peak_worker_rss_mib": 121.34375,
+      "rss_observations": 1837,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S05__optimized__200500001",
+      "policy": "optimized",
+      "decisions": 121,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 121
+      },
+      "sampled_peak_worker_rss_mib": 43.28125,
+      "rss_observations": 122,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S05__baseline__200500001",
+      "policy": "baseline",
+      "decisions": 78,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 78
+      },
+      "sampled_peak_worker_rss_mib": 43.359375,
+      "rss_observations": 79,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S05__rh_milp_grid__200500001",
+      "policy": "rh_milp_grid",
+      "decisions": 147,
+      "accepted_rh_plans": 14,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 123,
+        "ALL_DEFERRED_RECOVERY": 23,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 116.546875,
+      "rss_observations": 148,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S05__rh_cpsat_linear__200500001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 152,
+      "accepted_rh_plans": 13,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 126,
+        "ALL_DEFERRED_RECOVERY": 24,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1,
+        "STALE_AVAILABILITY": 1
+      },
+      "sampled_peak_worker_rss_mib": 135.671875,
+      "rss_observations": 153,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S06__optimized__200600002",
+      "policy": "optimized",
+      "decisions": 181,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 181
+      },
+      "sampled_peak_worker_rss_mib": 43.53125,
+      "rss_observations": 182,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S06__baseline__200600002",
+      "policy": "baseline",
+      "decisions": 119,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 119
+      },
+      "sampled_peak_worker_rss_mib": 43.546875,
+      "rss_observations": 120,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S06__rh_milp_grid__200600002",
+      "policy": "rh_milp_grid",
+      "decisions": 231,
+      "accepted_rh_plans": 42,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 215,
+        "HARD_TIMEOUT": 1,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 2,
+        "ALL_DEFERRED_RECOVERY": 8,
+        "STALE_AVAILABILITY": 4,
+        "STALE_CRITICAL_ARRIVAL": 1
+      },
+      "sampled_peak_worker_rss_mib": 149.109375,
+      "rss_observations": 233,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S06__rh_cpsat_linear__200600002",
+      "policy": "rh_cpsat_linear",
+      "decisions": 228,
+      "accepted_rh_plans": 35,
+      "late_primary_accepted": 0,
+      "pending": 1,
+      "decision_reasons": {
+        "COMMITTED": 203,
+        "ALL_DEFERRED_RECOVERY": 6,
+        "HARD_TIMEOUT": 2,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 6,
+        "MODEL_INVALID: resource capacity exceeded": 1,
+        "STALE_AVAILABILITY": 5,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 1,
+        "STALE_CRITICAL_ARRIVAL": 2,
+        "DEADLINE_BEFORE_OBSERVATION": 1,
+        "PENDING_AT_END": 1
+      },
+      "sampled_peak_worker_rss_mib": 182.640625,
+      "rss_observations": 230,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S07__optimized__200700001",
+      "policy": "optimized",
+      "decisions": 77,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 77
+      },
+      "sampled_peak_worker_rss_mib": 42.671875,
+      "rss_observations": 78,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S07__baseline__200700001",
+      "policy": "baseline",
+      "decisions": 38,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 38
+      },
+      "sampled_peak_worker_rss_mib": 42.15625,
+      "rss_observations": 39,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S07__rh_milp_grid__200700001",
+      "policy": "rh_milp_grid",
+      "decisions": 106,
+      "accepted_rh_plans": 14,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 100,
+        "ALL_DEFERRED_RECOVERY": 3,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 3
+      },
+      "sampled_peak_worker_rss_mib": 76.9375,
+      "rss_observations": 107,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S07__rh_cpsat_linear__200700001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 104,
+      "accepted_rh_plans": 14,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 98,
+        "ALL_DEFERRED_RECOVERY": 3,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 3
+      },
+      "sampled_peak_worker_rss_mib": 110.296875,
+      "rss_observations": 105,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S08__optimized__200800000",
+      "policy": "optimized",
+      "decisions": 36,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 36
+      },
+      "sampled_peak_worker_rss_mib": 44.296875,
+      "rss_observations": 37,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S08__baseline__200800000",
+      "policy": "baseline",
+      "decisions": 37,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 37
+      },
+      "sampled_peak_worker_rss_mib": 44.359375,
+      "rss_observations": 38,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S08__rh_milp_grid__200800000",
+      "policy": "rh_milp_grid",
+      "decisions": 46,
+      "accepted_rh_plans": 13,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 37,
+        "ALL_DEFERRED_RECOVERY": 9
+      },
+      "sampled_peak_worker_rss_mib": 93.3125,
+      "rss_observations": 47,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S08__rh_cpsat_linear__200800000",
+      "policy": "rh_cpsat_linear",
+      "decisions": 46,
+      "accepted_rh_plans": 13,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 37,
+        "ALL_DEFERRED_RECOVERY": 9
+      },
+      "sampled_peak_worker_rss_mib": 123.234375,
+      "rss_observations": 47,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S08__rh_cpsat_native__200800000",
+      "policy": "rh_cpsat_native",
+      "decisions": 43,
+      "accepted_rh_plans": 10,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 33,
+        "ALL_DEFERRED_RECOVERY": 7,
+        "STALE_ROUTE_OR_CABIN": 2,
+        "STALE_JOB_SET": 1
+      },
+      "sampled_peak_worker_rss_mib": 126.328125,
+      "rss_observations": 44,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S09__optimized__200900001",
+      "policy": "optimized",
+      "decisions": 2037,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 2036,
+        "STALE_LAYOUT_OR_EPOCH": 1
+      },
+      "sampled_peak_worker_rss_mib": 45.09375,
+      "rss_observations": 2038,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S09__baseline__200900001",
+      "policy": "baseline",
+      "decisions": 973,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 973
+      },
+      "sampled_peak_worker_rss_mib": 46.234375,
+      "rss_observations": 974,
+      "faults": 26,
+      "rescue_energy": 71.99999999999991
+    },
+    {
+      "case_id": "canary_S09__rh_milp_grid__200900001",
+      "policy": "rh_milp_grid",
+      "decisions": 1621,
+      "accepted_rh_plans": 13,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 359,
+        "ALL_DEFERRED_RECOVERY": 26,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 35,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_POSITION;STALE_ROBOT_ENERGY": 1,
+        "STALE_AVAILABILITY": 3,
+        "MODEL_INVALID: resource capacity exceeded": 1,
+        "HARD_TIMEOUT": 3,
+        "DEADLINE_BEFORE_OBSERVATION": 2,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 1,
+        "STALE_JOB_SET": 2,
+        "BACKEND_NOT_READY": 1188
+      },
+      "sampled_peak_worker_rss_mib": 116.171875,
+      "rss_observations": 434,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S09__rh_cpsat_linear__200900001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 1563,
+      "accepted_rh_plans": 36,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 409,
+        "ALL_DEFERRED_RECOVERY": 21,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 36,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 2,
+        "HARD_TIMEOUT": 3,
+        "DEADLINE_BEFORE_OBSERVATION": 2,
+        "STALE_JOB_SET": 1,
+        "STALE_AVAILABILITY": 5,
+        "BACKEND_NOT_READY": 1084
+      },
+      "sampled_peak_worker_rss_mib": 127.859375,
+      "rss_observations": 480,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S10__optimized__201000000",
+      "policy": "optimized",
+      "decisions": 84,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 84
+      },
+      "sampled_peak_worker_rss_mib": 42.34375,
+      "rss_observations": 85,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S10__baseline__201000000",
+      "policy": "baseline",
+      "decisions": 59,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 59
+      },
+      "sampled_peak_worker_rss_mib": 42.6875,
+      "rss_observations": 60,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S10__rh_milp_grid__201000000",
+      "policy": "rh_milp_grid",
+      "decisions": 100,
+      "accepted_rh_plans": 24,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 85,
+        "ALL_DEFERRED_RECOVERY": 13,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1,
+        "STALE_JOB_SET": 1
+      },
+      "sampled_peak_worker_rss_mib": 91.484375,
+      "rss_observations": 101,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S10__rh_cpsat_linear__201000000",
+      "policy": "rh_cpsat_linear",
+      "decisions": 96,
+      "accepted_rh_plans": 25,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 85,
+        "ALL_DEFERRED_RECOVERY": 10,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 112.546875,
+      "rss_observations": 97,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11__optimized__201100001",
+      "policy": "optimized",
+      "decisions": 84,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 84
+      },
+      "sampled_peak_worker_rss_mib": 42.546875,
+      "rss_observations": 85,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11__baseline__201100001",
+      "policy": "baseline",
+      "decisions": 44,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 44
+      },
+      "sampled_peak_worker_rss_mib": 42.328125,
+      "rss_observations": 45,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11__rh_milp_grid__201100001",
+      "policy": "rh_milp_grid",
+      "decisions": 97,
+      "accepted_rh_plans": 13,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 90,
+        "STALE_AVAILABILITY": 2,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 5
+      },
+      "sampled_peak_worker_rss_mib": 115.375,
+      "rss_observations": 98,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11__rh_cpsat_linear__201100001",
+      "policy": "rh_cpsat_linear",
+      "decisions": 97,
+      "accepted_rh_plans": 14,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 90,
+        "STALE_AVAILABILITY": 1,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 4,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_POSITION;STALE_ROBOT_ENERGY": 1,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY": 1
+      },
+      "sampled_peak_worker_rss_mib": 134.359375,
+      "rss_observations": 98,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11__rh_cpsat_native__201100001",
+      "policy": "rh_cpsat_native",
+      "decisions": 101,
+      "accepted_rh_plans": 16,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 95,
+        "ALL_DEFERRED_RECOVERY": 1,
+        "STALE_AVAILABILITY": 1,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 3,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_POSITION;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 153.5,
+      "rss_observations": 102,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11_large__optimized__201190009",
+      "policy": "optimized",
+      "decisions": 76,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 76
+      },
+      "sampled_peak_worker_rss_mib": 42.578125,
+      "rss_observations": 77,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11_large__baseline__201190009",
+      "policy": "baseline",
+      "decisions": 51,
+      "accepted_rh_plans": 0,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 51
+      },
+      "sampled_peak_worker_rss_mib": 42.203125,
+      "rss_observations": 52,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11_large__rh_milp_grid__201190009",
+      "policy": "rh_milp_grid",
+      "decisions": 110,
+      "accepted_rh_plans": 17,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 88,
+        "TIMING_COVERAGE_VIOLATION": 19,
+        "STALE_AVAILABILITY": 2,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 109.09375,
+      "rss_observations": 111,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11_large__rh_cpsat_linear__201190009",
+      "policy": "rh_cpsat_linear",
+      "decisions": 111,
+      "accepted_rh_plans": 17,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 89,
+        "TIMING_COVERAGE_VIOLATION": 18,
+        "STALE_AVAILABILITY": 2,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_ENERGY": 1,
+        "PARTIAL_AUXILIARY: STALE_ROBOT_AVAILABILITY;STALE_ROBOT_POSITION;STALE_ROBOT_ENERGY": 1
+      },
+      "sampled_peak_worker_rss_mib": 144.421875,
+      "rss_observations": 112,
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case_id": "canary_S11_large__rh_cpsat_native__201190009",
+      "policy": "rh_cpsat_native",
+      "decisions": 93,
+      "accepted_rh_plans": 27,
+      "late_primary_accepted": 0,
+      "pending": 0,
+      "decision_reasons": {
+        "COMMITTED": 70,
+        "TIMING_COVERAGE_VIOLATION": 22,
+        "ALL_DEFERRED_RECOVERY": 1
+      },
+      "sampled_peak_worker_rss_mib": 153.5,
+      "rss_observations": 94,
+      "faults": 0,
+      "rescue_energy": 0.0
+    }
+  ],
+  "scope": "development timing/exposure only; sampled RSS is not an exact instantaneous peak"
+}

@@ -217,9 +217,14 @@ def run_case(
     execution_epoch: str | None = None,
     decision_settings: dict[str, Any] | None = None,
     replay_controls: list[dict[str, Any]] | None = None,
+    static_layout: bool = False,
 ) -> dict[str, Any]:
     """Execute one arm with its own watchdog; retain partial results on runtime failure."""
     scenario.validate()
+    if type(static_layout) is not bool:
+        raise ValueError("static_layout must be boolean")
+    if static_layout and scenario.interventions:
+        raise ValueError("static-layout runs require an empty intervention trace")
     integer(seed, "seed")
     number(wall_limit, "wall_limit")
     if policy not in POLICIES:
@@ -246,6 +251,25 @@ def run_case(
     checks, maximum_error = 0, 0.0
     started = time.perf_counter()
     window_energy: dict[str, Any] | None = None
+    static_audit: dict[str, Any] | None = (
+        {"schema": "clover-static-layout-audit-v1", "enabled": True, "ok": False, "checks": 0,
+         "check_interval_seconds": scenario.check_interval, "initial_layout_version": None,
+         "final_layout_version": None, "initial_factory_hash": None, "final_factory_hash": None,
+         "failure": "engine not initialized"} if static_layout else None
+    )
+
+    def check_static_factory() -> None:
+        """Observe the configured factory, never the robots' evolving physical state."""
+        if static_audit is None or engine is None:
+            return
+        current = fingerprint(engine.factory.to_dict())
+        static_audit.update(final_layout_version=engine.layout_version, final_factory_hash=current)
+        static_audit["checks"] += 1
+        if (engine.layout_version != static_audit["initial_layout_version"]
+                or current != static_audit["initial_factory_hash"]):
+            static_audit.update(ok=False, failure="factory or layout version changed during a static-layout run")
+            raise AssertionError(static_audit["failure"])
+
     try:
         engine = SimulationEngine(
             copy.deepcopy(scenario.factory),
@@ -266,6 +290,10 @@ def run_case(
             replay_controls=replay_controls,
             roam=False,
         )
+        if static_audit is not None:
+            static_audit.update(initial_layout_version=engine.layout_version,
+                                initial_factory_hash=fingerprint(engine.factory.to_dict()), ok=True, failure=None)
+            check_static_factory()
         if decision_settings is not None:
             from simulation.decisions.input_store import PlanningInputStore
 
@@ -285,6 +313,7 @@ def run_case(
             if window_energy is None:
                 target = min(target, scenario.warmup)
             engine.env.run(until=target)
+            check_static_factory()
             audit = assert_invariants(engine)
             live = sum(t.status not in TaskState.TERMINAL for t in engine.tasks.values())
             if observations.wip != live:
@@ -484,6 +513,8 @@ def run_case(
             for t in tasks
         ],
     }
+    if static_audit is not None:
+        result["static_layout_audit"] = static_audit
     for process in external_processes:
         if process.is_alive:
             process._generator.close()
@@ -552,6 +583,7 @@ def replay(result: dict[str, Any], *, require_same_source: bool = True,
         execution_epoch=result["execution_epoch"],
         decision_settings=control["settings"] if control else None,
         replay_controls=control["decisions"] if control else None,
+        static_layout=bool((result.get("static_layout_audit") or {}).get("enabled", False)),
     )
     return {
         "matches": rerun["event_digest"] == result["event_digest"] and rerun["status"] == result["status"],
@@ -571,10 +603,15 @@ def run_suite(
     suite_wall_limit: float | None = None,
     planning_settings: dict[str, Any] | None = None,
     decision_settings: dict[str, Any] | None = None,
+    compress_artifacts: bool = False,
+    archive_codec: str = "gzip",
+    static_layout: bool = False,
 ) -> dict[str, Any]:
     """Run paired arms in randomized block order and checkpoint every outcome."""
     if not scenarios or len({s.id for s in scenarios}) != len(scenarios):
         raise ValueError("suite requires unique scenarios")
+    if type(static_layout) is not bool or (static_layout and any(s.interventions for s in scenarios)):
+        raise ValueError("static-layout suites require a boolean flag and empty intervention traces")
     if not seeds or len(set(seeds)) != len(seeds):
         raise ValueError("suite requires unique seeds")
     if not policies or len(set(policies)) != len(policies) or any(p not in POLICIES for p in policies):
@@ -609,6 +646,8 @@ def run_suite(
         "planned_runs": len(scenarios) * len(seeds) * len(policies),
         "scope": "foundation correctness smoke; no algorithm superiority conclusion",
     }
+    if static_layout:
+        manifest["static_layout"] = True
     started = time.perf_counter()
 
     def checkpoint() -> None:
@@ -643,6 +682,7 @@ def run_suite(
                         wall_limit=run_wall_limit,
                         planning_settings=planning_settings,
                         decision_settings=decision_settings,
+                        static_layout=static_layout,
                     )
                     row = {
                         key: result[key]
@@ -670,6 +710,11 @@ def run_suite(
                         )
                     }
                     row.update(scenario=scenario.id, result=f"{case_id}.json", events=f"{case_id}.events.jsonl")
+                    if compress_artifacts:
+                        from simulation.artifacts import archive_run, events_for_result
+
+                        archived, archive = archive_run(output / f"{case_id}.json", archive_codec)
+                        row.update(result=archived.name, events=events_for_result(archived).name, **archive)
                     row["same_source"] = result["source"]["source_hash"] == manifest["source"]["source_hash"]
                 manifest["runs"].append(row)
                 checkpoint()

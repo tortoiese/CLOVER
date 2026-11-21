@@ -1,0 +1,48 @@
+{
+  "schema": "clover-static-implementation-review-v1",
+  "written_on": "2026-11-20",
+  "scope": "M0 static runtime and M1 technical readiness; M2/M3 exploratory execution is separate",
+  "runtime_commit": "33fcc9d3922468f3557172fd6df3c302453f4bf8",
+  "frozen_checkout_commit": "7445390",
+  "source_hash": "94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05",
+  "tests": {
+    "python311_pytest": 642,
+    "legacy_input_unittest": 23,
+    "new_input_unittest_py311": 7,
+    "new_input_unittest_py314": 7,
+    "static_pytest_py314": 4,
+    "compression_unittest": 2
+  },
+  "ci": {
+    "commit": "7445390",
+    "acceptance_six_os_python_combinations": "SUCCESS",
+    "acceptance_url": "https://github.com/tortoiese/CLOVER/actions/runs/44689842198",
+    "codeql": "SUCCESS",
+    "codeql_url": "https://github.com/tortoiese/CLOVER/actions/runs/44689842218"
+  },
+  "g1_status": "PASS",
+  "readiness_receipt_hash": "08eb23235be35f33cb55fe5e6113f9dc7d7aeb4350b2cca9ed06d37f5682c8c7",
+  "technical_runs": 20,
+  "copied_runs_are_additional_samples": false,
+  "storage_copy": {
+    "artifacts": 921,
+    "source_campaign_sha256": "71e1d55e5fb6f698de40e006d27caa446e027b7ad57760aa88f2e0b2e0f7b346",
+    "source_bundle_sha256": "2e4c4b7234699f0eee270e9c02cd4c8d46c4fc2ecca42b36cb19c69cb0b76c2d",
+    "new_bundle_sha256": "c4ab23c678c661e134bb7e802080387d584388343cd47447617a6571cada8566",
+    "receipt_file_sha256": "50dd69369bd155ca05ffa1d4d3ac11c9f927104f4b1600603ec25103ccb2ccf7",
+    "logical_bytes": 2347496333,
+    "xz_stored_bytes": 17601524,
+    "original_gzip_bytes": 198280612
+  },
+  "next": {
+    "M2_development_runs": 360,
+    "M3_map_validation_runs": 240,
+    "M4_confirmation": "NOT_REGISTERED"
+  },
+  "restrictions": [
+    "Synthetic inputs; lambda_ref is not measured capacity.",
+    "Technical and exploratory results do not establish statistical superiority.",
+    "No pooling with previous 288 or 4020 runs.",
+    "Dynamic corridor change remains deferred."
+  ]
+}

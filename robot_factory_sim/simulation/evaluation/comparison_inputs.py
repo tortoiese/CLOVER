@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import math
 from collections import Counter
@@ -10,6 +9,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from simulation.artifacts import read_saved, stored_path, stored_sha256
 from simulation.evaluation.analysis import analyze
 from simulation.evaluation.scenario import POLICIES, Scenario, fingerprint
 
@@ -18,27 +18,23 @@ PLAN_SCHEMA = "clover-paired-analysis-plan-v1"
 
 def read_json(path: Path) -> tuple[dict[str, Any], str]:
     """Read an object and its exact file digest without modifying evidence."""
-    raw = path.read_bytes()
+    raw = read_saved(path)
     value = json.loads(raw)
     if not isinstance(value, dict):
         raise ValueError("expected JSON object: " + str(path))
-    return value, hashlib.sha256(raw).hexdigest()
+    return value, stored_sha256(path)
 
 
 def file_sha256(path: Path) -> str:
     """Hash large saved event/model files without retaining them in memory."""
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return stored_sha256(path)
 
 
 def inside(root: Path, relative: str) -> Path:
     """Keep a suite's saved result/event references inside that suite."""
     if not isinstance(relative, str) or not relative:
         raise ValueError("missing saved file reference")
-    path = (root / relative).resolve()
+    path = stored_path(root / relative).resolve()
     if Path(relative).is_absolute() or not path.is_relative_to(root.resolve()):
         raise ValueError("saved file reference escapes suite directory")
     return path
@@ -157,6 +153,13 @@ def load_arm(suite_path: Path, scenario_id: str, seed: int, policy: str) -> dict
     if len(due_ids) != run["due_jobs"]:
         raise ValueError("due-job population does not match saved task records")
     compact["due_cohort_hash"] = fingerprint(due_ids)
+    priorities = {job["uid"]: job["priority"] for job in run["trace"]}
+    urgent_ids = [uid for uid in due_ids if priorities[uid] == 0]
+    by_uid = {task["uid"]: task for task in tasks}
+    urgent_late = sum(by_uid[uid]["completed"] is None or by_uid[uid]["completed"] > deadlines[uid]
+                      for uid in urgent_ids)
+    compact.update(urgent_due_jobs=len(urgent_ids), urgent_due_cohort_hash=fingerprint(urgent_ids),
+                   urgent_late_due_rate=urgent_late / len(urgent_ids) if urgent_ids else None)
     compact["batch_makespan"] = (
         max(t["completed"] for t in tasks) - min(t["created"] for t in tasks)
         if complete and tasks and run["completed_total"] == run["offered"]

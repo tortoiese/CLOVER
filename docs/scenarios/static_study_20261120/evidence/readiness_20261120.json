@@ -1,0 +1,152 @@
+{
+  "schema": "clover-static-study-readiness-v1",
+  "status": "PASS",
+  "identity": {
+    "bundle_manifest_sha256": "c4ab23c678c661e134bb7e802080387d584388343cd47447617a6571cada8566",
+    "source_hash": "94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05",
+    "tools": {
+      "materialize_static_scenario_study.py": "10048592fcdf0c9f09f033c1c48e0e88314bfc3e4c7dd71ca6301e4e06e30243",
+      "audit_static_scenario_study.py": "3fdea9b8aa05145c958e04312db2357ccb4a1a6da71fe82884ed2262443d9e7f",
+      "run_static_scenario_study.py": "27f372d1ae95b7ef1eec954c95661befbdfa0c009feaa690c51cd628fb614e53",
+      "static_scenario_metrics.py": "6af2f8c20a4e83a6b2d0cce17ef43464a37bf142f6eedbfef4e76e15088454ca",
+      "materialize_korean_case_pilot.py": "5d99d9c85df583afc6374f9dfc666d7747cdf4fa655609686ae0b763e3c57bdf",
+      "audit_korean_case_pilot.py": "12b410dd12ef3f1283764fbd1c4b89767dd0434f8165de4f37ece4cddb657e73"
+    },
+    "hardware_id": "host-3bef45ab6d069605967b",
+    "environment": {
+      "wall_clock": {
+        "name": "perf_counter",
+        "implementation": "mach_absolute_time()",
+        "resolution_seconds": 4.166666666666667e-08,
+        "monotonic": true
+      },
+      "python": "3.11.14",
+      "os": "Darwin",
+      "machine": "arm64",
+      "packages": {
+        "simpy": "4.1.2",
+        "numpy": "2.4.6",
+        "ortools": "9.15.6755",
+        "psutil": "7.2.2",
+        "scipy": "1.17.1"
+      }
+    }
+  },
+  "technical_planned_runs": 20,
+  "verified_runs": [
+    {
+      "arm": "0:baseline",
+      "result_sha256": "605d88f6f1d1db897e14f724379c06e3a78a7b5a68876e706442e6c5e9e13c22"
+    },
+    {
+      "arm": "0:optimized",
+      "result_sha256": "a4d84d9472f1bfe5cd5ae5234b511046a0efd75069d73945c653607379a9ab57"
+    },
+    {
+      "arm": "0:rh_milp_grid",
+      "result_sha256": "34c1ad90951acf997899409ce03a4993056b54fca22ff64659ef31fc90a1e3e7"
+    },
+    {
+      "arm": "0:rh_cpsat_linear",
+      "result_sha256": "3f6e418f8ad09c697b3c80d8a895df683bc1ca202d9f8ed5e08aa5c76023b2d1"
+    },
+    {
+      "arm": "1:baseline",
+      "result_sha256": "34eeb5d1d333a653d9ed4f1d8aabcb2a28e4aaf84fa805c71687d00f7f9346dd"
+    },
+    {
+      "arm": "1:optimized",
+      "result_sha256": "a50e17325f563a746132db17155ec161e7d657c7720372960758774afff79b6b"
+    },
+    {
+      "arm": "1:rh_milp_grid",
+      "result_sha256": "2b2483aeee8c28340dd6f991c236d2d340bd9ee376c8292ca38691a2feded7b6"
+    },
+    {
+      "arm": "1:rh_cpsat_linear",
+      "result_sha256": "38f0b7b5b7f752f489644cedefd478550159c602c8b4fcef5f25c5ff03790ab4"
+    },
+    {
+      "arm": "2:baseline",
+      "result_sha256": "34b6ecd9bc8d120f52d99043bf5a79d0f4b064598652f705bfe718eb284f8999"
+    },
+    {
+      "arm": "2:optimized",
+      "result_sha256": "1c981e8cc6eebc6f6f5c595c055269feaa81fab96fd8ad86eaf9f51ed3aaecda"
+    },
+    {
+      "arm": "2:rh_milp_grid",
+      "result_sha256": "b5f53d16e86de5d9ff5d35e751eb6db8d0e94e8c082a9cf564af360c83c0d0a0"
+    },
+    {
+      "arm": "2:rh_cpsat_linear",
+      "result_sha256": "6e1239b6e3474b938fc0ff704abd6b689fe78a102ddfc69902f98ff01f202489"
+    },
+    {
+      "arm": "3:baseline",
+      "result_sha256": "5beca8eff0cf8a64df35dd1bf9acbe98934aa1f48c8ae51d727c55189aeb441b"
+    },
+    {
+      "arm": "3:optimized",
+      "result_sha256": "767fde486adf5318e0f32908a81c3ea915a1f24cc60e1fad1a8194e6b81831f4"
+    },
+    {
+      "arm": "3:rh_milp_grid",
+      "result_sha256": "d22d68038bef29f1e8a1eadd9fc900a414b25584143da8a675e54b6b331fb450"
+    },
+    {
+      "arm": "3:rh_cpsat_linear",
+      "result_sha256": "f44f2d00c2106defaecc135ead458b38fe76e137078277b620d22f6a135d368e"
+    },
+    {
+      "arm": "4:baseline",
+      "result_sha256": "54a9d9d537abb346f723556aaaa94f66839976ebfe8461b81dae72d08ea54a00"
+    },
+    {
+      "arm": "4:optimized",
+      "result_sha256": "347b4176c4b76d3a0348536408ede988e7e10c249e0828830338bc729b5033dd"
+    },
+    {
+      "arm": "4:rh_milp_grid",
+      "result_sha256": "7505e7fde5b5f1f6badd245441777a142010c3a0b91ce8ae0541ef3bc061df7c"
+    },
+    {
+      "arm": "4:rh_cpsat_linear",
+      "result_sha256": "d816901a7f40a119330ea9f092620b1e8483e215457dd8fd28ebe3789e0c55e3"
+    }
+  ],
+  "primary_prefix_commits": {
+    "baseline": 0,
+    "optimized": 0,
+    "rh_milp_grid": 287,
+    "rh_cpsat_linear": 327
+  },
+  "returned_native_search_reports": {
+    "baseline": 0,
+    "optimized": 0,
+    "rh_milp_grid": 372,
+    "rh_cpsat_linear": 401
+  },
+  "replays": {
+    "baseline": true,
+    "optimized": true,
+    "rh_milp_grid": true,
+    "rh_cpsat_linear": true
+  },
+  "charge_exposed_d1_arms": 12,
+  "due_jobs_across_d1_arms": 1624,
+  "urgent_due_jobs_across_d1_arms": 232,
+  "issues": [],
+  "window_review": "charging and due cohorts observed; steady-state capacity not established",
+  "resource_budget": {
+    "free_disk_bytes": 7095361536,
+    "reserved_bytes": 2147483648,
+    "estimated_remaining_archive_bytes": 1861560000,
+    "scratch_estimate_bytes": 260386769,
+    "estimate_method": "1.5 times maximum canary D1 stored arm size times 600; unseen-map size not guaranteed",
+    "maximum_observed_run_wall_seconds": 76.21311495802365,
+    "maximum_observed_d1_archive_bytes": 2068400
+  },
+  "scope": "technical readiness only; does not register thresholds, sample size or algorithm superiority",
+  "receipt_hash": "08eb23235be35f33cb55fe5e6113f9dc7d7aeb4350b2cca9ed06d37f5682c8c7"
+}

@@ -1,5 +1,8 @@
 # 본 실험 전 보완 검수 결과
 
+> 후속 상태: 이 문서는 이전 소스의45회 보완 검수 기록이다. 참조 μ와 독립 반복 설계의 현재 준비 상태는 [본 실험 준비 검수](MAIN_STUDY_READINESS_REVIEW_20261114.md)와 PRD §29를 따른다. 과거 수치를 새 소스의 결과로 바꾸지 않는다.
+
+
 2026-11-14. 사용자의 **합성 연구환경 검증** 선택을 적용했다. 판정은 **합성 파일럿 실행 기반 검증 완료**다. 본 실험의 반복 실행·통계적 우세·환경별 추천이 완료됐다는 뜻은 아니다. 기본 optimized·휴리스틱 가중치·D0·기존 D1 v1 soft 규약·수학 목적은 유지했다.
 
 최종 실험 코드: `89afcdcce55ee3b38106d571084ddd2001754f36`, source hash `192e456b789a4f940588631079177d75062770b5e374c81098d87141c4e360c5`. Python179개가 해당 Git HEAD blob과 일치했고 실행 전후 source가 같았다. 문서 후속 커밋은 이 실험 소스를 소급 변경하지 않는다. [기계 판정](scenarios/experiment_hardening_20261114/evidence/receipt.json), [실행 사용법](../robot_factory_sim/STUDY_PROTOCOL.md), [보완 PRD](PRD_EXPERIMENT_HARDENING.md)를 함께 본다.

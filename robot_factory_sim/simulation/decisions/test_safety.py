@@ -12,7 +12,7 @@ import pytest
 from simulation.audit import assert_invariants
 from simulation.decisions import admission
 from simulation.decisions.adapters import propose
-from simulation.decisions.contracts import DecisionSettings
+from simulation.decisions.contracts import DEADLINE_PROTOCOL, DecisionSettings
 from simulation.decisions.observation import capture
 from simulation.engine import SimulationEngine
 from simulation.evaluation.fixtures import examples, joint_batch
@@ -108,6 +108,41 @@ def test_publication_overrun_invalidates_run_without_retroactive_shift(monkeypat
     assert result["status"] == "TIMING_COVERAGE_VIOLATION"
     assert not result["control"]["coverage_ok"] and result["final_audit"]["ok"]
     assert any(not r["coverage_ok"] for r in result["control"]["decisions"])
+    assert replay(result)["matches"]
+
+
+def test_committed_rh_prefix_is_not_retried_when_auxiliary_is_stale(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A real accepted plan survives auxiliary rejection without a second fallback."""
+    original_publish = admission.publish
+
+    def reject_after_rh_commit(engine: SimulationEngine, proposal: Any,
+                               approved: dict[str, tuple[str, float]]) -> dict[str, Any]:
+        if proposal.observation.policy == "safe_fallback" and any(
+            robot.planned_action is not None for robot in engine.robot_list()
+        ):
+            return {"accepted": False, "reason": "STALE_ROBOT_AVAILABILITY", "applied": []}
+        return original_publish(engine, proposal, approved)
+
+    monkeypatch.setattr(admission, "publish", reject_after_rh_commit)
+    scenario = joint_batch()
+    scenario.duration = 45
+    for job in scenario.workload["jobs"]:
+        job["at"] = 3
+    control = DecisionSettings(timing_protocol=DEADLINE_PROTOCOL,
+                              primary_deadline_policy="reject_late_primary", record_planning_inputs=True,
+                              admission_reserve_seconds=.1, publication_allowance_seconds=.2)
+    result = run_case(scenario, "rh_cpsat_linear", 1001,
+                      planning_settings={"horizon": 20, "step": 2, "interval": 2,
+                                         "max_tasks": 4, "sigma": 0, "timeout": .5},
+                      decision_settings=control.to_dict())
+    rows = [r for r in result["control"]["decisions"]
+            if r["reason"].startswith("COMMITTED_AUXILIARY_DEFERRED")]
+    assert rows, "regression must exercise a real committed prefix plus a failed auxiliary"
+    assert all(r["accepted"] and r["receipt"]["primary_accepted"] for r in rows)
+    assert all(r["receipt"]["schema"] == "clover-rh-publication-receipt-v2" for r in rows)
+    assert all(r["receipt"]["applied_result"] is not None and not r["receipt"]["auxiliary_accepted"] for r in rows)
+    assert all(r["fallback"] is None for r in rows)
+    assert result["final_audit"]["ok"] and result["completed_total"] > 0
     assert replay(result)["matches"]
 
 

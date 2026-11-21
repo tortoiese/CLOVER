@@ -8,6 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from simulation.artifacts import read_saved, stored_path
 from simulation.decisions.contracts import digest
 from simulation.planning.contracts import Snapshot
 from simulation.planning.replay import decode_snapshot
@@ -39,8 +40,8 @@ class PlanningInputStore:
             target = self.root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             raw = (json.dumps(body, ensure_ascii=False, sort_keys=True, allow_nan=False) + "\n").encode()
-            if target.exists():
-                if target.read_bytes() != raw:
+            if stored_path(target).exists():
+                if read_saved(target) != raw:
                     raise ValueError("planning input already exists with different content")
             else:
                 temporary = target.with_suffix(".pending")
@@ -76,10 +77,10 @@ def load_planning_input(control: dict[str, Any], ref: str, root: Path | None = N
         if root is None:
             raise ValueError("saved planning input requires the run directory")
         relative = Path(entry["path"])
-        target = (root / relative).resolve()
+        target = stored_path(root / relative).resolve()
         if relative.is_absolute() or not target.is_relative_to(root.resolve()):
             raise ValueError("planning input path escapes run directory")
-        raw = target.read_bytes()
+        raw = read_saved(target)
         if hashlib.sha256(raw).hexdigest() != entry["file_sha256"]:
             raise ValueError("planning input file hash mismatch")
         body = json.loads(raw)

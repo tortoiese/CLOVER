@@ -7,6 +7,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from simulation.artifacts import events_for_result, open_saved
 from simulation.evaluation.analysis import analyze
 from simulation.evaluation.comparison_inputs import read_json
 from simulation.evaluation.scenario import Scenario, fingerprint, integer, number
@@ -70,7 +71,7 @@ def calibrate(run_path: Path, window: dict[str, Any], *, bins: int = 6) -> dict[
     robots = {r.id: {"completed": 0, "interrupted": 0, "carry_in": 0, "small": 0, "open": 0,
                       "delivered_energy": 0.0} for r in case.factory.robots if r.is_active}
     active, starts, ends = {}, 0, 0
-    with run_path.with_suffix(".events.jsonl").open(encoding="utf-8") as stream:
+    with open_saved(events_for_result(run_path)) as stream:
         for line in stream:
             row = json.loads(line)
             if row["event"] not in {"charge_session_start", "charge_session_end"}:

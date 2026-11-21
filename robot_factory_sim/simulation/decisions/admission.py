@@ -89,9 +89,10 @@ def check(engine: SimulationEngine, proposal: Proposal) -> tuple[str, ...]:
                 or not math.isfinite(estimate_trip(engine, robot, intent.destination).seconds)
             ):
                 errors.append("STALE_DESTINATION")
-        if intent.kind in {"charge_choice", "charge_target"}:
-            if intent.target is None or not math.isfinite(intent.target) or not 0 <= intent.target <= 100:
-                errors.append("INVALID_CHARGE_TARGET")
+        if intent.kind in {"charge_choice", "charge_target"} and (
+            intent.target is None or not math.isfinite(intent.target) or not 0 <= intent.target <= 100
+        ):
+            errors.append("INVALID_CHARGE_TARGET")
         if intent.kind == "charge_target" and robot.state != RobotState.CHARGING:
             errors.append("STALE_CHARGE_SESSION")
         if intent.kind not in {
@@ -153,7 +154,7 @@ def publish(
                 if previous is not None:
                     approved_charge[intent.robot] = (previous[0], intent.target)
             applied.append(asdict(intent))
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - preserve and report unexpected partial physical application
         reason = "PARTIAL_APPLICATION: " + str(exc)
     finally:
         for robot in wake:
@@ -204,3 +205,26 @@ def publish_rh(engine: SimulationEngine, result: Any, observation: Observation) 
         "reason": reason,
         "applied_result": encode(shifted) if accepted else None,
     }
+
+
+def publish_rh_with_auxiliary(
+    engine: SimulationEngine, result: Any, observation: Observation,
+    auxiliary: Proposal, approved_charge: dict[str, tuple[str, float]],
+) -> dict[str, Any]:
+    """Retain a committed prefix when a separate charging request becomes stale.
+
+    A prefix has already mutated the plant and cannot be reported as rejected
+    merely because an auxiliary intent fails its fresh check. Deferred charging
+    remains explicit; its waiting callers are notified separately by the owner.
+    """
+    receipt = publish_rh(engine, result, observation)
+    receipt["schema"] = "clover-rh-publication-receipt-v2"
+    if not receipt["accepted"]:
+        return receipt
+    receipt["primary_accepted"] = True
+    auxiliary_receipt = publish(engine, auxiliary, approved_charge)
+    receipt["auxiliary"] = auxiliary_receipt
+    receipt["auxiliary_accepted"] = auxiliary_receipt["accepted"]
+    if not auxiliary_receipt["accepted"]:
+        receipt["reason"] = "COMMITTED_AUXILIARY_DEFERRED: " + auxiliary_receipt["reason"]
+    return receipt

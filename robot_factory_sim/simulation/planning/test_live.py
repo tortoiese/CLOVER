@@ -4,11 +4,14 @@ from __future__ import annotations
 import time
 from dataclasses import replace
 
+import pytest
+
 from simulation.engine import SimulationEngine
 from simulation.evaluation.fixtures import joint_batch
+from simulation.planning.backend import Backend
 from simulation.planning.contracts import Result, Settings
 from simulation.planning.live import LiveRollingHorizonScheduler, LiveSolverProcess
-from simulation.planning.snapshot import capture
+from simulation.planning.snapshot import capture, prepare
 
 
 def engine() -> SimulationEngine:
@@ -98,6 +101,69 @@ def test_settings_change_discards_pending_values_before_new_request() -> None:
         assert plant.scheduler.pending_observation is None
         assert not plant.scheduler.records
         assert task in plant.pending_tasks
+    finally:
+        plant.close()
+
+
+def test_live_capture_does_not_build_detached_policy_trip_matrix(monkeypatch: pytest.MonkeyPatch) -> None:
+    """RH admission needs the original job cohort, not heuristic trip estimates."""
+    from simulation.decisions import observation
+
+    plant = engine()
+    submitted = []
+
+    def unexpected_trip(*args: object, **kwargs: object) -> None:
+        raise AssertionError("live RH must prepare routes in its isolated worker")
+
+    try:
+        monkeypatch.setattr(observation, "estimate_trip", unexpected_trip)
+        monkeypatch.setattr(plant.scheduler.worker, "submit", lambda snapshot, backend: submitted.append(snapshot))
+        task = plant.add_task("P", plant.factory.stations[0].id, 2, external_uid="observed")
+        plant.scheduler.dispatch(plant)
+        assert len(submitted) == 1
+        assert task.external_uid in {job.uid for job in submitted[0].jobs}
+        assert plant.scheduler.pending_observation is not None
+    finally:
+        plant.close()
+
+
+@pytest.mark.parametrize("change, reason", [
+    ("expired", "STALE_HORIZON"),
+    ("energy", "STALE_ROBOT"),
+    ("critical", "STALE_CRITICAL_ARRIVAL"),
+])
+def test_live_cohort_keeps_stale_rejection_before_fallback(
+    monkeypatch: pytest.MonkeyPatch, change: str, reason: str,
+) -> None:
+    """Cheap live capture must still reject expired or changed physical inputs."""
+    from simulation.decisions.observation import capture_rh_cohort
+
+    plant = engine()
+    scheduler = plant.scheduler
+    try:
+        sid = plant.factory.stations[0].id
+        plant.add_task("P", sid, 2, external_uid="original")
+        snapshot = capture(plant, scheduler.settings, "controlled")
+        value = Backend("cpsat_linear").solve(prepare(snapshot))
+        assert value.report.status in {"OPTIMAL", "FEASIBLE"}
+        scheduler.pending_observation = capture_rh_cohort(plant, plant.mode, snapshot.token)
+        scheduler.worker.pending = snapshot
+        monkeypatch.setattr(scheduler.worker, "poll", lambda: None)
+        if change == "expired":
+            plant.env.run(until=snapshot.now + snapshot.settings.horizon + 1)
+        elif change == "energy":
+            plant.robot_list()[0].battery -= 1
+        else:
+            plant.add_task("P", sid, 0, external_uid="new-critical")
+        scheduler.worker.pending = None
+        replies = iter((value, None))
+        monkeypatch.setattr(scheduler.worker, "poll", lambda: next(replies, None))
+        scheduler.dispatch(plant)
+        assert len(scheduler.records) == 1
+        assert not scheduler.records[0]["accepted"]
+        assert scheduler.records[0]["reason"] == reason
+        assert scheduler.fallbacks[reason] == 1
+        assert not any(robot.planned_action is not None for robot in plant.robot_list())
     finally:
         plant.close()
 

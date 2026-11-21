@@ -1,0 +1,55 @@
+{
+  "schema": "clover-case-sources-v1",
+  "accessed_on": "2026-11-17",
+  "scope": "Public descriptions of operations in South Korea; not measured factory traces or equipment specifications.",
+  "sources": [
+    {
+      "id": "HTS_SEOSAN",
+      "publisher": "현대트랜시스 공식 블로그",
+      "title": "AX로 진화하는 현대트랜시스 스마트 제조 현장",
+      "url": "https://blog.hyundai-transys.com/731",
+      "published_on": "2026-09-01",
+      "location": "대한민국 서산",
+      "domain": "manufacturing",
+      "verified_facts": ["서산공장 일부 라인에서 부품·자재 이송용 AMR을 시범 운영한다고 설명한다.", "작업자·장애물 감지와 우회 경로 탐색 기능을 소개한다."],
+      "not_publicly_established": ["현장 AMR 대수·수요 trace·좌표·통로 폭·SOC·충전 제원", "작업자 통행의 정량 분포와 정지·복구 시간"],
+      "mapping_limit": "시간에 따른 통로 용량 감소는 연구용 근사다. 사람의 움직임·센서·충돌 회피·새 우회 경로 생성은 구현하지 않는다."
+    },
+    {
+      "id": "LG_CHANGWON",
+      "publisher": "LG CNS",
+      "title": "LG전자 · 한국·창원 고객 성공사례",
+      "url": "https://smartfactory.lgcns.com/cases/lge_changwon",
+      "published_on": null,
+      "location": "대한민국 창원 LG 스마트파크",
+      "domain": "manufacturing",
+      "verified_facts": ["5G 기반 AGV와 고공 컨베이어를 이용한 부품 운송을 소개한다.", "공정 관제·품질·물류를 함께 개선한 통합 스마트팩토리 사례다."],
+      "not_publicly_established": ["이 페이지의 실제 AGV 속도 혼합·충전 슬롯·경로 좌표·도착률", "MILP 또는 CP-SAT만의 인과적 개선율"],
+      "mapping_limit": "지상 로봇의 공유 통로·서비스 지점만 모델링한다. 컨베이어, 적재 중량, 부품 재고 및 공정 간 선후 의존은 재현하지 않는다. 공개 성과를 본 알고리즘 목표값으로 사용하지 않는다."
+    },
+    {
+      "id": "CJ_GUNPO",
+      "publisher": "CJ 뉴스룸",
+      "title": "CJ대한통운, ‘디지털 물류’ 가속화 … 로봇 기반 ‘스마트 풀필먼트’ 가동",
+      "url": "https://cjnews.cj.net/cj대한통운-디지털-물류-가속화-로봇-기반-스/",
+      "published_on": "2021-12-21",
+      "location": "대한민국 군포",
+      "domain": "fulfillment_non_manufacturing",
+      "verified_facts": ["발표 당시 스마트 풀필먼트는 기존 센터 내 1개층에 구현됐다고 설명한다.", "AGV·AMR 등 무인운송로봇 128대와 상품·박스·부자재 운송을 소개한다."],
+      "not_publicly_established": ["현재 운영 대수와 현재 동선", "급증 배수·긴급 비중·주문별 마감 trace·충전 부족"],
+      "mapping_limit": "합성 8대 축소 모델이며128대 현장 재현이 아니다. burst·충전 슬롯 감소는 민감도 요인이다. 랙 픽업→작업자→포장 선후 공정과 재고는 모델 범위 밖이다."
+    },
+    {
+      "id": "NAVER_1784",
+      "publisher": "NAVER LABS",
+      "title": "Multi-Robot, Multi-Service, Multi-Floor",
+      "url": "https://www.naverlabs.com/en/blogDetail?seq=34019",
+      "published_on": "2024-04-23",
+      "location": "대한민국 성남 1784",
+      "domain": "office_service_non_manufacturing",
+      "verified_facts": ["다수의 로봇을 ARC로 연결하고 식음료·물품 배송 서비스를 제공한다고 설명한다.", "로보포트는 수직 레일과 상하부 수평 장치에서10개 운반기가 순환하는 구조라고 설명한다."],
+      "not_publicly_established": ["작업별 수요·납기·초기 층/SOC·충전 배치", "본 코드의 단일 캐빈 모델과 로보포트의 기구적 동등성"],
+      "mapping_limit": "2·3층/6대의 일반 단일 캐빈 승강기 연구 모델이다. 순환형 로보포트의10운반기를 독립 캐빈10대로 바꿔 입력하지 않는다. 제조 공장 사례와 별도 분석한다."
+    }
+  ]
+}

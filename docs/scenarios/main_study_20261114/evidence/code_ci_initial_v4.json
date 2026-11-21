@@ -1,0 +1,64 @@
+{
+  "commit": "2e5cf4b4a5e19ae5bb067aace5ab5e19452f7b6f",
+  "source_hash": "fac6d32ab3cbc9168b6a945344b9d699da7012f8706432c3591abdd4bfa0c3ad",
+  "run_id": 43600291866,
+  "jobs": [
+    {
+      "id": 132463379436,
+      "name": "acceptance (macos-latest, 3.11)",
+      "conclusion": "success",
+      "summary": [
+        "2026-11-14T13:36:24.5614030Z 632 passed, 3 warnings in 187.80s (0:03:07)"
+      ],
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379598,
+      "name": "acceptance (windows-latest, 3.11)",
+      "conclusion": "failure",
+      "summary": [
+        "2026-11-14T13:39:43.0323086Z FAILED gui/test_rh_gui.py::test_settings_and_default_factory_gui_response - AssertionError: {'platform': 'offscreen', 'initial_state_ready_seconds': 2.7071894000000043, 'factory_robots': 12, 'factory_stations': 9, ...}\r",
+        "2026-11-14T13:39:43.0326081Z 1 failed, 631 passed, 3 warnings in 301.65s (0:05:01)\r"
+      ],
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379649,
+      "name": "acceptance (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "summary": [
+        "2026-11-14T13:37:40.4227559Z 632 passed in 236.71s (0:03:56)"
+      ],
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379663,
+      "name": "acceptance (windows-latest, 3.14)",
+      "conclusion": "success",
+      "summary": [
+        "2026-11-14T13:39:12.0908731Z 632 passed, 4 warnings in 281.04s (0:04:41)\r"
+      ],
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379704,
+      "name": "acceptance (macos-latest, 3.14)",
+      "conclusion": "failure",
+      "summary": [
+        "2026-11-14T13:37:22.7200300Z FAILED gui/test_rh_gui.py::test_gui_policy_activation_async_solver_and_clean_shutdown[rh_cpsat_linear] - AssertionError: {'candidates': 1, 'total_pending': 1, 'reason': 'STALE_HORIZON', 'stale': 1, ...}",
+        "2026-11-14T13:37:22.7201460Z 1 failed, 631 passed, 4 warnings in 209.70s (0:03:29)"
+      ],
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132463379764,
+      "name": "acceptance (ubuntu-latest, 3.14)",
+      "conclusion": "success",
+      "summary": [
+        "2026-11-14T13:37:48.7208203Z 632 passed, 1 warning in 237.03s (0:03:57)"
+      ],
+      "unhandled_thread_warnings": 0
+    }
+  ],
+  "rerun_scope": "Only failed GUI response/async acceptance jobs; preserve first-attempt failures; no test thresholds changed"
+}

@@ -1,0 +1,108 @@
+{
+  "cwd": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_main_study_ready_20261114/robot_factory_sim",
+  "environment": {
+    "QT_QPA_PLATFORM": "offscreen",
+    "CLOVER_RAG_ENABLED": "0",
+    "CLOVER_RAG_ALLOW_NETWORK": "0",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "commands": {
+    "heldout_batch": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "execute-main-jobs",
+      "--bundle",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6",
+      "--phase",
+      "heldout",
+      "--limit",
+      "10"
+    ],
+    "heldout_collect": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "collect-main-jobs",
+      "--bundle",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6",
+      "--phase",
+      "heldout",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/heldout_collection.json"
+    ],
+    "heldout_plan": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "study-analysis-plan",
+      "--manifest",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/heldout_collection.json",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/heldout_analysis_plan.json"
+    ],
+    "heldout_analyze": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "compare",
+      "--plan",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/heldout_analysis_plan.json",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/heldout_analysis"
+    ],
+    "stress_batch": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "execute-main-jobs",
+      "--bundle",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6",
+      "--phase",
+      "stress",
+      "--limit",
+      "10"
+    ],
+    "stress_collect": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "collect-main-jobs",
+      "--bundle",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6",
+      "--phase",
+      "stress",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/stress_collection.json"
+    ],
+    "stress_plan": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "study-analysis-plan",
+      "--manifest",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/stress_collection.json",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/stress_analysis_plan.json"
+    ],
+    "stress_analyze": [
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/work/clover_prd_gate311_20261026/bin/python",
+      "-B",
+      "-m",
+      "simulation.evaluation",
+      "compare",
+      "--plan",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/stress_analysis_plan.json",
+      "--output",
+      "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/stress_analysis"
+    ]
+  },
+  "main_started": false
+}

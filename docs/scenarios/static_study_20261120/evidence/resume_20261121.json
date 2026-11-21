@@ -1,0 +1,53 @@
+{
+  "schema": "clover-static-resume-evidence-v1",
+  "observed_at_utc": "2026-11-21T06:45:16.588619+00:00",
+  "orchestration_commit": "6e504d9",
+  "source_hash": "94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05",
+  "bundle_manifest_sha256": "c4ab23c678c661e134bb7e802080387d584388343cd47447617a6571cada8566",
+  "session": "resume_20261121_01",
+  "counts": {
+    "SUCCESS": 64,
+    "NOT_STARTED": 556
+  },
+  "health": {
+    "recorded_status": "RUNNING",
+    "derived_status": "RUNNING",
+    "pid_alive": true,
+    "child_pid_alive": true,
+    "heartbeat_age_seconds": 0.950709
+  },
+  "driver_phase": "M2a",
+  "job033_status": "SUCCESS",
+  "resumed_policies": [
+    "rh_cpsat_linear",
+    "baseline"
+  ],
+  "preserved_completed_runs_before_resume": 61,
+  "recovered_native_runs_added": 0,
+  "new_native_runs_completed": 2,
+  "recovery": {
+    "schema": "clover-static-raw-recovery-v1",
+    "job": 33,
+    "policy": "rh_milp_grid",
+    "original_result": "job_033/DEV_GRID_A_ADV_L06_C2_A1_2026111904__rh_milp_grid__2026111904.json",
+    "original_sha256": "a4a18f7da2f392bdd38ab9ec74d4b8196de8a92f4fc332464624eaa8e3383495",
+    "recovered_result": "job_033/recovered/resume_20261121_01/rh_milp_grid/DEV_GRID_A_ADV_L06_C2_A1_2026111904__rh_milp_grid__2026111904.json.xz",
+    "recovered_stored_sha256": "aad6df6aef59871991e7b00610d82d7907e5ddc924522e4db96d0b0da55fb1f5",
+    "logical_sha256": "a4a18f7da2f392bdd38ab9ec74d4b8196de8a92f4fc332464624eaa8e3383495",
+    "additional_solver_runs": 0,
+    "original_raw_retained": true
+  },
+  "registered_remaining_native_runs": 558,
+  "resume_protocol_sha256": "bc17e0ac1960831e39fd14c715a2521f35775b467607e9743e63457c24a33f93",
+  "tests": {
+    "new_resume_unittest_py311": 11,
+    "new_resume_unittest_py314": 11,
+    "previous_static_repack_resume_regression": 19,
+    "previous_korean_input_execution_regression": 23
+  },
+  "limitations": [
+    "Intermediate progress, not completed 620-run study.",
+    "Cross-session job033 and original elapsed-budget uncertainty are retained.",
+    "The prior stopped-results report remains an as-of snapshot."
+  ]
+}
