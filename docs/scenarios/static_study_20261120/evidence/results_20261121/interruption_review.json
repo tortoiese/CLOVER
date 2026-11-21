@@ -1,0 +1,25 @@
+{
+  "schema": "clover-static-status-reconciliation-v1",
+  "detected_at_utc": "2026-11-21T05:59:52.271378+00:00",
+  "original_metadata": {
+    "campaign.json": "1b0b37dd955e493901336b4f0d67084fe56d7e1fe7a99051c2be222b6f63e02a",
+    "driver.json": "1d2c4abcfef1b8cd5ed4e7697c06dbea39867392b1e15df34fbf39af24e443b4",
+    "report.json": "0762a5423c6b3b9595a586395d25f194d1bb1228a52e70df947577ea020ff4f4",
+    "REPORT.md": "71932dc772b698d42d9902185b13a795e5df59e1206ba3b9f3e956a19f76d689",
+    "driver.log": "b58b8bdcef2af34399811d73d33268f03c8bbbd4fdec7072732be0bde3a429dc",
+    "readiness.json": "adb8c3fab1010a850c19a9db0ffd67708809677da394112b478f758c208e7c79"
+  },
+  "counts": {
+    "SUCCESS": 61,
+    "NOT_STARTED": 558,
+    "RESULT_UNFINALIZED": 1
+  },
+  "interrupted_job": 33,
+  "process_alive": false,
+  "exit_cause": "UNKNOWN",
+  "completed_result_files_audited": 62,
+  "raw_artifacts_changed": false,
+  "additional_solver_runs": 0,
+  "last_partial_archive_write_utc": "2026-11-20T11:06:08.808721+00:00",
+  "scope": "administrative checkpoint reconciliation; original metadata snapshots retained in report/source_state"
+}

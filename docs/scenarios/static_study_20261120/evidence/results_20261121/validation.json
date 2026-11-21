@@ -1,0 +1,40 @@
+{
+  "schema": "clover-static-report-validation-v1",
+  "status": "PASS",
+  "raw_results_audited": 62,
+  "checkpointed_results": 61,
+  "unfinalized_raw_results": 1,
+  "primary_policy_runs": 40,
+  "primary_blocks": 10,
+  "unique_archived_files": 4241,
+  "markdown_tables": 17,
+  "local_references": 11,
+  "images": {
+    "coverage.png": [
+      1582,
+      740
+    ],
+    "paired_gain.png": [
+      2180,
+      920
+    ],
+    "throughput.png": [
+      2180,
+      1010
+    ],
+    "tradeoffs.png": [
+      2180,
+      830
+    ]
+  },
+  "arithmetic": "task-derived throughput/lateness and independently recomputed paired means/latency quantiles",
+  "source_metadata_snapshots_unchanged": true,
+  "files": {
+    "data.json": "5834c124a32f6e88237bf7b9cb6eb94db6c5a07a50d15bd8f897806beaf2a099",
+    "summary.json": "9157396938939bd0f815377ac028e1463c797bbf9e08a6bf585b075ad9b5fc10",
+    "REPORT.md": "9a2fcf1e495846a1617aa5cb59a716bdb4ae3b50582599e4de8bd3d4e5df6416",
+    "REPORT.html": "c96b7ecc04b28f5530d7d2d82e13098d8b339694bed2d2ff2202e95788410eee",
+    "interruption_review.json": "1525933a3b56874d12f478e71db7f96742a8cdcc7d59bd850507ec4a650a53bb",
+    "rejected_plan_review.json": "0914b0228cb8513719edbc36413e68763298b4fb69f7027438184596682d897e"
+  }
+}
