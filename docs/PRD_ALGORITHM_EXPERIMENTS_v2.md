@@ -1011,3 +1011,5 @@ XZ 기준 남은600회 저장량은 canary 최대 arm 크기×600×1.5로 약1.8
 운영 보완: 분리 실행, 원래 host lock, 감시 프로세스의15초 heartbeat와 실제 PID/생성시각 확인, 자식 종료코드·종료 영수증, 고아 자식 감지, 단계별 native search/primary 반영 검사. 생존 상태가 불명확하면 RUNNING으로 단정하지 않는다. macOS 실행 동안 idle sleep 방지를 함께 사용한다. 이는 전체 실행의 무중단 보장이 아니라 중단을 관측·기록하기 위한 보완이다.
 
 검증: 신규 재개11개는 Python3.11/3.14에서 통과했다. 기존 static/repack/resume 회귀와 한국 사례 입력·실행 회귀도 재확인했다. 모델 source hash는 기존과 같으며 사전 기술20회를 다시 생성하지 않는다. 실제 복구·재개 결과는 이후 영수증으로 추가한다. M2/M3 완료나 M4 등록을 미리 주장하지 않는다.
+
+재개 관측: `6e504d9` 분리 checkout에서 감독 프로세스가 PID1의 자식·별도 프로세스 그룹으로 실행됨을 확인했다. 감시·복구 자식의 실제 생존과15초 heartbeat를 확인했고, job033의 원시 MILP를 원본 보존·동일 논리 hash로 복구했다(추가solver0회). 같은 입력의 미실행 CP-SAT·baseline이 원래 순서대로 SUCCESS로 끝나 **64 SUCCESS / 556 NOT_STARTED**, M2a44/180·전체개발44/360 상태에서 M2a를 계속 실행 중이다. [재개 근거](scenarios/static_study_20261120/evidence/resume_20261121.json)에 세션·source·복구hash·건수·생존검사와 한계를 보존한다. 이 숫자는 관측 시점의 체크포인트이며 전체 종료 결과가 아니다.
