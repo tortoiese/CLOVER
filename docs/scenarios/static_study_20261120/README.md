@@ -98,3 +98,13 @@ python scripts/resume_static_scenario_study.py --bundle /absolute/path/static_in
 신규 재개 회귀11개가 로컬 Python3.11/3.14에서 통과했다. 원본·부분압축 보존, 압축된 CAS 복구, 원래 정책 순서, 미실행만 선택, 원시 검수 전 승격 거부, 자식 실패 종료 기록, PID 재사용·접근 거부·고아 자식·heartbeat 지연 판정을 검증했다. 현재 확보자료 종합 보고서는 중단 시점의 고정 이력으로 유지한다.
 
 실제 재개 세션 `resume_20261121_01`에서 job033 복구와 누락2정책 실행이 성공했고,64회 저장 완료·556회 미실행 시점에서 M2a를 계속 수행 중이다. [재개 영수증](evidence/resume_20261121.json)을 참고한다. 최신 실행 상태는 위 status 명령으로 실제 프로세스와 함께 확인한다.
+
+## 2026-11-22 시간 초과 검수 후 재개
+
+이전 세션은215정상·1시간 계측 실패·404미실행에서 중단됐다. M2a180회는 모두 정상 종료됐다. M2b의 job081 MILP는 결과 반영0.201972초가 예납0.2초를 넘었으므로 실패를 유지한다. 원시 작업·자원·에너지 검수와 기록 재생이 일치했다. 재생은 native solver를 다시 실행한 실험이나 실패의 대체 표본이 아니다. 원래 wall 초과의 근본 원인은 확정하지 못했다.
+
+검수 후 재개는 `review_static_timing_failure.py --mode create`로 원래 실패의 result/events hash·동일 source/환경/설정·원시 감사·기록 재생을 먼저 묶어 등록한다. `resume_static_scenario_study.py`에 `--coverage-review /absolute/path/timing_review.json`을 전달하면 이 **정확한 실패만** 단계 진행에 허용한다. 새 실패나 변경된 결과는 거부한다. 등록 뒤 영수증·감독/검수 도구가 바뀌어도 중단한다.
+
+M2b 미실행164회 다음에 M3 미실행240회를 원래 순서·정책·예산으로 진행한다. M3는 개발360개 arm이 모두 종료되고 검수되지 않은 실패가 없을 때만 시작한다. 이 조건은 별도 validation launcher의 명시적 절차 개정이며, 원래 SUCCESS 조건을 만족했다고 표시하지 않는다. 기존 canary20회 기술 게이트는 유지한다.
+
+실패1회를 재실행하거나 SUCCESS로 바꾸지 않는다. 최종 상태도 `COMPLETE_WITH_REVIEWED_FAILURES`로 구분한다. 전체620회 분모에서 실패를 공개하며, 네 정책의 주 성능 비교에서는 해당 입력 블록 전체를 제외한다. 정책별 사용 가능한 쌍의 민감도와 교차 세션 민감도는 별도로 본다. 기본 정책·모델·가중치와2초/0.2초 시간 설정은 유지한다. [PRD §41](../../PRD_ALGORITHM_EXPERIMENTS_v2.md)과 [검수 근거](evidence/timing_review_20261122.json)를 참고한다.

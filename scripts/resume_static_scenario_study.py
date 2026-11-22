@@ -290,12 +290,31 @@ def recover_interrupted(bundle: Path, output: Path, session: Path) -> None:
             checkpoint(output, campaign, job, suite)
 
 
-def phase_valid(campaign: dict[str, Any], phase: str) -> bool:
-    """Require complete operating evidence and real RH use before the next stage."""
+def phase_valid(
+    campaign: dict[str, Any], phase: str, reviewed: dict[tuple[int, str], dict[str, Any]] | None = None
+) -> bool:
+    """Require closed evidence and RH use; only exact pre-reviewed failures may pass.
+
+    A reviewed timing failure remains invalid for performance comparisons.
+    The optional review permits progression, never a replacement SUCCESS label.
+    """
+    reviewed = reviewed or {}
+
+    def closed(job: dict[str, Any], arm: dict[str, Any]) -> bool:
+        if arm["status"] == "SUCCESS":
+            return True
+        receipt = reviewed.get((job.get("index"), arm["policy"]))
+        return bool(
+            receipt and receipt["status"] == arm["status"] == "TIMING_COVERAGE_VIOLATION"
+            and receipt["result_sha256"] == arm.get("result_sha256")
+        )
+
     return all(
-        j["status"] == "SUCCESS"
+        (j["status"] == "SUCCESS" or (
+            j["status"] == "PARTIAL" and any((j.get("index"), a["policy"]) in reviewed for a in j["arms"])
+        ))
         and all(
-            a["status"] == "SUCCESS"
+            closed(j, a)
             and (
                 not a["policy"].startswith("rh_")
                 or (
@@ -310,9 +329,14 @@ def phase_valid(campaign: dict[str, Any], phase: str) -> bool:
     )
 
 
-def supervise(bundle: Path, output: Path, session: Path) -> None:
+def supervise(bundle: Path, output: Path, session: Path, *, review: Path | None = None) -> None:
     """Monitor original frozen launchers in separate process groups with durable heartbeat/exit receipts."""
     campaign = open_campaign(bundle, output)
+    reviewed: dict[tuple[int, str], dict[str, Any]] = {}
+    if review is not None:
+        from review_static_timing_failure import load_review
+
+        reviewed = load_review(review, campaign, output)
     previous_driver = json.loads((output / "driver.json").read_text(encoding="utf-8"))
     if health(previous_driver)["pid_alive"]:
         raise ValueError("another matching supervisor is alive")
@@ -357,6 +381,17 @@ def supervise(bundle: Path, output: Path, session: Path) -> None:
             "interrupted_job_budget": "3600s active continuation segment; previous unfinished archive elapsed unknown",
             "analysis": "retain original sessions and cross_session flag; report interrupted-block sensitivity",
         }
+        if review is not None:
+            protocol.update(
+                coverage_review=str(review), coverage_review_sha256=file_sha(review),
+                reviewed_failures=list(reviewed.values()),
+                review_tool_sha256=file_sha(REPO / "scripts/review_static_timing_failure.py"),
+                analysis=("retain the reviewed failure in the 620-arm denominator; exclude timing-invalid "
+                          "performance pairs; retain cross-session sensitivity; no retries, "
+                          "no timing guarantee, no M4 confirmation"),
+                validation_gate_amendment=("all development arms must close; only exact pre-reviewed timing "
+                                          "failures may progress; any new failure still stops execution"),
+            )
         save(session / "protocol.json", protocol)
         state = {
             "schema": "clover-static-driver-v2",
@@ -383,6 +418,13 @@ def supervise(bundle: Path, output: Path, session: Path) -> None:
         signal.signal(signal.SIGINT, request_stop)
 
         def child(arguments: list[str], label: str) -> None:
+            if file_sha(Path(__file__)) != protocol["supervisor_sha256"]:
+                raise ValueError("registered supervisor changed")
+            if review is not None and (
+                file_sha(review) != protocol["coverage_review_sha256"]
+                or file_sha(REPO / "scripts/review_static_timing_failure.py") != protocol["review_tool_sha256"]
+            ):
+                raise ValueError("registered coverage review or validation launcher changed")
             state.update(current_phase=label, heartbeat_at_utc=now())
             with (session / (label + ".log")).open("xb") as log:
                 process = subprocess.Popen(
@@ -434,8 +476,14 @@ def supervise(bundle: Path, output: Path, session: Path) -> None:
                 "RECOVERY",
             )
             for phase in PHASES:
-                child(
-                    [
+                if phase == "M3" and review is not None:
+                    arguments = [
+                        str(REPO / "scripts/review_static_timing_failure.py"),
+                        "--bundle", str(bundle), "--output", str(output),
+                        "--review", str(review), "--mode", "validation",
+                    ]
+                else:
+                    arguments = [
                         str(REPO / "scripts/run_static_scenario_study.py"),
                         "--bundle",
                         str(bundle),
@@ -443,11 +491,14 @@ def supervise(bundle: Path, output: Path, session: Path) -> None:
                         str(output),
                         "--phase",
                         phase,
-                    ],
-                    phase,
-                )
+                    ]
+                child(arguments, phase)
                 current = json.loads((output / "campaign.json").read_text(encoding="utf-8"))
-                if not phase_valid(current, phase):
+                if review is not None:
+                    if file_sha(review) != protocol["coverage_review_sha256"]:
+                        raise ValueError("registered coverage review changed")
+                    reviewed = load_review(review, current, output)
+                if not phase_valid(current, phase, reviewed):
                     raise RuntimeError("phase incomplete or RH native coverage missing; review required")
                 state["completed_phases"].append(phase)
                 child(
@@ -462,7 +513,12 @@ def supervise(bundle: Path, output: Path, session: Path) -> None:
                     ],
                     phase + "_REPORT",
                 )
-            state["status"] = "COMPLETE"
+            state["status"] = "COMPLETE_WITH_REVIEWED_FAILURES" if reviewed else "COMPLETE"
+            if reviewed:
+                current = json.loads((output / "campaign.json").read_text(encoding="utf-8"))
+                current["status"] = state["status"]
+                current["coverage_review"] = str(review)
+                save(output / "campaign.json", current)
         except BaseException as exc:
             state.update(status="STOPPED_REQUIRES_REVIEW", failure=f"{type(exc).__name__}: {exc}")
             current = json.loads((output / "campaign.json").read_text(encoding="utf-8"))
@@ -490,6 +546,7 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--session", default="resume_20261121")
     parser.add_argument("--mode", required=True, choices=["supervise", "recover", "status"])
+    parser.add_argument("--coverage-review", type=Path)
     args = parser.parse_args()
     bundle, output = args.bundle.resolve(), args.output.resolve()
     if not args.session.replace("_", "").isalnum():
@@ -504,7 +561,7 @@ def main() -> None:
             raise ValueError("resume tool changed after registration")
         recover_interrupted(bundle, output, session)
     else:
-        supervise(bundle, output, session)
+        supervise(bundle, output, session, review=args.coverage_review.resolve() if args.coverage_review else None)
 
 
 if __name__ == "__main__":
