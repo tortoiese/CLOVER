@@ -130,5 +130,41 @@
   "native_retries": 0,
   "next_session": "resume_20261122_01",
   "planned_remaining_native_runs": 404,
-  "analysis": "Primary four-policy common cohort excludes the entire failed input block; available-case pairwise results are sensitivity only. Retain the failure in all 620 planned arms and retain cross-session sensitivity. M4 remains unregistered."
+  "analysis": "Primary four-policy common cohort excludes the entire failed input block; available-case pairwise results are sensitivity only. Retain the failure in all 620 planned arms and retain cross-session sensitivity. M4 remains unregistered.",
+  "resume_observation": {
+    "session": "resume_20261122_01",
+    "health": {
+      "recorded_status": "RUNNING",
+      "derived_status": "RUNNING",
+      "pid_alive": true,
+      "child_pid_alive": true,
+      "heartbeat_age_seconds": 3.424819
+    },
+    "phase": "M2a_REPORT",
+    "completed_phases": [
+      "M2a"
+    ],
+    "failure": null,
+    "parent_pid": 1,
+    "checkpoint_counts": {
+      "SUCCESS": 215,
+      "NOT_STARTED": 404,
+      "TIMING_COVERAGE_VIOLATION": 1
+    },
+    "active_jobs": [],
+    "runtime_commit": "0e41b16",
+    "protocol_sha256": "e43f4ddfbc78b12a0ca77887102e935c19d4495e811ad49cb97e56a2213fd794",
+    "protocol_remaining": 404,
+    "heartbeat_at_utc": "2026-11-22T06:29:12.331109+00:00"
+  },
+  "tests": {
+    "python_3_11": {
+      "passed": 29
+    },
+    "python_3_14": {
+      "passed": 29
+    },
+    "lint": "PASS",
+    "diff_check": "PASS"
+  }
 }
