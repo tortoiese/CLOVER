@@ -1,0 +1,4277 @@
+{
+  "source_hash": "fac6d32ab3cbc9168b6a945344b9d699da7012f8706432c3591abdd4bfa0c3ad",
+  "reports": [
+    {
+      "case": "training_S01_joint_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S01_joint_L0_r1/calibration.json",
+      "sha256": "5e863edfbed5d46b1535d67cd4cbdc58ac48dca1e4f322a00f4d387ef5a97c69",
+      "reasons": [],
+      "seed": 200100001,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.352745005872436
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 44.070221722809634
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 42.71173273613226
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S06_smooth_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S06_smooth_L0_r2/calibration.json",
+      "sha256": "77691dcb00e0ed020e9ccf0896cde9bd28733814dd6c5227ca30f746d213d021",
+      "reasons": [],
+      "seed": 200600002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.668990702830797
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.668990702830797
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.379512130866942
+        },
+        "R4": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.68043158861303
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.873088861525503
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.17951213086735
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.600403135961415
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S02_width_1p3_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S02_width_1p3_L0_r1/calibration.json",
+      "sha256": "77a592017b5946f785ea15cfa0cdd4e0b0a2f2d32bbc521e620eeab12fcc5078",
+      "reasons": [],
+      "seed": 200200001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 73.65314954251858
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 72.46023316437288
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 71.23054893410881
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 78.54523093589933
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S08_cabins_1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S08_cabins_1_L0_r0/calibration.json",
+      "sha256": "6e0c43bd39579c3341885f9dd94396e7f2794a1c94ca24fc8829a08c67e4fd71",
+      "reasons": [],
+      "seed": 200800000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 122.09108624084735
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 77.36081613259671
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 112.18851637333614
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.6329494826561
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S07_heterogeneous_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S07_heterogeneous_L0_r1/calibration.json",
+      "sha256": "b6ffcac75337242cdd88ae467302dd14fc4f66b87d145c9cdd46b3254fd55dd5",
+      "reasons": [],
+      "seed": 200700001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 37.314143608012955
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 42.59087152282291
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.74698839833968
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 69.013569437152
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S11_grid64_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S11_grid64_L0_r1/calibration.json",
+      "sha256": "f58155a0f09364c01032bdc2aec5840ac7704f2dee13baf395f939d679a13f90",
+      "reasons": [],
+      "seed": 201100001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.78909564023138
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.78909564023138
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S03_intersection_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S03_intersection_L0_r2/calibration.json",
+      "sha256": "838b72ad2613c9cac8b378b31f625350f4fa1b0a4d9fa4ba96d89127ebad7519",
+      "reasons": [],
+      "seed": 200300002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 35.154413979879564
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 35.16641213724938
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.87438002192516
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 40.570578315297325
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S01_joint_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S01_joint_L0_r0/calibration.json",
+      "sha256": "31da18aa8f96e671a210e02a1bc7c46d97ed01d268daa75025d3165050e7a7ba",
+      "reasons": [],
+      "seed": 200100000,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.352745005872436
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 44.070221722809634
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 42.71173273613226
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S05_hotspot_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S05_hotspot_L0_r1/calibration.json",
+      "sha256": "e3b18507c425b77c5fe875d2a81994170c3c52ad136897a7d018ce411e4e985f",
+      "reasons": [],
+      "seed": 200500001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.546058499736773
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 30.901938874773123
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.234673281826986
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.589194567434333
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 35.2951623088984
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 34.11617027034026
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.265432596638902
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.069752630480934
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S06_smooth_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S06_smooth_L0_r0/calibration.json",
+      "sha256": "464bdd0b0d017401d2e349daa7786c87ddab3ed765923d5a9a1920e5cbfa936e",
+      "reasons": [],
+      "seed": 200600000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.482238008229615
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.379512130866942
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.436841043380355
+        },
+        "R5": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.311551338050094
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.038865612486006
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S04_slots_1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S04_slots_1_L0_r1/calibration.json",
+      "sha256": "d5fb2ce6b8b0e2d98cfd406ab321b86dcffb8fad0ec01721f86cb11a3b04bb13",
+      "reasons": [],
+      "seed": 200400001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 136.11841587745477
+        },
+        "R1": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 94.6524702322167
+        },
+        "R2": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 103.39405589703489
+        },
+        "R3": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 105.6918843248708
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S10_load_1p1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S10_load_1p1_L0_r0/calibration.json",
+      "sha256": "ec55f925cd20bbdd6d20af10ff392d12a9d72bc76a19d728c18e6bb485f18b03",
+      "reasons": [],
+      "seed": 201000000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 186.17134701284215
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 118.65689860285103
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 114.29827031498746
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 119.49929097429333
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S00_low_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S00_low_L0_r2/calibration.json",
+      "sha256": "3150df8cbc6e9590fdcceff91dc401b83af4233746a116d2875da544819079dc",
+      "reasons": [],
+      "seed": 200000002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.5932840604313
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 66.00906316869555
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.0830156305999
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S03_intersection_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S03_intersection_L0_r1/calibration.json",
+      "sha256": "a925c215e8b6c81583d13d04c48917d1ad937c3c82e7b1c2bf7f57f590f35e88",
+      "reasons": [],
+      "seed": 200300001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.72983562217746
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.33513299567335
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.78135320622937
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.65256443189401
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S04_slots_1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S04_slots_1_L0_r0/calibration.json",
+      "sha256": "fad69f055da3fedd9fcbda907d9c2e23866551ab893c40b668171de236636798",
+      "reasons": [],
+      "seed": 200400000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 119.02245316607534
+        },
+        "R1": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 105.71934906970478
+        },
+        "R2": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 120.72624453534031
+        },
+        "R3": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 107.97756777431057
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S04_slots_1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S04_slots_1_L0_r2/calibration.json",
+      "sha256": "e6b31df5521ccbf212e24d045673905fe72fa7020446efcdbfadc525e5647573",
+      "reasons": [],
+      "seed": 200400002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 11,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 103.10232167995717
+        },
+        "R1": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 101.55912353534814
+        },
+        "R2": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 127.97594797720959
+        },
+        "R3": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 107.31147345515788
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S07_heterogeneous_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S07_heterogeneous_L0_r0/calibration.json",
+      "sha256": "d915741ef206ea12b6a64c72631a29272e51ae4158d3d60069aeddef121396b5",
+      "reasons": [],
+      "seed": 200700000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 30.90310527385782
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 65.006210547715
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.966723845417164
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 65.81724888186955
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S05_hotspot_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S05_hotspot_L0_r0/calibration.json",
+      "sha256": "c600929ae17280eb8680a88a320f39bb44235d50546a61a932b41d28ced76501",
+      "reasons": [],
+      "seed": 200500000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.529390937586754
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.34769281799936
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.234673281826417
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.135155584479435
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.468575388755653
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.197661316107883
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.1534783967943
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.53681083464494
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S10_load_1p1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S10_load_1p1_L0_r1/calibration.json",
+      "sha256": "1a54f8a4e00c84d7eda7d0ad24259719c76c61b0d67f7ae230ae32bedf1776f4",
+      "reasons": [],
+      "seed": 201000001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 133.17763415629543
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 129.17857661093194
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 129.059168924843
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 130.3229916046348
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S11_grid64_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S11_grid64_L0_r2/calibration.json",
+      "sha256": "0ba2e08ffd0f81f85e4eda0f168ff505e4e94c73a65d0827bf566657ad1bbc18",
+      "reasons": [],
+      "seed": 201100002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.56490303573082
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S02_width_1p3_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S02_width_1p3_L0_r2/calibration.json",
+      "sha256": "dccbf700bd9d14120fa88daba238b86a1be7d061c2056b77b574a5c3f7dbfe18",
+      "reasons": [],
+      "seed": 200200002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 131.22908753766524
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 133.7449823476129
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 60.643228535285516
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.45963066750278
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S07_heterogeneous_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S07_heterogeneous_L0_r2/calibration.json",
+      "sha256": "6ca86cbd6c1616ea71796b8e0b09e4fe9b0ab55670f5fcc46790c9185617e1f8",
+      "reasons": [],
+      "seed": 200700002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.143308953621045
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 65.80988999243345
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 34.27026048353014
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.670260483530456
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S11_grid64_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S11_grid64_L0_r0/calibration.json",
+      "sha256": "be7128c3377fa2a3754a2095e7d65bfc744a029b52cb491253d01769e1f0e740",
+      "reasons": [],
+      "seed": 201100000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.56490303573082
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.76902114191216
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.56902114191257
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.2944655613619
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S06_smooth_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S06_smooth_L0_r1/calibration.json",
+      "sha256": "0eb1051fdcde5e5f62de00cbb2a787b2424dc3572d9799ecba6548e021edb43d",
+      "reasons": [],
+      "seed": 200600001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 30.92070048475307
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.379512130866942
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.379512130866942
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.668990702830797
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.368880250563507
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.873088861525503
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.668990702830797
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 20.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S08_cabins_1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S08_cabins_1_L0_r2/calibration.json",
+      "sha256": "5a405a756be48d6be0e57af016048ae2a035e28d1cbcf71931fd4a6df1e46396",
+      "reasons": [],
+      "seed": 200800002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 112.77439051892657
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 83.63714040222817
+        },
+        "R2": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 116.55691489925374
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 112.76737977822592
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S00_low_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S00_low_L0_r1/calibration.json",
+      "sha256": "9f23589ef093ce64f733100df170b2d16ed2548c43deabcdae3d64b433bf0067",
+      "reasons": [],
+      "seed": 200000001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.413196870090587
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.44838802967729
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S03_intersection_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S03_intersection_L0_r0/calibration.json",
+      "sha256": "87ba85c0a64b23af385861f2df43a6933e1736bce51935b7a19f8268e5f18db3",
+      "reasons": [],
+      "seed": 200300000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.55731105810696
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.39846640863243
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S08_cabins_1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S08_cabins_1_L0_r1/calibration.json",
+      "sha256": "02bd012f9d37fbfc5166ddb7268ccda3f19b5133b0d48e609fa98132f8493b6f",
+      "reasons": [],
+      "seed": 200800001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 79.63172633549732
+        },
+        "R1": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 118.39833085299233
+        },
+        "R2": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 122.1965658526372
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 88.56554627209675
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S09_recovery_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S09_recovery_L0_r1/calibration.json",
+      "sha256": "a9534077a8cf609f6b20fd42a32ca938ac3e0c1828e927f299edccb5eae4263b",
+      "reasons": [],
+      "seed": 200900001,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 35,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 412.8726685939789
+        },
+        "R1": {
+          "completed": 30,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 388.46239569085225
+        },
+        "R2": {
+          "completed": 33,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 419.7456615539782
+        },
+        "R3": {
+          "completed": 31,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 412.94450211171073
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S02_width_1p3_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S02_width_1p3_L0_r0/calibration.json",
+      "sha256": "aa5ba49da5399792b0cb2cdd666ba43c6fa1ac1f1221ded15db0a6eaff5305d6",
+      "reasons": [],
+      "seed": 200200000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 115.57801720286874
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 114.85763991372664
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 110.5170988980302
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 118.75532202206728
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S09_recovery_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S09_recovery_L0_r2/calibration.json",
+      "sha256": "5260373e1963967fcaca5635c0e2d451990e37fecc0c66462b734d3c4d59b47d",
+      "reasons": [],
+      "seed": 200900002,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 35,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 449.5693156752539
+        },
+        "R1": {
+          "completed": 30,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 419.7870024441756
+        },
+        "R2": {
+          "completed": 32,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 429.9969900167766
+        },
+        "R3": {
+          "completed": 32,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 435.7188525071
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S00_low_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S00_low_L0_r0/calibration.json",
+      "sha256": "84c81ba810d8cd504d82bd8876482d8270590bc207644f984518c498785d30cd",
+      "reasons": [],
+      "seed": 200000000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.35915614998737
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.34756654069065
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S09_recovery_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S09_recovery_L0_r0/calibration.json",
+      "sha256": "0b6e75c50caeaa62dd2927ee9b4a8018b7be020c37d6682a2813839e3c419269",
+      "reasons": [],
+      "seed": 200900000,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 35,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 431.0040703561997
+        },
+        "R1": {
+          "completed": 33,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 429.15393215675437
+        },
+        "R2": {
+          "completed": 32,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 411.6094413181683
+        },
+        "R3": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 430.20951371094924
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S05_hotspot_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S05_hotspot_L0_r2/calibration.json",
+      "sha256": "1af983a9bba8a94139d1ba0c585ea9d1b7e8e5ed8a3d32daf0e4bd6823d1ea74",
+      "reasons": [],
+      "seed": 200500002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.44316571033869
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.75745211342041
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 65.06756612183096
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 69.06377886208645
+        },
+        "R4": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 67.2120456556047
+        },
+        "R5": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 67.30376016215246
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.269655147789308
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.681048761473676
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S10_load_1p1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S10_load_1p1_L0_r2/calibration.json",
+      "sha256": "d438ea1d1043adcfdf1ebaeb200e8f730a822da6c9224c05ed798942a0ea7314",
+      "reasons": [],
+      "seed": 201000002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 131.12739154483052
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 114.35619370511121
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 131.01283588866465
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 131.18668971114914
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "training_S01_joint_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/training_S01_joint_L0_r2/calibration.json",
+      "sha256": "ef572f76627b7e34a0951b64be794567ce84079d9100d93cf64fd710e0f35649",
+      "reasons": [],
+      "seed": 200100002,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.352745005872436
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 44.070221722809634
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 42.71173273613226
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S06_smooth_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S06_smooth_L0_r0/calibration.json",
+      "sha256": "7fe105c7288e8bac516a25192b4ed2e3fe3c27c5a4287d37deec4f338d8c788d",
+      "reasons": [],
+      "seed": 300600000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 45.93496609485442
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.00605958136293
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.60894171407756
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.21748168320778
+        },
+        "R4": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.76279095633981
+        },
+        "R5": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.200934798181606
+        },
+        "R6": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.22865411085161
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.30855936410171
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S09_recovery_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S09_recovery_L0_r2/calibration.json",
+      "sha256": "5f875b98a9d5e2506b0bfa63dea6f02933bf840f8582dd5f3be54b4f7ee6a830",
+      "reasons": [],
+      "seed": 300900002,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 38,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 422.6117861281001
+        },
+        "R1": {
+          "completed": 37,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 409.4904750650304
+        },
+        "R2": {
+          "completed": 37,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 406.8858360931075
+        },
+        "R3": {
+          "completed": 37,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 417.2638070803674
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S10_load_1p1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S10_load_1p1_L0_r1/calibration.json",
+      "sha256": "10d46a2a332db09caa8237508c521407c1e99ef3694203b6396b22e4fcc85499",
+      "reasons": [],
+      "seed": 301000001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 114.66316191147996
+        },
+        "R1": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 152.12313910770405
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 116.26804549947396
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 130.75578567083085
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S09_recovery_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S09_recovery_L0_r1/calibration.json",
+      "sha256": "9aa4eea01d90072f5b4eaa0c7123aecf9e022286fc68a95d2c52d2645fc1224e",
+      "reasons": [],
+      "seed": 300900001,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 403.8361554093623
+        },
+        "R1": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 402.48519293903587
+        },
+        "R2": {
+          "completed": 38,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 405.55597371314224
+        },
+        "R3": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 378.6838657122071
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S06_smooth_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S06_smooth_L0_r1/calibration.json",
+      "sha256": "2b432d48a95aecbf4d731df9e1ba755b6223f21061cec67a699ae9129af8da21",
+      "reasons": [],
+      "seed": 300600001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.64797692102377
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 64.22825182120732
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.304470857038496
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.304470857038496
+        },
+        "R4": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 95.17711801176603
+        },
+        "R5": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.405645354818944
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.304470857038496
+        },
+        "R7": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.11502123510792
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S04_slots_1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S04_slots_1_L0_r2/calibration.json",
+      "sha256": "2d2f5ab21e6f3888a67eddca2f28299de81773026c4f21f71628a54785a02275",
+      "reasons": [],
+      "seed": 300400002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 7,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 97.59840851961008
+        },
+        "R1": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 103.78147475516302
+        },
+        "R2": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 107.63983074472131
+        },
+        "R3": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 113.3531536046803
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S04_slots_1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S04_slots_1_L0_r0/calibration.json",
+      "sha256": "74116894ae31872fbdbc604174fbcff7ebf1654dc3fec0afdef2967a6e44d4e3",
+      "reasons": [],
+      "seed": 300400000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 108.50782458791404
+        },
+        "R1": {
+          "completed": 7,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 98.75587991618859
+        },
+        "R2": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 94.52822941048031
+        },
+        "R3": {
+          "completed": 10,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 121.42940072567285
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S08_cabins_1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S08_cabins_1_L0_r1/calibration.json",
+      "sha256": "f1156bff76eff7f452dbabfb307fd8f6ecb4c11af0c4222740703aea6c009bdf",
+      "reasons": [],
+      "seed": 300800001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 124.534203727751
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 138.34095786421472
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 119.39752906242575
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 133.48946435089601
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S11_grid64_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S11_grid64_L0_r2/calibration.json",
+      "sha256": "737713193bcccae748f504ee15ae669f6e1aab769e45b63078980d8c5969601c",
+      "reasons": [],
+      "seed": 301100002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.21862365484549
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.43698632579253
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.43698632579253
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.21862365484549
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S00_low_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S00_low_L0_r2/calibration.json",
+      "sha256": "f49d3f7ca042a5859b797d7ffa8c8d0276da939ddd6d49035334d68e1e4619dc",
+      "reasons": [],
+      "seed": 300000002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S00_low_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S00_low_L0_r0/calibration.json",
+      "sha256": "8f0a4aa1d4c0d80d18e6c687427e117542dd70bbcaa442a4651ccddcbb2a6472",
+      "reasons": [],
+      "seed": 300000000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S05_hotspot_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S05_hotspot_L0_r1/calibration.json",
+      "sha256": "fafe55d1bb611b2cf69bbbec55141457e82a81ed756cdd3636019ea48fe37844",
+      "reasons": [],
+      "seed": 300500001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.702723102017103
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 37.45232045878765
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.705705089519824
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.20754636599827
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 30.94471904526671
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 42.7924674774556
+        },
+        "R6": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.84131541246893
+        },
+        "R7": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.620495522923875
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S06_smooth_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S06_smooth_L0_r2/calibration.json",
+      "sha256": "c4767410328835ac00f461d5f0143a520a33b8215935a281e51f3b953e79258e",
+      "reasons": [],
+      "seed": 300600002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.93181146707377
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 1,
+          "open": 0,
+          "delivered_energy": 63.22354126457071
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.422192239845117
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.422192239845117
+        },
+        "R4": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.83720438911445
+        },
+        "R5": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.28792397201232
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.422192239845117
+        },
+        "R7": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.321330490671585
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S01_joint_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S01_joint_L0_r1/calibration.json",
+      "sha256": "728c8494eab3e2032af50239675091819f483d0502f8371a405122db531f1958",
+      "reasons": [],
+      "seed": 300100001,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.755309301604655
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.14750676209536
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 52.62615685099615
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S07_heterogeneous_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S07_heterogeneous_L0_r1/calibration.json",
+      "sha256": "f8784c542aca0292a1e5e7d971a51c6a16f9fbba6dcd26a8bf9ed93dddceecbe",
+      "reasons": [],
+      "seed": 300700001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 72.74200714250924
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 69.91484619987546
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.642395827713244
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 73.92684945568476
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S00_low_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S00_low_L0_r1/calibration.json",
+      "sha256": "537215e9742704b388a686bc3567247356118f0131bd2620005352a94c9666bc",
+      "reasons": [],
+      "seed": 300000001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S08_cabins_1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S08_cabins_1_L0_r0/calibration.json",
+      "sha256": "1c2eddf4728730614ea8152e6c80f87730a36f363c712c21e80f214f84e80a7b",
+      "reasons": [],
+      "seed": 300800000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 121.30439292517396
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 139.22101389650663
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 122.81920209132922
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 122.32464978122891
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S07_heterogeneous_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S07_heterogeneous_L0_r0/calibration.json",
+      "sha256": "f7a9df99e129cbb7d8e14b336130460abd402c09c08cc7cbb74608269e627e6c",
+      "reasons": [],
+      "seed": 300700000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 71.4423958277132
+        },
+        "R1": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 115.61232080718355
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 32.005265269222605
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 66.49658661961297
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S02_width_1p3_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S02_width_1p3_L0_r2/calibration.json",
+      "sha256": "8f93d81d8e934c2809e43b87006ed3172094469a5f74411dd550d1ef901a93b4",
+      "reasons": [],
+      "seed": 300200002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 84.94768209189886
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 67.4169047246312
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 74.31299158336742
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 109.83516284584255
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S04_slots_1_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S04_slots_1_L0_r1/calibration.json",
+      "sha256": "4acb9e86e74a0817a05d0bdde4da776b7bc52dd562b64a9d768cc9f0c13d1cfb",
+      "reasons": [],
+      "seed": 300400001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 2,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 1,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 121.82466592479531
+        },
+        "R1": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 99.5628303524293
+        },
+        "R2": {
+          "completed": 8,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 97.28017408220572
+        },
+        "R3": {
+          "completed": 9,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 122.26497036816515
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S11_grid64_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S11_grid64_L0_r1/calibration.json",
+      "sha256": "ce1590e477294fe0c512326b0f0c02c13f3871d3c147da2fc54c9b5fc335ca41",
+      "reasons": [],
+      "seed": 301100001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.43698632579253
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.43698632579253
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.94971470662972
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.21862365484549
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S03_intersection_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S03_intersection_L0_r1/calibration.json",
+      "sha256": "03537cfb2fb5799a38211a25609e4c9eb12751c9c97913482d1d42b51588c433",
+      "reasons": [],
+      "seed": 300300001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.525166059482444
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.97287586479251
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.46589589195764
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.862007016025245
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S10_load_1p1_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S10_load_1p1_L0_r0/calibration.json",
+      "sha256": "ba43f84aa763c3e2cf8244369cf75dcedf43f4b403269b7b46ce620f373bc0f7",
+      "reasons": [],
+      "seed": 301000000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 115.74395682210422
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 114.12414536485358
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 115.02209332293491
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 172.53865998935623
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S02_width_1p3_L0_r1",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S02_width_1p3_L0_r1/calibration.json",
+      "sha256": "4a9eb42a2ebca2942ca72e6a37f9ddf0d7d927eaa0f23cf52d89f5b3de47357a",
+      "reasons": [],
+      "seed": 300200001,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 87.70084465519972
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 75.07951123902615
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 73.28982268933373
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 70.89190410129845
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S09_recovery_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S09_recovery_L0_r0/calibration.json",
+      "sha256": "24d57d3ed0fb04c681d5ab0de6fe78512a5a3cb5b1973b29ed026b2c89ef7ebb",
+      "reasons": [],
+      "seed": 300900000,
+      "window": {
+        "mode": "transient_stress",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 2100,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 34,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 417.0280512636527
+        },
+        "R1": {
+          "completed": 36,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 432.07688077872865
+        },
+        "R2": {
+          "completed": 35,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 416.45032710573014
+        },
+        "R3": {
+          "completed": 37,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 433.9629710163422
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S03_intersection_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S03_intersection_L0_r2/calibration.json",
+      "sha256": "7ff04bb0f4fd1e465d03ef1e1cdde385a2bc947de03c8c8da804a3632fd971a0",
+      "reasons": [],
+      "seed": 300300002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.262290592904264
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 66.06138172984004
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.04702811670495
+        },
+        "R3": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S02_width_1p3_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S02_width_1p3_L0_r0/calibration.json",
+      "sha256": "54d9b6d287f5839f9782825174c23e43f848ee782669554c0b48c1372744fe88",
+      "reasons": [],
+      "seed": 300200000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 132.5863684359274
+        },
+        "R1": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 154.439911855398
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 111.26362166587683
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 125.8865637893166
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S07_heterogeneous_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S07_heterogeneous_L0_r2/calibration.json",
+      "sha256": "dc5a91f8b9d9b80028be8a8e0b9b74d584418d5ae581dbd69bb1d5bab322dd24",
+      "reasons": [],
+      "seed": 300700002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 35.17681806399992
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 66.92885662483349
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 68.78048088002629
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.992644119807665
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S05_hotspot_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S05_hotspot_L0_r0/calibration.json",
+      "sha256": "8350efbef1068ac003d4fad8db6a9f8c04249150c130f342a8f100204b6f4aae",
+      "reasons": [],
+      "seed": 300500000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.39913201791387
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 77.60156802089028
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.39913201791387
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 35.42426340333577
+        },
+        "R4": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.90272310201681
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 43.91231372895163
+        },
+        "R6": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 37.51231372895177
+        },
+        "R7": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 67.4443528141191
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S03_intersection_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S03_intersection_L0_r0/calibration.json",
+      "sha256": "de9bf10ff9e5a49fcdb24da1ae4ef55bad04179a0d744ee3282d9a9606094b4f",
+      "reasons": [],
+      "seed": 300300000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 34.84716990514471
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.9363574587984
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.36261314345393
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.147636688961484
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S05_hotspot_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S05_hotspot_L0_r2/calibration.json",
+      "sha256": "1a8032491e014fc4f0cf5a3638969d41dffbcdcd1330593ae17e79937f64107b",
+      "reasons": [],
+      "seed": 300500002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.79574391827032
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.67248135357306
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.38744122901585
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.314413890915375
+        },
+        "R4": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 62.24072184902269
+        },
+        "R5": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 31.30312921415907
+        },
+        "R6": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 64.3277275892899
+        },
+        "R7": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 63.51322188586494
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S01_joint_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S01_joint_L0_r2/calibration.json",
+      "sha256": "86ac4af186f01ea0211abfe1f27fd778f8dc326d744eb7cdd8f908af6e2b85b5",
+      "reasons": [],
+      "seed": 300100002,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.755309301604655
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.14750676209536
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 52.62615685099615
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S01_joint_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S01_joint_L0_r0/calibration.json",
+      "sha256": "cefc696d3df41dde10767d08c79b1268a9fe1217feac7f592801eadbdec2fe5d",
+      "reasons": [],
+      "seed": 300100000,
+      "window": {
+        "mode": "finite_batch",
+        "arrival_cutoff": 300,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 300,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.755309301604655
+        },
+        "R1": {
+          "completed": 0,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 0.0
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 38.14750676209536
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 52.62615685099615
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S10_load_1p1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S10_load_1p1_L0_r2/calibration.json",
+      "sha256": "3ae4e1043c06ba58ef6eb213107bf5716c0050fe86d969e0900afa09c6a44536",
+      "reasons": [],
+      "seed": 301000002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 154.8600957130219
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 1,
+          "delivered_energy": 109.15904576193384
+        },
+        "R2": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 157.11029904684779
+        },
+        "R3": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 91.07534634196611
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S11_grid64_L0_r0",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S11_grid64_L0_r0/calibration.json",
+      "sha256": "939995a786faaa636e4111fee12ec845f6164c2178004c6e37e97e1e6b012406",
+      "reasons": [],
+      "seed": 301100000,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 33.21862365484549
+        },
+        "R1": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.43698632579253
+        },
+        "R2": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 34.0186236548459
+        },
+        "R3": {
+          "completed": 1,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 32.82862840039343
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    },
+    {
+      "case": "validation_S08_cabins_1_L0_r2",
+      "status": "PASS",
+      "report": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_MAIN_STUDY_20261114_v4/bundle6/development/validation_S08_cabins_1_L0_r2/calibration.json",
+      "sha256": "aebc3f97653a0b3f9aa491d9fc74fac3f1c5d6534388040e6be533b283b148f9",
+      "reasons": [],
+      "seed": 300800002,
+      "window": {
+        "mode": "finite_stream",
+        "arrival_cutoff": 2100,
+        "drain_seconds": 0,
+        "drain_in_measurement": true,
+        "minimum_observation_seconds": 1800,
+        "minimum_completed_charge_sessions_per_robot": 0,
+        "minimum_charge_fraction": 0.1,
+        "nominal": true
+      },
+      "robots": {
+        "R0": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 75.41612340555446
+        },
+        "R1": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 97.56617393518411
+        },
+        "R2": {
+          "completed": 2,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 119.19164253736199
+        },
+        "R3": {
+          "completed": 3,
+          "interrupted": 0,
+          "carry_in": 0,
+          "small": 0,
+          "open": 0,
+          "delivered_energy": 127.82247378878765
+        }
+      },
+      "faults": 0,
+      "rescue_energy": 0.0
+    }
+  ]
+}

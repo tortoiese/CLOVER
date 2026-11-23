@@ -35,6 +35,23 @@ def trip_key(robot: str, origin: tuple[float, float, int], destination: str) -> 
     return json.dumps([robot, float(origin[0]), float(origin[1]), int(origin[2]), destination])
 
 
+def capture_rh_cohort(engine: SimulationEngine, policy: str, token: str) -> Observation:
+    """Retain queued job identities for RH publication without heuristic routing.
+
+    Live RH sends its own complete planning Snapshot to the isolated worker.
+    Its admission path uses this observation only to retain the original job
+    cohort and detect new critical arrivals. Robot, layout, energy and resource
+    checks still use the independent current planning snapshot at publication.
+    This payload is not an input for detached heuristic or charging selection.
+    """
+    return Observation(
+        engine.execution_epoch, engine.layout_version, policy, token, engine.now,
+        json.dumps({"scope": "rh-cohort-v1", "tasks": [
+            {key: getattr(task, key) for key in TASK_FIELDS} for task in engine.pending_tasks
+        ]}, sort_keys=True, allow_nan=False),
+    )
+
+
 def capture(
     engine: SimulationEngine,
     policy: str,

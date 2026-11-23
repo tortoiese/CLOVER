@@ -1,0 +1,170 @@
+{
+  "schema": "clover-static-timing-review-summary-v1",
+  "date_kst": "2026-11-22",
+  "checkpoint_counts": {
+    "SUCCESS": 215,
+    "NOT_STARTED": 404,
+    "TIMING_COVERAGE_VIOLATION": 1
+  },
+  "phase_counts": {
+    "M1_D1": {
+      "SUCCESS": 12,
+      "TIMING_COVERAGE_VIOLATION": 0,
+      "NOT_STARTED": 0
+    },
+    "M1_D0": {
+      "SUCCESS": 8,
+      "TIMING_COVERAGE_VIOLATION": 0,
+      "NOT_STARTED": 0
+    },
+    "M2a": {
+      "SUCCESS": 180,
+      "TIMING_COVERAGE_VIOLATION": 0,
+      "NOT_STARTED": 0
+    },
+    "M2b": {
+      "SUCCESS": 15,
+      "TIMING_COVERAGE_VIOLATION": 1,
+      "NOT_STARTED": 164
+    },
+    "M3": {
+      "SUCCESS": 0,
+      "TIMING_COVERAGE_VIOLATION": 0,
+      "NOT_STARTED": 240
+    }
+  },
+  "source_hash_unchanged": true,
+  "original_six_tool_hashes_unchanged": true,
+  "review": {
+    "schema": "clover-static-reviewed-timing-v1",
+    "registered_at_utc": "2026-11-22T06:23:50.069300+00:00",
+    "identity": {
+      "bundle_manifest_sha256": "c4ab23c678c661e134bb7e802080387d584388343cd47447617a6571cada8566",
+      "source_hash": "94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05",
+      "tools": {
+        "materialize_static_scenario_study.py": "10048592fcdf0c9f09f033c1c48e0e88314bfc3e4c7dd71ca6301e4e06e30243",
+        "audit_static_scenario_study.py": "3fdea9b8aa05145c958e04312db2357ccb4a1a6da71fe82884ed2262443d9e7f",
+        "run_static_scenario_study.py": "27f372d1ae95b7ef1eec954c95661befbdfa0c009feaa690c51cd628fb614e53",
+        "static_scenario_metrics.py": "6af2f8c20a4e83a6b2d0cce17ef43464a37bf142f6eedbfef4e76e15088454ca",
+        "materialize_korean_case_pilot.py": "5d99d9c85df583afc6374f9dfc666d7747cdf4fa655609686ae0b763e3c57bdf",
+        "audit_korean_case_pilot.py": "12b410dd12ef3f1283764fbd1c4b89767dd0434f8165de4f37ece4cddb657e73"
+      },
+      "hardware_id": "host-3bef45ab6d069605967b",
+      "environment": {
+        "wall_clock": {
+          "name": "perf_counter",
+          "implementation": "mach_absolute_time()",
+          "resolution_seconds": 4.166666666666667e-08,
+          "monotonic": true
+        },
+        "python": "3.11.14",
+        "os": "Darwin",
+        "machine": "arm64",
+        "packages": {
+          "simpy": "4.1.2",
+          "numpy": "2.4.6",
+          "ortools": "9.15.6755",
+          "psutil": "7.2.2",
+          "scipy": "1.17.1"
+        }
+      }
+    },
+    "reviewed_failures": [
+      {
+        "job": 81,
+        "policy": "rh_milp_grid",
+        "status": "TIMING_COVERAGE_VIOLATION",
+        "result": "DEV_GRID_A_ADV_L10_C2_A4_2026111904__rh_milp_grid__2026111904.json.xz",
+        "result_sha256": "a87b570d6f539ca4e870d6aadd3552f1b8a2b321bfd7917de1e176f21e02ae0b",
+        "events": "DEV_GRID_A_ADV_L10_C2_A4_2026111904__rh_milp_grid__2026111904.events.jsonl.xz",
+        "events_sha256": "a9c75fa2680eb6b9710ac9c3d3141498579d4fa64b3859e973fe95e9bbe002f4"
+      }
+    ],
+    "replay_proof": "/Users/kangjaemin/Documents/Codex/2026-09-19/new-chat/outputs/CLOVER_STATIC_TIMING_REVIEW_20261122_v1/original_replay.json",
+    "replay_proof_sha256": "532783ea63e07fe47f1dacc799e30dd7a982dfd86146788785bea605d1b0334a",
+    "scope": "continue never-started inputs; failed arm stays invalid and is never retried",
+    "analysis": "report failure in full denominator; exclude its timing-invalid performance pairs",
+    "cause": "wall-clock overrun observed; root cause not established by recorded replay",
+    "settings_changed": false,
+    "native_retries_allowed": 0,
+    "receipt_hash": "4a304e3488c0f56a482cf7a70acaf1c39cd48b2e920d1e6d99fa1fcf5df575a0"
+  },
+  "review_sha256": "1a49bec6369f8cd4fa6aa1ff34132ae5f69bb585fbf7925aafe028076711a032",
+  "recorded_replay": {
+    "schema": "clover-static-timing-diagnostic-v1",
+    "native_solver_calls": 0,
+    "matches": true,
+    "expected_digest": "9391df4889c6e252e3a66417bd6211ccbd6b4d96022948a441c4ccfdf8098ff5",
+    "actual_digest": "9391df4889c6e252e3a66417bd6211ccbd6b4d96022948a441c4ccfdf8098ff5",
+    "status": "TIMING_COVERAGE_VIOLATION",
+    "observations": [
+      {
+        "now": 1602.0081257918384,
+        "metrics": {
+          "completions": 140,
+          "wait_times": 140,
+          "cycle_times": 140,
+          "charge_waits": 11,
+          "response_times": 0,
+          "corridor_waits": 1,
+          "intersection_waits": 224,
+          "ev_waits": 0,
+          "sample_totals": 6,
+          "sample_counts": 6
+        }
+      }
+    ],
+    "target_publication": {
+      "name": "publication",
+      "wall_seconds": 0.2019720000680536,
+      "injected_seconds": 0.2,
+      "at": 1601.8081257918384
+    }
+  },
+  "diagnostic_profile": {
+    "seconds": 0.037,
+    "scope": "one replayed publication under cProfile; not a new operational sample or a latency guarantee",
+    "file_sha256": "86a567e3e67be580bc3eb28505fe1596a5a276be25cc4c3bbbfe7e0bec7570bf"
+  },
+  "failure_remains_excluded": true,
+  "native_retries": 0,
+  "next_session": "resume_20261122_01",
+  "planned_remaining_native_runs": 404,
+  "analysis": "Primary four-policy common cohort excludes the entire failed input block; available-case pairwise results are sensitivity only. Retain the failure in all 620 planned arms and retain cross-session sensitivity. M4 remains unregistered.",
+  "resume_observation": {
+    "session": "resume_20261122_01",
+    "health": {
+      "recorded_status": "RUNNING",
+      "derived_status": "RUNNING",
+      "pid_alive": true,
+      "child_pid_alive": true,
+      "heartbeat_age_seconds": 3.424819
+    },
+    "phase": "M2a_REPORT",
+    "completed_phases": [
+      "M2a"
+    ],
+    "failure": null,
+    "parent_pid": 1,
+    "checkpoint_counts": {
+      "SUCCESS": 215,
+      "NOT_STARTED": 404,
+      "TIMING_COVERAGE_VIOLATION": 1
+    },
+    "active_jobs": [],
+    "runtime_commit": "0e41b16",
+    "protocol_sha256": "e43f4ddfbc78b12a0ca77887102e935c19d4495e811ad49cb97e56a2213fd794",
+    "protocol_remaining": 404,
+    "heartbeat_at_utc": "2026-11-22T06:29:12.331109+00:00"
+  },
+  "tests": {
+    "python_3_11": {
+      "passed": 29
+    },
+    "python_3_14": {
+      "passed": 29
+    },
+    "lint": "PASS",
+    "diff_check": "PASS"
+  }
+}

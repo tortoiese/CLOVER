@@ -1,0 +1,56 @@
+{
+  "schema": "clover-main-source-ci-v1",
+  "commit": "71948bacbea218e717623318f36e62a8b7db5766",
+  "source_hash": "8757062d02cb282b6422ae77116dfcb91800b8e5805c5aeb14f875b5d5a7db3c",
+  "url": "https://github.com/tortoiese/CLOVER/actions/runs/43597920611",
+  "jobs": [
+    {
+      "id": 132456287722,
+      "name": "acceptance (windows-latest, 3.11)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:11:23.0828282Z 630 passed, 3 warnings in 295.87s (0:04:55)\r",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132456287915,
+      "name": "acceptance (ubuntu-latest, 3.14)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:09:49.7406758Z 630 passed, 1 warning in 236.45s (0:03:56)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132456287949,
+      "name": "acceptance (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:08:30.5182821Z 630 passed in 160.46s (0:02:40)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132456287962,
+      "name": "acceptance (macos-latest, 3.14)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:10:14.7474900Z 630 passed, 4 warnings in 266.48s (0:04:26)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132456287974,
+      "name": "acceptance (macos-latest, 3.11)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:09:15.8833840Z 630 passed, 3 warnings in 223.95s (0:03:43)",
+      "unhandled_thread_warnings": 0
+    },
+    {
+      "id": 132456287985,
+      "name": "acceptance (windows-latest, 3.14)",
+      "conclusion": "success",
+      "tests_passed": 630,
+      "summary": "2026-11-14T13:11:39.3312161Z 630 passed, 4 warnings in 292.71s (0:04:52)\r",
+      "unhandled_thread_warnings": 0
+    }
+  ]
+}

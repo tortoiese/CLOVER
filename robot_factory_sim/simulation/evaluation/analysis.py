@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import config
+from simulation.artifacts import events_for_result, open_saved, read_saved, stored_sha256
 from simulation.evaluation.digest import PhysicalDigest
 from simulation.evaluation.resource_metrics import ResourceMetrics
 from simulation.evaluation.runner import DECISION_RESULT_SCHEMA, RESULT_SCHEMA
@@ -23,7 +24,7 @@ def analyze(run_path: Path, events_path: Path | None = None) -> dict[str, Any]:
     Returns:
         Complete recomputed metrics and comparison with stored observations.
     """
-    content = run_path.read_bytes()
+    content = read_saved(run_path)
     result = json.loads(content)
     if result.get("schema") not in {RESULT_SCHEMA,DECISION_RESULT_SCHEMA}:
         raise ValueError("unsupported resource analysis schema; use the matching source version")
@@ -33,7 +34,8 @@ def analyze(run_path: Path, events_path: Path | None = None) -> dict[str, Any]:
     metrics = ResourceMetrics(scenario["warmup"], scenario["duration"], threshold)
     digest, raw_digest, physical = hashlib.sha256(), hashlib.sha256(), PhysicalDigest()
     previous, count = 0.0, 0
-    with (events_path or run_path.with_suffix(".events.jsonl")).open("rb") as stream:
+    actual_events = events_path or events_for_result(run_path)
+    with open_saved(actual_events) as stream:
         for line in stream:
             raw_digest.update(line)
             row = json.loads(line)
@@ -61,8 +63,9 @@ def analyze(run_path: Path, events_path: Path | None = None) -> dict[str, Any]:
         "run_status": result["status"],
         "events": count,
         "source": result["source"],
-        "input_result_sha256": hashlib.sha256(content).hexdigest(),
-        "input_events_sha256": raw_digest.hexdigest(),
+        "input_result_sha256": stored_sha256(run_path),
+        "input_events_sha256": stored_sha256(actual_events),
+        "logical_events_sha256": raw_digest.hexdigest(),
         "event_digest": digest.hexdigest(),
         "physical_event_digest": physical.hexdigest(),
         "stored_metrics_match": waits == result["resource_waits"] and cabins == result["cabin_phases"],

@@ -1,0 +1,26 @@
+{
+  "schema": "clover-static-proposal-rejection-review-v1",
+  "source_hash": "94f48723b0a5338404dc0b3d37de66a7f347561c1d4456fa00bc4827dd871b05",
+  "checked": [
+    {
+      "case": "DEV_GRID_A_ADV_L13_C1_A4_2026111900__rh_milp_grid__2026111900",
+      "token": "decision-748",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "original_report": "OPTIMAL",
+      "original_validation_errors": [],
+      "accepted": false,
+      "fallback_present": true
+    },
+    {
+      "case": "DEV_GRID_A_ADV_L13_C1_A4_2026111900__rh_cpsat_linear__2026111900",
+      "token": "decision-764",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "original_report": "OPTIMAL",
+      "original_validation_errors": [],
+      "accepted": false,
+      "fallback_present": true
+    }
+  ],
+  "all_original_returned_plans_valid": true,
+  "scope": "independent validation of original returned plans; delayed publication uses a fresh resource calendar and may reject them"
+}

@@ -45,6 +45,11 @@ class RollingMilpScheduler(OptimizedScheduler):
         tasks = sorted(engine.pending_tasks, key=self._task_key(engine))[:40]
         entries = []
         stations = []
+        # All entries observe the same plant before any assignment is applied.
+        # Repeated jobs do not change a robot/station trip or return energy.
+        # Discard these estimates after this dispatch so later motion, cabin
+        # positions, energy and hot reloads are always observed afresh.
+        estimates: dict[tuple[str, str], tuple[float, float, float]] = {}
         for task in tasks:
             for robot in idle:
                 if robot.emergency_order and task.order_id != robot.emergency_order:
@@ -59,13 +64,17 @@ class RollingMilpScheduler(OptimizedScheduler):
                         continue
                     if any(r.target_id == station_id for r in engine.robot_list() if not r.is_available()):
                         continue
-                    trip = estimate_trip(engine, robot, station_id)
-                    distance = trip.horizontal_m
+                    key = (robot.robot_id, station_id)
+                    if key not in estimates:
+                        trip = estimate_trip(engine, robot, station_id)
+                        distance = trip.horizontal_m
+                        energy = (self._energy_needed(robot, engine, station_id, distance)
+                                  if math.isfinite(distance) else math.inf)
+                        estimates[key] = (distance, energy, trip.seconds)
+                    distance, energy, travel_time = estimates[key]
                     if not math.isfinite(distance):
                         continue
-                    energy = self._energy_needed(robot, engine, station_id, distance)
                     reserve = robot.capacity * config.BATTERY_RESERVE / 100
-                    travel_time = trip.seconds
                     if robot.live_battery() - energy < reserve:
                         continue
                     if travel_time + station.cfg.avg_process_time > self.horizon:

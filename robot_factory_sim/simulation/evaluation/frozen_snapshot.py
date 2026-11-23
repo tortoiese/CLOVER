@@ -48,7 +48,9 @@ def freeze_snapshot(run_path: Path, decision: int, output: Path, *, preparation_
         raise ValueError("snapshot output already exists")
     source = source_manifest()
     original_hash = sha256(run_path)
-    run = json.loads(run_path.read_text(encoding="utf-8"))
+    from simulation.evaluation.comparison_inputs import read_json
+
+    run, _ = read_json(run_path)
     if run.get("schema") != "clover-headless-run-v5" or not run.get("control"):
         raise ValueError("freeze requires a saved staged-D1 v5 run")
     control = run["control"]

@@ -1,0 +1,68 @@
+{
+  "schema": "clover-static-rejected-plan-review-v2",
+  "records": [
+    {
+      "job": 2,
+      "policy": "rh_milp_grid",
+      "token": "decision-748",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    },
+    {
+      "job": 2,
+      "policy": "rh_cpsat_linear",
+      "token": "decision-764",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    },
+    {
+      "job": 12,
+      "policy": "rh_milp_grid",
+      "token": "decision-2941",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    },
+    {
+      "job": 14,
+      "policy": "rh_cpsat_linear",
+      "token": "decision-680",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    },
+    {
+      "job": 21,
+      "policy": "rh_cpsat_linear",
+      "token": "decision-1942",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    },
+    {
+      "job": 47,
+      "policy": "rh_milp_grid",
+      "token": "decision-1089",
+      "reason": "MODEL_INVALID: resource capacity exceeded",
+      "accepted": false,
+      "fallback_present": true,
+      "original_report": "OPTIMAL",
+      "original_validation_errors": []
+    }
+  ],
+  "count": 6,
+  "all_original_plans_valid": true,
+  "scope": "original snapshot plan validation only; fresh-calendar publication rejections are kept"
+}

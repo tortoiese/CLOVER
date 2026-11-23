@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import lzma
 import sys
 from pathlib import Path
 
@@ -102,13 +103,69 @@ def main(argv: list[str] | None = None) -> int:
     study_run.add_argument("--frozen", type=Path, required=True)
     study_run.add_argument("--phase", choices=("training", "validation", "heldout", "stress"), required=True)
     study_run.add_argument("--output", type=Path, required=True)
-    study_run.add_argument("--run-wall-limit", type=float, default=240)
+    study_run.add_argument("--run-wall-limit", type=float)
     study_run.add_argument("--suite-wall-limit", type=float, default=3600)
+    study_run.add_argument("--shard-index", type=int, default=0)
+    study_run.add_argument("--shard-count", type=int, default=1)
+    study_collect = commands.add_parser("collect-study", help="verify and collect every registered phase shard")
+    study_collect.add_argument("--manifest", type=Path, nargs="+", required=True)
+    study_collect.add_argument("--output", type=Path, required=True)
+    capacity = commands.add_parser("calibrate-reference", help="calibrate finite-window service references")
+    capacity.add_argument("--output", type=Path, required=True)
+    main_prepare = commands.add_parser("prepare-main-study", help="prepare main inputs from verified calibration")
+    main_prepare.add_argument("--capacity", type=Path, required=True)
+    main_prepare.add_argument("--output", type=Path, required=True)
+    main_prepare.add_argument("--core-layouts", type=int, choices=(3, 6), default=6)
+    main_prepare.add_argument("--development-from", type=Path)
+    main_ready = commands.add_parser("check-main-ready", help="audit frozen main inputs and development canaries")
+    main_ready.add_argument("--bundle", type=Path, required=True)
+    main_ready.add_argument("--canary", type=Path, required=True)
+    main_ready.add_argument("--output", type=Path, required=True)
+    main_execute = commands.add_parser("execute-main-jobs", help="serially run/resume immutable main shards")
+    main_execute.add_argument("--bundle", type=Path, required=True)
+    main_execute.add_argument("--phase", choices=("heldout", "stress"), required=True)
+    main_execute.add_argument("--limit", type=int)
+    main_collect = commands.add_parser("collect-main-jobs", help="collect all planned main shards without omissions")
+    main_collect.add_argument("--bundle", type=Path, required=True)
+    main_collect.add_argument("--phase", choices=("heldout", "stress"), required=True)
+    main_collect.add_argument("--output", type=Path, required=True)
     study_analysis = commands.add_parser("study-analysis-plan", help="derive exactly the registered phase analysis")
     study_analysis.add_argument("--manifest", type=Path, required=True)
     study_analysis.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command in {"execute-main-jobs", "collect-main-jobs"}:
+            from simulation.evaluation.main_jobs import collect_jobs, execute_jobs
+
+            result = (execute_jobs(args.bundle, args.phase, limit=args.limit) if args.command == "execute-main-jobs"
+                      else collect_jobs(args.bundle, args.phase, args.output))
+            print(json.dumps({"status": result["status"]}))
+            return 0 if result["status"] in {"BATCH_FINISHED", "SUCCESS"} else 1
+        if args.command == "check-main-ready":
+            from simulation.evaluation.main_protocol import readiness
+
+            result = readiness(args.bundle, args.canary, args.output)
+            print(json.dumps({"status": result["status"], "reasons": result["reasons"]}))
+            return 0 if result["status"] == "READY" else 1
+        if args.command == "calibrate-reference":
+            from simulation.evaluation.reference_capacity import calibrate_reference
+
+            result = calibrate_reference(args.output)
+            print(json.dumps({"status": result["status"], "planned_runs": result["planned_runs"]}))
+            return 0 if result["status"] == "PASS" else 1
+        if args.command == "prepare-main-study":
+            from simulation.evaluation.main_protocol import prepare_main
+
+            result = prepare_main(args.capacity, args.output, core_layouts=args.core_layouts,
+                                  development_from=args.development_from)
+            print(json.dumps({"status": result["status"], "cases": result["cases"]}))
+            return 0 if result["status"] == "PREPARED" else 1
+        if args.command == "collect-study":
+            from simulation.evaluation.study_shards import collect_study
+
+            result = collect_study(tuple(args.manifest), args.output)
+            print(json.dumps({"status": result["status"], "planned_runs": result["planned_runs"]}))
+            return 0 if result["status"] == "SUCCESS" else 1
         if args.command in {"freeze-study", "run-study", "study-analysis-plan", "calibrate-window"}:
             from simulation.evaluation.calibration import calibrate
             from simulation.evaluation.study import freeze_study, run_study, study_plan
@@ -120,7 +177,8 @@ def main(argv: list[str] | None = None) -> int:
                 status = "FROZEN_" + result["stage"].upper()
             elif args.command == "run-study":
                 result = run_study(args.frozen, args.output, phase=args.phase,
-                                   run_wall_limit=args.run_wall_limit, suite_wall_limit=args.suite_wall_limit)
+                                   run_wall_limit=args.run_wall_limit, suite_wall_limit=args.suite_wall_limit,
+                                   shard_index=args.shard_index, shard_count=args.shard_count)
                 status = result["status"]
             else:
                 result = (study_plan(args.manifest) if args.command == "study-analysis-plan" else
@@ -271,10 +329,12 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(json.dumps({"status": result["status"], "runs": len(result["runs"])}))
             return 0 if result["status"] == "SUCCESS" else 1
-        result = replay(json.loads(args.run.read_text(encoding="utf-8")), input_root=args.run.resolve().parent)
+        from simulation.evaluation.comparison_inputs import read_json
+
+        result = replay(read_json(args.run)[0], input_root=args.run.resolve().parent)
         print(json.dumps({key: value for key, value in result.items() if key != "result"}))
         return 0 if result["matches"] else 1
-    except (ValueError, TypeError, KeyError, OSError) as exc:
+    except (ValueError, TypeError, KeyError, OSError, EOFError, lzma.LZMAError) as exc:
         print(json.dumps({"status": "INVALID_INPUT", "error": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2
 
