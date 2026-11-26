@@ -1,52 +1,48 @@
-"""CLOVER 데모 화면 녹화 — Linux/Xvfb 환경 전용.
+"""CLOVER 데모 화면 녹화 — Linux/Xvfb 환경 전용 (상세 시연, 약 2분 30초).
 
 실행: python tools/record_demo_linux.py  (working-dir: robot_factory_sim)
 출력: robot_factory_sim/demo_raw.mp4
 """
 from __future__ import annotations
-import os, subprocess, sys, time
+import os, re, subprocess, sys, time
 from pathlib import Path
 
-# DISPLAY가 설정돼 있어야 함
 DISPLAY = os.environ.get("DISPLAY", ":99")
 W, H = 1920, 1080
 FPS = 30
 OUTPUT = Path("demo_raw.mp4")
-
 PYTHON = sys.executable
 
 
-def wait_window(title_part: str, timeout: float = 30.0) -> str | None:
-    """xdotool로 창 ID 반환. 없으면 None."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        try:
-            out = subprocess.check_output(
-                ["xdotool", "search", "--name", title_part],
-                stderr=subprocess.DEVNULL,
-            ).decode().strip()
-            if out:
-                return out.split()[0]
-        except subprocess.CalledProcessError:
-            pass
-        time.sleep(0.5)
-    return None
+# ------------------------------------------------------------------
+# 헬퍼
+# ------------------------------------------------------------------
+def xdo(*args: str) -> None:
+    subprocess.run(["xdotool", *args], check=False, stderr=subprocess.DEVNULL)
 
 
 def click(x: int, y: int) -> None:
-    subprocess.run(["xdotool", "mousemove", str(x), str(y), "click", "1"],
-                   check=False, stderr=subprocess.DEVNULL)
-    time.sleep(0.2)
+    xdo("mousemove", str(x), str(y), "click", "1")
+    time.sleep(0.25)
+
+
+def type_text(text: str) -> None:
+    xdo("type", "--clearmodifiers", "--delay", "30", text)
+    time.sleep(0.3)
 
 
 def key(k: str) -> None:
-    subprocess.run(["xdotool", "key", k],
-                   check=False, stderr=subprocess.DEVNULL)
+    xdo("key", k)
     time.sleep(0.2)
 
 
 def sleep(s: float) -> None:
     time.sleep(s)
+
+
+def activate_window(wid: str) -> None:
+    xdo("windowactivate", "--sync", wid)
+    sleep(0.3)
 
 
 # ------------------------------------------------------------------
@@ -67,20 +63,39 @@ if ffproc.poll() is not None:
     print("[ERROR] ffmpeg 시작 실패")
     print(open("ffmpeg.log").read()[-800:])
     sys.exit(1)
-print("[1] ffmpeg 녹화 중...")
+print("[1] 녹화 중...")
 
 # ------------------------------------------------------------------
 # 2. 앱 실행
 # ------------------------------------------------------------------
 print("[2] 앱 실행...")
-env = {**os.environ, "PYTHONUTF8": "1",
-       "QT_QPA_PLATFORM": "xcb",
-       "CLOVER_RAG_ENABLED": os.environ.get("CLOVER_RAG_ENABLED", "0"),
-       "CLOVER_RAG_PROVIDER": os.environ.get("CLOVER_RAG_PROVIDER", "local"),
-       "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
-       "DISPLAY": DISPLAY}
+env = {
+    **os.environ,
+    "PYTHONUTF8": "1",
+    "QT_QPA_PLATFORM": "xcb",
+    "CLOVER_RAG_ENABLED": os.environ.get("CLOVER_RAG_ENABLED", "0"),
+    "CLOVER_RAG_PROVIDER": os.environ.get("CLOVER_RAG_PROVIDER", "local"),
+    "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
+    "DISPLAY": DISPLAY,
+}
 app = subprocess.Popen([PYTHON, "-B", "main.py"], env=env)
-sleep(10)  # 앱 로드 대기
+sleep(12)   # 앱 + AI 에이전트 초기화 대기
+
+# 창 찾기
+def wait_window(title_part: str, timeout: float = 30.0) -> str | None:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            out = subprocess.check_output(
+                ["xdotool", "search", "--name", title_part],
+                stderr=subprocess.DEVNULL,
+            ).decode().strip()
+            if out:
+                return out.split()[0]
+        except subprocess.CalledProcessError:
+            pass
+        time.sleep(0.5)
+    return None
 
 wid = wait_window("CLOVER")
 if not wid:
@@ -88,110 +103,163 @@ if not wid:
     ffproc.terminate(); app.terminate(); sys.exit(1)
 print(f"[2] 창 ID: {wid}")
 
-# 창 최대화 + 활성화
-subprocess.run(["wmctrl", "-ir", wid, "-b", "add,maximized_vert,maximized_horz"],
-               check=False)
-subprocess.run(["xdotool", "windowactivate", "--sync", wid], check=False)
+subprocess.run(["wmctrl", "-ir", wid, "-b", "add,maximized_vert,maximized_horz"], check=False)
+activate_window(wid)
 sleep(1.5)
 
-# 창 위치/크기 확인
 geo = subprocess.check_output(["xdotool", "getwindowgeometry", wid]).decode()
 print("[2]", geo.strip())
-
-# 편의상 창이 (0,0) 에서 W x H 라고 가정 (최대화 후)
-# 실제 위치를 파싱
-import re
 m_pos  = re.search(r"Position:\s*(\d+),(\d+)", geo)
 m_size = re.search(r"Geometry:\s*(\d+)x(\d+)", geo)
 rx = int(m_pos.group(1)) if m_pos else 0
 ry = int(m_pos.group(2)) if m_pos else 0
 rw = int(m_size.group(1)) if m_size else W
 rh = int(m_size.group(2)) if m_size else H
-print(f"[2] 창: pos=({rx},{ry}) size={rw}x{rh}")
+print(f"[2] pos=({rx},{ry}) size={rw}x{rh}")
 
 # ------------------------------------------------------------------
-# 버튼 절대 좌표 (창 기준)
+# 절대 좌표 계산
 # ------------------------------------------------------------------
-TB = 28     # 툴바 y
-TAB_Y = 72  # 탭바 y
+TB   = 28    # 툴바 y
+TABy = 72    # 메인 탭바 y
 
-# 툴바 버튼 (Qt 고정 크기)
-bx = lambda lx: rx + lx
-by = lambda ly: ry + ly
+def bx(lx: int) -> int: return rx + lx
+def by(ly: int) -> int: return ry + ly
 
-START  = (bx(45),  by(TB))
-PAUSE  = (bx(118), by(TB))
-STOP   = (bx(188), by(TB))
-SPD    = (bx(320), by(TB))   # 배속 콤보박스
-ORDER  = (bx(rw - 390), by(TB))
+# 툴바 버튼 (Qt 고정 크기, Fusion 테마)
+BTN_START  = (bx(45),  by(TB))
+BTN_PAUSE  = (bx(118), by(TB))
+BTN_STOP   = (bx(188), by(TB))
+SPD_COMBO  = (bx(315), by(TB))   # 배속 콤보박스
+# 공장 설정 / 주문 관리: 오른쪽 고정 버튼
+BTN_CONFIG = (bx(rw - 490), by(TB))   # 공장 설정
+BTN_ORDER  = (bx(rw - 400), by(TB))   # 주문 관리
 
-TAB_SIM = (bx(50),  by(TAB_Y))
-TAB_CON = (bx(145), by(TAB_Y))
+# 메인 탭
+TAB_SIM  = (bx(50),  by(TABy))
+TAB_CON  = (bx(145), by(TABy))
+TAB_EXP  = (bx(240), by(TABy))   # 기간 실험
 
-CON_CX = rx + rw // 2
-BTN_STATUS = (CON_CX - 220, ry + rh - 65)
-BTN_URGENT = (CON_CX + 195, ry + rh - 65)
-
+# 대시보드 패널 (오른쪽 절반)
 DASH_X = rx + int(rw * 0.63)
-TAB_THRU  = (DASH_X + 45,  ry + TAB_Y + 50)
-TAB_RADAR = (DASH_X + 265, ry + TAB_Y + 50)
+DT = ry + TABy + 50   # 대시보드 탭 y
+TAB_THRU     = (DASH_X + 45,  DT)
+TAB_TIMELINE = (DASH_X + 135, DT)
+TAB_QUEUE    = (DASH_X + 210, DT)
+TAB_BATT     = (DASH_X + 275, DT)
+TAB_RADAR    = (DASH_X + 345, DT)
+
+# 관제 콘솔 패널
+CON_CX = rx + rw // 2
+BTN_STATUS = (CON_CX - 220, ry + rh - 65)   # 현재 상태
+BTN_EFF    = (CON_CX - 130, ry + rh - 65)   # 효율 분석
+BTN_BOTTLE = (CON_CX - 40,  ry + rh - 65)   # 병목
+BTN_URGENT = (CON_CX + 195, ry + rh - 65)   # 긴급 주문
+INPUT_BOX  = (CON_CX,       ry + rh - 33)   # 텍스트 입력창
 
 # ------------------------------------------------------------------
-# 3. 시연
+# 3. 시연 (약 2분 30초)
 # ------------------------------------------------------------------
 print("[3] 시연 시작...")
-sleep(3)   # 초기 화면 보여주기
 
-# 시작 버튼
-click(*START)
+# ── 장면 1: 초기 화면 보여주기 (10초) ──
+sleep(10)
+
+# ── 장면 2: 시뮬레이션 시작 + 10x 배속 ──
+print("[3] 시뮬레이션 시작...")
+activate_window(wid)
+click(*BTN_START)
 sleep(0.5)
-
-# 배속 10x
-click(*SPD)
+click(*SPD_COMBO)
 sleep(0.4)
 key("End")
 sleep(0.2)
 key("Return")
 sleep(0.5)
 
-# 로봇 이동 확인
+# 로봇 이동 확인 (15초)
 print("[3] 로봇 이동...")
-sleep(8)
+sleep(15)
 
-# KPI 처리량 탭
-click(*TAB_THRU)
-sleep(0.5)
-print("[3] KPI 처리량 대시보드...")
-sleep(8)
-
-# KPI 레이더
-click(*TAB_RADAR)
-sleep(5)
-
-# 주문 관리
-print("[3] 주문 관리...")
-click(*ORDER)
-sleep(4)
+# ── 장면 3: 공장 설정 다이얼로그 ──
+print("[3] 공장 설정...")
+activate_window(wid)
+click(*BTN_CONFIG)
+sleep(10)   # 다이얼로그 열린 상태 유지
 key("Escape")
-sleep(0.5)
-
-# AI 관제 콘솔
-print("[3] AI 관제 콘솔...")
-click(*TAB_CON)
 sleep(1)
 
-click(*BTN_STATUS)
-sleep(8)
+# ── 장면 4: KPI 처리량 대시보드 ──
+print("[3] KPI 처리량...")
+activate_window(wid)
+click(*TAB_THRU)
+sleep(0.5)
+sleep(12)
 
-# 긴급 주문
-print("[3] 긴급 주문...")
-click(*BTN_URGENT)
+# ── 장면 5: KPI 레이더 ──
+print("[3] KPI 레이더...")
+activate_window(wid)
+click(*TAB_RADAR)
 sleep(10)
 
-# 최종 로봇 확인
-print("[3] 로봇 최종 확인...")
+# ── 장면 6: 주문 관리 다이얼로그 ──
+print("[3] 주문 관리...")
+activate_window(wid)
+click(*BTN_ORDER)
+sleep(12)
+key("Escape")
+sleep(1)
+
+# ── 장면 7: AI 관제 콘솔 — 현재 상태 질의 ──
+print("[3] AI 관제 콘솔 — 현재 상태...")
+activate_window(wid)
+click(*TAB_CON)
+sleep(1)
+click(*BTN_STATUS)
+sleep(20)   # AI 응답 대기
+
+# ── 장면 8: 직접 명령 입력 ──
+print("[3] AI 콘솔 직접 명령...")
+activate_window(wid)
+click(*INPUT_BOX)
+sleep(0.4)
+type_text("지금 가장 병목인 구간이 어디야?")
+sleep(0.3)
+key("Return")
+sleep(18)   # AI 응답 대기
+
+# ── 장면 9: 긴급 주문 발생 ──
+print("[3] 긴급 주문...")
+activate_window(wid)
+click(*BTN_URGENT)
+sleep(22)   # AI 긴급 대응 대기
+
+# ── 장면 10: 로봇 타임라인 탭 ──
+print("[3] 로봇 타임라인...")
+activate_window(wid)
 click(*TAB_SIM)
-sleep(8)
+sleep(0.5)
+click(*TAB_TIMELINE)
+sleep(10)
+
+# ── 장면 11: 배터리 탭 ──
+print("[3] 배터리 현황...")
+activate_window(wid)
+click(*TAB_BATT)
+sleep(10)
+
+# ── 장면 12: 기간 실험 탭 ──
+print("[3] 기간 실험...")
+activate_window(wid)
+click(*TAB_EXP)
+sleep(15)
+
+# ── 장면 13: 시뮬레이션 최종 복귀 ──
+print("[3] 최종 화면...")
+activate_window(wid)
+click(*TAB_SIM)
+click(*TAB_THRU)
+sleep(10)
 
 # ------------------------------------------------------------------
 # 4. 종료
@@ -204,15 +272,15 @@ try:
     ffproc.wait(timeout=20)
     print("[4] ffmpeg 정상 종료")
 except subprocess.TimeoutExpired:
-    ffproc.kill()
-    ffproc.wait()
+    ffproc.kill(); ffproc.wait()
 
 app.terminate()
 app.wait(timeout=10)
 
-if OUTPUT.exists() and OUTPUT.stat().st_size > 100_000:
-    print(f"[OK] 녹화 완료: {OUTPUT} ({OUTPUT.stat().st_size // 1024} KB)")
+if OUTPUT.exists() and OUTPUT.stat().st_size > 500_000:
+    print(f"[OK] {OUTPUT}  ({OUTPUT.stat().st_size // 1024} KB)")
 else:
-    print(f"[ERROR] 녹화 실패 또는 파일이 너무 작습니다.")
-    print(open("ffmpeg.log").read()[-800:])
+    print("[ERROR] 녹화 파일 없거나 너무 작음")
+    if Path("ffmpeg.log").exists():
+        print(open("ffmpeg.log").read()[-800:])
     sys.exit(1)

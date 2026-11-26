@@ -6,7 +6,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONUTF8: '1'
       CLOVER_RAG_ENABLED: '1'
@@ -51,21 +51,28 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX &
           sleep 3
-          echo "Xvfb started"
+          echo "Xvfb ready"
+
+      - name: Create intro clip
+        run: python -B ../tools/make_intro.py
 
       - name: Run demo and record
         run: python -B ../tools/record_demo_linux.py
 
-      - name: Upload demo video (raw)
-        uses: actions/upload-artifact@v4
-        with:
-          name: clover-demo-raw
-          path: robot_factory_sim/demo_raw.mp4
-          if-no-files-found: warn
+      - name: Concat intro + demo
+        run: |
+          ffmpeg -y \
+            -i intro.mp4 -i demo_raw.mp4 \
+            -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[v]" \
+            -map "[v]" \
+            -c:v libx264 -preset ultrafast -crf 18 -pix_fmt yuv420p \
+            combined.mp4
 
       - name: Burn subtitles
-        run: |
-          python -B ../tools/burn_subtitles.py demo_raw.mp4 demo_subtitled.mp4
+        run: python -B ../tools/burn_subtitles.py combined.mp4 demo_subtitled.mp4
+
+      - name: Show final video info
+        run: ffprobe -v error -show_entries format=duration,size -of default combined.mp4 demo_subtitled.mp4 || true
 
       - name: Upload demo video (with subtitles)
         uses: actions/upload-artifact@v4
@@ -73,3 +80,11 @@ jobs:
           name: clover-demo
           path: robot_factory_sim/demo_subtitled.mp4
           if-no-files-found: error
+
+      - name: Upload raw (no subtitles, for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clover-demo-raw
+          path: robot_factory_sim/demo_raw.mp4
+          if-no-files-found: warn
