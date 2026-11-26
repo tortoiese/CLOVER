@@ -9,9 +9,10 @@ jobs:
     timeout-minutes: 20
     env:
       PYTHONUTF8: '1'
-      CLOVER_RAG_ENABLED: '0'
-      CLOVER_RAG_PROVIDER: local
-      CLOVER_RAG_ALLOW_NETWORK: '0'
+      CLOVER_RAG_ENABLED: '1'
+      CLOVER_RAG_PROVIDER: openai
+      CLOVER_RAG_ALLOW_NETWORK: '1'
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       ANONYMIZED_TELEMETRY: 'False'
       MPLBACKEND: Agg
       DISPLAY: ':99'

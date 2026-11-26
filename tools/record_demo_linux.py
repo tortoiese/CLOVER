@@ -75,8 +75,9 @@ print("[1] ffmpeg 녹화 중...")
 print("[2] 앱 실행...")
 env = {**os.environ, "PYTHONUTF8": "1",
        "QT_QPA_PLATFORM": "xcb",
-       "CLOVER_RAG_ENABLED": "0",
-       "CLOVER_RAG_PROVIDER": "local",
+       "CLOVER_RAG_ENABLED": os.environ.get("CLOVER_RAG_ENABLED", "0"),
+       "CLOVER_RAG_PROVIDER": os.environ.get("CLOVER_RAG_PROVIDER", "local"),
+       "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
        "DISPLAY": DISPLAY}
 app = subprocess.Popen([PYTHON, "-B", "main.py"], env=env)
 sleep(10)  # 앱 로드 대기
