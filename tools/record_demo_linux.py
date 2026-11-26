@@ -49,35 +49,42 @@ def activate_window(wid: str) -> None:
     sleep(0.3)
 
 
+def _keysym(char: str) -> str:
+    """문자 → xdotool keysym 문자열."""
+    cp = ord(char)
+    if char == " ":
+        return "space"
+    # 모든 문자(ASCII 포함)를 Unicode keysym 형식으로 통일 — IME 불필요
+    return f"U{cp:04X}"
+
+
 def paste_to_input(wid: str, text: str) -> None:
     """
-    입력창에 한국어 텍스트 주입 — Xvfb(WM 없음) 전용.
+    입력창에 텍스트 주입 — Xvfb(WM 없음) 전용.
 
-    xclip으로 클립보드에 올린 뒤 --window로 대상 창에 직접 ctrl+v를 전송.
-    xdotool key에 --window 없이 보내면 Xvfb에서 키보드 포커스가 없어
-    ctrl+v가 허공으로 날아간다.
+    Unicode keysym(UXXXX)을 --window로 한 글자씩 직접 전송한다.
+    - xdotool type: 한국어 IME 없어서 실패
+    - xclip + ctrl+v: Xvfb에서 X 키보드 포커스 없어 허공으로 날아감
+    - Unicode keysym + --window: 창에 직접 주입 → Qt가 focused QLineEdit에 삽입
     """
-    # 1. 창 활성화 + 입력창 클릭
-    activate_window(wid)
-    xdo("mousemove", str(INPUT_BOX[0]), str(INPUT_BOX[1]))
+    # 1. 창 포커싱 + 입력창 클릭
+    xdo("windowfocus", "--sync", wid)
+    sleep(0.2)
+    xdo("mousemove", "--sync", str(INPUT_BOX[0]), str(INPUT_BOX[1]))
     sleep(0.3)
-    xdo("click", "1")
-    sleep(0.6)   # 입력창이 화면에 포커스된 상태로 잡히도록 대기
+    xdo("mousedown", "1")
+    sleep(0.05)
+    xdo("mouseup", "1")
+    sleep(0.7)  # QLineEdit 포커스 완료 + 화면에 커서 보이도록 대기
 
-    # 2. 클립보드에 한국어 텍스트 복사
-    proc = subprocess.Popen(
-        ["xclip", "-selection", "clipboard"],
-        stdin=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    proc.communicate(input=text.encode("utf-8"))
-    sleep(0.4)
+    # 2. 한 글자씩 Unicode keysym으로 전송
+    for char in text:
+        xdo("key", "--window", wid, "--clearmodifiers", _keysym(char))
+        time.sleep(0.06)  # 글자가 화면에 나타나는 게 보이도록 약간 느리게
 
-    # 3. 대상 창에 직접 ctrl+v 전송 → Qt가 포커스된 QLineEdit에 붙여넣기
-    xdo("key", "--window", wid, "--clearmodifiers", "ctrl+v")
-    sleep(0.6)   # 텍스트가 화면에 표시된 상태로 잡히도록 대기
+    sleep(0.5)  # 완성된 텍스트가 화면에 잡히도록 대기
 
-    # 4. Enter 전송
+    # 3. Enter
     xdo("key", "--window", wid, "--clearmodifiers", "Return")
     sleep(0.3)
 
