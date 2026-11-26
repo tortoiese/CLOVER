@@ -1,4 +1,4 @@
-"""CLOVER 데모 화면 녹화 — Linux/Xvfb 환경 전용 (상세 시연, 약 2분 30초).
+"""CLOVER 데모 화면 녹화 — Linux/Xvfb 환경 전용 (상세 시연, 약 3분 30초).
 
 실행: python tools/record_demo_linux.py  (working-dir: robot_factory_sim)
 출력: robot_factory_sim/demo_raw.mp4
@@ -43,6 +43,20 @@ def sleep(s: float) -> None:
 def activate_window(wid: str) -> None:
     xdo("windowactivate", "--sync", wid)
     sleep(0.3)
+
+
+def clear_input_and_type(wid: str, text: str) -> None:
+    """입력창 선택 후 기존 내용 지우고 새 텍스트 입력."""
+    activate_window(wid)
+    click(*INPUT_BOX)
+    sleep(0.3)
+    key("ctrl+a")
+    sleep(0.1)
+    key("Delete")
+    sleep(0.2)
+    type_text(text)
+    sleep(0.3)
+    key("Return")
 
 
 # ------------------------------------------------------------------
@@ -126,23 +140,22 @@ TABy = 72    # 메인 탭바 y
 def bx(lx: int) -> int: return rx + lx
 def by(ly: int) -> int: return ry + ly
 
-# 툴바 버튼 (Qt 고정 크기, Fusion 테마)
+# 툴바 버튼
 BTN_START  = (bx(45),  by(TB))
 BTN_PAUSE  = (bx(118), by(TB))
 BTN_STOP   = (bx(188), by(TB))
-SPD_COMBO  = (bx(315), by(TB))   # 배속 콤보박스
-# 공장 설정 / 주문 관리: 오른쪽 고정 버튼
-BTN_CONFIG = (bx(rw - 490), by(TB))   # 공장 설정
-BTN_ORDER  = (bx(rw - 400), by(TB))   # 주문 관리
+SPD_COMBO  = (bx(315), by(TB))
+BTN_CONFIG = (bx(rw - 490), by(TB))
+BTN_ORDER  = (bx(rw - 400), by(TB))
 
 # 메인 탭
 TAB_SIM  = (bx(50),  by(TABy))
 TAB_CON  = (bx(145), by(TABy))
-TAB_EXP  = (bx(240), by(TABy))   # 기간 실험
+TAB_EXP  = (bx(240), by(TABy))
 
-# 대시보드 패널 (오른쪽 절반)
+# 대시보드 패널
 DASH_X = rx + int(rw * 0.63)
-DT = ry + TABy + 50   # 대시보드 탭 y
+DT = ry + TABy + 50
 TAB_THRU     = (DASH_X + 45,  DT)
 TAB_TIMELINE = (DASH_X + 135, DT)
 TAB_QUEUE    = (DASH_X + 210, DT)
@@ -150,19 +163,19 @@ TAB_BATT     = (DASH_X + 275, DT)
 TAB_RADAR    = (DASH_X + 345, DT)
 
 # 관제 콘솔 패널
-CON_CX = rx + rw // 2
-BTN_STATUS = (CON_CX - 220, ry + rh - 65)   # 현재 상태
+CON_CX     = rx + rw // 2
+BTN_STATUS = (CON_CX - 220, ry + rh - 65)   # 현재 상태 조회
 BTN_EFF    = (CON_CX - 130, ry + rh - 65)   # 효율 분석
-BTN_BOTTLE = (CON_CX - 40,  ry + rh - 65)   # 병목
-BTN_URGENT = (CON_CX + 195, ry + rh - 65)   # 긴급 주문
+BTN_BOTTLE = (CON_CX - 40,  ry + rh - 65)   # 병목 분석
+BTN_URGENT = (CON_CX + 195, ry + rh - 65)   # 긴급 주문 발생
 INPUT_BOX  = (CON_CX,       ry + rh - 33)   # 텍스트 입력창
 
 # ------------------------------------------------------------------
-# 3. 시연 (약 2분 30초)
+# 3. 시연 (약 3분 20초)
 # ------------------------------------------------------------------
 print("[3] 시연 시작...")
 
-# ── 장면 1: 초기 화면 보여주기 (10초) ──
+# ── 장면 1: 초기 화면 (10초) ──
 sleep(10)
 
 # ── 장면 2: 시뮬레이션 시작 + 10x 배속 ──
@@ -176,16 +189,13 @@ key("End")
 sleep(0.2)
 key("Return")
 sleep(0.5)
-
-# 로봇 이동 확인 (15초)
-print("[3] 로봇 이동...")
-sleep(15)
+sleep(15)   # 로봇 이동 확인
 
 # ── 장면 3: 공장 설정 다이얼로그 ──
 print("[3] 공장 설정...")
 activate_window(wid)
 click(*BTN_CONFIG)
-sleep(10)   # 다이얼로그 열린 상태 유지
+sleep(10)
 key("Escape")
 sleep(1)
 
@@ -193,7 +203,6 @@ sleep(1)
 print("[3] KPI 처리량...")
 activate_window(wid)
 click(*TAB_THRU)
-sleep(0.5)
 sleep(12)
 
 # ── 장면 5: KPI 레이더 ──
@@ -202,37 +211,56 @@ activate_window(wid)
 click(*TAB_RADAR)
 sleep(10)
 
-# ── 장면 6: 주문 관리 다이얼로그 ──
+# ── 장면 6: 주문 관리 다이얼로그 (상세) ──
 print("[3] 주문 관리...")
 activate_window(wid)
 click(*BTN_ORDER)
-sleep(12)
+sleep(14)   # 주문 목록 상세 확인
 key("Escape")
 sleep(1)
 
-# ── 장면 7: AI 관제 콘솔 — 현재 상태 질의 ──
-print("[3] AI 관제 콘솔 — 현재 상태...")
+# ── 장면 7a: AI 관제 콘솔 — 현재 상태 조회 ──
+print("[3] AI 관제 콘솔 — 현재 상태 조회...")
 activate_window(wid)
 click(*TAB_CON)
 sleep(1)
 click(*BTN_STATUS)
-sleep(20)   # AI 응답 대기
+sleep(15)   # AI 응답 대기
 
-# ── 장면 8: 직접 명령 입력 ──
-print("[3] AI 콘솔 직접 명령...")
+# ── 장면 7b: AI 효율 분석 버튼 ──
+print("[3] AI 효율 분석...")
 activate_window(wid)
-click(*INPUT_BOX)
-sleep(0.4)
-type_text("지금 가장 병목인 구간이 어디야?")
-sleep(0.3)
-key("Return")
-sleep(18)   # AI 응답 대기
+click(*BTN_EFF)
+sleep(12)   # AI 응답 대기
 
-# ── 장면 9: 긴급 주문 발생 ──
-print("[3] 긴급 주문...")
+# ── 장면 8a: 직접 명령 — 병목 질의 ──
+print("[3] AI 직접 질의 — 병목 위치...")
+clear_input_and_type(wid, "지금 가장 병목인 구간이 어디야?")
+sleep(15)   # AI 분석 응답 대기
+
+# ── 장면 8b: 직접 명령 — 로봇 작업 재배치 오더 ──
+print("[3] AI 직접 오더 — 로봇 재배치 명령...")
+clear_input_and_type(wid, "5번 로봇 충전소로 귀환시키고 작업 재배치해줘")
+sleep(20)   # AI 명령 실행 및 결과 대기
+
+# ── 장면 8c: 직접 명령 — 처리량 최대화 오더 ──
+print("[3] AI 직접 오더 — 처리량 최대화 명령...")
+clear_input_and_type(wid, "처리량 최대화 방향으로 스케줄러 재조정 명령 내려줘")
+sleep(20)   # AI 명령 실행 및 결과 대기
+
+# ── 장면 9: 긴급 주문 발생 (자율 AI 대응) ──
+print("[3] 긴급 주문 발생...")
 activate_window(wid)
 click(*BTN_URGENT)
 sleep(22)   # AI 긴급 대응 대기
+
+# ── 장면 9b: 주문 관리 — 긴급 주문 처리 결과 확인 ──
+print("[3] 주문 처리 결과 확인...")
+activate_window(wid)
+click(*BTN_ORDER)
+sleep(12)   # 긴급 주문이 목록에 반영된 것 확인
+key("Escape")
+sleep(1)
 
 # ── 장면 10: 로봇 타임라인 탭 ──
 print("[3] 로봇 타임라인...")
@@ -252,7 +280,7 @@ sleep(10)
 print("[3] 기간 실험...")
 activate_window(wid)
 click(*TAB_EXP)
-sleep(15)
+sleep(12)
 
 # ── 장면 13: 시뮬레이션 최종 복귀 ──
 print("[3] 최종 화면...")

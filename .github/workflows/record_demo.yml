@@ -56,14 +56,17 @@ jobs:
       - name: Create intro clip
         run: python -B ../tools/make_intro.py
 
+      - name: Create outro clip
+        run: python -B ../tools/make_outro.py
+
       - name: Run demo and record
         run: python -B ../tools/record_demo_linux.py
 
-      - name: Concat intro + demo
+      - name: Concat intro + demo + outro
         run: |
           ffmpeg -y \
-            -i intro.mp4 -i demo_raw.mp4 \
-            -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[v]" \
+            -i intro.mp4 -i demo_raw.mp4 -i outro.mp4 \
+            -filter_complex "[0:v][1:v][2:v]concat=n=3:v=1:a=0[v]" \
             -map "[v]" \
             -c:v libx264 -preset ultrafast -crf 18 -pix_fmt yuv420p \
             combined.mp4
