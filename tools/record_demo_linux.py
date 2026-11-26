@@ -31,21 +31,12 @@ def type_text(text: str) -> None:
     time.sleep(0.3)
 
 
-def paste_text(text: str) -> None:
-    """xclip 클립보드 경유 붙여넣기 — 한국어 IME 없이도 정확히 입력됨."""
-    proc = subprocess.Popen(
-        ["xclip", "-selection", "clipboard"],
-        stdin=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    proc.communicate(input=text.encode("utf-8"))
-    time.sleep(0.3)
-    xdo("key", "--clearmodifiers", "ctrl+v")
-    time.sleep(0.4)
-
-
-def key(k: str) -> None:
-    xdo("key", k)
+def key(k: str, wid: str = "") -> None:
+    """키 입력. wid를 주면 해당 창에 직접 전달 (Xvfb WM-less 환경 필수)."""
+    if wid:
+        xdo("key", "--window", wid, "--clearmodifiers", k)
+    else:
+        xdo("key", k)
     time.sleep(0.2)
 
 
@@ -58,18 +49,37 @@ def activate_window(wid: str) -> None:
     sleep(0.3)
 
 
-def clear_input_and_type(wid: str, text: str) -> None:
-    """입력창 클릭 → 기존 내용 삭제 → 클립보드로 한국어 붙여넣기."""
+def paste_to_input(wid: str, text: str) -> None:
+    """
+    입력창에 한국어 텍스트 주입 — Xvfb(WM 없음) 전용.
+
+    xclip으로 클립보드에 올린 뒤 --window로 대상 창에 직접 ctrl+v를 전송.
+    xdotool key에 --window 없이 보내면 Xvfb에서 키보드 포커스가 없어
+    ctrl+v가 허공으로 날아간다.
+    """
+    # 1. 창 활성화 + 입력창 클릭
     activate_window(wid)
-    click(*INPUT_BOX)
-    sleep(0.5)           # 입력창 포커스가 화면에 보이도록 대기
-    key("ctrl+a")
-    sleep(0.15)
-    key("Delete")
-    sleep(0.4)           # 빈 입력창이 카메라에 잡히도록 대기
-    paste_text(text)     # 클립보드 경유 — 한국어 그대로 나타남
-    sleep(0.5)
-    key("Return")
+    xdo("mousemove", str(INPUT_BOX[0]), str(INPUT_BOX[1]))
+    sleep(0.3)
+    xdo("click", "1")
+    sleep(0.6)   # 입력창이 화면에 포커스된 상태로 잡히도록 대기
+
+    # 2. 클립보드에 한국어 텍스트 복사
+    proc = subprocess.Popen(
+        ["xclip", "-selection", "clipboard"],
+        stdin=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    proc.communicate(input=text.encode("utf-8"))
+    sleep(0.4)
+
+    # 3. 대상 창에 직접 ctrl+v 전송 → Qt가 포커스된 QLineEdit에 붙여넣기
+    xdo("key", "--window", wid, "--clearmodifiers", "ctrl+v")
+    sleep(0.6)   # 텍스트가 화면에 표시된 상태로 잡히도록 대기
+
+    # 4. Enter 전송
+    xdo("key", "--window", wid, "--clearmodifiers", "Return")
+    sleep(0.3)
 
 
 # ------------------------------------------------------------------
@@ -177,11 +187,7 @@ TAB_RADAR    = (DASH_X + 345, DT)
 
 # 관제 콘솔 패널
 CON_CX     = rx + rw // 2
-BTN_STATUS = (CON_CX - 220, ry + rh - 65)   # 현재 상태 조회
-BTN_EFF    = (CON_CX - 130, ry + rh - 65)   # 효율 분석
-BTN_BOTTLE = (CON_CX - 40,  ry + rh - 65)   # 병목 분석
-BTN_URGENT = (CON_CX + 195, ry + rh - 65)   # 긴급 주문 발생
-INPUT_BOX  = (CON_CX,       ry + rh - 33)   # 텍스트 입력창
+INPUT_BOX  = (CON_CX,       ry + rh - 33)   # 텍스트 입력창 (QLineEdit)
 
 # ------------------------------------------------------------------
 # 3. 시연 (약 3분 20초)
@@ -236,35 +242,36 @@ sleep(1)
 print("[3] AI 관제 콘솔 — 현재 상태 조회...")
 activate_window(wid)
 click(*TAB_CON)
-sleep(1)
-click(*BTN_STATUS)
+sleep(1.5)
+
+# BTN_STATUS 대신 직접 입력: 현재 상태 질의
+print("[3] 현재 상태 질의 입력...")
+paste_to_input(wid, "현재 상태 알려줘")
 sleep(15)   # AI 응답 대기
 
-# ── 장면 7b: AI 효율 분석 버튼 ──
-print("[3] AI 효율 분석...")
-activate_window(wid)
-click(*BTN_EFF)
+# ── 장면 7b: AI 효율 분석 질의 ──
+print("[3] AI 효율 분석 질의...")
+paste_to_input(wid, "현재 효율 분석해줘")
 sleep(12)   # AI 응답 대기
 
 # ── 장면 8a: 직접 명령 — 병목 질의 ──
 print("[3] AI 직접 질의 — 병목 위치...")
-clear_input_and_type(wid, "지금 가장 병목인 구간이 어디야?")
+paste_to_input(wid, "지금 가장 병목인 구간이 어디야?")
 sleep(15)   # AI 분석 응답 대기
 
 # ── 장면 8b: 직접 명령 — 로봇 작업 재배치 오더 ──
 print("[3] AI 직접 오더 — 로봇 재배치 명령...")
-clear_input_and_type(wid, "5번 로봇 충전소로 귀환시키고 작업 재배치해줘")
+paste_to_input(wid, "5번 로봇 충전소로 귀환시키고 작업 재배치해줘")
 sleep(20)   # AI 명령 실행 및 결과 대기
 
 # ── 장면 8c: 직접 명령 — 처리량 최대화 오더 ──
 print("[3] AI 직접 오더 — 처리량 최대화 명령...")
-clear_input_and_type(wid, "처리량 최대화 방향으로 스케줄러 재조정 명령 내려줘")
+paste_to_input(wid, "처리량 최대화 방향으로 스케줄러 재조정 명령 내려줘")
 sleep(20)   # AI 명령 실행 및 결과 대기
 
-# ── 장면 9: 긴급 주문 발생 (자율 AI 대응) ──
+# ── 장면 9: 긴급 주문 — 직접 입력으로 발생 ──
 print("[3] 긴급 주문 발생...")
-activate_window(wid)
-click(*BTN_URGENT)
+paste_to_input(wid, "긴급 주문 넣어줘: 제품B 150개, 1시간 내")
 sleep(22)   # AI 긴급 대응 대기
 
 # ── 장면 9b: 주문 관리 — 긴급 주문 처리 결과 확인 ──
