@@ -31,6 +31,19 @@ def type_text(text: str) -> None:
     time.sleep(0.3)
 
 
+def paste_text(text: str) -> None:
+    """xclip 클립보드 경유 붙여넣기 — 한국어 IME 없이도 정확히 입력됨."""
+    proc = subprocess.Popen(
+        ["xclip", "-selection", "clipboard"],
+        stdin=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    proc.communicate(input=text.encode("utf-8"))
+    time.sleep(0.3)
+    xdo("key", "--clearmodifiers", "ctrl+v")
+    time.sleep(0.4)
+
+
 def key(k: str) -> None:
     xdo("key", k)
     time.sleep(0.2)
@@ -46,16 +59,16 @@ def activate_window(wid: str) -> None:
 
 
 def clear_input_and_type(wid: str, text: str) -> None:
-    """입력창 선택 후 기존 내용 지우고 새 텍스트 입력."""
+    """입력창 클릭 → 기존 내용 삭제 → 클립보드로 한국어 붙여넣기."""
     activate_window(wid)
     click(*INPUT_BOX)
-    sleep(0.3)
+    sleep(0.5)           # 입력창 포커스가 화면에 보이도록 대기
     key("ctrl+a")
-    sleep(0.1)
+    sleep(0.15)
     key("Delete")
-    sleep(0.2)
-    type_text(text)
-    sleep(0.3)
+    sleep(0.4)           # 빈 입력창이 카메라에 잡히도록 대기
+    paste_text(text)     # 클립보드 경유 — 한국어 그대로 나타남
+    sleep(0.5)
     key("Return")
 
 

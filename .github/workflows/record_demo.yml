@@ -44,7 +44,7 @@ jobs:
             libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
             libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 \
             libxcb1 libxcb-util1 \
-            xvfb ffmpeg x11-utils xdotool wmctrl \
+            xvfb ffmpeg x11-utils xdotool wmctrl xclip \
             fonts-noto-cjk fonts-noto fonts-dejavu
 
       - name: Start virtual display
